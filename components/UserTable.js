@@ -64,12 +64,10 @@ var Table = React.createClass({
 
   		return (
 			<div className='clearfix'>
-			  <div style={{overflow: 'auto'}}>
-  				<Bootstrap.Table hover style={{margin: 0, padding: 0}}>
-  					<Table.Header data = {this.props.data}></Table.Header>
-  					<Table.Body data={this.props.data} activePageIndex={currentPageIndex - 1}></Table.Body>			
-  				</Bootstrap.Table>
-				</div>
+				<Bootstrap.Table hover style={{margin: 0, padding: 0}}>
+					<Table.Header data = {this.props.data}></Table.Header>
+					<Table.Body data={this.props.data} activePageIndex={currentPageIndex - 1}></Table.Body>			
+				</Bootstrap.Table>
 				<div style={{float:'right'}}>
 					<Bootstrap.Pagination 	prev
 											next
@@ -295,10 +293,7 @@ var Cell = React.createClass({
 			
 		}
 
-		var style = {
-		    maxHeight: 100,
-		    overflowY: 'auto'
-		};
+		var style = {};
     if((this.props.field.width) && (this.props.field.width > 0)) {
       style.width = this.props.field.width;
     }
