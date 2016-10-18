@@ -240,7 +240,7 @@ var FavouritesActions = {
     };
   },  
   getFavouriteChart : function(favourite) {
-  
+  /* jshint ignore:start */
   return function(dispatch, getState) {
     dispatch(_chartRequest());
     return queryAPI.queryMeasurements({query: favourite.query}).then(
@@ -260,7 +260,8 @@ var FavouritesActions = {
               timestamp: p.timestamp,
               values: p.users.map(u => u[rr.field][rr.metric]).sort(rr.comparator),
             }));
-            // Shape a result with ranking on users  //TODO - fix dot notation jshint errors in this block            
+            // Shape a result with ranking on users  //TODO - fix dot notation jshint errors in this block   
+
             return _.times(rr.limit, (i) => ({
               source, 
               timespan: [favourite.query.time.start,favourite.query.time.end], 
@@ -268,7 +269,7 @@ var FavouritesActions = {
               metric: favourite.query.metric,
               population: g,
               ranking: {...rr.toJSON(), index: i}, 
-              data: points.map(p => ([p.timestamp, p.values[i] || null])),
+              data: points.map(p => ([p.timestamp, p.values[i] || null]))
             }));
           } else {   
             // Shape a normal timeseries result for requested metrics
@@ -279,14 +280,16 @@ var FavouritesActions = {
               granularity: favourite.query.time.granularity,
               metric,
               population: g,
-              data: rs.points.map(p => ([p.timestamp, p.volume[metric]])),
+              data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
             }));
           }          
         });
           dispatch(_chartResponse(res.success, res.errors, _.flatten(res1)));
           return _.flatten(res1);    
       });
+     
     };
+  /* jshint ignore:end */    
   },  
   getFeatures : function(index, timestamp, label) {
     return _getFeatures(index, timestamp, label);
