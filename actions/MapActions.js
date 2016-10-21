@@ -32,7 +32,6 @@ var _buildTimelineQuery = function(population, source, geometry, timezone, inter
       operation : 'INTERSECT'
     });
   }
-
   return {
     'query' : {
       'timezone' : timezone,
@@ -151,7 +150,6 @@ var MapActions = {
       var interval = getState().map.interval;
       var source = getState().map.source;
       var geometry = getState().map.geometry;
-
       var query = _buildTimelineQuery(population, source, geometry, timezone, interval);
 
       dispatch(_getTimelineInit(population, query));
@@ -217,10 +215,12 @@ var MapActions = {
                     moment(getState().favourites.selectedFavourite.query.time.end)];
         source = getState().favourites.selectedFavourite.query.source;
         
-        if( (!getState().map.features) || (getState().map.features.length === 0) ){
+        //if( (!getState().map.features) || (getState().map.features.length === 0) ){
+        if(!getState().favourites.selectedFavourite.query.spatial){
           geometry = null;
         } else {
-          geometry = getState().map.features[0].geometry;
+          //geometry = getState().map.features[0].geometry;
+          geometry = getState().favourites.selectedFavourite.query.spatial[1].geometry;
         }        
         dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
