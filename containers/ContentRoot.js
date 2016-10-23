@@ -272,6 +272,13 @@ var ContentRoot = React.createClass({
                           </Link>
                         </li>
                         <li>
+                          <Link to='/support/export'>
+                            <span  style={{paddingLeft: 18}}>
+                            <i className='fa fa-cloud-download fa-fw'></i>{' ' + _t({ id: 'Section.Support.DataExport'})}
+                            </span>
+                          </Link>
+                        </li>
+                        <li>
                           <Link to='/support/messages'>
                             <span  style={{paddingLeft: 18}}>
                               <i className='fa fa-commenting fa-fw'></i>{' ' + _t({ id: 'Section.ManageAlerts.Messages'})}

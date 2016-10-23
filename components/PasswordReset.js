@@ -131,7 +131,6 @@ var PasswordReset = React.createClass({
   },
   
   render: function() {
-    console.log(this.props.success);
     if(this.props.success) {
       return this.renderSuccess();
     } else {

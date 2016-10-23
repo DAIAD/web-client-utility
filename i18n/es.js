@@ -65,7 +65,8 @@
         "Group": "Support",
         "Logging": "Logs",
         "Data": "Data Management",
-        "Development": "Development"
+        "Development": "Development",
+        "DataExport": "Data Export"
       }
   },
   "Page": {

@@ -62,7 +62,8 @@
         "Group": "Υποστήριξη",
         "Logging": "Καταγραφή Συμβάντων",
         "Data": "Διαχείριση Δεδομένων",
-        "Development": "Ανάπτυξη"
+        "Development": "Ανάπτυξη",
+        "DataExport": "Data Export"
 	    }
 	},
 	"Page": {
