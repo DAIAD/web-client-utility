@@ -12,7 +12,7 @@ var Dropzone = require('react-dropzone');
 var moment = require('moment');
 
 var Breadcrumb = require('../../Breadcrumb');
-var Checkbox = require('../..//Checkbox');
+var Checkbox = require('../../Checkbox');
 
 var { submitQuery } = require('../../../actions/QueryActions');
 var { createUser, createAmphiro } = require('../../../actions/DebugActions');

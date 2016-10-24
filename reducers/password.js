@@ -46,7 +46,6 @@ var password = function(state, action) {
       });
       
     case types.PASSWORD_RESET_SET_ERRORS:
-      console.log(action);
       return Object.assign({}, state, {
         errors : action.errors
       });
