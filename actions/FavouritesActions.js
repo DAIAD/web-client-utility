@@ -204,10 +204,10 @@ var FavouritesActions = {
                     moment(favourite.query.time.end)];
         source = favourite.query.source;
 
-        if(!favourite.query.spatial){
-          geometry = null;
+        if(favourite.query.spatial && favourite.query.spatial.length > 1){
+          geometry = favourite.query.spatial[1].geometry;        
         } else {
-          geometry = favourite.query.spatial[1].geometry;
+          geometry = null;
         }        
         dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));

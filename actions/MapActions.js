@@ -216,11 +216,12 @@ var MapActions = {
         source = getState().favourites.selectedFavourite.query.source;
         
         //if( (!getState().map.features) || (getState().map.features.length === 0) ){
-        if(!getState().favourites.selectedFavourite.query.spatial){
-          geometry = null;
+        if(getState().favourites.selectedFavourite.query.spatial 
+            && getState().favourites.selectedFavourite.query.spatial > 1){
+          geometry = getState().favourites.selectedFavourite.query.spatial[1].geometry;
         } else {
           //geometry = getState().map.features[0].geometry;
-          geometry = getState().favourites.selectedFavourite.query.spatial[1].geometry;
+          geometry = null;
         }        
         dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
