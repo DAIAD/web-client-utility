@@ -442,6 +442,7 @@ var ReportPanel = React.createClass({
     var formFragment = this._renderFormFragment();
 
     var reportTitle = this._titleForReport();
+    
     return (
       <Panel header={header} footer={footer}>
         <ListGroup fill>
@@ -913,7 +914,7 @@ var ReportPanel = React.createClass({
 
       if(this.props.favouriteChart.query.population.length > 1){ //ClusterGroup with all groups
         groupKey = null;
-      } else if(this.props.favouriteChart.query.population[0].type == 'UTILITY') { //Utility all
+      } else if(this.props.favouriteChart.query.population[0].type == 'UTILITY') { //Utility all   
         clusterKey = groupKey = null;
       } else if(this.props.favouriteChart.query.population.length == 1){ //ClusterGroup with subgroup
         groupKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).key;
@@ -962,23 +963,22 @@ var ReportPanel = React.createClass({
     namedQuery.query.time.granularity = this.props.level.toUpperCase();
     
     var tempPop = [];
-    //todo fix population shape
     for(var i = 0; i<this.props.series.length; i++){
-      let popu = {};
+      var popu = {};
       if(this.props.series[i].ranking){
 
 
         var target = this.props.series[i].population;
-        var [clusterKey, groupKey] = population.extractGroupParams(target);
+        var [clusterKey2, groupKey2] = population.extractGroupParams(target);
         if (target instanceof population.Utility || target == null) {
           popu.label = ('UTILITY:'+this.props.series[i].population.key.toString() + '/' + new population.Ranking(this.props.series[i].ranking).toString());
-          popu.utility = groupKey; 
-        } else if (target instanceof population.Cluster) {
-          popu.label = ('CLUSTER:'+clusterKey + '/' + new population.Ranking(this.props.series[i].ranking).toString());
-          popu.group = groupKey;
-        } else if (target instanceof population.ClusterGroup) {
-          popu.label = ('CLUSTER:'+clusterKey +':'+ groupKey+ '/' + new population.Ranking(this.props.series[i].ranking).toString());
-          popu.group = groupKey;
+          popu.utility = this.props.series[i].population.key; 
+        } else if (target instanceof population.Cluster) {      
+          popu.label = ('CLUSTER:'+clusterKey2 + '/' + new population.Ranking(this.props.series[i].ranking).toString());
+          popu.group = groupKey2;
+        } else if (target instanceof population.ClusterGroup) {       
+          popu.label = ('CLUSTER:'+clusterKey2 +':'+ groupKey2+ '/' + new population.Ranking(this.props.series[i].ranking).toString());
+          popu.group = groupKey2;
         }    
         
         //popu.type = this.props.series[i].population.type;
@@ -994,10 +994,11 @@ var ReportPanel = React.createClass({
         tempPop.push(this.props.series[i].population);      
       }
     }
-    //namedQuery.query.population =  _.uniqBy(tempPop, function(popu) { return [popu.label, popu.ranking].join(); }); 
-    namedQuery.query.population =  _.uniq(tempPop); 
-
-    namedQuery.query.timezone = "Etc/GMT"; 
+   namedQuery.query.population =  _.uniqBy(tempPop, function(popu) { return [popu.label, popu.key, popu.group, popu.utility, popu.ranking].join(); }); 
+    //namedQuery.query.population =  _.uniq(tempPop); 
+    //namedQuery.query.population = pleaseWork(tempPop);
+    //namedQuery.query.population = [...new Set(tempPop)];
+    //namedQuery.query.timezone = "Etc/GMT"; 
     var request =  {
       'namedQuery' : namedQuery
     };
@@ -1585,6 +1586,9 @@ ReportInfo = ReactRedux.connect(
 
 var ChartContainer = require('./chart-container');
 
+var pleaseWork = function(duplicates){
+  return _.uniq(duplicates)
+}
 module.exports = {
   Panel: ReportPanel,
   Form: ReportForm, 
