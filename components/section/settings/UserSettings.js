@@ -17,6 +17,7 @@ var UserSettings = React.createClass({
   },
   getInitialState: function() {
     const { profile:{firstname, lastname, address, zip, country, timezone, locale} } = this.props;
+
     return {
       status: 'normal',
       firstname, 
@@ -25,17 +26,13 @@ var UserSettings = React.createClass({
       zip,
       country,
       timezone,
-      locale
+      locale: locale === 'en' ? 'en-GB' : locale
     };
   },
   render: function() {
     const { profile, actions:{saveToProfile} } = this.props;
     if (!profile) return <div/>;
-
     var _t = this.context.intl.formatMessage;
-
-    if (this.state.locale === 'en') this.setState({locale: 'en-GB'});
-
     const countryKey = this.state.country ? "Countries."+this.state.country : "UserSettings.CountryPlaceholder";
     const timezoneKey = this.state.timezone ? "Timezones."+this.state.timezone : "UserSettings.TimezonePlaceholder";
     return (
