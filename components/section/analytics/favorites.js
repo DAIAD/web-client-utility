@@ -192,7 +192,7 @@ var Favourites = React.createClass({
    if(this.props.selectedFavourite){
      switch(this.props.selectedFavourite.type) {
        case 'MAP':   
-		       title = 'Map: ' + this.props.selectedFavourite.title; 
+		       title = 'Map: ' + this.props.selectedFavourite.title;        
 		       dataContent = (
 			        <Bootstrap.ListGroupItem>
 				         <LeafletMap style={{ width: '100%', height: 400}} 
@@ -231,10 +231,8 @@ var Favourites = React.createClass({
 				 	     </Bootstrap.ListGroupItem>
 				     );  
            break;
-       case 'CHART':
+       case 'CHART':        
          title = 'Chart: ' + this.props.selectedFavourite.title;
-           console.log('RENDERING CHART, SERIES:');
-           console.log(this.props.data);
 		         dataContent = (
              <Bootstrap.ListGroup fill>
                <Bootstrap.ListGroupItem className="report-chart-wrapper">

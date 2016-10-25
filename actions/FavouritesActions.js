@@ -203,11 +203,11 @@ var FavouritesActions = {
         interval = [moment(favourite.query.time.start),
                     moment(favourite.query.time.end)];
         source = favourite.query.source;
-        
-        if( (!getState().map.features) || (getState().map.features.length === 0) ){
-          geometry = null;
+
+        if(favourite.query.spatial && favourite.query.spatial.length > 1){
+          geometry = favourite.query.spatial[1].geometry;        
         } else {
-          geometry = getState().map.features[0].geometry;
+          geometry = null;
         }        
         dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
