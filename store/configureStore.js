@@ -6,6 +6,7 @@ var ReduxLogger = require('redux-logger');
 var {routerMiddleware}  = require('react-router-redux');
 
 var rootReducer = require('../reducers/index');
+var history = require('../routing/history');
 
 var middleware = [
   thunkMiddleware,
@@ -14,10 +15,10 @@ var middleware = [
 
 if (develop) {
   // The logger middleware should always be last
-  //middleware.push(ReduxLogger());
+  middleware.push(ReduxLogger());
 }
 
-function configureStore(history, initialState) {
+function configureStore(initialState) {
   return createStore(rootReducer, initialState, applyMiddleware(...middleware));
 }
 

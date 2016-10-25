@@ -13,7 +13,7 @@ var {setLocale} = require('./actions/LocaleActions');
 var {refreshProfile} = require('./actions/SessionActions');
 var {configure} = require('./actions/config');
 
-var store = configureStore(history);
+var store = configureStore();
 history = syncHistoryWithStore(history, store);
 
 var renderRoot = function() {
