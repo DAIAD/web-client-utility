@@ -70,7 +70,8 @@
         "Data": "Data Management",
         "Development": "Development",
         "DataExport": "Data Export"
-      }
+      },
+      "Savings": "Savings Potential"
 	},
   "Page": {
     "PasswordReset":"Reset Password"

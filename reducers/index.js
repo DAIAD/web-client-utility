@@ -29,6 +29,7 @@ var charting = require('./charting');
 var overview = require('./overview');
 var trials = require('./trials');
 var dataExport =require('./data-export');
+var savings = require('./savings');
 
 var rootReducer = combineReducers({
   i18n,
@@ -59,7 +60,8 @@ var rootReducer = combineReducers({
   charting,
   overview,
   trials,
-  dataExport
+  dataExport,
+  savings
 });
 
 module.exports = rootReducer;

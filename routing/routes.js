@@ -29,6 +29,11 @@ var DataExport = require('../components/section/support/DataExport');
 var Development = require('../components/section/support/Development');
 var PasswordReset = require('../components/PasswordReset');
 
+var SavingsPotential = require('../components/section/savings');
+var SavingsPotentialList = require('../components/section/savings/ListView');
+var SavingsPotentialAdd = require('../components/section/savings/AddView');
+var SavingsPotentialExplore = require('../components/section/savings/ExploreView');
+
 module.exports = (
   <Route path="/" component={App} >
     <IndexRoute component={Dashboard} />
@@ -60,5 +65,12 @@ module.exports = (
     <Route path="/support/messages" component={MessageAnalytics} />    
     <Route path="/support/development" component={Development}/>
 		<Route path="/password/reset/:token" component={PasswordReset}/>
+    <Route path="/savings" component={SavingsPotential}>
+      <IndexRoute component={SavingsPotentialList} />
+      <Route path="/savings/list" component={SavingsPotentialList} />
+      <Route path="/savings/add" component={SavingsPotentialAdd} />
+      <Route path="/savings/:id" component={SavingsPotentialExplore} />
+    </Route>
+
   </Route>
 );
