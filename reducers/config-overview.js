@@ -1,11 +1,9 @@
 // This kind of "overview" reports is just a standard (i.e. "canned") subset
 // of ordinary measurement reports on water consumption.
 
-var ActionTypes = require('../action-types');
-
 var initialState = {
-  
-  // Configure available per-unit reports 
+
+  // Configure available per-unit reports
   // Note report names refer to config.reports.measurements
   reports: {
     day: {
@@ -37,37 +35,37 @@ var initialState = {
       duration: [-2, 'year'],
     },
   },
- 
+
   sections: {
     'utility': {
       title: 'Utility',
       population: null,
     },
     'per-efficiency': {
-      title: 'Per Customer Efficiency',  
+      title: 'Per Customer Efficiency',
       population: null,
     },
     'per-household-size': {
-      title: 'Per Household Size',  
+      title: 'Per Household Size',
       population: null,
     },
     'per-household-members': {
-      title: 'Per Household Members',  
+      title: 'Per Household Members',
       population: null,
     },
     'per-income': {
-      title: 'Per Income',  
+      title: 'Per Income',
       population: null,
     },
     'per-age': {
-      title: 'Per Age',  
+      title: 'Per Age',
       population: null,
     },
-  } 
+  }
 };
 
 var reduce = function (state, action) {
-  
+
   // Note This part of configuration does not ever change
   return initialState;
 

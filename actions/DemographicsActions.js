@@ -23,7 +23,7 @@ var receivedFavourites = function(success, errors, favouritesInfo) {
     errors : errors,
     favouritesInfo : favouritesInfo
   };
-}; 
+};
 
 var requestedNewGroupPossibleMembers = function(){
   return {
@@ -101,29 +101,29 @@ var receivedFavouriteDeletionResponse = function(success, errors){
 
 
 var DemographicActions = {
-    
+
   setGroupsFilter : function(groupsFilter){
     return {
       type : types.DEMOGRAPHICS_SET_GROUPS_FILTER,
       groupsFilter : groupsFilter
     };
   },
-  
+
   setFavouritesFilter : function(favouritesFilter){
     return {
       type : types.DEMOGRAPHICS_SET_FAVOURITES_FILTER,
       favouritesFilter : favouritesFilter
     };
   },
-  
+
 
   getGroupsAndFavourites : function (){
     return function(dispatch, getState) {
       dispatch(requestedGroupsAndFavourites());
-      
+
       return demographicsAPI.fetchGroups().then(function(response) {
         dispatch(receivedGroups(response.success, response.errors, response.groups));
-        
+
         return demographicsAPI.fetchFavourites().then(function(response) {
           dispatch(receivedFavourites(response.success, response.errors, response.favouritesInfo));
         }, function(error) {
@@ -134,11 +134,11 @@ var DemographicActions = {
       });
     };
   },
-  
+
   showNewGroupForm : function(){
     return function (dispatch, getState) {
       dispatch(requestedNewGroupPossibleMembers());
-      
+
       return demographicsAPI.fetchPossibleGroupMembers().then(function(response) {
         dispatch(receivedNewGroupPossibleMembers(response.success, response.errors, response.groupMembersInfo));
       }, function(error){
@@ -146,17 +146,17 @@ var DemographicActions = {
       });
     };
   },
-  
+
   hideNewGroupForm : function(){
     return {
       type : types.DEMOGRAPHICS_HIDE_NEW_GROUP_FORM
     };
   },
-  
+
   getGroupMembers : function (group_id){
     return function(dispatch, getState) {
       dispatch(requestedGroupMembers());
-      
+
       return demographicsAPI.fetchPossibleGroupMembers(group_id).then(function(response) {
         dispatch(receivedGroupMembers(response.success, response.errors, response.groupMembersInfo));
       }, function(error) {
@@ -164,7 +164,7 @@ var DemographicActions = {
       });
     };
   },
-  
+
   toggleCandidateGroupMemberToAdd : function(memberId, selected){
     return {
       type : types.DEMOGRAPHICS_TOGGLE_CANDIDATE_GROUP_MEMBER_TO_ADD,
@@ -172,7 +172,7 @@ var DemographicActions = {
       selected : selected
     };
   },
-  
+
   toggleCandidateGroupMemberToRemove : function(memberId, selected){
     return {
       type : types.DEMOGRAPHICS_TOGGLE_CANDIDATE_GROUP_MEMBER_TO_REMOVE,
@@ -180,43 +180,43 @@ var DemographicActions = {
       selected : selected
     };
   },
-  
+
   addSelectedGroupMembers : function(){
     return {
       type : types.DEMOGRAPHICS_ADD_SELECTED_GROUP_MEMBERS
     };
   },
-  
+
   removeSelectedGroupMembers : function(){
     return {
       type : types.DEMOGRAPHICS_REMOVE_SELECTED_GROUP_MEMBERS
     };
   },
-  
+
   setGroupName : function(groupName){
     return {
       type : types.DEMOGRAPHICS_CREATE_GROUP_SET_NAME,
       groupName : groupName
     };
   },
-  
+
   addGroupValidationErrorsOccurred : function(errors) {
     return {
       type : types.DEMOGRAPHICS_CREATE_GROUP_VALIDATION_ERRORS_OCCURRED,
       errors : errors
     };
   },
-  
+
   addGroupHideErrorAlert : function() {
     return{
       type : types.DEMOGRAPHICS_CREATE_GROUP_HIDE_MESSAGE_ALERT
     };
   },
-  
+
   createGroupSet : function (groupInfo){
     return function(dispatch, getState) {
       dispatch(groupSetCreateMakeRequest());
-      
+
       return demographicsAPI.createGroupSet(groupInfo).then(function(response) {
         dispatch(groupSetCreateReceiveResponse(response.success, response.errors));
       }, function(error) {
@@ -231,7 +231,7 @@ var DemographicActions = {
       groupId : groupId
     };
   },
-  
+
   hideFavouriteGroupForm : function(){
     return {
       type : types.DEMOGRAPHICS_HIDE_FAVOURITE_GROUP_FORM
@@ -243,17 +243,17 @@ var DemographicActions = {
       type : types.DEMOGRAPHICS_RESET_COMPONENT
     };
   },
-  
+
   deleteGroup : function(groupId){
     return function (dispatch, getState) {
       dispatch(requestedGroupDeletion());
       return demographicsAPI.deleteGroup(groupId).then(function(response) {
-        
+
         dispatch(receivedGroupDeletionResponse(response.success, response.errors));
         dispatch(requestedGroupsAndFavourites());
         return demographicsAPI.fetchGroups().then(function(response) {
           dispatch(receivedGroups(response.success, response.errors, response.groups));
-          
+
           return demographicsAPI.fetchFavourites().then(function(response) {
             dispatch(receivedFavourites(response.success, response.errors, response.favouritesInfo));
           }, function(error) {
@@ -263,12 +263,12 @@ var DemographicActions = {
           dispatch(receivedGroups(false, error, null));
         });
       }, function(error){
-        
+
         dispatch(receivedGroupDeletionResponse(false, error));
       });
     };
   },
-  
+
   showModal : function(groupId, title, body, actions){
     return {
       type : types.DEMOGRAPHICS_SHOW_MODAL,
@@ -278,33 +278,33 @@ var DemographicActions = {
       actions : actions
     };
   },
-  
+
   hideModal : function(){
     return {
       type : types.DEMOGRAPHICS_HIDE_MODAL
     };
   },
-  
+
   deleteFavourite : function(favouriteId){
     return function (dispatch, getState) {
       dispatch(requestedFavouriteDeletion());
       return demographicsAPI.deleteFavourite(favouriteId).then(function(response) {
-        
+
         dispatch(receivedFavouriteDeletionResponse(response.success, response.errors));
       }, function(error){
-        
+
         dispatch(receivedFavouriteDeletionResponse(false, error));
       });
     };
   },
-  
-  
+
+
   hideMessageAlert : function(){
     return {
       type : types.DEMOGRAPHICS_HIDE_MESSAGE_ALERT
     };
   },
-  
+
 };
 
 

@@ -31,14 +31,12 @@ var ModeManagementTableSchema = {
           type:'action',
           icon: 'pencil',
           handler: function() {
-            console.log(this);
           }
         }, {
         name: 'remove',
             type:'action',
             icon: 'remove',
             handler: function() {
-              console.log(this);
             }
         }],
     

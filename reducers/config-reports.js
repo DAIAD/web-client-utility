@@ -1,8 +1,5 @@
-
-var ActionTypes = require('../action-types');
-
 var initialState = {
-  
+
   // The  level of detail
   levels: {
     'hour': {bucket: 'hour', duration: [1, 'h']},
@@ -12,15 +9,15 @@ var initialState = {
     'quarter': {bucket: 'quarter', duration: [1, 'Q']},
     'year': {bucket: 'year', duration: [1, 'Y']},
   },
-  
+
   // Describe types of reports
-  byType: { 
-    
+  byType: {
+
     // Measurements //
-    
+
     measurements: {
       title: 'Measurements',
-      
+
       // The data sources for our measurements
       sources: {
         'meter': {name: 'Meter', title: 'Meter (SWM)'},
@@ -29,7 +26,7 @@ var initialState = {
 
       // Metrics provided
       metrics: ['SUM', 'COUNT', 'AVERAGE', 'MIN', 'MAX'],
-      
+
       // What physical quantities are being measured
       fields: {
         'volume': {
@@ -45,9 +42,9 @@ var initialState = {
           sources: ['device'],
         },
       },
-      
-      // Report on different levels of detail 
-      levels: { 
+
+      // Report on different levels of detail
+      levels: {
         'hour': {
           name: 'hour',
           title: 'Hour',
@@ -216,12 +213,12 @@ var initialState = {
         },
       },
     },
-  
+
   },
 };
 
 var reduce = function (state, action) {
-  
+
   // Note This part (configuration for reports) does not ever change
   return initialState;
 

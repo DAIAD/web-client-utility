@@ -224,7 +224,6 @@ var dataReducer = function(state, action) {
           features : _extractFeatures([])
         };
       }
-      break;
 
     default:
       return state || _createInitialGroupState();

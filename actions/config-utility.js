@@ -7,11 +7,11 @@ var {getGroups} = require('../api/admin');
 
 var actions = {
 
-  // Plain actions 
+  // Plain actions
 
   requestConfiguration: () => ({
     type: ActionTypes.config.utility.REQUEST_CONFIGURATION,
-  }), 
+  }),
 
   setConfiguration: (config) => ({
     type: ActionTypes.config.utility.SET_CONFIGURATION,
@@ -24,12 +24,12 @@ var actions = {
     var state = getState();
 
     if (!_.isEmpty(state.config.utility)) {
-      console.info('Configuration for utility is already present; Skipping');
+      console.warn('Configuration for utility is already present; Skipping');
       return Promise.resolve();
     }
 
     dispatch(actions.requestConfiguration());
-    
+
     // Fetch all groups inside this utility
     return getGroups().then(
       res => {
@@ -38,7 +38,7 @@ var actions = {
             'Cannot configure utility: %s', _.first(res.errors).description
           ));
         }
-        
+
         var {name, key} = _.first(res.groups.filter(g => g.type == 'UTILITY'));
         var clusters = res.groups.filter(g => g.utilityKey == key && g.type == 'CLUSTER');
         var config = {

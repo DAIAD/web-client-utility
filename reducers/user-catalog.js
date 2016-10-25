@@ -230,7 +230,6 @@ var dataReducer = function(state, action) {
           features : _extractFeatures([])
         });
       }
-      break;
 
     case types.USER_CATALOG_SAVE_BAG_OF_CONSUMER_RESPONSE:
       if(action.success) {
@@ -254,7 +253,6 @@ var dataReducer = function(state, action) {
       } else {
         return state.data;
       }
-      break;
 
     default:
       return state || _createInitialeDataState();
@@ -338,7 +336,6 @@ var userCatalog = function(state, action) {
       } else {
         return state;
       }
-      break;
       
     case types.USER_CATALOG_METER_REQUEST:
       return Object.assign({}, state, {

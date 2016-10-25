@@ -8,13 +8,13 @@ var Bootstrap = require('react-bootstrap');
 var {connect} = require('react-redux');
 var Select = require('react-controls/select-dropdown');
 
-var {Panel, PanelGroup, ListGroup, ListGroupItem, Button, Collapse} = Bootstrap;
+var {Panel, ListGroup, ListGroupItem, Button} = Bootstrap;
 var PropTypes = React.PropTypes;
 
 var {generateTimestamps} = require('../../helpers/timestamps');
 var {product} = require('../../helpers/array-funcs');
 var population = require('../../model/population');
-var {seriesPropType, populationPropType, reportPropType, configPropType} = require('../../prop-types');
+var {configPropType} = require('../../prop-types');
 var Report = require('./sliding-report');
 
 var Form = React.createClass({
@@ -33,7 +33,7 @@ var Form = React.createClass({
   },
 
   contextTypes: {config: configPropType},
-  
+
   getInitialState: function () {
     var computedState = this.constructor._computeNextState(this.props, this.context);
     return computedState;
@@ -54,14 +54,14 @@ var Form = React.createClass({
 
   render: function () {
     var {now, start, end} = this.state;
-    
+
     var monthOptions = new Map(
       Array.from(generateTimestamps(start, end, 'month'))
         .map((t, i) => (
           [t.toString(), sprintf('M%d : %s', i + 1, moment(t).utc().format('MMMM YYYY'))]
         ))
     );
-   
+
     return (
       <form className="form-inline report-form">
         <div className="form-group">
@@ -72,7 +72,7 @@ var Form = React.createClass({
           />
         </div>
         <div className="form-group submit-buttons">
-          <Button bsStyle="primary" 
+          <Button bsStyle="primary"
             onClick={() => (this.props.setReferenceTime(now.valueOf()))}
            >
             <i className="fa fa-fw fa-refresh"></i>&nbsp;Refresh
@@ -86,17 +86,17 @@ var Form = React.createClass({
 Form.displayName = 'PilotReports.Form';
 
 var ReportsPanel = React.createClass({
-  
+
   propTypes: {
     now: PropTypes.number,
   },
-  
+
   contextTypes: {config: configPropType},
-  
+
   render: function () {
     var {config} = this.context;
     var {now} = this.props;
-    
+
     if (now == null)
       return (<div>No reference time yet...</div>);
 
@@ -114,7 +114,7 @@ var ReportsPanel = React.createClass({
         return new population.Utility(config.utility.key, config.utility.name);
       }
     });
-    
+
     var nameTarget = (target) => {
       if (target instanceof population.Cluster) {
         return 'Cluster: ' + target.name;
@@ -127,7 +127,7 @@ var ReportsPanel = React.createClass({
       .map(([report, source, target], i) => (
         <ListGroupItem key={i}>
           <h4>{report.title} - {sources[source].name} - {nameTarget(target)}</h4>
-          <Report 
+          <Report
             field='volume'
             source={source}
             now={now}
@@ -135,9 +135,9 @@ var ReportsPanel = React.createClass({
             target={target}
             reportKey={sprintf('pilot-%d-%s', i + 1, target.key)}
           />
-        </ListGroupItem>    
+        </ListGroupItem>
       ));
-    
+
     var header = (
       <h3>
         Pilot Reports
@@ -148,7 +148,7 @@ var ReportsPanel = React.createClass({
     );
 
     return (
-      <Panel header={header}> 
+      <Panel header={header}>
         <ListGroup fill>
           {reportItems}
         </ListGroup>
@@ -159,7 +159,7 @@ var ReportsPanel = React.createClass({
   shouldComponentUpdate: function (nextProps) {
     return (
       nextProps.now != this.props.now
-    ); 
+    );
   },
 });
 

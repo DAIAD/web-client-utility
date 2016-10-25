@@ -7,11 +7,10 @@ var ReactRedux = require('react-redux');
 var Select = require('react-controls/select-dropdown');
 var DatetimeInput = require('react-datetime');
 
-var {Panel, PanelGroup, ListGroup, ListGroupItem, Button, Collapse} = Bootstrap;
+var {Panel, PanelGroup, ListGroup, ListGroupItem, Button} = Bootstrap;
 var PropTypes = React.PropTypes;
 
-var population = require('../../model/population');
-var {seriesPropType, populationPropType, reportPropType, configPropType} = require('../../prop-types');
+var {populationPropType, reportPropType, configPropType} = require('../../prop-types');
 var {ReportByDay, ReportByWeek, ReportByMonth, ReportByYear} = require('./common-reports');
 
 var commonPropTypes = {
@@ -22,7 +21,7 @@ var commonPropTypes = {
 };
 
 var OverviewPanel = React.createClass({
- 
+
   statics: {
     itemSpecs: {
       day: {
@@ -56,25 +55,25 @@ var OverviewPanel = React.createClass({
     target: populationPropType,
     title: PropTypes.string.isRequired,
   },
-  
+
   getDefaultProps: function () {
-    return {};  
+    return {};
   },
 
   render: function () {
     var {itemSpecs} = this.constructor;
     var {now, field, source, uom, reports, reportKey, target} = this.props;
-    
+
     var reportProps = {
-      now, 
-      source, 
-      field, 
-      uom, 
-      reportKey: !reportKey? 
+      now,
+      source,
+      field,
+      uom,
+      reportKey: !reportKey?
         (target? target.toString().toLowerCase() : 'utility') : reportKey,
       target,
     };
-      
+
     var items = _.values(
       _.mapValues(itemSpecs, (y, k) => (
         <ListGroupItem key={k}>
@@ -83,13 +82,13 @@ var OverviewPanel = React.createClass({
         </ListGroupItem>
       ))
     );
-   
+
     var header = (<h3>{this.props.title}</h3>);
 
     return (
       <Panel header={header}>
         <ListGroup fill>
-          {items} 
+          {items}
         </ListGroup>
       </Panel>
     );
@@ -97,7 +96,7 @@ var OverviewPanel = React.createClass({
 });
 
 var OverviewPanelGroup = React.createClass({
-   
+
   propTypes: {
     ...commonPropTypes,
     reports: PropTypes.shape({
@@ -108,17 +107,17 @@ var OverviewPanelGroup = React.createClass({
     }),
     title: PropTypes.string.isRequired,
   },
- 
+
   contextTypes: {
     config: configPropType,
   },
-  
+
   getInitialState: function () {
     return {
       activeKey: 'utility',
     };
   },
-  
+
   shouldComponentUpdate: function (nextProps, nextState) {
     return (
       (nextProps.now != this.props.now) ||
@@ -148,7 +147,7 @@ var OverviewPanelGroup = React.createClass({
         visible: visible('per-efficiency')
       },
     };
-    
+
     var panelProps = {
       utility: {
         id: 'overview-utility',
@@ -164,7 +163,7 @@ var OverviewPanelGroup = React.createClass({
 
     return (
       <PanelGroup accordion onSelect={this._selectPanel} activeKey={this.state.activeKey}>
-        
+
         <Panel {...panelProps.utility}>
           <ListGroup fill>
             <ListGroupItem>
@@ -185,14 +184,14 @@ var OverviewPanelGroup = React.createClass({
             </ListGroupItem>
           </ListGroup>
         </Panel>
-        
+
         {/*
         <Panel {...panelProps.perEfficiency}>
-          <div>Todo</div> 
+          <div>Todo</div>
         </Panel>
         */}
-        
-      </PanelGroup>    
+
+      </PanelGroup>
     );
   },
 
@@ -204,12 +203,12 @@ var OverviewPanelGroup = React.createClass({
 });
 
 var Form = React.createClass({
-  
+
   statics: {
-    
+
     defaults: {
       datetimeProps: {
-        dateFormat: 'D MMM[,] YYYY', 
+        dateFormat: 'D MMM[,] YYYY',
         timeFormat: null,
         inputProps: {size: 10},
       },
@@ -220,7 +219,7 @@ var Form = React.createClass({
       return {now, field, source, submitted: false};
     },
   },
-  
+
   contextTypes: {
     config: configPropType,
   },
@@ -244,7 +243,7 @@ var Form = React.createClass({
     var {source, field, now, submitted} = this.state;
 
     var {fields, sources} = config.reports.byType.measurements;
-    
+
     var sourceOptions = new Map(
       _.values(
         _.mapValues(sources, (s, k) => ([k, s.title])))
@@ -260,38 +259,38 @@ var Form = React.createClass({
 
     return(
       <form className="form-inline report-form">
-        
+
         <div className="form-group" title="Select source">
           <Select className="select-source"
-            value={source}  
+            value={source}
             onChange={(val) => (this.setState({source: val}), false)}
             options={sourceOptions}
            />
         </div>
-        
+
         <div className="form-group">
           <Select className="select-field"
-            value={field}  
+            value={field}
             onChange={(val) => (this.setState({field: val}), false)}
             options={fieldOptions}
-           />      
-        </div>  
-        
+           />
+        </div>
+
         <div className="form-group">
           <label>Use reference time:</label>
-          <DatetimeInput {...defaults.datetimeProps} 
-            value={now} 
+          <DatetimeInput {...defaults.datetimeProps}
+            value={now}
             onChange={(m) => (this.setState({now: m.valueOf()}), false)}
            />
         </div>
 
         <div className="form-group submit-buttons">
-          <Button className="submit-btn" bsStyle="default" title="Export to PDF" 
+          <Button className="submit-btn" bsStyle="default" title="Export to PDF"
             onClick={this._exportToPdf} disabled={true}
            >
             <i className="fa fa-send-o"></i>&nbsp; Export
           </Button>
-          <Button className="submit-btn" bsStyle="primary" title="Re-generate reports" 
+          <Button className="submit-btn" bsStyle="primary" title="Re-generate reports"
             onClick={this._submit} disabled={submitted}
            >
             <i className={"fa fa-refresh" + (submitted? ' fa-spin': '')}></i>&nbsp; Refresh
@@ -300,11 +299,11 @@ var Form = React.createClass({
       </form>
     );
   },
- 
+
   // Event handlers
 
   _exportToPdf: function () {
-    console.info('Todo: Exporting to PDF...');
+    console.warn('Todo: Exporting to PDF...');
     return false;
   },
 
@@ -313,17 +312,17 @@ var Form = React.createClass({
       console.warn('No reference time was given! Skipping refresh');
       return false;
     }
-    
+
     var t = moment(this.state.now);
     if (!t.isValid()) {
-      console.warn('Failed to convert to a valid moment! Skipping refresh'); 
+      console.warn('Failed to convert to a valid moment! Skipping refresh');
       return false;
     }
-    
+
     this.props.submit(this.state.source, this.state.field, t.valueOf());
     this.setState({submitted: true});
     return false;
-  }, 
+  },
 });
 
 //

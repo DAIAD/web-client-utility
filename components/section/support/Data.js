@@ -1,22 +1,13 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Select = require('react-select');
-var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var $ = require('jquery');
 
-var FormattedMessage = require('react-intl').FormattedMessage;
-
 var Bootstrap = require('react-bootstrap');
 var Dropzone = require('react-dropzone');
-var moment = require('moment');
 
 var Breadcrumb = require('../../Breadcrumb');
 var Checkbox = require('../../Checkbox');
-
-var { submitQuery } = require('../../../actions/QueryActions');
-var { createUser, createAmphiro } = require('../../../actions/DebugActions');
-
 
 var UPLOAD_NONE = 0;
 var UPLOAD_METER = 1;
@@ -27,13 +18,13 @@ var onChangeSRID = function(val) {
   this.setState({
     srid: val.value
   });
-}; 
+};
 
 var onChangeTimezone = function(val) {
   this.setState({
     timezone: val.value
   });
-}; 
+};
 
 var onChangeMode = function(val) {
   this.setState({
@@ -51,12 +42,12 @@ var DataManagement = React.createClass({
   contextTypes: {
       intl: React.PropTypes.object
   },
-  
+
   getInitialState() {
     var profile = this.props.profile;
 
     var timezone = profile.timezone || 'UTC';
-    
+
     var srid = null;
     switch(profile.country) {
       case 'Greece': case 'Hellas':
@@ -69,7 +60,7 @@ var DataManagement = React.createClass({
          srid = 4326;
          break;
     }
-    
+
     return {
       isLoading: false,
       srid: srid,
@@ -88,24 +79,24 @@ var DataManagement = React.createClass({
     var data = new FormData();
     data.append('srid', this.state.srid);
     data.append('firstRowHeader', this.state.isFirstRowProfile);
-    
+
     this.onDrop('/action/upload', files, data, 'METER');
   },
-  
+
   onDropMeterData: function (files) {
     var data = new FormData();
     data.append('timezone', this.state.timezone);
-    
+
     this.onDrop('/action/upload', files, data, 'METER_DATA');
   },
-  
+
   onDropForecastData: function (files) {
     var data = new FormData();
     data.append('timezone', this.state.timezone);
-    
+
     this.onDrop('/action/upload', files, data, 'METER_DATA_FORECAST');
   },
-  
+
   onDrop: function (url, files, data, type) {
     if(this.state.isLoading) {
       return;
@@ -116,14 +107,14 @@ var DataManagement = React.createClass({
     for(var f=0; f<files.length; f++) {
       data.append('files', files[f]);
     }
-    
+
     var updateCsrfToken = function(crsf) {
       $('meta[name=_csrf]').attr('content', crsf);
       $('input[name=_csrf]').val(crsf);
     };
 
     this.setState({ isLoading : type, errors: null });
-    
+
     var request = {
       url: url,
       type: 'POST',
@@ -147,8 +138,6 @@ var DataManagement = React.createClass({
   },
 
   render: function() {
-    var _t = this.context.intl.formatMessage;
-
     var dropZoneImage = (<i className="fa fa-cloud-upload fa-4x"></i>);
     if(this.state.isLoading) {
       dropZoneImage = (<i className="fa fa-cog fa-spin fa-4x"></i>);
@@ -167,7 +156,7 @@ var DataManagement = React.createClass({
             <Bootstrap.Modal.Title>Error</Bootstrap.Modal.Title>
           </Bootstrap.Modal.Header>
           <Bootstrap.Modal.Body>
-            {errors} 
+            {errors}
           </Bootstrap.Modal.Body>
           <Bootstrap.Modal.Footer>
             <Bootstrap.Button onClick={clearErrors.bind(this)}>Close</Bootstrap.Button>
@@ -175,9 +164,9 @@ var DataManagement = React.createClass({
         </Bootstrap.Modal>
       );
     }
-    
+
     var panel = null;
-    
+
     var modeSelection = (
       <Bootstrap.ListGroupItem>
         <div className='row'>
@@ -191,14 +180,14 @@ var DataManagement = React.createClass({
                         { value: UPLOAD_FORECAST, label: 'Upload forecasting data' },
                     ]}
                     onChange={onChangeMode.bind(this)}
-                    clearable={false} 
+                    clearable={false}
             />
-            <span className='help-block'>Select task type</span>  
+            <span className='help-block'>Select task type</span>
           </div>
         </div>
       </Bootstrap.ListGroupItem>
     );
-    
+
     switch(this.state.mode) {
       case UPLOAD_METER:
         panel = (
@@ -223,9 +212,9 @@ var DataManagement = React.createClass({
                               { value: 2100, label: 'GGRS87 - EPSG:2100)' },
                           ]}
                           onChange={onChangeSRID.bind(this)}
-                        clearable={false} 
+                        clearable={false}
                   />
-                  <span className='help-block'>Select Coordinates Reference System for meter location</span>  
+                  <span className='help-block'>Select Coordinates Reference System for meter location</span>
                 </div>
               </div>
               <div className='row'>
@@ -241,7 +230,7 @@ var DataManagement = React.createClass({
               </div>
               <div className='row'>
                 <div className='form-group col-md-12'>
-                  <Dropzone onDrop={this.onDropMeter.bind(this)} disableClick={true} multiple={true} 
+                  <Dropzone onDrop={this.onDropMeter.bind(this)} disableClick={true} multiple={true}
                             style={{ textAlign: 'center', fontSize: '3em', color: '#656565', border: '1px dotted #656565' }}>
                     {dropZoneImage}
                   </Dropzone>
@@ -250,7 +239,7 @@ var DataManagement = React.createClass({
             </Bootstrap.ListGroupItem>
             <Bootstrap.ListGroupItem>
               <span color='#565656'>Drop an excel file with user and meter data. The first sheet must contain
-              four columns with the username, meter serial number, longitude and latitude values respectively. Longitude 
+              four columns with the username, meter serial number, longitude and latitude values respectively. Longitude
               and latitude values are optional.</span>
             </Bootstrap.ListGroupItem>
           </Bootstrap.ListGroup>
@@ -278,14 +267,14 @@ var DataManagement = React.createClass({
                               { value: 'Europe/Athens', label: 'Athens' }
                           ]}
                           onChange={onChangeTimezone.bind(this)}
-                        clearable={false} 
+                        clearable={false}
                   />
-                  <span className='help-block'>Select time zone of the uploaded data</span>  
+                  <span className='help-block'>Select time zone of the uploaded data</span>
                 </div>
               </div>
               <div className='row'>
                 <div className='form-group col-md-12'>
-                  <Dropzone onDrop={this.onDropMeterData.bind(this)} disableClick={true} multiple={true} 
+                  <Dropzone onDrop={this.onDropMeterData.bind(this)} disableClick={true} multiple={true}
                             style={{ textAlign: 'center', fontSize: '3em', color: '#656565', border: '1px dotted #656565'}}>
                     {dropZoneImage}
                   </Dropzone>
@@ -336,14 +325,14 @@ var DataManagement = React.createClass({
                                 { value: 'Europe/Athens', label: 'Athens' }
                             ]}
                             onChange={onChangeTimezone.bind(this)}
-                          clearable={false} 
+                          clearable={false}
                     />
-                    <span className='help-block'>Select time zone of the uploaded data</span>  
+                    <span className='help-block'>Select time zone of the uploaded data</span>
                   </div>
                 </div>
                 <div className='row'>
                   <div className='form-group col-md-12'>
-                    <Dropzone onDrop={this.onDropForecastData.bind(this)} disableClick={true} multiple={true} 
+                    <Dropzone onDrop={this.onDropForecastData.bind(this)} disableClick={true} multiple={true}
                               style={{ textAlign: 'center', fontSize: '3em', color: '#656565', border: '1px dotted #656565'}}>
                       {dropZoneImage}
                     </Dropzone>
@@ -377,14 +366,14 @@ var DataManagement = React.createClass({
         );
         break;
     }
-    
+
     var header = (
       <span>
         <i className='fa fa-cog fa-fw'></i>
         <span style={{ paddingLeft: 4 }}>Task</span>
       </span>
     );
-    
+
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         {modal}

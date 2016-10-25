@@ -3,7 +3,7 @@ var ActionTypes = require('../action-types');
 
 var actions = {
 
-  // Plain actions 
+  // Plain actions
 
   setConfiguration: () => ({
     type: ActionTypes.config.reports.SET_CONFIGURATION,

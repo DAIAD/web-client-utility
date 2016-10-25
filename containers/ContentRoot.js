@@ -1,12 +1,9 @@
 const develop = (process.env.NODE_ENV !== 'production');
 
 var React = require('react');
-var ReactDOM = require('react-dom');
 var {bindActionCreators} = require('redux');
 var {connect} = require('react-redux');
 var {Link} = require('react-router');
-var FormattedMessage = require('react-intl').FormattedMessage;
-var Bootstrap = require('react-bootstrap');
 var ScrollToTop = require('react-scroll-up');
 
 var LoginForm = require('../components/LoginForm');
@@ -17,10 +14,6 @@ var {setLocale} = require('../actions/LocaleActions');
 var {configure} = require('../actions/config');
 
 var Collapsible = require('../components/Collapsible');
-
-var disableLink = function(e) {
-  e.preventDefault();
-};
 
 var ContentRoot = React.createClass({
   contextTypes: {
@@ -67,9 +60,9 @@ var ContentRoot = React.createClass({
             </div>
           </nav>
           <div>
-            <LoginForm 
+            <LoginForm
               action='login'
-              isAuthenticated={this.props.isAuthenticated} 
+              isAuthenticated={this.props.isAuthenticated}
               errors={this.props.session.errors}
               onLogin={this.props.actions.login}
               isLoading={this.props.session.isLoading}
@@ -114,7 +107,7 @@ var ContentRoot = React.createClass({
                       <i className='fa fa-dashboard fa-fw'></i>{' ' + _t({ id: 'Section.Dashboard'})}
                     </Link>
                   </li>
-                  
+
                   <li>
                     <a href='#' onClick={() => this._toggleExpand('analytics')}>
                       <i className='fa fa-bar-chart fa-fw'></i>
@@ -150,7 +143,7 @@ var ContentRoot = React.createClass({
                               <i className='fa fa-diamond fa-fw'></i>{' ' + _t({ id: 'Section.Analytics.Fav'})}
                             </span>
                           </Link>
-                        </li>                     
+                        </li>
                       </ul>
                     </Collapsible>
                   </li>
@@ -190,7 +183,7 @@ var ContentRoot = React.createClass({
                       <i className='fa fa-clock-o fa-fw'></i>{' ' + _t({ id: 'Section.Scheduler'})}
                     </Link>
                   </li>
-                  
+
                   <li>
                     <a href='#' onClick={() => this._toggleExpand('alerts')}>
                       <i className='fa fa-commenting-o fa-fw'></i>
@@ -215,7 +208,7 @@ var ContentRoot = React.createClass({
                         </li>
                       </ul>
                     </Collapsible>
-                  </li>  
+                  </li>
                   <li>
                     <a href='#' onClick={() => this._toggleExpand('trials')}>
                       <i className='fa fa-flask fa-fw'></i>
@@ -241,7 +234,7 @@ var ContentRoot = React.createClass({
                       </ul>
                     </Collapsible>
                   </li>
-                  
+
                   <li>
                     <a href='#' onClick={() => this._toggleExpand('support')}>
                       <i className='fa fa-support fa-fw'></i>
@@ -284,7 +277,7 @@ var ContentRoot = React.createClass({
                               <i className='fa fa-commenting fa-fw'></i>{' ' + _t({ id: 'Section.ManageAlerts.Messages'})}
                             </span>
                           </Link>
-                        </li>                       
+                        </li>
                         {development}
                       </ul>
                     </Collapsible>
@@ -309,7 +302,7 @@ var ContentRoot = React.createClass({
         </div>
       );
     }
-    
+
     return content;
   },
 
@@ -320,14 +313,14 @@ var ContentRoot = React.createClass({
   },
 
   componentDidUpdate: function (prevProps, prevState) {
-  
-    // Detect a succesfull login, and try to configure the client side. 
+
+    // Detect a succesfull login, and try to configure the client side.
     // This usually includes requesting configuration parts from the server side.
     if (!prevProps.isAuthenticated && this.props.isAuthenticated) {
       this.props.actions.configure();
     }
-    
-    // Todo On a succesfull logout, we should probably deconfigure the client 
+
+    // Todo On a succesfull logout, we should probably deconfigure the client
     // (if the configuration holds any security-sensitive parts).
   },
 
@@ -348,7 +341,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(
-      Object.assign({}, {login, logout, setLocale, configure}), 
+      Object.assign({}, {login, logout, setLocale, configure}),
       dispatch
     )
   };

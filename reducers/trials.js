@@ -1,9 +1,7 @@
-var moment = require('moment');
-
 var ActionTypes = require('../action-types');
 
 var initialState = {
-  referenceTime: null, //moment('2016-03-01T00:00:00Z').valueOf(), 
+  referenceTime: null, 
 };
 
 var reduce = function (state, action) {

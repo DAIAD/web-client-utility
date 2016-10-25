@@ -29,20 +29,6 @@ var changeIndex = function(index) {
   };
 };
 
-var filterText = function(text) {
-  return {
-    type : types.USER_CATALOG_FILTER_TEXT,
-    text : text
-  };
-};
-
-var filterSerial = function(serial) {
-  return {
-    type : types.USER_CATALOG_FILTER_SERIAL,
-    serial : serial
-  };
-};
-
 var clearFilter = function() {
   return {
     type : types.USER_CATALOG_FILTER_CLEAR

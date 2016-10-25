@@ -3,10 +3,7 @@ var favouritesAPI = require('../api/favourites');
 var queryAPI = require('../api/query');
 var moment = require('moment');
 var population = require('../model/population');
-var {queryMeasurements} = require('../service/query');
 var _ = require('lodash');
-
-var sprintf = require('sprintf');
 
 var requestedFavouriteQueries = function () {
   return {
@@ -18,7 +15,7 @@ var receivedFavouriteQueries = function (success, errors, favourites) {
   return {
     type: types.FAVOURITES_RECEIVE_QUERIES,
     success: success,
-    errors: errors,    
+    errors: errors,
     favourites: favourites
   };
 };
@@ -125,7 +122,7 @@ var _chartRequest = function() {
 var _chartResponse = function(success, errors, data, t=null) {
   return {
     type : types.FAVOURITES_CHART_RESPONSE,
-    success : success, 
+    success : success,
     errors : errors,
     data : data,
     timestamp: (t || new Date()).getTime()
@@ -150,35 +147,35 @@ var FavouritesActions = {
       });
     };
   },
-  
+
   addCopy : function(favourite) {
     return function(dispatch, getState) {
       dispatch(addFavouriteRequest());
       return favouritesAPI.addFavourite(favourite).then(function (response) {
-        dispatch(addFavouriteResponse(response.success, response.errors));     
+        dispatch(addFavouriteResponse(response.success, response.errors));
         dispatch(requestedFavouriteQueries());
         return favouritesAPI.fetchFavouriteQueries().then(function (response) {
           dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
         }, function (error) {
           dispatch(receivedFavouriteQueries(false, error, null));
-        });      
+        });
           }, function (error) {
             dispatch(addFavouriteResponse(false, error));
         });
     };
   },
   deleteFavourite : function(event) {
-    return function(dispatch, getState) {     
+    return function(dispatch, getState) {
       dispatch(addFavouriteRequest());
       var fav = getState(event).favourites.favouriteToBeDeleted;
       return favouritesAPI.deleteFavourite(fav).then(function (response) {
-        dispatch(deleteFavouriteResponse(response.success, response.errors));     
+        dispatch(deleteFavouriteResponse(response.success, response.errors));
         dispatch(requestedFavouriteQueries());
         return favouritesAPI.fetchFavouriteQueries().then(function (response) {
           dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
         }, function (error) {
           dispatch(receivedFavouriteQueries(false, error, null));
-        });      
+        });
           }, function (error) {
             dispatch(deleteFavouriteResponse(false, error));
         });
@@ -194,39 +191,39 @@ var FavouritesActions = {
   getFavouriteMap : function(favourite) {
     return function(dispatch, getState) {
       var population, source, geometry, interval, timezone;
-      
+
         population = {
           utility: favourite.query.population[0].utility,
           label: favourite.query.population[0].label,
           type: favourite.query.population[0].type
-        };         
+        };
         interval = [moment(favourite.query.time.start),
                     moment(favourite.query.time.end)];
         source = favourite.query.source;
 
         if(favourite.query.spatial && favourite.query.spatial.length > 1){
-          geometry = favourite.query.spatial[1].geometry;        
+          geometry = favourite.query.spatial[1].geometry;
         } else {
           geometry = null;
-        }        
+        }
         dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
         dispatch(_setEditorValue('spatial', geometry));
-        dispatch(_setEditorValue('source', source));  
-      
+        dispatch(_setEditorValue('source', source));
+
       var query = _buildTimelineQuery(population, source, geometry, timezone, interval);
       dispatch(_getTimelineInit(population, query));
-      
+
       return queryAPI.queryMeasurements(query).then(function(response) {
         var data = {
           meters : null,
           devices : null,
           areas : null
         };
-        if (response.success) { 
+        if (response.success) {
           data.areas = response.areas;
           data.meters = response.meters;
-          data.devices = response.devices;            
+          data.devices = response.devices;
         }
 
         dispatch(_getTimelineComplete(response.success, response.errors, data));
@@ -238,62 +235,62 @@ var FavouritesActions = {
         dispatch(_getFeatures(0, null, null));
       });
     };
-  },  
+  },
   getFavouriteChart : function(favourite) {
   /* jshint ignore:start */
   return function(dispatch, getState) {
     dispatch(_chartRequest());
     return queryAPI.queryMeasurements({query: favourite.query}).then(
       res => {
-        if (res.errors.length) 
-          throw 'The request is rejected: ' + res.errors[0].description; 
+        if (res.errors.length)
+          throw 'The request is rejected: ' + res.errors[0].description;
 
         var source = favourite.query.source;
 
         var resultSets = (favourite.query.source == 'AMPHIRO') ? res.devices : res.meters;
-        
-        var res1 = (resultSets || []).map(rs => {      
+
+        var res1 = (resultSets || []).map(rs => {
           var [g, rr] = population.fromString(rs.label);
-          
+
           if (rr) {
             var points = rs.points.map(p => ({
               timestamp: p.timestamp,
               values: p.users.map(u => u[rr.field][rr.metric]).sort(rr.comparator),
             }));
-            // Shape a result with ranking on users  //TODO - fix dot notation jshint errors in this block   
+            // Shape a result with ranking on users  //TODO - fix dot notation jshint errors in this block
 
             return _.times(rr.limit, (i) => ({
-              source, 
-              timespan: [favourite.query.time.start,favourite.query.time.end], 
+              source,
+              timespan: [favourite.query.time.start,favourite.query.time.end],
               granularity: favourite.query.time.granularity,
               metric: favourite.query.metric,
               population: g,
-              ranking: {...rr.toJSON(), index: i}, 
+              ranking: {...rr.toJSON(), index: i},
               data: points.map(p => ([p.timestamp, p.values[i] || null]))
             }));
-          } else {   
+          } else {
             // Shape a normal timeseries result for requested metrics
             // Todo support other metrics (as client-side "average")
             return favourite.query.metrics.map(metric => ({
-              source, 
-              timespan: [favourite.query.time.start,favourite.query.time.end], 
+              source,
+              timespan: [favourite.query.time.start,favourite.query.time.end],
               granularity: favourite.query.time.granularity,
               metric,
               population: g,
               data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
             }));
-          }          
+          }
         });
           dispatch(_chartResponse(res.success, res.errors, _.flatten(res1)));
-          return _.flatten(res1);    
+          return _.flatten(res1);
       });
-     
+
     };
-  /* jshint ignore:end */    
-  },  
+  /* jshint ignore:end */
+  },
   getFeatures : function(index, timestamp, label) {
     return _getFeatures(index, timestamp, label);
-  },  
+  },
   closeFavourite : function() {
     return{
       type : types.FAVOURITES_CLOSE_SELECTED,
@@ -303,11 +300,11 @@ var FavouritesActions = {
       data: null
     };
   },
-  
+
   setActiveFavourite : function(favourite) {
     return {
       type: types.FAVOURITES_SET_ACTIVE_FAVOURITE,
-      selectedFavourite: favourite 
+      selectedFavourite: favourite
     };
   },
   openWarning : function(favourite) {
@@ -315,7 +312,7 @@ var FavouritesActions = {
       type : types.FAVOURITES_DELETE_QUERY_REQUEST,
       favouriteToBeDeleted: favourite
     };
-  },    
+  },
   closeWarning : function() {
     return {
       type : types.FAVOURITES_CANCEL_DELETE_QUERY,
@@ -326,7 +323,7 @@ var FavouritesActions = {
     return {
       type : types.FAVOURITES_RESET_MAP_STATE
     };
-  } 
+  }
 };
 
 

@@ -1,6 +1,3 @@
-
-var api = require('./base');
-
 var ConfigurationAPI = {
   getConfiguration: function (entityName) {
     // Todo Fetch relevant configuration from server

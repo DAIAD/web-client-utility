@@ -1,5 +1,4 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
 var {FormattedDate} = require('react-intl');
 
@@ -14,11 +13,11 @@ var { connect } = require('react-redux');
 var { bindActionCreators } = require('redux');
 
 var UpsertFavouriteForm = React.createClass({
-  
+
   contextTypes: {
     intl: React.PropTypes.object
   },
-  
+
   componentWillMount : function() {
     if (this.props.type === 'ACCOUNT'){
       this.props.fetchFavouriteAccountStatus(this.props.itemId);
@@ -26,7 +25,7 @@ var UpsertFavouriteForm = React.createClass({
       this.props.fetchFavouriteGroupStatus(this.props.itemId);
     }
   },
-  
+
   getDefaultProps: function() {
     return {
       type: null,
@@ -35,74 +34,74 @@ var UpsertFavouriteForm = React.createClass({
         cancelAction : function(){},
         refreshParentForm : function(){}
       }
-      
+
      };
   },
-  
+
   updateLabel : function(){
     this.props.setFavouriteLabel(this.refs.favouriteLabel.getValue());
   },
-  
+
   validateUpsertFavouriteForm : function (){
     var errors = [];
-        
+
     if(!this.props.favouriteInfo.label){
       errors.push({code: errorsCodes['ValidationError.Favourite.NO_LABEL']});
     }
-    
+
     return errors;
   },
-  
-  
-  processUpsertFavourite : function (){    
+
+
+  processUpsertFavourite : function (){
     var errors = this.validateUpsertFavouriteForm();
-    
+
     if (errors.length === 0){
       this.props.upsertFavourite({
         key: this.props.favouriteInfo.itemId,
         label: this.props.favouriteInfo.label,
         type: this.props.type
       });
-            
+
     } else {
       this.props.upsertFavouriteValidationErrorsOccurred(errors);
     }
   },
-  
 
-  
+
+
   render: function(){
-    
+
     var self = this;
     var _t = this.context.intl.formatMessage;
-    
-    
-    var itemInfoTitleText = this.props.type === 'GROUP' ? 
-          _t({ id:'Demographics.NewFavourite.Group.FavouriteGroupInfo'}) : 
+
+
+    var itemInfoTitleText = this.props.type === 'GROUP' ?
+          _t({ id:'Demographics.NewFavourite.Group.FavouriteGroupInfo'}) :
           _t({ id:'Demographics.NewFavourite.Account.FavouriteAccountInfo'});
-          
+
     const itemInfoTitle = (
         <span>
           <i className='fa fa-info fa-fw'></i>
-          <span style={{ paddingLeft: 4 }}>{itemInfoTitleText}</span>  
+          <span style={{ paddingLeft: 4 }}>{itemInfoTitleText}</span>
         </span>
       );
-    
-    
+
+
     const favouriteLabel = (
         <span>
           <i className='fa fa-bookmark fa-fw'></i>
-          <span style={{ paddingLeft: 4 }}>{_t({ id:'Demographics.NewFavourite.Label'})}</span>  
+          <span style={{ paddingLeft: 4 }}>{_t({ id:'Demographics.NewFavourite.Label'})}</span>
         </span>
       );
-    
-    
+
+
     var createdOn = null;
     var included = null;
     var successCode = null;
     var buttons = null;
     var messageAlert = null;
-    
+
     if (this.props.favouriteInfo){
       switch (this.props.type) {
       case 'ACCOUNT':
@@ -120,8 +119,8 @@ var UpsertFavouriteForm = React.createClass({
         }
         break;
       }
-      
-      
+
+
       if (this.props.favouriteInfo.included === true){
         included = (<b>{_t({ id:'Demographics.NewFavourite.Status.Included'})}</b>);
       } else if (this.props.favouriteInfo.included === false) {
@@ -129,13 +128,13 @@ var UpsertFavouriteForm = React.createClass({
       } else {
         included = ('-');
       }
-      
+
       if(this.props.favouriteInfo.justAdded){
         successCode = 'FavouriteSuccess.FAVOURITE_ADDED';
       } else {
         successCode = 'FavouriteSuccess.FAVOURITE_UPDATED';
       }
-            
+
       const cancelButton = (
         <Bootstrap.Col xs={6}>
           <Bootstrap.Button onClick={
@@ -147,7 +146,7 @@ var UpsertFavouriteForm = React.createClass({
           </Bootstrap.Button>
         </Bootstrap.Col>
       );
-      
+
       if (this.props.favouriteInfo.included === true){
         buttons = (
             <div style={{ float: 'left'}}>
@@ -159,7 +158,7 @@ var UpsertFavouriteForm = React.createClass({
               </Bootstrap.Col>
             </div>
            );
-        
+
       } else if (this.props.favouriteInfo.included === false){
         buttons = (
             <div style={{ float: 'left'}}>
@@ -178,7 +177,7 @@ var UpsertFavouriteForm = React.createClass({
             </div>
            );
       }
-      
+
       messageAlert = (
         <div className='col-md-12'>
             <MessageAlert
@@ -193,11 +192,11 @@ var UpsertFavouriteForm = React.createClass({
         </div>
       );
     }
-    
+
     var accountInfoUI = null;
     var groupInfoUI = null;
-    if (this.props.favouriteInfo){     
-      
+    if (this.props.favouriteInfo){
+
       accountInfoUI = (
           <Bootstrap.ListGroup fill>
             <Bootstrap.ListGroupItem>
@@ -231,20 +230,20 @@ var UpsertFavouriteForm = React.createClass({
                     <tr>
                       <td>{_t({ id:'Demographics.NewFavourite.Account.NumDevices'})}</td>
                       <td>{this.props.favouriteInfo.accountDevicesNum ? this.props.favouriteInfo.accountDevicesNum : 0}</td>
-                    </tr> 
+                    </tr>
                     <tr>
                       <td>{_t({ id:'Demographics.NewFavourite.Status.Label'})}</td>
                       <td>{included}</td>
-                    </tr> 
+                    </tr>
                   </tbody>
                 </table>
               </div>
             </Bootstrap.ListGroupItem>
           </Bootstrap.ListGroup>
-      );      
-      
+      );
+
       groupInfoUI = (
-          
+
           <Bootstrap.ListGroup fill>
             <Bootstrap.ListGroupItem>
               <div className='row'>
@@ -269,21 +268,21 @@ var UpsertFavouriteForm = React.createClass({
                     <tr>
                       <td>{_t({ id:'Group.Size'})}</td>
                       <td>{this.props.favouriteInfo.groupSize ? this.props.favouriteInfo.groupSize : 0}</td>
-                    </tr> 
+                    </tr>
                     <tr>
                       <td>{_t({ id:'Demographics.NewFavourite.Status.Label'})}</td>
                       <td>{included}</td>
-                    </tr> 
+                    </tr>
                   </tbody>
                 </table>
               </div>
             </Bootstrap.ListGroupItem>
           </Bootstrap.ListGroup>
       );
-      
+
     }
-    
-    
+
+
     if (this.props.favouriteInfo){
       var infoUI;
       if (this.props.type === 'ACCOUNT'){
@@ -305,11 +304,11 @@ var UpsertFavouriteForm = React.createClass({
                     <Bootstrap.ListGroupItem>
                       <div className='row'>
                         <div className='col-md-12'>
-                          <Bootstrap.Input 
-                            type='text' 
+                          <Bootstrap.Input
+                            type='text'
                             value={this.props.favouriteInfo.label}
                             label={_t({ id:'Demographics.NewFavourite.Label'})}
-                            ref='favouriteLabel' 
+                            ref='favouriteLabel'
                             placeholder={_t({ id:'Demographics.NewFavourite.LabelPlaceholder'})}
                             onChange={this.updateLabel}
                           />
@@ -339,9 +338,9 @@ var UpsertFavouriteForm = React.createClass({
        );
     }
   }
-  
+
 });
-      
+
 function mapStateToProps(state) {
   return {
     isLoading : state.upsertFavouriteForm.isLoading,

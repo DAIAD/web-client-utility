@@ -1,6 +1,3 @@
-
-var _ = require('lodash');
-
 var React = require('react');
 var Bootstrap = require('react-bootstrap');
 
@@ -30,16 +27,16 @@ var _ButtonGroup = React.createClass({
   propTypes: {
     id: PropTypes.string,
     className: PropTypes.string,
-    component: PropTypes.oneOfType([PropTypes.func, PropTypes.string]), 
+    component: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
     buttons: PropTypes.arrayOf(buttonPropType),
     onSelect: PropTypes.func.isRequired,
   },
-  
+
   getDefaultProps: function () {
     return {
       component: ButtonGroup,
     };
-  }, 
+  },
 
   getInitialState: function () {
     return {
@@ -47,22 +44,22 @@ var _ButtonGroup = React.createClass({
     };
   },
 
-  render: function () {    
+  render: function () {
     var Wrapper = this.props.component;
     var wrapperProps = {id: this.state.id};
     if (this.props.className)
       wrapperProps.className = this.props.className;
-    
+
     var buttons = this.props.buttons.map((spec) => {
-      var icon = !spec.iconName? 
+      var icon = !spec.iconName?
         null : (<i className={"fa fa-fw" + ' ' + ('fa-' + spec.iconName)}></i>);
-      
+
       var button = (
         <Button key={spec.key} {...spec.buttonProps} onClick={() => this.props.onSelect(spec.key)}>
           {icon}{!spec.text? null : ((icon? ' ' : '') + spec.text)}
         </Button>
       );
-      
+
       if (spec.tooltip) {
         var tooltip = (
           <Tooltip id={['tooltip', this.state.id, spec.key].join('--')}>
@@ -79,7 +76,7 @@ var _ButtonGroup = React.createClass({
         return button;
       }
     });
-    
+
     return React.createElement(Wrapper, wrapperProps, buttons);
   },
 });
@@ -87,7 +84,7 @@ var _ButtonGroup = React.createClass({
 _ButtonGroup.displayName = 'toolbars.ButtonGroup';
 
 var _ButtonToolbar = React.createClass({
-  
+
   statics: {
     defaults: {
       groupComponent: ButtonGroup,
@@ -97,7 +94,7 @@ var _ButtonToolbar = React.createClass({
   propTypes: {
     id: PropTypes.string,
     className: PropTypes.string,
-    component: PropTypes.oneOfType([PropTypes.func, PropTypes.string]), 
+    component: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
     groups: PropTypes.arrayOf(PropTypes.shape({
       component: PropTypes.oneOfType([PropTypes.func, PropTypes.string]),
       key: PropTypes.string,
@@ -105,12 +102,12 @@ var _ButtonToolbar = React.createClass({
     })),
     onSelect: PropTypes.func.isRequired,
   },
-  
+
   getDefaultProps: function () {
     return {
       component: ButtonToolbar,
     };
-  }, 
+  },
 
   getInitialState: function () {
     return {
@@ -120,12 +117,12 @@ var _ButtonToolbar = React.createClass({
 
   render: function () {
     var {defaults} = this.constructor;
-    
-    var Wrapper = this.props.component; 
+
+    var Wrapper = this.props.component;
     var wrapperProps = {id: this.state.id};
     if (this.props.className)
       wrapperProps.className = this.props.className;
-    
+
     var buttonGroups = this.props.groups
       .filter(spec => spec.buttons.length > 0)
       .map((spec) => (
@@ -138,7 +135,7 @@ var _ButtonToolbar = React.createClass({
       ));
 
     return React.createElement(Wrapper, wrapperProps, buttonGroups);
-  },  
+  },
 
 });
 

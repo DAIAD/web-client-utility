@@ -1,14 +1,10 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../UserTable');
 var Modal = require('../Modal');
-var {FormattedMessage, FormattedTime, FormattedDate} = require('react-intl');
+var {FormattedMessage} = require('react-intl');
 var DropDown = require('../DropDown');
-var Select = require('react-controls/select-dropdown');
-var Redux = require('react-redux');
-var DropDown = require('../UtilityDropDown');
 
 var { connect } = require('react-redux');
 var { bindActionCreators } = require('redux');
@@ -19,102 +15,100 @@ var Announcements = React.createClass({
   contextTypes: {
       intl: React.PropTypes.object
   },
-  
+
   componentWillMount : function() {
     this.props.getAnnouncementHistory();
     this.props.getCurrentUtilityUsers();
     this.props.fetchGroups();
   },
-  
+
   setFilter: function(e) {
     this.props.setFilter(this.refs.filter.getValue());
-  },  
-  
+  },
+
   clearFilter: function(e) {
     this.props.setFilter('');
-  }, 
-  
+  },
+
   handleCurrentMembersCheckboxChange: function (rowId, row, checked){
     this.props.toggleInitialUserSelected(this.props.accounts, rowId, checked);
   },
-  
+
   handleAddedMembersCheckboxChange: function (rowId, row, checked){
     this.props.toggleAddedUserSelected(this.props.addedUsers, rowId, checked);
-  },  
+  },
   addUsersButtonClick: function (){
     var addedAccounts = [];
     for(var obj in this.props.accounts){
-               
+
       for(var prop in this.props.accounts[obj]){
         if(prop == "selected"){
           if(this.props.accounts[obj][prop] === true){
             addedAccounts.push(this.props.accounts[obj]);
           }
         }
-      } 
-    }     
+      }
+    }
     this.props.addUsers(addedAccounts);
-  }, 
-  
+  },
+
   removeUsersButtonClick: function (){
     var remainingAccounts = [];
-    for(var obj in this.props.addedUsers){             
+    for(var obj in this.props.addedUsers){
       for(var prop in this.props.addedUsers[obj]){
         if(prop == "selected"){
           if(this.props.addedUsers[obj][prop] === false){
             remainingAccounts.push(this.props.addedUsers[obj]);
           }
         }
-      } 
-    }     
+      }
+    }
     this.props.removeUsers(remainingAccounts);
-  }, 
-  
+  },
+
   render: function() {
     var thisAnnouncements = this;
     self = this;
-  		var _t = this.context.intl.formatMessage;
- 
-  		var historyTable = {
-  				fields: [{
-  					 name: 'id',
-  					 title: 'Id',
-  					 hidden: true
-  				}, {
-  					 name: 'title',
-  					 title: 'Title'
-  				}, {
-  					 name: 'content',
-  					 title: 'Content'
-  				}, {
-  					 name: 'dispatchedOn',
-  					 title: 'Dispatched On',
-  					 type: 'datetime'
-  				}, {
+      var historyTable = {
+          fields: [{
+             name: 'id',
+             title: 'Id',
+             hidden: true
+          }, {
+             name: 'title',
+             title: 'Title'
+          }, {
+             name: 'content',
+             title: 'Content'
+          }, {
+             name: 'dispatchedOn',
+             title: 'Dispatched On',
+             type: 'datetime'
+          }, {
         name: 'view',
         title: 'Details',
         type:'action',
         icon: 'group',
         handler: function() {
-          self.props.showAnnouncementDetails(this.props.row);          
-        }, 
+          self.props.showAnnouncementDetails(this.props.row);
+        },
       }, {
         name: 'cancel',
         title: 'Delete',
         type:'action',
         icon: 'remove',
         handler: function() {
-          self.props.setShowModal(this.props.row);            
+          self.props.setShowModal(this.props.row);
         }
       }],
-  				rows: this.props.announcements,
-  				pager: {
-  					index: 0,
-  					size: 3,
-  					count:this.props.announcements ? this.props.announcements.length : 0
-  				}
-  			};
-         
+          rows: this.props.announcements,
+          pager: {
+            index: 0,
+            size: 3,
+            count:this.props.announcements ? this.props.announcements.length : 0
+          }
+        };
+
     var filteredAccounts = [];
     if(this.props.accounts) {
       var records = this.props.accounts;
@@ -126,9 +120,9 @@ var Announcements = React.createClass({
             lastName: records[i].lastName || '',
             selected: records[i].selected || false
           });
-        }        
-      }         
-    }  
+        }
+      }
+    }
 
     var currentUsersFields = {
         fields: [{
@@ -157,8 +151,8 @@ var Announcements = React.createClass({
           size: 10,
           count:this.props.accounts ? this.props.accounts.length : 0
         }
-    }; 
-    
+    };
+
     var addedUsersFields = {
       fields: [{
         name: 'accountId',
@@ -174,8 +168,8 @@ var Announcements = React.createClass({
         name: 'selected',
         type:'boolean',
         handler: function(field, row) {
-          self.handleAddedMembersCheckboxChange(field, row, this.checked);          
-        }        
+          self.handleAddedMembersCheckboxChange(field, row, this.checked);
+        }
       }],
       rows: this.props.addedUsers,
       pager: {
@@ -183,8 +177,8 @@ var Announcements = React.createClass({
         size: 10,
         count:this.props.addedUsers ? this.props.addedUsers.length : 0
       }
-    };   
-    
+    };
+
     var finalUsersFields = {
       fields: [{
         name: 'accountId',
@@ -203,8 +197,8 @@ var Announcements = React.createClass({
         size: 10,
         count:this.props.addedUsers ? this.props.addedUsers.length : 0
       }
-    }; 
-    
+    };
+
     const usersTitle = (
       <span>
         <i className='fa fa-calendar fa-fw'></i>
@@ -212,15 +206,15 @@ var Announcements = React.createClass({
           <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}></span>
       </span>
     );
-   
+
     const selectedUsersTitle = (
       <span>
         <i className='fa fa-calendar fa-fw'></i>
           <span style={{ paddingLeft: 4 }}>Selected Users</span>
           <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}></span>
       </span>
-    );   
-   
+    );
+
     const historyTitle = (
       <span>
        <i className='fa fa-calendar fa-fw'></i>
@@ -239,11 +233,11 @@ var Announcements = React.createClass({
           value={this.props.filter}
           buttonAfter={
            <Bootstrap.Button onClick={this.clearFilter} style={{paddingTop: 7, paddingBottom: 7 }}><i className='fa fa-trash fa-fw'></i></Bootstrap.Button>
-         }          
+         }
         />
       </div>
-    );  
-   
+    );
+
     var groupOptions = [];
     groupOptions.push({id : null, label: 'Everyone'});
     if(this.props.groups){
@@ -251,7 +245,7 @@ var Announcements = React.createClass({
         groupOptions.push({value: this.props.groups[obj].id, label: this.props.groups[obj].name});
       }
     }
-    
+
     var groupDisabled;
     var groupTitle;
     if(groupOptions.length === 1){
@@ -266,57 +260,57 @@ var Announcements = React.createClass({
       <div className='form-horizontal report-form' >
         <div className='col-sm-1 control-label'>
           <label>Group:</label>
-        </div> 
-        <div className='col-sm-9' style = {{marginLeft: 8, marginBottom:10}}> 
-          <DropDown  
-            title = {this.props.group ? this.props.group.label : groupTitle}                             
+        </div>
+        <div className='col-sm-9' style = {{marginLeft: 8, marginBottom:10}}>
+          <DropDown
+            title = {this.props.group ? this.props.group.label : groupTitle}
             options={groupOptions}
             disabled={groupDisabled}
-            onSelect={this.props.setGroup}  
-          />   
-        </div> 
+            onSelect={this.props.setGroup}
+          />
+        </div>
       </div>
-    );  
+    );
     var usersTable = (
       <div>
         <Table data={currentUsersFields} setSelectedAll={this.props.setSelectedAll} allChecked={thisAnnouncements.props.checked}></Table>
       </div>
-    );  
-   
+    );
+
     var addedUsersTable = (
       <div>
         <Table data={addedUsersFields} setSelectedAll={this.props.setSelectedAll}></Table>
       </div>
     );
-   
+
     var finalUsersTable = (
       <div>
         <Table data={finalUsersFields}></Table>
       </div>
     );
-   
+
     var announcementForm = (
       <div>
         <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
-            <label>Title</label>            
-            <textarea name="title" 
-              rows="1" cols="120" 
+            <label>Title</label>
+            <textarea name="title"
+              rows="1" cols="120"
               ref="title"
               defaultValue={""}
             />
           </Bootstrap.Col>
-        </Bootstrap.Row> 
+        </Bootstrap.Row>
          <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
             <label>Content</label>
-            <textarea name="content" 
-              rows="3" cols="120" 
+            <textarea name="content"
+              rows="3" cols="120"
               ref="content"
               defaultValue={""}
             />
           </Bootstrap.Col>
-        </Bootstrap.Row>            
+        </Bootstrap.Row>
          <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
             <div>
@@ -335,55 +329,54 @@ var Announcements = React.createClass({
                 onClick={this.props.cancelShowForm}
                   style={{ height: 33, marginLeft : 10}}>
                 <FormattedMessage id='Cancel' />
-              </button>  
+              </button>
             </div>
-          </Bootstrap.Col>         
-        </Bootstrap.Row>           
-      </div>  
+          </Bootstrap.Col>
+        </Bootstrap.Row>
+      </div>
       );
-    
+
     if(this.props.showForm){
-      return (     
-        < div className = "container-fluid" style = {{ paddingTop: 10 }} >  
+      return (
+        < div className = "container-fluid" style = {{ paddingTop: 10 }} >
           <div className="row">
               <Bootstrap.Panel header={selectedUsersTitle}>
                 <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>	       
-                    {finalUsersTable}  
+                  <Bootstrap.ListGroupItem>
+                    {finalUsersTable}
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
-              </Bootstrap.Panel> 
-          </div>     
+              </Bootstrap.Panel>
+          </div>
           <div className="row">
             {announcementForm}
           </div>
-        </div>        
-      );       
+        </div>
+      );
     }
 
     if(this.props.showModal){
-      var modal;
       var title = 'Delete Announcement?';
-			   var actions = [{
-				    action: self.props.hideModal,
-				    name: "Cancel"
-			     },  {
-				      action: this.props.confirmDeleteAnnouncement,
-				      name: "Delete",
-				      style: 'danger'
-			      }];    
-      return (     
+         var actions = [{
+            action: self.props.hideModal,
+            name: "Cancel"
+           },  {
+              action: this.props.confirmDeleteAnnouncement,
+              name: "Delete",
+              style: 'danger'
+            }];
+      return (
        <div>
-  		      <Modal show = {this.props.showModal}
+            <Modal show = {this.props.showModal}
               onClose = {this.props.hideModal}
               title = {title}
               text = {'You are about to delete the announcement with title "' + this.props.announcement.title + '". This announcement will not be visible to users anymore. Are you sure?'}
-  		          actions = {actions}
-  		      />
-      </div>     
-      );   
+                actions = {actions}
+            />
+      </div>
+      );
     }
-    
+
     if(this.props.showAnnouncementDetailsTable){
 
       var receiversFields = {
@@ -409,22 +402,22 @@ var Announcements = React.createClass({
           count:this.props.receivers ? this.props.receivers.length : 0
         }
       };
-      
+
       var receiversTitle = (
         <span>
           <i className='fa fa-calendar fa-fw'></i>
             <span style={{ paddingLeft: 4 }}>Users that received this announcement</span>
             <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}></span>
         </span>
-      ); 
-     
+      );
+
       var announcementTitle = (
         <span>
           <i className='fa fa-calendar fa-fw'></i>
             <span style={{ paddingLeft: 4 }}>Announcement Info</span>
             <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}></span>
         </span>
-      );          
+      );
       var receiversTable = (
         <div>
           <Table data={receiversFields}></Table>
@@ -435,14 +428,14 @@ var Announcements = React.createClass({
       <div>
         <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
-            <label>Title:</label>  
+            <label>Title:</label>
           </Bootstrap.Col>
           <Bootstrap.Col xs={6}>
-            <div style={{fontSize:16}}>            
-              <label>{this.props.announcement.title}</label>   
+            <div style={{fontSize:16}}>
+              <label>{this.props.announcement.title}</label>
             </div>
           </Bootstrap.Col>
-        </Bootstrap.Row>        
+        </Bootstrap.Row>
          <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
             <label>Content:</label>
@@ -450,9 +443,9 @@ var Announcements = React.createClass({
           <Bootstrap.Col xs={6}>
             <div style={{fontSize:16}}>
               <label>{this.props.announcement.content}</label>
-            </div> 
-          </Bootstrap.Col>         
-        </Bootstrap.Row>     
+            </div>
+          </Bootstrap.Col>
+        </Bootstrap.Row>
          <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
             <label>Dispatched On:</label>
@@ -461,42 +454,42 @@ var Announcements = React.createClass({
             <div style={{fontSize:16}}>
             <label>{new Date(this.props.announcement.dispatchedOn).toUTCString()}</label>
             </div>
-          </Bootstrap.Col>         
-        </Bootstrap.Row>         
-      </div>  
+          </Bootstrap.Col>
+        </Bootstrap.Row>
+      </div>
       );
-     
-      return (     
-        < div className = "container-fluid" style = {{ paddingTop: 10 }} >  
+
+      return (
+        < div className = "container-fluid" style = {{ paddingTop: 10 }} >
           <div className="row">
               <Bootstrap.Panel header={announcementTitle}>
                 <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>	       
-                    {announcementInfo}  
+                  <Bootstrap.ListGroupItem>
+                    {announcementInfo}
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
-              </Bootstrap.Panel> 
-          </div>        
+              </Bootstrap.Panel>
+          </div>
           <div className="row">
               <Bootstrap.Panel header={receiversTitle}>
                 <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>	       
-                    {receiversTable}  
+                  <Bootstrap.ListGroupItem>
+                    {receiversTable}
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
-              </Bootstrap.Panel> 
-          </div>   
+              </Bootstrap.Panel>
+          </div>
             <div className="row">
-              <Bootstrap.Button 
+              <Bootstrap.Button
                 onClick = {this.props.goBack}>
                 {'Back'}
               </Bootstrap.Button>
             </div>
-        </div>  
+        </div>
 
-      );   
+      );
     }
-    
+
     if(this.props.groups && this.props.accounts && this.props.announcements && !this.props.isLoading){
       return (
         <div className="container-fluid" style={{ paddingTop: 10 }}>
@@ -509,13 +502,13 @@ var Announcements = React.createClass({
             <div className='col-md-5 equal-height-col'>
               <Bootstrap.Panel header={usersTitle}>
                 <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>	
+                  <Bootstrap.ListGroupItem>
                     {groupDropDown}
-                    {filter} 
-                    {usersTable}    
+                    {filter}
+                    {usersTable}
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
-              </Bootstrap.Panel> 
+              </Bootstrap.Panel>
             </div>
 
             <div className='col-md-2 equal-height-col' >
@@ -534,21 +527,21 @@ var Announcements = React.createClass({
                   </div>
                 </div>
               </div>
-            </div>         
+            </div>
 
             <div className='col-md-5 equal-height-col'>
               <Bootstrap.Panel header={selectedUsersTitle}>
                 <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>	       
-                    {addedUsersTable}  
+                  <Bootstrap.ListGroupItem>
+                    {addedUsersTable}
                     <div>
-                      <Bootstrap.Button disabled = {this.props.addedUsers.length===0} onClick = {this.props.setShowForm}> 
+                      <Bootstrap.Button disabled = {this.props.addedUsers.length===0} onClick = {this.props.setShowForm}>
                         {'Form Announcement'}
                       </Bootstrap.Button>
                     </div>
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
-              </Bootstrap.Panel> 
+              </Bootstrap.Panel>
             </div>
           </div>
           <div>
@@ -557,16 +550,16 @@ var Announcements = React.createClass({
               <div className="col-md-12">
                 <Bootstrap.Panel header={historyTitle}>
                  <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>	
+                  <Bootstrap.ListGroupItem>
                    <Table data={historyTable}></Table>
                   </Bootstrap.ListGroupItem>
                  </Bootstrap.ListGroup>
                 </Bootstrap.Panel>
-              </div> 
-            </div> 
+              </div>
+            </div>
           </div>
         </div>
-      );  
+      );
     }
     else{
       return (
@@ -574,14 +567,14 @@ var Announcements = React.createClass({
           <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
           <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
         </div>
-      );      
+      );
     }
 
   }
 });
 
 function mapStateToProps(state) {
-  return {    
+  return {
       accounts: state.announcements.accounts,
       announcements: state.announcements.announcements,
       initialUsers: state.announcements.initialUsers,
@@ -604,7 +597,7 @@ function mapDispatchToProps(dispatch) {
     fetchGroups : bindActionCreators(AnnouncementsActions.fetchGroups, dispatch),
     setGroup: function (event, group){
       dispatch(AnnouncementsActions.setGroup(event, group));
-      if(group.label == 'Everyone'){      
+      if(group.label == 'Everyone'){
         self.props.getCurrentUtilityUsers();
       }
       else{
@@ -618,7 +611,7 @@ function mapDispatchToProps(dispatch) {
     },
     toggleAddedUserSelected: function (addedUsers, accountId, selected){
       dispatch(AnnouncementsActions.setSelectedAddedUser(addedUsers, accountId, selected));
-    },       
+    },
     addUsers: bindActionCreators(AnnouncementsActions.addUsers, dispatch),
     removeUsers: bindActionCreators(AnnouncementsActions.removeUsers, dispatch),
     setShowForm: bindActionCreators(AnnouncementsActions.showForm, dispatch),
@@ -629,10 +622,10 @@ function mapDispatchToProps(dispatch) {
     },
     setFilter: bindActionCreators(AnnouncementsActions.setFilter, dispatch),
     setSelectedAll: function (event, selected){
-			   dispatch(AnnouncementsActions.setSelectedAll(event, selected));
-		  },
+         dispatch(AnnouncementsActions.setSelectedAll(event, selected));
+      },
     setShowModal : bindActionCreators(AnnouncementsActions.showModal, dispatch),
-    hideModal : bindActionCreators(AnnouncementsActions.hideModal, dispatch),  
+    hideModal : bindActionCreators(AnnouncementsActions.hideModal, dispatch),
     confirmDeleteAnnouncement : bindActionCreators(AnnouncementsActions.deleteAnnouncement, dispatch),
     showAnnouncementDetails: function (announcement){
       dispatch(AnnouncementsActions.showAnnouncementDetails(event, announcement));

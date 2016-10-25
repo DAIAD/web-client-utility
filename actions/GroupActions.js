@@ -27,33 +27,33 @@ var receivedGroupMembers = function (success, errors, groupMembersInfo){
 
 
 var GroupActions = {
-    
+
   showGroup : function(groupId){
     return function (dispatch, getState) {
       dispatch(requestedGroup());
-      
+
       return GroupAPI.fetchGroupInfo(groupId).then(function(response) {
         dispatch(receivedGroupInfo(response.success, response.errors, response.groupInfo));
-        
+
         return GroupAPI.fetchGroupMembers(groupId).then( function (response) {
           dispatch(receivedGroupMembers(response.success, response.errors, response.groupMembersInfo));
         }, function (error) {
           dispatch(receivedGroupMembers(false, error, null));
         });
-        
+
       }, function(error){
         dispatch(receivedGroupInfo(false, error, null));
       });
     };
   },
-  
+
   showFavouriteGroupForm : function(groupId){
     return {
       type : types.GROUP_SHOW_FAVOURITE_GROUP_FORM,
       groupId : groupId
     };
   },
-  
+
   hideFavouriteGroupForm : function(){
     return {
       type : types.GROUP_HIDE_FAVOURITE_GROUP_FORM
@@ -65,20 +65,20 @@ var GroupActions = {
       type : types.GROUP_RESET_COMPONENT
     };
   },
-  
+
   showFavouriteAccountForm : function (accountId){
     return {
       type : types.GROUP_SHOW_FAVOURITE_ACCOUNT_FORM,
       accountId : accountId
     };
   },
-  
+
   hideFavouriteAccountForm : function(){
     return {
       type : types.GROUP_HIDE_FAVOURITE_ACCOUNT_FORM
     };
   }
-  
+
 };
 
 module.exports = GroupActions;

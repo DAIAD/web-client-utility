@@ -159,10 +159,10 @@ var MapActions = {
           devices : null,
           areas : null
         };
-        if (response.success) {     
+        if (response.success) {
           data.areas = response.areas;
           data.meters = response.meters;
-          data.devices = response.devices;            
+          data.devices = response.devices;
         }
         dispatch(_getTimelineComplete(response.success, response.errors, data));
 
@@ -174,13 +174,13 @@ var MapActions = {
       });
     };
   },
-  
+
   setEditorValuesBatch : function(isDefault) {
 
     return function(dispatch, getState) {
-      
+
       var utility = getState().session.profile.utility;
-      MapActions.setTimezone(utility.timezone); 
+      MapActions.setTimezone(utility.timezone);
       var timezone = getState().map.timezone;
       var population, source, geometry, interval;
       if(isDefault){
@@ -189,8 +189,8 @@ var MapActions = {
             utility: utility.key,
             label: utility.name,
             type: 'UTILITY'
-          };        
-        } 
+          };
+        }
 
         source = 'METER';
         interval = [moment().subtract(14, 'day'), moment()];
@@ -202,31 +202,31 @@ var MapActions = {
         dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
         dispatch(_setEditorValue('source', source));
-        dispatch(_setEditorValue('spatial', geometry));     
-        
+        dispatch(_setEditorValue('spatial', geometry));
+
       }
       else if(getState().favourites.selectedFavourite){
         population = {
           utility: getState().favourites.selectedFavourite.query.population[0].utility,
           label: getState().favourites.selectedFavourite.query.population[0].label,
           type: getState().favourites.selectedFavourite.query.population[0].type
-        };         
+        };
         interval = [moment(getState().favourites.selectedFavourite.query.time.start),
                     moment(getState().favourites.selectedFavourite.query.time.end)];
         source = getState().favourites.selectedFavourite.query.source;
-        
+
         //if( (!getState().map.features) || (getState().map.features.length === 0) ){
-        if(getState().favourites.selectedFavourite.query.spatial 
+        if(getState().favourites.selectedFavourite.query.spatial
             && getState().favourites.selectedFavourite.query.spatial > 1){
           geometry = getState().favourites.selectedFavourite.query.spatial[1].geometry;
         } else {
           //geometry = getState().map.features[0].geometry;
           geometry = null;
-        }        
+        }
         dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
         dispatch(_setEditorValue('spatial', geometry));
-        dispatch(_setEditorValue('source', source));  
+        dispatch(_setEditorValue('source', source));
       }
 
       var query = _buildTimelineQuery(population, source, geometry, timezone, interval);
@@ -237,10 +237,10 @@ var MapActions = {
           devices : null,
           areas : null
         };
-        if (response.success) { 
+        if (response.success) {
           data.areas = response.areas;
           data.meters = response.meters;
-          data.devices = response.devices;            
+          data.devices = response.devices;
         }
         dispatch(_getTimelineComplete(response.success, response.errors, data));
 
@@ -266,7 +266,7 @@ var MapActions = {
 
         if (response.success) {
           data.meters = response.meters;
-          data.devices = response.devices;             
+          data.devices = response.devices;
         }
         dispatch(_getChartComplete(response.success, response.errors, data));
       }, function(error) {
@@ -295,7 +295,7 @@ var MapActions = {
         if (response.success) {
           data.areas = response.areas;
           data.meters = response.meters;
-          data.devices = response.devices;        
+          data.devices = response.devices;
         }
         dispatch(_getTimelineComplete(response.success, response.errors, data));
 
@@ -338,7 +338,7 @@ var MapActions = {
         dispatch(addFavouriteResponse(false, error));
       });
     };
-  }  
+  }
 };
 
 module.exports = MapActions;

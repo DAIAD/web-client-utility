@@ -1,22 +1,17 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
 var Breadcrumb = require('../Breadcrumb');
-var Checkbox = require('../Checkbox');
 var UtilityDropDown = require('../UtilityDropDown');
 var ManageAlertsActions = require('../../actions/ManageAlertsActions');
 var { connect } = require('react-redux');
 var { bindActionCreators } = require('redux');
 var TipsEditTable = require('../TipsEditTable');
-var {FormattedMessage, FormattedTime, FormattedDate} = require('react-intl');
+var {FormattedMessage} = require('react-intl');
 var Schema = require('../../constants/ManageAlertsTableSchema');
-var { getUtilities, addTip, cancelAddTip, showAddTipForm, beganEditingTip } = require('../../actions/ManageAlertsActions');
+var { cancelAddTip, showAddTipForm, beganEditingTip } = require('../../actions/ManageAlertsActions');
 var Modal = require('../Modal');
 
 var self;
-var rowsOriginalTemp = [];
-var tempRows = [];
-var savedTips = [];
 
 var ManageAlerts = React.createClass({
   changedModes: [],
@@ -24,31 +19,31 @@ var ManageAlerts = React.createClass({
     intl: React.PropTypes.object
   },
   getDefaultProps: function() {
-    return {  
-        defaultDropDownTitle: 'Select Utility', 
+    return {
+        defaultDropDownTitle: 'Select Utility',
         rowsChanged : [],
         saveButtonDisabled : true
     };
   },
   componentWillMount : function() {
-    this.props.fetchUtilities();   
+    this.props.fetchUtilities();
   },
 
   editClickedTip : function(tip) {
     this.props.editTip(tip);
   },
-  
+
   validateNewTipForm: function(title, description, image){
-    var errors = [];   
+    var errors = [];
     return errors;
-  },  
-  
+  },
+
   processAddNewTipForm: function(){
     var inputFieldsFormValues = {
       title : this.refs.title.getValue(),
       description : this.description.lastName.getValue(),
       image : this.refs.image.getValue()
-    };   
+    };
     var errors = this.validateNewTipForm(
       this.refs.title.getValue(),
       this.refs.description.getValue(),
@@ -56,47 +51,45 @@ var ManageAlerts = React.createClass({
     );
     if (errors.length === 0){
       this.props.actions.addTipFillForm(inputFieldsFormValues);
-      var userInfo = {
+      var tipInfo = {
         title : this.refs.lastName.getValue(),
         description : this.refs.email.getValue(),
         image : this.refs.address.getValue() === '' ? null : this.refs.address.getValue(),
-      };    
+      };
       this.props.actions.addTip(tipInfo);
     } else {
       this.props.actions.addTipValidationsErrorsOccurred(errors);
     }
-  },  
-  
+  },
+
   render: function() {
     self = this;
-    var _t = this.context.intl.formatMessage;
 
     if(this.props.showModal){
-        var modal;
         var title = 'Delete Tip?';
-			     var actions = [{
-				      action: self.props.hideModal,
-				        name: "Cancel"
-			     },  {
-				      action: self.props.confirmDeleteTip,
-				        name: "Delete",
-				        style: 'danger'
-			         }
-		      ];
-            
+           var actions = [{
+              action: self.props.hideModal,
+                name: "Cancel"
+           },  {
+              action: self.props.confirmDeleteTip,
+                name: "Delete",
+                style: 'danger'
+               }
+          ];
+
       return (
        <div>
-  		      <Modal show = {this.props.showModal}
+            <Modal show = {this.props.showModal}
               onClose = {self.props.hideModal}
               title = {title}
               text = {'You are about to delete tip with ID ' + this.props.currentTip.index + ' permanently. Are you sure?'}
-  		          actions = {actions}
-  		      />
+                actions = {actions}
+            />
       </div>
-      );      
+      );
     }
-    
-    if (!this.props.isLoading && this.props.utilities){ 
+
+    if (!this.props.isLoading && this.props.utilities){
 
      var fieldsData = [{
           name: 'index',
@@ -124,21 +117,21 @@ var ManageAlerts = React.createClass({
           name: 'edit',
           type:'action',
           icon: 'pencil',
-          handler: function() {           
+          handler: function() {
             self.editClickedTip(this.props.row);
           }
         }, {
           name: 'cancel',
           type:'action',
           icon: 'remove',
-          handler: function() { 
-            self.props.setShowModal(this.props.row);            
+          handler: function() {
+            self.props.setShowModal(this.props.row);
           }
         }];
-      
-      var data = { 
+
+      var data = {
         filters: Schema.filters,
-        fields: fieldsData, 
+        fields: fieldsData,
         rows: populateTips(this),
         pager: {
           index: 0,
@@ -146,7 +139,7 @@ var ManageAlerts = React.createClass({
           count:1
         }
       };
-           
+
       var utilityOptions = populateUtilityOptions(this.props.utilities);
 
       var filterTitle = (
@@ -159,25 +152,25 @@ var ManageAlerts = React.createClass({
       );
       var filter = (
         < div className = "row" >
-          < Bootstrap.Panel header = {filterTitle} >       
-            <UtilityDropDown  
-              title = {this.props.utility ? this.props.utility.label : this.props.defaultDropDownTitle}                                   
+          < Bootstrap.Panel header = {filterTitle} >
+            <UtilityDropDown
+              title = {this.props.utility ? this.props.utility.label : this.props.defaultDropDownTitle}
               options={utilityOptions}
               disabled={false}
-              onSelect={this.props.setUtility}  
+              onSelect={this.props.setUtility}
             />
             < /Bootstrap.Panel>
-        < /div>      
+        < /div>
       );
-    
+
       var staticTipsTitle = (
         < span >
           < i className = 'fa fa-commenting-o fa-fw' > < /i>
           < span style = {{ paddingLeft: 4 }} > Static Tips < /span>
-            < span style = {{float: 'right', marginTop: - 3, marginLeft: 5 }} >          
-              < Bootstrap.Button  bsStyle = "default" className = "btn-circle" onClick={this.props.actions.showAddTipForm} >    
+            < span style = {{float: 'right', marginTop: - 3, marginLeft: 5 }} >
+              < Bootstrap.Button  bsStyle = "default" className = "btn-circle" onClick={this.props.actions.showAddTipForm} >
                 < Bootstrap.Glyphicon glyph = "plus" />
-              < /Bootstrap.Button>                           
+              < /Bootstrap.Button>
           < /span>
         < /span>
       );
@@ -187,52 +180,52 @@ var ManageAlerts = React.createClass({
          < Bootstrap.Panel header = {staticTipsTitle} >
            < Bootstrap.ListGroup fill >
              < Bootstrap.ListGroupItem >
-                < TipsEditTable 
-                  data = {this.props.data ? this.props.data : data} 
-                  setActivePage={this.props.setActivePage} 
+                < TipsEditTable
+                  data = {this.props.data ? this.props.data : data}
+                  setActivePage={this.props.setActivePage}
                   activePage={this.props.activePage}
                   setActivationChanged={this.props.setActivationChanged}
                   initialRows={data}
                   saveActiveStatusAction={this.props.saveActiveStatusAction}
-                  changedRows={this.props.changedRows}  
-                  currentTip={this.props.currentTip ? this.props.currentTip : null} > 
+                  changedRows={this.props.changedRows}
+                  currentTip={this.props.currentTip ? this.props.currentTip : null} >
                < /TipsEditTable>
              < /Bootstrap.ListGroupItem>
            < /Bootstrap.ListGroup>
-         < /Bootstrap.Panel>                 
+         < /Bootstrap.Panel>
        < /div>
       );
 
       var tipsBody = (
-        < div className = "container-fluid" style = {{ paddingTop: 10 }} >   
+        < div className = "container-fluid" style = {{ paddingTop: 10 }} >
           {filter}
           {table}
         < /div>
       );
-      
+
       var tipForm = (
         <div>
           <Bootstrap.Row>
             <Bootstrap.Col xs={6}>
-              <label>Title</label>            
-              <textarea name="Title" 
-                rows="2" cols="120" 
+              <label>Title</label>
+              <textarea name="Title"
+                rows="2" cols="120"
                 ref="title"
                 index={this.props.currentTip ? this.props.currentTip.index : null}
                 defaultValue={this.props.currentTip ? this.props.currentTip.title : ""}
               />
             </Bootstrap.Col>
-          </Bootstrap.Row> 
+          </Bootstrap.Row>
            <Bootstrap.Row>
             <Bootstrap.Col xs={6}>
               <label>Description</label>
-              <textarea name="Description" 
-                rows="8" cols="120" 
+              <textarea name="Description"
+                rows="8" cols="120"
                 ref="description"
                 defaultValue={this.props.currentTip ? this.props.currentTip.description : ""}
               />
             </Bootstrap.Col>
-          </Bootstrap.Row>            
+          </Bootstrap.Row>
            <Bootstrap.Row>
             <Bootstrap.Col xs={6}>
               <div>
@@ -252,20 +245,20 @@ var ManageAlerts = React.createClass({
                     style={{ height: 33, marginLeft : 10}}
                     onClick={this.props.actions.cancelAddTip}>
                   <FormattedMessage id='Cancel' />
-                </button>  
+                </button>
               </div>
-            </Bootstrap.Col>         
-          </Bootstrap.Row>           
-        </div>  
+            </Bootstrap.Col>
+          </Bootstrap.Row>
+        </div>
         );
-      
+
       var addTipForm = (
-        < div className = "container-fluid" style = {{ paddingTop: 10 }} >   
+        < div className = "container-fluid" style = {{ paddingTop: 10 }} >
             {filter}
             {tipForm}
-        < /div>        
-      );       
-      
+        < /div>
+      );
+
       var visiblePart = this.props.show ? addTipForm : tipsBody; //lala
 
       return (
@@ -278,8 +271,8 @@ var ManageAlerts = React.createClass({
         {visiblePart}
       </div>);
 
-    
-    } else {       
+
+    } else {
       return (
         <div>
           <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
@@ -294,29 +287,28 @@ function populateUtilityOptions(utilities){
   var utilityOptions = [];
   for(var obj in utilities){
     var currentName, currentId, currentKey, currentLocale;
-    for(var prop in utilities[obj]){     
+    for(var prop in utilities[obj]){
       if(prop == "name"){
         currentName = utilities[obj][prop];
-      } 
+      }
       else if(prop == "id"){
         currentId = utilities[obj][prop];
-      } 
+      }
       else if(prop == "key"){
         currentKey = utilities[obj][prop];
-      }  
+      }
       else if(prop == "locale"){
         currentLocale = utilities[obj][prop];
       }
-    }  
-    var option = {label: currentName, value: currentId, key: currentKey, locale: currentLocale};    
+    }
+    var option = {label: currentName, value: currentId, key: currentKey, locale: currentLocale};
     utilityOptions.push(option);
-  } 
+  }
   return utilityOptions;
 }
 
-function populateTips(object){ 
-  rowsOriginalTemp = [];
-  var element = {}, populatedTips = [];   
+function populateTips(object){
+  var element = {}, populatedTips = [];
   if(object.props.tips == null){
     return []; //admin has not selected a utility, return empty tips
   }
@@ -327,10 +319,10 @@ function populateTips(object){
       for(var prop in object.props.tips[obj]){
         if(prop == "id"){
             currentId = object.props.tips[obj][prop];
-        } 
+        }
         else if(prop == "index"){
             currentIndex = object.props.tips[obj][prop];
-        } 
+        }
         else if(prop == "title"){
             currentTitle = object.props.tips[obj][prop];
         }
@@ -342,19 +334,19 @@ function populateTips(object){
         }
         else if(prop == "modifiedOn"){
             currentModifiedOn = object.props.tips[obj][prop];
-        }  
+        }
         else if(prop == "active"){
-            currentActive = object.props.tips[obj][prop];                    
+            currentActive = object.props.tips[obj][prop];
         }
       }
 
-      element = {id: currentId, index : currentIndex, title : currentTitle, description : currentDescription, 
+      element = {id: currentId, index : currentIndex, title : currentTitle, description : currentDescription,
         createdOn : currentCreatedOn, modifiedOn : currentModifiedOn, active : currentActive};
       populatedTips.push(element);
-    } 
+    }
 
     populatedTips.sort(sortBy('index', true));
-    
+
     return populatedTips;
   }
 }
@@ -363,12 +355,12 @@ var sortBy = function(field, reverse){
    var key = function (x) {return x[field];};
 
    return function (a,b) {
-	  var keyA = key(a), keyB = key(b);
-	  return ( (keyA < keyB) ? -1 : ((keyA > keyB) ? 1 : 0) ) * [-1,1][+!!reverse];                  
+    var keyA = key(a), keyB = key(b);
+    return ( (keyA < keyB) ? -1 : ((keyA > keyB) ? 1 : 0) ) * [-1,1][+!!reverse];
    };
 };
 
-function mapStateToProps(state) {  
+function mapStateToProps(state) {
   return {
     utility: state.alerts.utility,
     tips: state.alerts.tips,
@@ -384,21 +376,21 @@ function mapStateToProps(state) {
   };
 }
 
-function mapDispatchToProps(dispatch) {  
+function mapDispatchToProps(dispatch) {
 
   return {
-    actions : bindActionCreators(Object.assign({}, {beganEditingTip, showAddTipForm, cancelAddTip}) , dispatch), 
+    actions : bindActionCreators(Object.assign({}, {beganEditingTip, showAddTipForm, cancelAddTip}) , dispatch),
     editTip : bindActionCreators(ManageAlertsActions.editTip, dispatch),
     setShowModal : bindActionCreators(ManageAlertsActions.showModal, dispatch),
-    hideModal : bindActionCreators(ManageAlertsActions.hideModal, dispatch),   
-    confirmDeleteTip : bindActionCreators(ManageAlertsActions.deleteTip, dispatch),    
+    hideModal : bindActionCreators(ManageAlertsActions.hideModal, dispatch),
+    confirmDeleteTip : bindActionCreators(ManageAlertsActions.deleteTip, dispatch),
     setUtility: function (event, utility){
       dispatch(ManageAlertsActions.setUtility(event, utility));
       dispatch(ManageAlertsActions.getStaticTips(event, utility, self.props.activePage));
     },
     saveCurrentTip : function (){
     var newTip;
-      if(self.props.currentTip == null){    
+      if(self.props.currentTip == null){
         newTip = {title : self.refs.title.value, description : self.refs.description.value};
         dispatch(ManageAlertsActions.addTip(event, newTip, self.props.utility));
       }
@@ -406,15 +398,15 @@ function mapDispatchToProps(dispatch) {
         self.props.currentTip.title = self.refs.title.value;
         self.props.currentTip.description = self.refs.description.value;
         dispatch(ManageAlertsActions.addTip(event, self.props.currentTip));
-      } 
+      }
     },
     fetchUtilities : bindActionCreators(ManageAlertsActions.fetchUtilities, dispatch),
     setActivePage: function(activePage){
       dispatch(ManageAlertsActions.setActivePage(activePage));
-    }, 
+    },
     setActivationChanged: function (newData){
       dispatch(ManageAlertsActions.setActivationChanged(newData));
-    },    
+    },
     saveActiveStatusAction: function (changedRows){
       dispatch(ManageAlertsActions.saveActiveStatusChanges(event,changedRows,self.props.utility, self.props.activePage));
     }

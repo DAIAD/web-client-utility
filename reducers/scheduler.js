@@ -96,7 +96,6 @@ var dataReducer = function(state, action) {
           }
         });
       }
-      break;
 
     case types.EXECUTION_RESPONSE:
       if (action.success === true) {
@@ -118,7 +117,6 @@ var dataReducer = function(state, action) {
           }
         });
       }
-      break;
 
     default:
       return state || createInitialeState();

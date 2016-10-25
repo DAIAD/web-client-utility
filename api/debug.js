@@ -1,5 +1,3 @@
-var moment = require('moment');
-
 var api = require('./base');
 
 var DebugAPI = {

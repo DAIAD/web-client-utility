@@ -1,5 +1,4 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 
@@ -20,9 +19,9 @@ var { getActivity, setFilter, getSessions, getMeters, resetUserData, exportUserD
       addUserValidationsErrorsOccurred, addUserShowMessageAlert, addUserHideErrorAlert, addUser, addUserGetUtilities } = require('../../../actions/AdminActions');
 
 var Overview = React.createClass({
-	contextTypes: {
-	    intl: React.PropTypes.object
-	},
+  contextTypes: {
+      intl: React.PropTypes.object
+  },
 
   componentWillMount : function() {
     if(this.props.admin.activity === null) {
@@ -514,7 +513,7 @@ var Overview = React.createClass({
                           type={model.chart.type}
                           options={model.chart.options}
                           data={model.chart.data}/>
-            		</Bootstrap.ListGroupItem>
+                </Bootstrap.ListGroupItem>
               </Bootstrap.ListGroup>
             </Bootstrap.Panel>
           </div>
@@ -689,16 +688,16 @@ var Overview = React.createClass({
 
     var visiblePart = this.props.admin.addUser.show ? addNewUserForm : reportBody;
 
-		return (
-  		<div className="container-fluid">
-  		  <div className="row">
-  				<div className="col-md-12">
-  					<Breadcrumb routes={this.props.routes}/>
-  				</div>
-  			</div>
-  			{visiblePart}
-  		</div>);
-  	}
+    return (
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-12">
+            <Breadcrumb routes={this.props.routes}/>
+          </div>
+        </div>
+        {visiblePart}
+      </div>);
+    }
 });
 
 Overview.icon = 'table';

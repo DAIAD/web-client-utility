@@ -1,28 +1,20 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Select = require('react-select');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
-var RadialChart = require('../RadialChart');
 
-var { jobChangeIndex, getJobs, executionChangeIndex, getExecutions, filterExecutionByJobName, 
+var { jobChangeIndex, getJobs, executionChangeIndex, getExecutions, filterExecutionByJobName,
       filterExecutionByExitCode, clearExecutionFilter, enableJob, disableJob,
       launchJob } = require('../../actions/SchedulerActions');
 
-var handleKeyPress = function(e) {
-  if (e.key === 'Enter') {
-    this.refresh();
-  }
-};
-
 var Scheduler = React.createClass({
-	contextTypes: {
-	    intl: React.PropTypes.object
-	},
-	
+  contextTypes: {
+      intl: React.PropTypes.object
+  },
+
   componentWillMount : function() {
     if(this.props.scheduler.data.jobs.items == null) {
       this.props.actions.getJobs();
@@ -35,43 +27,41 @@ var Scheduler = React.createClass({
   onExecutionPageIndexChange: function(index) {
     this.props.actions.executionChangeIndex(index);
   },
-  
+
   onJobPageIndexChange: function(index) {
     this.props.actions.jobChangeIndex(index);
   },
-  
+
   filterExecutionByJobName: function(e) {
     this.props.actions.filterExecutionByJobName(e.value === 'UNDEFINED' ? null : e.value);
   },
-  
+
   filterExecutionByExitCode: function(e) {
     this.props.actions.filterExecutionByExitCode(e.value === 'UNDEFINED' ? null : e.value);
   },
-  
+
   clearExecutionFilter: function(e) {
     this.props.actions.clearExecutionFilter();
   },
- 
+
   refreshExecutions: function(e) {
     this.props.actions.getExecutions();
   },
-  
+
   refreshJobs: function(e) {
     this.props.actions.getJobs();
   },
-  
-	render: function() {
-    var _t = this.context.intl.formatMessage;
-    
+
+  render: function() {
     var jobs = this.props.scheduler.data.jobs;
 
     var jobNames = [
       { value: 'UNDEFINED', label: '-' }
     ];
     if(jobs.items) {
-      jobNames = jobs.items.reduce(function(newArray, currentValue, currentIndex) {    
+      jobNames = jobs.items.reduce(function(newArray, currentValue, currentIndex) {
         newArray.push({ value: currentValue.name, label: currentValue.name });
-      
+
         return newArray;
       }, [
         { value: 'UNDEFINED', label: '-' }
@@ -120,10 +110,9 @@ var Scheduler = React.createClass({
               } else {
                 return '#9E9E9E';
               }
-              break;
-            default: 
+            default:
               return '#000000';
-          }          
+          }
         },
         handler: (function(field, row) {
           switch(row.schedule.type) {
@@ -134,7 +123,7 @@ var Scheduler = React.createClass({
                 this.props.actions.enableJob(row.id);
               }
               break;
-            default: 
+            default:
               // No action is required
               break;
           }
@@ -146,7 +135,7 @@ var Scheduler = React.createClass({
           switch(row.schedule.type) {
             case 'CRON': case 'PERIOD':
               return true;
-            default: 
+            default:
               return false;
           }
         }
@@ -179,9 +168,9 @@ var Scheduler = React.createClass({
         mode: Table.PAGING_CLIENT_SIDE
       }
     };
-    
+
     var executions = this.props.scheduler.data.executions;
-    
+
     var executionTableConfig = {
       fields: [{
         name: 'jobId',
@@ -222,7 +211,6 @@ var Scheduler = React.createClass({
             default:
               return 'log_debug';
           }
-          return '';
         }
       }, {
         name: 'exitCode',
@@ -238,7 +226,6 @@ var Scheduler = React.createClass({
             default:
               return 'log_debug';
           }
-          return '';
         }
       }, {
         name: 'view',
@@ -263,7 +250,7 @@ var Scheduler = React.createClass({
     const jobDataNotFound = (
       <span>No jobs found.</span>
     );
-    
+
     const executionDataNotFound = (
       <span>No executions found.</span>
     );
@@ -298,7 +285,7 @@ var Scheduler = React.createClass({
         </div>
       );
     }
-    
+
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>
@@ -310,8 +297,8 @@ var Scheduler = React.createClass({
           <div className='col-md-12'>
             <Bootstrap.Panel header={jobTableHeader}>
               <Bootstrap.ListGroup fill>
-                <Bootstrap.ListGroupItem> 
-                  <Table  data={jobTableConfig} 
+                <Bootstrap.ListGroupItem>
+                  <Table  data={jobTableConfig}
                           onPageIndexChange={this.onJobPageIndexChange}
                           template={{empty : jobDataNotFound}}
                   ></Table>
@@ -331,9 +318,9 @@ var Scheduler = React.createClass({
                               value={this.props.scheduler.query.execution.jobName || 'UNDEFINED'}
                               options={jobNames}
                               onChange={this.filterExecutionByJobName}
-                              clearable={false} 
+                              clearable={false}
                               searchable={false} className='form-group'/>
-                      <span className='help-block'>Filter by job name</span>  
+                      <span className='help-block'>Filter by job name</span>
                     </div>
                     <div className='col-md-2'>
                       <Select name='exitCode'
@@ -347,9 +334,9 @@ var Scheduler = React.createClass({
                                 { value: 'STOPPED', label: 'STOPPED' }
                               ]}
                               onChange={this.filterExecutionByExitCode}
-                              clearable={false} 
+                              clearable={false}
                               searchable={false} className='form-group'/>
-                      <span className='help-block'>Filter by exit code</span>  
+                      <span className='help-block'>Filter by exit code</span>
                     </div>
                     <div className='col-md-4' style={{float: 'right'}}>
                       {resetButton}
@@ -359,8 +346,8 @@ var Scheduler = React.createClass({
                     </div>
                   </div>
                 </Bootstrap.ListGroupItem>
-                  <Bootstrap.ListGroupItem> 
-                  <Table  data={executionTableConfig} 
+                  <Bootstrap.ListGroupItem>
+                  <Table  data={executionTableConfig}
                           onPageIndexChange={this.onExecutionPageIndexChange}
                           template={{empty : executionDataNotFound}}
                   ></Table>
@@ -386,12 +373,12 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { 
-                jobChangeIndex, 
-                getJobs, 
-                executionChangeIndex, 
-                getExecutions, 
-                filterExecutionByJobName, 
+    actions : bindActionCreators(Object.assign({}, {
+                jobChangeIndex,
+                getJobs,
+                executionChangeIndex,
+                getExecutions,
+                filterExecutionByJobName,
                 filterExecutionByExitCode,
                 clearExecutionFilter,
                 enableJob,

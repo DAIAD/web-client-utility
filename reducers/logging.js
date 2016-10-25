@@ -90,7 +90,6 @@ var logging = function(state, action) {
           }
         });
       }
-      break;
 
     case types.USER_RECEIVED_LOGOUT:
       return createInitialeState();

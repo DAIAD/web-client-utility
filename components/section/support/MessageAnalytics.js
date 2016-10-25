@@ -4,12 +4,11 @@ var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
 var Breadcrumb = require('../../Breadcrumb');
-var Select = require('react-select');
 var DateRangePicker = require('react-bootstrap-daterangepicker');
 var FilterTag = require('../../chart/dimension/FilterTag');
 var GroupSearchTextBox = require('../../GroupSearchTextBox');
 var Table = require('../../UserTable');
-var { fetchMessages, changeIndex, showReceivers, goBack, setEditor, setEditorValue, setTimezone, setSelectedMessage } 
+var { fetchMessages, changeIndex, showReceivers, goBack, setEditor, setEditorValue, setTimezone, setSelectedMessage }
  = require('../../../actions/MessageAnalyticsActions');
 
 var _onIntervalEditorChange = function (event, picker) {
@@ -31,33 +30,33 @@ var onPopulationEditorChange = function(e) {
 var _setEditor = function(key) {
   this.props.actions.setEditor(key);
 };
-  
+
 var MessageAnalytics = React.createClass({
 
   contextTypes: {
       intl: React.PropTypes.object
   },
   componentWillMount : function() {
-    this.props.actions.fetchMessages();   
+    this.props.actions.fetchMessages();
   },
   componentDidMount : function() {
     var utility = this.props.profile.utility;
-   
+
     this.props.actions.setTimezone(utility.timezone);
   },
-  
+
   onPageIndexChange: function(index) {
     this.props.actions.changeIndex(index);
   },
- 
+
   clickedShowReceivers : function(row) {
     this.props.actions.showReceivers(row);
   },
-  
+
   render: function() {
     var self = this;
     if(this.props.showReceivers && !this.props.isLoading){
-      
+
       var receiversFields = {
         fields: [{
           name: 'accountId',
@@ -81,22 +80,22 @@ var MessageAnalytics = React.createClass({
           count:this.props.receivers ? this.props.receivers.length : 0
         }
       };
-      
+
       var receiversTitle = (
         <span>
           <i className='fa fa-calendar fa-fw'></i>
             <span style={{ paddingLeft: 4 }}>Users that received this Message</span>
             <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}></span>
         </span>
-      ); 
-     
+      );
+
       var messageInfoTitle = (
         <span>
           <i className='fa fa-calendar fa-fw'></i>
             <span style={{ paddingLeft: 4 }}>Message Info</span>
             <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}></span>
         </span>
-      );          
+      );
       var receiversTable = (
         <div>
           <Table data={receiversFields}></Table>
@@ -107,14 +106,14 @@ var MessageAnalytics = React.createClass({
       <div>
         <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
-            <label>Title:</label>  
+            <label>Title:</label>
           </Bootstrap.Col>
           <Bootstrap.Col xs={6}>
-            <div style={{fontSize:16}}>            
-              <label>{this.props.selectedMessage.title}</label>   
+            <div style={{fontSize:16}}>
+              <label>{this.props.selectedMessage.title}</label>
             </div>
           </Bootstrap.Col>
-        </Bootstrap.Row>        
+        </Bootstrap.Row>
          <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
             <label>Description:</label>
@@ -122,9 +121,9 @@ var MessageAnalytics = React.createClass({
           <Bootstrap.Col xs={6}>
             <div style={{fontSize:16}}>
               <label>{this.props.selectedMessage.description}</label>
-            </div> 
-          </Bootstrap.Col>         
-        </Bootstrap.Row>  
+            </div>
+          </Bootstrap.Col>
+        </Bootstrap.Row>
          <Bootstrap.Row>
           <Bootstrap.Col xs={6}>
             <label>Total receivers:</label>
@@ -132,42 +131,42 @@ var MessageAnalytics = React.createClass({
           <Bootstrap.Col xs={6}>
             <div style={{fontSize:16}}>
               <label>{this.props.selectedMessage.receiversCount}</label>
-            </div> 
-          </Bootstrap.Col>         
-        </Bootstrap.Row>                
-      </div>  
+            </div>
+          </Bootstrap.Col>
+        </Bootstrap.Row>
+      </div>
       );
-     
-      return (     
-        < div className = "container-fluid" style = {{ paddingTop: 10 }} >  
+
+      return (
+        < div className = "container-fluid" style = {{ paddingTop: 10 }} >
           <div className="row">
               <Bootstrap.Panel header={messageInfoTitle}>
                 <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>	       
-                    {messageInfo}  
+                  <Bootstrap.ListGroupItem>
+                    {messageInfo}
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
-              </Bootstrap.Panel> 
-          </div>        
+              </Bootstrap.Panel>
+          </div>
           <div className="row">
               <Bootstrap.Panel header={receiversTitle}>
                 <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>	       
-                    {receiversTable}  
+                  <Bootstrap.ListGroupItem>
+                    {receiversTable}
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
-              </Bootstrap.Panel> 
-          </div>   
+              </Bootstrap.Panel>
+          </div>
             <div className="row">
-              <Bootstrap.Button 
+              <Bootstrap.Button
                 onClick = {this.props.actions.goBack}>
                 {'Back'}
               </Bootstrap.Button>
             </div>
-        </div>  
-      );       
+        </div>
+      );
     }
-  
+
     // Filter configuration
     var intervalLabel ='';
     if(this.props.interval) {
@@ -177,13 +176,13 @@ var MessageAnalytics = React.createClass({
       if (start === end) {
         intervalLabel = start;
       }
-    }     
+    }
 
     var intervalEditor = (
       <div className='col-md-3'>
-        <DateRangePicker  startDate={this.props.interval[0]} 
-                  endDate={this.props.interval[1]} 
-                  ranges={this.props.ranges} 
+        <DateRangePicker  startDate={this.props.interval[0]}
+                  endDate={this.props.interval[1]}
+                  ranges={this.props.ranges}
                   onEvent={_onIntervalEditorChange.bind(this)}>
           <div className='clearfix Select-control' style={{ cursor: 'pointer', padding: '5px 10px', width: '100%'}}>
             <span>{intervalLabel}</span>
@@ -192,14 +191,14 @@ var MessageAnalytics = React.createClass({
           <span className='help-block'>Select time interval</span>
       </div>
     );
-    
+
     var populationEditor = (
       <div className='col-md-3'>
         <GroupSearchTextBox name='groupname' onChange={onPopulationEditorChange.bind(this)}/>
         <span className='help-block'>Select a consumer group</span>
       </div>
     );
-   
+
     var filter = null;
 
     switch(this.props.editor) {
@@ -248,10 +247,10 @@ var MessageAnalytics = React.createClass({
 
     var statistics, filterTags = [];
 
-    filterTags.push( 
+    filterTags.push(
       <FilterTag key='time' text={intervalLabel} icon='calendar' />
     );
-    filterTags.push( 
+    filterTags.push(
       <FilterTag key='population' text={ this.props.population ? this.props.population.label : this.props.profile.utility.name } icon='group' />
     );
 
@@ -272,7 +271,7 @@ var MessageAnalytics = React.createClass({
           name: 'details',
           type:'action',
           icon: 'group',
-          handler: function() {           
+          handler: function() {
             self.props.actions.setSelectedMessage(this.props.row);
             self.clickedShowReceivers(this.props.row);
           }
@@ -282,26 +281,26 @@ var MessageAnalytics = React.createClass({
         index: 0,
         size: 10,
         count: this.props.messages ? this.props.messages.length : 0,
-        mode: Table.PAGING_CLIENT_SIDE        
+        mode: Table.PAGING_CLIENT_SIDE
       }
-  	 };    
-       
+     };
+
     statistics = (
       <Bootstrap.ListGroup fill>
         {filter}
         <Bootstrap.ListGroupItem>
-          <Table 
-            data = {messageFields} 
-            onPageIndexChange={this.onPageIndexChange}> 
+          <Table
+            data = {messageFields}
+            onPageIndexChange={this.onPageIndexChange}>
           </Table>
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem className='clearfix'>
           <div className='pull-left'>
             {filterTags}
-          </div>       
+          </div>
           <span style={{ paddingLeft : 7}}> </span>
           <Link className='pull-right' to='/' style={{ paddingLeft : 7, paddingTop: 12 }}>View dashboard</Link>
-        </Bootstrap.ListGroupItem>     
+        </Bootstrap.ListGroupItem>
       </Bootstrap.ListGroup>
     );
 
@@ -310,7 +309,7 @@ var MessageAnalytics = React.createClass({
         {statistics}
       </Bootstrap.Panel>
     );
-   
+
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>
@@ -339,17 +338,17 @@ function mapStateToProps(state) {
       receivers: state.messages.receivers,
       selectedMessage: state.messages.selectedMessage,
       interval: state.messages.interval,
-      editor: state.messages.editor,     
+      editor: state.messages.editor,
       timezone: state.messages.timezone
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { fetchMessages, changeIndex, 
+    actions : bindActionCreators(Object.assign({}, { fetchMessages, changeIndex,
                                                      setEditor, setEditorValue,
-                                                     setTimezone, showReceivers, 
-                                                     setSelectedMessage, goBack}) , dispatch)                                                     
+                                                     setTimezone, showReceivers,
+                                                     setSelectedMessage, goBack}) , dispatch)
   };
 }
 

@@ -1,22 +1,17 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
-var { Link } = require('react-router');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
-var Chart = require('../Chart');
 var UpsertFavouriteForm = require('./demographics/UpsertFavouriteForm');
 var CreateGroupForm = require('./demographics/CreateGroupForm');
 var MessageAlert = require('../AlertDismissable');
 var Modal = require('../Modal');
 
-var errorsCodes = require('../../constants/Errors');
 var successCodes = require('../../constants/Successes');
 
 var Helpers = require('../../helpers/array-funcs');
 
 var DemographicsActions = require('../../actions/DemographicsActions');
-var DemographicsTablesSchema = require('../../constants/DemographicsTablesSchema');
 
 var { connect } = require('react-redux');
 var { bindActionCreators } = require('redux');
@@ -25,19 +20,19 @@ var Demographics = React.createClass({
   contextTypes: {
       intl: React.PropTypes.object
   },
-  
+
   getInitialState() {
     return {
       key: 1,
       showAddNewUserForm: false
       };
   },
-  
+
   componentWillMount : function() {
     this.props.getGroupsAndFavourites();
-    //this.props.getGroupMembers('c1403676-de58-4960-bd0a-5d406f533807');   
+    //this.props.getGroupMembers('c1403676-de58-4960-bd0a-5d406f533807');
   },
-  
+
   componentWillUnmount : function() {
     this.props.resetDemograhpics();
   },
@@ -45,27 +40,27 @@ var Demographics = React.createClass({
   selectSection(key) {
     this.setState({key : key});
     },
-    
+
     showAddNewUserForm: function (){
       this.setState({showAddNewUserForm : true});
     },
-    
+
     setGroupsFilter : function(){
       this.props.setGroupsFilter(this.refs.searchGroups.getValue());
     },
-    
+
     clearGroupsFilter : function(){
       this.props.setGroupsFilter('');
     },
-    
+
     setFavouritesFilter : function(){
       this.props.setFavouritesFilter(this.refs.searchFavourites.getValue());
     },
-    
+
     clearFavouritesFilter : function(){
       this.props.setFavouritesFilter('');
     },
-    
+
     computeVisibleItems : function(items, filter){
       var visibleItems = {
           fields : items.fields,
@@ -76,7 +71,7 @@ var Demographics = React.createClass({
             count : 1
           }
       };
-      
+
       if (filter){
         visibleItems.rows = Helpers.pickQualiffiedOnSusbstring(items.rows, 'name', filter, false);
       } else {
@@ -86,32 +81,32 @@ var Demographics = React.createClass({
 
       return visibleItems;
     },
-    
+
     deleteGroup: function (){
       this.props.hideModal();
       this.props.deleteGroup(this.props.ModalForm.itemId);
     },
-    
+
     deleteFavourite: function (){
       this.props.hideModal();
       this.props.deleteFavourite(this.props.ModalForm.itemId);
     },
-    
+
     showDeleteGroupModal: function(group_id){
-      
+
       var _t = this.context.intl.formatMessage;
       var title = _t({id:'Modal.DeleteGroup.Title'});
-      
+
       var group = Helpers.pickQualiffiedOnEquality(this.props.groups.rows, 'id', group_id);
-            
+
       var body;
       if (group){
         body = _t({id:'Modal.DeleteGroup.Body.Part1'}) + group[0].name + _t({id:'Modal.DeleteGroup.Body.Part2'});
       } else {
         body = _t({id:'Modal.DeleteGroup.Body.Part1'}) + group_id + _t({id:'Modal.DeleteGroup.Body.Part2'});
-      }     
-      
-      
+      }
+
+
       var actions = [{
         action: this.props.hideModal,
         name: _t({id:'Buttons.Cancel'})
@@ -121,24 +116,24 @@ var Demographics = React.createClass({
           style: 'danger'
         }
       ];
-      
+
       this.props.showModal(group_id, title, body, actions);
     },
-    
+
     showDeleteFavouriteModal: function(favourite_id){
-      
+
       var _t = this.context.intl.formatMessage;
       var title = _t({id:'Modal.DeleteFavourite.Title'});
-            
+
       var favourite = Helpers.pickQualiffiedOnEquality(this.props.favourites.rows, 'id', favourite_id);
-            
+
       var body;
       if (favourite){
         body = _t({id:'Modal.DeleteFavourite.Body.Part1'}) + favourite[0].name + _t({id:'Modal.DeleteFavourite.Body.Part2'});
       } else {
         body = _t({id:'Modal.DeleteFavourite.Body.Part1'}) + favourite_id + _t({id:'Modal.DeleteFavourite.Body.Part2'});
-      }     
-      
+      }
+
       var actions = [{
         action: this.props.hideModal,
         name: _t({id:'Buttons.Cancel'})
@@ -148,15 +143,15 @@ var Demographics = React.createClass({
           style: 'danger'
         }
       ];
-      
+
       this.props.showModal(favourite_id, title, body, actions);
     },
-    
-  
+
+
     render: function() {
       var _t = this.context.intl.formatMessage;
       var self = this;
-      
+
       var visibleGroups = this.computeVisibleItems(this.props.groups, this.props.groupsFilter);
       visibleGroups.fields.forEach(function(field){
         if(field.hasOwnProperty('name') && field.name === 'add-favourite'){
@@ -169,7 +164,7 @@ var Demographics = React.createClass({
           };
         }
       });
-      
+
       var visibleFavourites = this.computeVisibleItems(this.props.favourites, this.props.favouritesFilter);
       visibleFavourites.fields.forEach(function(field){
         if(field.hasOwnProperty('name') && field.name === 'remove'){
@@ -178,8 +173,8 @@ var Demographics = React.createClass({
           };
         }
       });
-      
-     
+
+
       const breadCrumb = (
             <div className="row">
               <div className="col-md-12">
@@ -187,7 +182,7 @@ var Demographics = React.createClass({
               </div>
             </div>
       );
-      
+
       const groupTitle = (
         <span>
           <i className='fa fa-group fa-fw'></i>
@@ -199,35 +194,14 @@ var Demographics = React.createClass({
           </span>
         </span>
       );
-      
+
       const favouriteTitle = (
         <span>
           <i className='fa fa-bookmark fa-fw'></i>
           <span style={{ paddingLeft: 4 }}>Favourites</span>
         </span>
       );
-      
-      const newGroupInfoFormTitle = (
-          <span>
-            <i className='fa fa-group fa-fw'></i>
-            <span style={{ paddingLeft: 4 }}>{_t({ id:'Demographics.NewGroup.NewGroup'})}</span>
-          </span>
-        );
-      
-      const membersTitle = (
-          <span>
-            <i className='fa fa-user fa-fw'></i>
-            <span style={{ paddingLeft: 4 }}>{_t({ id:'Demographics.NewGroup.CurrentMembers'})}</span>
-          </span>
-        );
-      
-      const nonMembersTitle = (
-          <span>
-            <i className='fa fa-user-plus fa-fw'></i>
-            <span style={{ paddingLeft: 4 }}>{_t({ id:'Demographics.NewGroup.PossibleMembers'})}</span>
-          </span>
-        );
-  
+
       const groupMessageAlert = (
           <MessageAlert
             show = {this.props.showMessageAlert}
@@ -239,9 +213,9 @@ var Demographics = React.createClass({
             dismissFunc={this.props.hideMessageAlert}
           />
         );
-      
+
       var modal;
-      if (this.props.hasOwnProperty('ModalForm') && 
+      if (this.props.hasOwnProperty('ModalForm') &&
           this.props.ModalForm.hasOwnProperty('modal') &&
           this.props.ModalForm.modal.hasOwnProperty('show') &&
           this.props.ModalForm.modal.show){
@@ -264,17 +238,17 @@ var Demographics = React.createClass({
             />
             );
       }
-      
+
       if (this.props.application === 'addNewGroup'){
         return (
           <div className="container-fluid" style={{ paddingTop: 10 }}>
             {breadCrumb}
             <CreateGroupForm
-              
+
               newGroupName = {this.props.newGroup.newGroupName}
               currentMembers = {this.props.newGroup.currentMembers}
               possibleMembers = {this.props.newGroup.possibleMembers}
-            
+
               messageAlert = {{
                 show: this.props.newGroup.showMessageAlert,
                 success: this.props.asyncResponse.success,
@@ -306,7 +280,7 @@ var Demographics = React.createClass({
                   cancelAction : this.props.hideFavouriteGroupForm,
                   refreshParentForm : this.props.getGroupsAndFavourites
                 }}
-                
+
               />
             </div>
         );
@@ -317,25 +291,25 @@ var Demographics = React.createClass({
               {breadCrumb}
               {groupMessageAlert}
               <div className='row'>
-                <div className='col-md-12'>           
+                <div className='col-md-12'>
                   {modal}
                 </div>
               </div>
               <div className='row'>
                 <div className='col-md-6'>
-                  <Bootstrap.Input  type="text" 
+                  <Bootstrap.Input  type="text"
                             ref="searchGroups"
                             placeholder='Search groups ...'
                             onChange={this.setGroupsFilter}
-                            buttonAfter={<Bootstrap.Button onClick={this.clearGroupsFilter}><i className='fa fa-trash fa-fw'></i></Bootstrap.Button>} 
+                            buttonAfter={<Bootstrap.Button onClick={this.clearGroupsFilter}><i className='fa fa-trash fa-fw'></i></Bootstrap.Button>}
                   />
                 </div>
                 <div className='col-md-6'>
-                  <Bootstrap.Input  type="text" 
+                  <Bootstrap.Input  type="text"
                             ref="searchFavourites"
-                            placeholder='Search favourites ...' 
+                            placeholder='Search favourites ...'
                             onChange={this.setFavouritesFilter}
-                            buttonAfter={<Bootstrap.Button onClick={this.clearFavouritesFilter}><i className='fa fa-trash fa-fw'></i></Bootstrap.Button>} 
+                            buttonAfter={<Bootstrap.Button onClick={this.clearFavouritesFilter}><i className='fa fa-trash fa-fw'></i></Bootstrap.Button>}
                   />
                 </div>
               </div>
@@ -352,7 +326,7 @@ var Demographics = React.createClass({
                 <div className='col-md-6'>
                   <Bootstrap.Panel header={favouriteTitle}>
                     <Bootstrap.ListGroup fill>
-                      <Bootstrap.ListGroupItem> 
+                      <Bootstrap.ListGroupItem>
                         <Table data={visibleFavourites}></Table>
                       </Bootstrap.ListGroupItem>
                     </Bootstrap.ListGroup>
@@ -389,7 +363,7 @@ function mapStateToProps(state) {
     favourites : state.demographics.favourites,
     favouriteGroupId : state.demographics.favouriteGroupId,
     showMessageAlert : state.demographics.showMessageAlert,
-    
+
     ModalForm : state.demographics.ModalForm
   };
 }
@@ -413,7 +387,7 @@ function mapDispatchToProps(dispatch) {
     showFavouriteGroupForm : bindActionCreators(DemographicsActions.showFavouriteGroupForm, dispatch),
     hideFavouriteGroupForm : bindActionCreators(DemographicsActions.hideFavouriteGroupForm, dispatch),
     resetDemograhpics : bindActionCreators(DemographicsActions.resetDemograhpics, dispatch),
-    
+
     deleteGroup : bindActionCreators(DemographicsActions.deleteGroup, dispatch),
     showModal : bindActionCreators(DemographicsActions.showModal, dispatch),
     hideModal : bindActionCreators(DemographicsActions.hideModal, dispatch),

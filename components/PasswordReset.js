@@ -1,11 +1,9 @@
 var React = require('react');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-var Bootstrap = require('react-bootstrap');
-var Button = require('react-bootstrap').Button;
 var Panel = require('react-bootstrap').Panel;
 var ReCAPTCHA = require("react-google-recaptcha");
-var {FormattedMessage, FormattedTime, FormattedDate} = require('react-intl');
+var {FormattedMessage} = require('react-intl');
 
 var AlertDismissable = require('./AlertDismissable');
 
@@ -27,9 +25,9 @@ var PasswordReset = React.createClass({
 
   onResetPassword: function(e) {
     e.preventDefault();
-    
+
     this.props.actions.clearErrors();
-    
+
     var errors = [];
 
     if(!this.refs.password1.value) {
@@ -68,7 +66,7 @@ var PasswordReset = React.createClass({
           <Panel>
             <form key='login' action={this.props.action}>
               <div className='form-group' >
-                <input  id='password1' 
+                <input  id='password1'
                         name='password1'
                         type='password'
                         ref='password1'
@@ -76,7 +74,7 @@ var PasswordReset = React.createClass({
                         className='form-control' />
               </div>
               <div className='form-group' >
-                <input  id='password2' 
+                <input  id='password2'
                         name='password2'
                         type='password'
                         ref='password2'
@@ -110,10 +108,8 @@ var PasswordReset = React.createClass({
       </div>
     );
   },
-  
-  renderSuccess: function() {
-    var _t = this.context.intl.formatMessage;
 
+  renderSuccess: function() {
     return (
       <div style={{ width: '100%' }}>
         <nav className='navbar navbar-default navbar-fixed-top'>
@@ -127,9 +123,9 @@ var PasswordReset = React.createClass({
           <a className='btn btn-success' style={{textAlign: 'center', fontSize: 'large', whiteSpace: 'normal'}} href='/home/'><FormattedMessage id='PasswordResetForm.message.success'/></a>
         </div>
       </div>
-    );    
+    );
   },
-  
+
   render: function() {
     if(this.props.success) {
       return this.renderSuccess();
@@ -157,7 +153,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(
-      Object.assign({}, {reset , setCaptchaValid, clearErrors, setErrors }),  
+      Object.assign({}, {reset , setCaptchaValid, clearErrors, setErrors }),
       dispatch
     )
   };

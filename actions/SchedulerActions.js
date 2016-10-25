@@ -71,20 +71,6 @@ var executionClearFilter = function() {
   };
 };
 
-var SchedulerActions = {
-  getStatus : function() {
-    return function(dispatch, getState) {
-      dispatch(requestStatus());
-
-      return schedulerAPI.getStatus().then(function(response) {
-        dispatch(receivedStatus(response.success, response.jobs, response.executions, response.errors));
-      }, function(errors) {
-        dispatch(receivedStatus(false, null, null, errors));
-      });
-    };
-  }
-};
-
 var enableJobInitialize = function() {
   return {
     type : types.JOB_ENABLE_REQUEST

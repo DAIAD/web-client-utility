@@ -1,13 +1,11 @@
 
 var _ = require('lodash');
 var moment = require('moment');
-var numeral = require('numeral');
 var sprintf = require('sprintf');
 
 var React = require('react');
 var ReactRedux = require('react-redux');
 var Bootstrap = require('react-bootstrap');
-var {FormattedMessage} = require('react-intl');
 var DatetimeInput = require('react-datetime');
 var Select = require('react-controls/select-dropdown');
 
@@ -19,20 +17,17 @@ var population = require('../../model/population');
 var {computeKey} = require('../../reports').measurements;
 var {timespanPropType, populationPropType, seriesPropType, configPropType} = require('../../prop-types');
 var {equalsPair} = require('../../helpers/comparators');
-var {toUtcTime} = require('../../helpers/timestamps');
 
 var Chart = require('./chart');
 
-var {Button, ButtonGroup, Collapse, Panel, ListGroup, ListGroupItem} = Bootstrap;
+var {Button, Collapse, Panel, ListGroup, ListGroupItem} = Bootstrap;
 var {PropTypes} = React;
 
 const REPORT_KEY = 'pane';
 
-var favouriteIcon;
-
 // Todo Move under react-intl
 const ErrorMessages = {
-  [Errors.reports.measurements.TIMESPAN_INVALID]: 
+  [Errors.reports.measurements.TIMESPAN_INVALID]:
     'The given time range is invalid.',
   [Errors.reports.measurements.TIMESPAN_TOO_NARROW]:
     'The given time range is too narrow.',
@@ -47,23 +42,23 @@ const ErrorMessages = {
 var checkTimespan = function (val, level, N=4) {
   // Check if a timespan (given either as name or as pair of timestamps)
   // is valid. A non-empty string represents an error, zero represents success.
-  
+
   var [t0, t1] = computeTimespan(val);
-  
+
   var dt = t1.valueOf() - t0.valueOf();
   if (dt <= 0)
     return Errors.reports.measurements.TIMESPAN_INVALID;
-  
+
   var dl = Granularity.fromName(level).valueOf();
   if (dl >= dt)
     return Errors.reports.measurements.TIMESPAN_TOO_NARROW;
-  
+
   if (dl * Math.pow(10, N) < dt)
     return Errors.reports.measurements.TIMESPAN_TOO_WIDE; // N orders of magnitude bigger than dl
-  
+
   return 0;
 };
-    
+
 var computeTimespan = function (val) {
   // Convert to a pair of moment instances
   if (_.isString(val)) {
@@ -84,7 +79,7 @@ var FormStatusParagraph = ({errorMessage, dirty}) => {
   if (errorMessage) {
     return (<p className="help text-danger">{errorMessage}</p>);
   } else if (dirty) {
-    return (<p className="help text-info">Parameters have changed. Refresh to redraw data!</p>); 
+    return (<p className="help text-info">Parameters have changed. Refresh to redraw data!</p>);
   } else {
     return (<p className="help text-muted">Refresh to redraw data.</p>);
   }
@@ -96,10 +91,10 @@ var ReportPanel = React.createClass({
       datetimeInputProps: {
         closeOnSelect: true,
         dateFormat: 'ddd D MMM[,] YYYY',
-        timeFormat: null, 
-        inputProps: {size: 10}, 
+        timeFormat: null,
+        inputProps: {size: 10},
       },
-      
+
       helpMessages: {
         'favourite': 'Open favourite settings for this chart.',
         'source': 'Specify the source device for measurements.',
@@ -114,52 +109,52 @@ var ReportPanel = React.createClass({
         height: 300,
       },
     },
-    
+
     templates: {
       reportTitle: _.template('<%= report.title %> - <%= populationName %>'),
-    },    
-    
+    },
+
     configForReport: function (props, {config}) {
       return config.reports.byType.measurements
         .levels[props.level]
         .reports[props.reportName];
     },
-    
-    toolbarSpec: [ 
+
+    toolbarSpec: [
       {
         key: 'parameters',
         //component: 'div', // Note default is Bootstrap.ButtonGroup
         buttons: [
           {
-            key: 'favourite', 
-            tooltip: {message: 'Favourite settings', placement: 'bottom'}, 
+            key: 'favourite',
+            tooltip: {message: 'Favourite settings', placement: 'bottom'},
             iconName: 'star-o',
             //text: 'Favourite',
             buttonProps: {bsStyle: 'default', /*className: 'btn-circle'*/ },
-          },        
+          },
           {
-            key: 'source', 
-            tooltip: {message: 'Select source of measurements', placement: 'bottom'}, 
+            key: 'source',
+            tooltip: {message: 'Select source of measurements', placement: 'bottom'},
             iconName: 'cube',
             //text: 'Source',
             buttonProps: {bsStyle: 'default', /*className: 'btn-circle'*/ },
           },
           {
-            key: 'report', 
-            tooltip: {message: 'Choose type of report', placement: 'bottom'}, 
+            key: 'report',
+            tooltip: {message: 'Choose type of report', placement: 'bottom'},
             iconName: 'area-chart',
             //text: 'Metric',
             buttonProps: {bsStyle: 'default', /*className: 'btn-circle'*/ },
           },
           {
-            key: 'timespan', 
-            tooltip: {message: 'Define a time range', placement: 'bottom'}, 
+            key: 'timespan',
+            tooltip: {message: 'Define a time range', placement: 'bottom'},
             iconName: 'calendar',
             //text: 'Time',
             buttonProps: {bsStyle: 'default', /*className: 'btn-circle'*/},
           },
           {
-            key: 'population-group', 
+            key: 'population-group',
             tooltip: {message: 'Define a population target', placement: 'bottom'},
             iconName: 'users',
             //text: 'Groups',
@@ -185,8 +180,8 @@ var ReportPanel = React.createClass({
             iconName: 'refresh',
             buttonProps: {bsStyle: 'primary', /*className: 'btn-circle'*/ },
           },
-        ],  
-      }, 
+        ],
+      },
     ],
   },
 
@@ -201,7 +196,7 @@ var ReportPanel = React.createClass({
     population: populationPropType,
     finished: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     series: PropTypes.arrayOf(seriesPropType),
-    
+
     // Funcs (dispatchers)
     initializeReport: PropTypes.func.isRequired,
     refreshData: PropTypes.func.isRequired,
@@ -222,10 +217,10 @@ var ReportPanel = React.createClass({
   },
 
   contextTypes: {config: configPropType},
-  
+
   // Lifecycle
-  
-  getInitialState: function () {  
+
+  getInitialState: function () {
     return {
       draw: true, // should draw chart?
       fadeIn: false, // animation effect in progress
@@ -234,10 +229,10 @@ var ReportPanel = React.createClass({
       error: null,
       formFragment: 'report',
       disabledButtons: '', // a '|' delimited string, e.g 'export|refresh'
-    };  
+    };
   },
-  
-  getDefaultProps: function () { 
+
+  getDefaultProps: function () {
     return {
       field: 'volume',
       level: 'week',
@@ -255,7 +250,7 @@ var ReportPanel = React.createClass({
       }
     };
   },
-  
+
   componentWillMount: function() {
     var isDefault;
     if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'){
@@ -272,7 +267,7 @@ var ReportPanel = React.createClass({
       this.props.defaultFavouriteValues.source = false;
       this.props.defaultFavouriteValues.population = false;
       this.props.defaultFavouriteValues.metricLevel = false;
-    }   
+    }
   },
   componentDidMount: function () {
     var cls = this.constructor;
@@ -281,17 +276,17 @@ var ReportPanel = React.createClass({
     if (_.isEmpty(field) || _.isEmpty(level) || _.isEmpty(reportName)) {
       return; // cannot yet initialize the target report
     }
-     
+
     var {timespan} = cls.configForReport(this.props, this.context);
     this.props.initializeReport(field, level, reportName, {timespan});
-    
+
     if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'){
       var clusterKey, groupKey;
-      
+
       if(population.Group.fromString(this.props.favouriteChart.query.population[0].label)){
         clusterKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).clusterKey;
       }
- 
+
       if(this.props.favouriteChart.query.population.length > 1){ //ClusterGroup with all groups
         groupKey = null;
       } else if(this.props.favouriteChart.query.population[0].type == 'UTILITY') { //Utility all
@@ -300,29 +295,29 @@ var ReportPanel = React.createClass({
         groupKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).key;
       } else{
         console.error('Could not resolve options for favourite population!');
-      }      
-      this._setPopulation(clusterKey, groupKey); 
-      
+      }
+      this._setPopulation(clusterKey, groupKey);
+
       var source;
       if(this.props.defaultFavouriteValues.source){
-            if(this.props.favouriteChart.query.source == 'AMPHIRO'){    
+            if(this.props.favouriteChart.query.source == 'AMPHIRO'){
               source = 'device';
-            } 
+            }
             else{
               source = 'meter';
             }
-      }       
+      }
       this._setSource(source);
 
-    }    
-    
+    }
+
     this.props.refreshData(field, level, reportName)
       .then(() => (this.setState({draw: false})));
   },
-  
+
   componentWillReceiveProps: function (nextProps, nextContext) {
     var cls = this.constructor;
-    
+
     // In any case, reset temporary copy of timespan, clear error/dirty flags
     this.setState({
       error: null,
@@ -332,7 +327,7 @@ var ReportPanel = React.createClass({
 
     // If moving to another report, take care to initialize it first
     if (
-      (nextProps.field != this.props.field) || 
+      (nextProps.field != this.props.field) ||
       (nextProps.level != this.props.level) ||
       (nextProps.reportName != this.props.reportName)
     ) {
@@ -340,7 +335,7 @@ var ReportPanel = React.createClass({
         'The panel will switch to report (%s, %s, %s)',
         nextProps.field, nextProps.level, nextProps.reportName
       ));
-      console.assert(nextContext.config == this.context.config, 
+      console.assert(nextContext.config == this.context.config,
         'Unexpected change for configuration in context!');
       var {timespan} = cls.configForReport(nextProps, nextContext);
       nextProps.initializeReport(
@@ -349,14 +344,14 @@ var ReportPanel = React.createClass({
       setTimeout(
         () => (nextProps.refreshData(
           nextProps.field, nextProps.level, nextProps.reportName)
-        ), 
+        ),
         100
       );
-    } 
+    }
   },
 
   shouldComponentUpdate: function (nextProps, nextState) {
-    // Suppress some (rather expensive) updates 
+    // Suppress some (rather expensive) updates
 
     var changedProps, changedState;
     var ignoredNextState = {
@@ -376,17 +371,17 @@ var ReportPanel = React.createClass({
       changedState, _.toPairs(ignoredNextState), equalsPair
     );
 
-    if (changedState.length == 0) console.info('Skipping update of <ReportPanel>'); 
+    if (changedState.length == 0) console.info('Skipping update of <ReportPanel>');
     return (changedState.length > 0);
   },
-  
+
   componentDidUpdate: function () {
     // The component has successfully updated
 
     // Check if redrawing or just redrawn
     if (this.state.draw) {
       var nextState = {dirty: false};
-      if (_.isNumber(this.props.finished)) 
+      if (_.isNumber(this.props.finished))
         nextState.draw = false; // next drawing will happen only on-demand
       this.setState(nextState);
     }
@@ -395,7 +390,7 @@ var ReportPanel = React.createClass({
     // This is needed, because only a change "" -> ".fade-in" can trigger a new animation.
     if (this.state.fadeIn) {
       setTimeout(
-        () => (this.state.fadeIn && this.setState({fadeIn: false})), 
+        () => (this.state.fadeIn && this.setState({fadeIn: false})),
         (this.props.fadeIn.duration + 0.25) * 1e+3
       );
     }
@@ -404,45 +399,45 @@ var ReportPanel = React.createClass({
   render: function () {
     var {defaults} = this.constructor;
     var {dirty, draw, error} = this.state;
-    if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART' 
+    if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'
        && this.props.defaultFavouriteValues.source
        && this.props.defaultFavouriteValues.timespan
        && this.props.defaultFavouriteValues.population
-       && this.props.defaultFavouriteValues.metricLevel) { 
-      favouriteIcon = 'star';
+       && this.props.defaultFavouriteValues.metricLevel) {
+
       this.props.favouriteChart.finished = this.props.finished;
 
       if(this.props.favouriteSeries){
         this.props.favouriteChart.series = this.props.favouriteSeries;
       }
       else{
-        this.props.favouriteChart.series = this.props.series; 
+        this.props.favouriteChart.series = this.props.series;
       }
       var {field, title, level, reportName, finished, series} = this.props.favouriteChart;
     } else {
-      favouriteIcon = 'star-o';
+
       var {field, title, level, reportName, finished, series} = this.props;
-   
+
     }
     var toolbarSpec = this._specForToolbar();
     var header = (
       <div className="header-wrapper">
         <h3>{title}</h3>
-        <toolbars.ButtonToolbar className="header-toolbar" 
-          groups={toolbarSpec} 
-          onSelect={this._handleToolbarEvent} 
+        <toolbars.ButtonToolbar className="header-toolbar"
+          groups={toolbarSpec}
+          onSelect={this._handleToolbarEvent}
          />
       </div>
     );
-    
+
     var footer = (
       <ReportInfo field={field} level={level} reportName={reportName} />
     );
-    
+
     var formFragment = this._renderFormFragment();
 
     var reportTitle = this._titleForReport();
-    
+
     return (
       <Panel header={header} footer={footer}>
         <ListGroup fill>
@@ -455,17 +450,17 @@ var ReportPanel = React.createClass({
           </ListGroupItem>
           <ListGroupItem className="report-form-help report-title-wrapper">
             <h4>{reportTitle}</h4>
-            <FormStatusParagraph 
+            <FormStatusParagraph
               dirty={dirty} errorMessage={!error? null : ErrorMessages[error]}
              />
           </ListGroupItem>
           <ListGroupItem className="report-chart-wrapper">
-            <Chart 
+            <Chart
               {...defaults.chartProps}
               draw={draw}
-              field={field} 
-              level={level} 
-              reportName={reportName} 
+              field={field}
+              level={level}
+              reportName={reportName}
               finished={finished}
               series={series}
              />
@@ -521,20 +516,20 @@ var ReportPanel = React.createClass({
     var {field, level, reportName} = this.props;
 
     this.props.defaultFavouriteValues.source = false;
-    
+
     this.props.setSource(field, level, reportName, source);
     this.setState({dirty: true});
     return false;
   },
-  
+
   _setReport: function (level, reportName) {
     this.props.defaultFavouriteValues.metricLevel = false;
-    
+
     this.props.setReport(level, reportName);
     this.setState({dirty: true});
     return false;
   },
-  
+
   _setField: function (field) {
     this.props.setField(field);
     this.setState({dirty: true});
@@ -542,19 +537,19 @@ var ReportPanel = React.createClass({
   },
 
   _setTimespan: function (value) {
-  
+
     this.props.defaultFavouriteValues.timespan = false;
-      
+
     var error = null, timespan = null;
-    
+
     // Validate
     if (_.isString(value)) {
       // Assume a symbolic name is always valid
       timespan = value;
     } else if (_.isArray(value)) {
-      // Check if given timespan is a valid range 
+      // Check if given timespan is a valid range
       var [t0, t1] = value;
-      console.assert(moment.isMoment(t0) && moment.isMoment(t1), 
+      console.assert(moment.isMoment(t0) && moment.isMoment(t1),
         'Expected a pair of moment instances');
       error = checkTimespan(value, this.props.level);
       if (!error) {
@@ -565,25 +560,25 @@ var ReportPanel = React.createClass({
         timespan = [t0.valueOf(), t1.valueOf()];
       }
     }
-    
+
     // If valid, invoke setTimespan()
     if (!error) {
       var {field, level, reportName} = this.props;
       this.props.setTimespan(field, level, reportName, timespan);
     }
-    
+
     // Update state with (probably invalid) timespan (to keep track of user input)
     this.setState({dirty: true, timespan: value, error});
     return false;
   },
-  
+
   _setPopulation: function (clusterKey, groupKey) {
-  
+
     this.props.defaultFavouriteValues.population = false;
-    
+
     var {field, level, reportName} = this.props;
     var {config} = this.context;
-    
+
     var target;
     if (!clusterKey && !groupKey) {
       target = new population.Utility(config.utility.key, config.utility.name);
@@ -601,7 +596,7 @@ var ReportPanel = React.createClass({
   },
 
   // Helpers
-  
+
   _renderFormFragment: function () {
     var {defaults} = this.constructor;
     var {helpMessages} = defaults;
@@ -616,13 +611,13 @@ var ReportPanel = React.createClass({
         {
           //Calculate tags
           var [t1, t2] = computeTimespan(this.props.timespan);
-          
-          var start = this.props.defaultFavouriteValues.timespan ? 
+
+          var start = this.props.defaultFavouriteValues.timespan ?
             moment(this.props.favouriteChart.query.time.start).format("DD/MM/YYYY") : t1.format("DD/MM/YYYY");
-            
-          var end = this.props.defaultFavouriteValues.timespan ? 
-            moment(this.props.favouriteChart.query.time.start).format("DD/MM/YYYY") : t2.format("DD/MM/YYYY");            
-          
+
+          var end = this.props.defaultFavouriteValues.timespan ?
+            moment(this.props.favouriteChart.query.time.start).format("DD/MM/YYYY") : t2.format("DD/MM/YYYY");
+
           if(this.props.defaultFavouriteValues.population){
             clusterKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).clusterKey;
 
@@ -635,52 +630,52 @@ var ReportPanel = React.createClass({
             } else{
               console.error('Could not resolve options for favourite population!');
             }
-          }      
+          }
 
           var {clusters} = config.utility;
           var selectedCluster = !clusterKey? null : clusters.find(c => (c.key == clusterKey));
           var favouritePopulationTag = selectedCluster ? selectedCluster.name : 'Everyone';
-          
+
           var [clusterKey2, groupKey2] = population.extractGroupParams(this.props.population);
-          
+
           var selectedCluster2 = !clusterKey2? null : clusters.find(c => (c.key == clusterKey2));
           var selectedPopulationTag = selectedCluster2 ? selectedCluster2.name : 'Everyone';
-          
+
           var defaultSource = this.props.source == 'device' ? 'AMPHIRO' : 'METER';
-          
-          var tags = 'Chart - ' + (this.props.defaultFavouriteValues.source ? this.props.favouriteChart.query.source : defaultSource) + ' - ' + 
-              (start + ' to ' + end) + ' - ' + 
-                  (this.props.defaultFavouriteValues.levelMetric ? 'Level: ' + 
-                      this.props.favouriteChart.level : 'Level: ' + this.props.level) + ' - ' + 
+
+          var tags = 'Chart - ' + (this.props.defaultFavouriteValues.source ? this.props.favouriteChart.query.source : defaultSource) + ' - ' +
+              (start + ' to ' + end) + ' - ' +
+                  (this.props.defaultFavouriteValues.levelMetric ? 'Level: ' +
+                      this.props.favouriteChart.level : 'Level: ' + this.props.level) + ' - ' +
                           (this.props.defaultFavouriteValues.population ? favouritePopulationTag : selectedPopulationTag);
           // \Calculate tags
 
           var enableHelpText = this.state.dirty ? 'Refresh to enable saving.' : '';
-          fragment1 = ( 
+          fragment1 = (
             <div>
               <div className='col-md-3'>
-                <input  id='label' name='favourite' type='favourite' ref='favourite' autofocus 
+                <input  id='label' name='favourite' type='favourite' ref='favourite' autofocus
                   defaultValue ={this.props.favouriteChart ? this.props.favouriteChart.title : null}
                   placeholder='Label ...' className='form-control' style={{ marginBottom : 15 }}/>
                 <span className='help-block'>Insert a label for this favourite</span>
               </div>
             <div className='col-md-6'>
-              <input  id='name' name='name' type='name' ref='name' autofocus disabled 
+              <input  id='name' name='name' type='name' ref='name' autofocus disabled
                 placeholder={tags} className='form-control' style={{ marginBottom : 15 }}/>
               <span className='help-block'>Auto-generated Identifier</span>
             </div>
             <div className='col-md-3'>
-              <Bootstrap.Button 
-                onClick={this._clickedAddFavourite} 
+              <Bootstrap.Button
+                onClick={this._clickedAddFavourite}
                 bsStyle='success' disabled={this.state.dirty}>
-                {favouriteButtonText} 
+                {favouriteButtonText}
               </Bootstrap.Button>
               <span className='help-block'>{enableHelpText}</span>
-            </div>      
-          </div> 
+            </div>
+          </div>
           );
-        } 
-        break;    
+        }
+        break;
       case 'source':
         {
           var {source} = this.props;
@@ -690,26 +685,26 @@ var ReportPanel = React.createClass({
           );
 
           if(this.props.defaultFavouriteValues.source){
-            if(this.props.favouriteChart.query.source == 'AMPHIRO'){    
+            if(this.props.favouriteChart.query.source == 'AMPHIRO'){
               source = 'device';
-            } 
+            }
             else{
               source = 'meter';
             }
-          } 
-          
-          fragment1 = ( 
+          }
+
+          fragment1 = (
             <div className="form-group">
               <label className="col-sm-2 control-label">Source:</label>
               <div className="col-sm-9">
-                <Select className="select-source" 
-                  value={source} options={sourceOptions} onChange={this._setSource} 
+                <Select className="select-source"
+                  value={source} options={sourceOptions} onChange={this._setSource}
                  />
                 <p className="help text-muted">{helpMessages['source']}</p>
               </div>
             </div>
           );
-        } 
+        }
         break;
       case 'report':
         {
@@ -722,7 +717,7 @@ var ReportPanel = React.createClass({
           var reportOptions = new Map(
             _.values(
               _.mapValues(levels[level].reports, (r, k) => ([k, r.title]))
-            )  
+            )
           );
 
           level = this.props.defaultFavouriteValues.metricLevel ? this.props.favouriteChart.level : level;
@@ -731,10 +726,10 @@ var ReportPanel = React.createClass({
               <div key="level" className="form-group" >
                 <label className="col-sm-2 control-label">Level:</label>
                 <div className="col-sm-9">
-                  <Select className="select-level" 
-                    value={level} 
-                    options={levelOptions} 
-                    onChange={(val) => this._setReport(val, reportName)} 
+                  <Select className="select-level"
+                    value={level}
+                    options={levelOptions}
+                    onChange={(val) => this._setReport(val, reportName)}
                    />
                   <p className="help text-muted">{helpMessages['level']}</p>
                 </div>
@@ -744,9 +739,9 @@ var ReportPanel = React.createClass({
                 <label className="col-sm-2 control-label">Metric:</label>
                 <div className="col-sm-9">
                   <Select className="select-report"
-                    value={reportName} 
-                    options={reportOptions} 
-                    onChange={(val) => this._setReport(level, val)} 
+                    value={reportName}
+                    options={reportOptions}
+                    onChange={(val) => this._setReport(level, val)}
                    />
                   <p className="help text-muted">{helpMessages['report-name']}</p>
                 </div>
@@ -768,7 +763,7 @@ var ReportPanel = React.createClass({
               disabled: _.isString(timespan)? 'disabled' : null
             },
           });
-          
+
           var timespanOptions = new Map(
             Array.from(TimeSpan.common.entries())
               .map(([k, u]) => ([k, u.title]))
@@ -780,20 +775,20 @@ var ReportPanel = React.createClass({
             <div className="form-group">
               <label className="col-sm-2 control-label">Time:</label>
               <div className="col-sm-9">
-                <Select className="select-timespan" 
+                <Select className="select-timespan"
                   value={_.isString(timespan)? timespan : ''}
                   options={timespanOptions}
                   onChange={(val) => (this._setTimespan(val? (val) : ([t0, t1])))}
                  />
                 &nbsp;&nbsp;
-                <DatetimeInput {...datetimeProps} 
-                  value={t0.toDate()} 
-                  onChange={(val) => (this._setTimespan([val, t1]))} 
+                <DatetimeInput {...datetimeProps}
+                  value={t0.toDate()}
+                  onChange={(val) => (this._setTimespan([val, t1]))}
                  />
                 &nbsp;-&nbsp;
-                <DatetimeInput {...datetimeProps} 
+                <DatetimeInput {...datetimeProps}
                   value={t1.toDate()}
-                  onChange={(val) => (this._setTimespan([t0, val]))} 
+                  onChange={(val) => (this._setTimespan([t0, val]))}
                  />
                 <p className="help text-muted">{helpMessages['timespan']}</p>
               </div>
@@ -805,19 +800,19 @@ var ReportPanel = React.createClass({
         {
           var target = this.props.population;
           var {clusters} = config.utility;
-          
+
           var clusterOptions = [
             {
-              group: null, 
+              group: null,
               options: new Map([['', 'None']])
             }, {
-              group: 'Cluster By:', 
+              group: 'Cluster By:',
               options: new Map(clusters.map(c => ([c.key, c.name ])))
             },
           ];
-          
+
           var [clusterKey, groupKey] = population.extractGroupParams(target);
-          
+
           if(this.props.defaultFavouriteValues.population){
             clusterKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).clusterKey;
 
@@ -831,7 +826,7 @@ var ReportPanel = React.createClass({
               console.error('Could not resolve options for favourite population!');
             }
           }
-           
+
           var selectedCluster = !clusterKey? null : clusters.find(c => (c.key == clusterKey));
 
           var groupOptions = [
@@ -862,7 +857,7 @@ var ReportPanel = React.createClass({
                   options={groupOptions}
                  />
                 <p className="help text-muted">{helpMessages['population-group']}</p>
-              </div> 
+              </div>
             </div>
           );
         }
@@ -886,82 +881,82 @@ var ReportPanel = React.createClass({
     if (flag && (i >= 0)) {
       // The button is currently disabled and must be enabled
       disabledKeys.splice(i, 1);
-      nextValue = disabledKeys.join('|'); 
+      nextValue = disabledKeys.join('|');
     } else if (!flag && (i < 0)) {
       // The button is currently enabled and must be disabled
       disabledKeys.push(key);
       nextValue = disabledKeys.sort().join('|');
     }
-    
+
     if (nextValue != null)
       this.setState({disabledButtons: nextValue});
   },
-  
+
   _clickedAddFavourite: function() {
-  
+
     var {config} = this.context;
     var [t1, t2] = computeTimespan(this.props.timespan);
-          
-    var start = this.props.defaultFavouriteValues.timespan ? 
+
+    var start = this.props.defaultFavouriteValues.timespan ?
         moment(this.props.favouriteChart.query.time.start).format("DD/MM/YYYY") : t1.format("DD/MM/YYYY");
-            
-    var end = this.props.defaultFavouriteValues.timespan ? 
-        moment(this.props.favouriteChart.query.time.end).format("DD/MM/YYYY") : t2.format("DD/MM/YYYY");            
-          
+
+    var end = this.props.defaultFavouriteValues.timespan ?
+        moment(this.props.favouriteChart.query.time.end).format("DD/MM/YYYY") : t2.format("DD/MM/YYYY");
+
     var clusterKey, groupKey;
     if(this.props.defaultFavouriteValues.population){
       clusterKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).clusterKey;
 
       if(this.props.favouriteChart.query.population.length > 1){ //ClusterGroup with all groups
         groupKey = null;
-      } else if(this.props.favouriteChart.query.population[0].type == 'UTILITY') { //Utility all   
+      } else if(this.props.favouriteChart.query.population[0].type == 'UTILITY') { //Utility all
         clusterKey = groupKey = null;
       } else if(this.props.favouriteChart.query.population.length == 1){ //ClusterGroup with subgroup
         groupKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).key;
       } else{
         console.error('Could not resolve options for favourite population!');
       }
-    }         
-                         
+    }
+
     var {clusters} = config.utility;
     var selectedCluster = !clusterKey? null : clusters.find(c => (c.key == clusterKey));
     var favouritePopulationTag = selectedCluster ? selectedCluster.name : 'Everyone';
-          
+
     var [clusterKey2, groupKey2] = population.extractGroupParams(this.props.population);
-          
+
     var selectedCluster2 = !clusterKey2? null : clusters.find(c => (c.key == clusterKey2));
     var selectedPopulationTag = selectedCluster2 ? selectedCluster2.name : 'Everyone';
-          
+
     var defaultSource = this.props.source == 'device' ? 'AMPHIRO' : 'METER';
-    var tags = 'Chart - ' + (this.props.defaultFavouriteValues.source ? 
-        this.props.favouriteChart.query.source : defaultSource) + ' - ' + 
-            (start + ' to ' + end) + ' - ' + 
-                (this.props.defaultFavouriteValues.levelMetric ? 'Level: ' + 
-                    this.props.favouriteChart.level : 'Level: ' + this.props.level) + ' - ' + 
-                        (this.props.defaultFavouriteValues.population ? 
-                            favouritePopulationTag : selectedPopulationTag);                         
+    var tags = 'Chart - ' + (this.props.defaultFavouriteValues.source ?
+        this.props.favouriteChart.query.source : defaultSource) + ' - ' +
+            (start + ' to ' + end) + ' - ' +
+                (this.props.defaultFavouriteValues.levelMetric ? 'Level: ' +
+                    this.props.favouriteChart.level : 'Level: ' + this.props.level) + ' - ' +
+                        (this.props.defaultFavouriteValues.population ?
+                            favouritePopulationTag : selectedPopulationTag);
 
     var namedQuery = {};
     namedQuery.type = 'Chart';
     namedQuery.tags = tags;
     namedQuery.title = this.refs.favourite.value;
     namedQuery.reportName = this.props.reportName;
-    namedQuery.level = this.props.level;    
-    namedQuery.field = this.props.field;     
+    namedQuery.level = this.props.level;
+    namedQuery.field = this.props.field;
     namedQuery.query = {};
-    //the metric should same for all series, except on peaks that MIN and MAX are both required  
+    //the metric should same for all series, except on peaks that MIN and MAX are both required
     var tempMetrics = [];
     for(var i = 0; i<this.props.series.length; i++){
       tempMetrics.push(this.props.series[i].metric);
-    }  
+    }
     var metricSet = [...new Set(tempMetrics)];
     namedQuery.query.metrics = metricSet;
     namedQuery.query.source = this.props.source;
     namedQuery.query.time = {};
     namedQuery.query.time.start = this.props.series[0].timespan[0];
-    namedQuery.query.time.end = this.props.series[0].timespan[1];  
+    namedQuery.query.time.end = this.props.series[0].timespan[1];
     namedQuery.query.time.granularity = this.props.level.toUpperCase();
-    
+
     var tempPop = [];
     for(var i = 0; i<this.props.series.length; i++){
       var popu = {};
@@ -972,62 +967,62 @@ var ReportPanel = React.createClass({
         var [clusterKey2, groupKey2] = population.extractGroupParams(target);
         if (target instanceof population.Utility || target == null) {
           popu.label = ('UTILITY:'+this.props.series[i].population.key.toString() + '/' + new population.Ranking(this.props.series[i].ranking).toString());
-          popu.utility = this.props.series[i].population.key; 
-        } else if (target instanceof population.Cluster) {      
+          popu.utility = this.props.series[i].population.key;
+        } else if (target instanceof population.Cluster) {
           popu.label = ('CLUSTER:'+clusterKey2 + '/' + new population.Ranking(this.props.series[i].ranking).toString());
           popu.group = groupKey2;
-        } else if (target instanceof population.ClusterGroup) {       
+        } else if (target instanceof population.ClusterGroup) {
           popu.label = ('CLUSTER:'+clusterKey2 +':'+ groupKey2+ '/' + new population.Ranking(this.props.series[i].ranking).toString());
           popu.group = groupKey2;
-        }    
-        
+        }
+
         //popu.type = this.props.series[i].population.type;
         popu.type = this.props.series[i].population.type;
-        
+
         popu.ranking = {};
         popu.ranking.field = this.props.series[i].ranking.field.toUpperCase();
         popu.ranking.limit = this.props.series[i].ranking.limit;
         popu.ranking.metric = this.props.series[i].ranking.metric;
-        popu.ranking.type = this.props.series[i].ranking.type;         
-        tempPop.push(popu);        
-      } else{   
-        tempPop.push(this.props.series[i].population);      
+        popu.ranking.type = this.props.series[i].ranking.type;
+        tempPop.push(popu);
+      } else{
+        tempPop.push(this.props.series[i].population);
       }
     }
-   namedQuery.query.population =  _.uniqBy(tempPop, function(popu) { return [popu.label, popu.key, popu.group, popu.utility, popu.ranking].join(); }); 
-    //namedQuery.query.population =  _.uniq(tempPop); 
+   namedQuery.query.population =  _.uniqBy(tempPop, function(popu) { return [popu.label, popu.key, popu.group, popu.utility, popu.ranking].join(); });
+    //namedQuery.query.population =  _.uniq(tempPop);
     //namedQuery.query.population = pleaseWork(tempPop);
     //namedQuery.query.population = [...new Set(tempPop)];
-    //namedQuery.query.timezone = "Etc/GMT"; 
+    //namedQuery.query.timezone = "Etc/GMT";
     var request =  {
       'namedQuery' : namedQuery
     };
     if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'){
       namedQuery.id = this.props.favouriteChart.id;
-      this.props.updateFavourite(request);  
+      this.props.updateFavourite(request);
     }
     else{
       this.props.addFavourite(request);
     }
     this.setState({dirty: true});
   },
-  
+
   _specForToolbar: function () {
     // Make a spec object suitable to feed toolbars.ButtonToolbar "groups" prop.
     // Note we must take into account our current state (disabled flags for buttons)
-    
-    // Todo This fuctionality fits better to the Toolbar component, 
+
+    // Todo This fuctionality fits better to the Toolbar component,
     // e.g.: <Toolbar spec={spec} enabledButtons={flags1} activeButtons={flags2} ... />
 
     var cls = this.constructor;
     var {disabledButtons} = this.state;
-    
+
     if (_.isEmpty(disabledButtons))
       return cls.toolbarSpec; // return the original spec
 
     var disabledKeys = disabledButtons.split('|');
     return cls.toolbarSpec.map(spec => ({
-      ...spec, 
+      ...spec,
       buttons: spec.buttons.map(b => _.merge({}, b, {
         buttonProps: {
           // A key disabled in the original spec cannot ever be enabled!
@@ -1037,17 +1032,17 @@ var ReportPanel = React.createClass({
     }));
   },
 
-  _titleForReport: function () {    
+  _titleForReport: function () {
     var {config} = this.context;
     var {configForReport, templates} = this.constructor;
     var {population: target} = this.props;
 
     var report = configForReport(this.props, {config});
-    
+
     // Find a friendly name for population target
     var populationName = target? target.name : 'Utility';
     if (target instanceof population.Utility || target == null) {
-      populationName = 'Utility'; //config.utility.name;  
+      populationName = 'Utility'; //config.utility.name;
     } else if (target instanceof population.Cluster) {
       var cluster = config.utility.clusters.find(c => c.key == target.key);
       populationName = 'Cluster by: ' + cluster.name;
@@ -1069,17 +1064,17 @@ var ReportForm = React.createClass({
       datetimeInputProps: {
         closeOnSelect: true,
         dateFormat: 'ddd D MMM[,] YYYY',
-        timeFormat: null, 
-        inputProps: {size: 9}, 
-      },  
+        timeFormat: null,
+        inputProps: {size: 9},
+      },
     },
-    
+
     timespanOptions: [].concat(
       Array.from(TimeSpan.common.entries()).map(([name, u]) => ({value: name, text: u.title})),
       [{value: '', text: 'Custom...'}]
     ),
   },
-  
+
   propTypes: {
     field: PropTypes.string.isRequired,
     level: PropTypes.string.isRequired,
@@ -1093,7 +1088,7 @@ var ReportForm = React.createClass({
 
   // Lifecycle
 
-  getInitialState: function () {  
+  getInitialState: function () {
     return {
       dirty: false,
       error: null,
@@ -1110,25 +1105,25 @@ var ReportForm = React.createClass({
       population: null,
     };
   },
-  
+
   componentDidMount: function () {
     var {level, reportName} = this.props;
-    
-    var _config = this.context.config.reports.byType.measurements; 
+
+    var _config = this.context.config.reports.byType.measurements;
     var report = _config.levels[level].reports[reportName];
 
     this.props.initializeReport({timespan: report.timespan});
     this.props.refreshData();
   },
- 
+
   componentWillReceiveProps: function (nextProps, nextContext) {
     // Check if moving to another report
     if (
-      (nextProps.field != this.props.field) || 
+      (nextProps.field != this.props.field) ||
       (nextProps.level != this.props.level) ||
       (nextProps.reportName != this.props.reportName)
     ) {
-      console.assert(nextContext.config == this.context.config, 
+      console.assert(nextContext.config == this.context.config,
         'Unexpected change for configuration in context!');
       var _config = nextContext.config.reports.byType.measurements;
       var report = _config.levels[nextProps.level].reports[nextProps.reportName];
@@ -1137,26 +1132,26 @@ var ReportForm = React.createClass({
       nextProps.initializeReport({timespan: report.timespan});
       setTimeout(nextProps.refreshData, 100);
     }
-    
+
     // Reset timespan
     if (nextProps.timespan != this.props.timespan) {
       this.setState({timespan: nextProps.timespan});
     }
   },
-  
+
   render: function () {
     var cls = this.constructor;
     var {config} = this.context;
     var {field, level, reportName, source, population: target, inlineForm} = this.props;
     var {timespan, error, collapsed} = this.state;
-    
+
     var _config = config.reports.byType.measurements;
     var [t0, t1] = computeTimespan(timespan);
 
     var datetimeProps = _.merge({}, cls.defaults.datetimeInputProps, {
       inputProps: {disabled: _.isString(timespan)? 'disabled' : null}
     });
-    
+
     var sourceOptions = _config.fields[field].sources.map(k => ({
       value: k, text: _config.sources[k].title
     }));
@@ -1168,42 +1163,42 @@ var ReportForm = React.createClass({
     var clusterOptions = config.utility.clusters.map(
       c => ({value: c.key, text: c.name })
     );
-    
+
     var [clusterKey, groupKey] = population.extractGroupParams(target);
     var groupOptions = !clusterKey? [] :
       config.utility.clusters
         .find(c => (c.key == clusterKey))
           .groups.map(g => ({value: g.key, text: g.name}));
-    
+
     var selectSource = (
       <Select className="select-source" value={source} onChange={this._setSource}>
         {sourceOptions.map(Option)}
       </Select>
     );
-    
+
     var selectTimespan = (
-      <Select className="select-timespan" 
-        value={_.isString(timespan)? timespan : ''} 
+      <Select className="select-timespan"
+        value={_.isString(timespan)? timespan : ''}
         onChange={(val) => (this._setTimespan(val? (val) : ([t0, t1])))}
        >
         {timespanOptions.map(Option)}
       </Select>
-    ); 
-    
+    );
+
     var inputStarts = (
-      <DatetimeInput {...datetimeProps} 
-        value={t0.toDate()} 
-        onChange={(val) => (this._setTimespan([val, t1]))} 
+      <DatetimeInput {...datetimeProps}
+        value={t0.toDate()}
+        onChange={(val) => (this._setTimespan([val, t1]))}
        />
     );
-    
+
     var inputEnds = (
-      <DatetimeInput {...datetimeProps} 
+      <DatetimeInput {...datetimeProps}
         value={t1.toDate()}
-        onChange={(val) => (this._setTimespan([t0, val]))} 
+        onChange={(val) => (this._setTimespan([t0, val]))}
        />
     );
-    
+
     var selectCluster = (
       <Select className='select-cluster'
         value={clusterKey || ''}
@@ -1241,17 +1236,17 @@ var ReportForm = React.createClass({
         <i className="fa fa-save" ></i>&nbsp; Save as image
       </Button>
     );
-  
+
     var buttonExport = (
       <Button onClick={this._exportToTable} bsStyle="default" disabled={true} title="Export">
         <i className="fa fa-table" ></i>&nbsp; Export as table
       </Button>
     );
-    
+
     var form, formId = ['panel', field, level, reportName].join('--');
     var statusParagraph = (
-      <FormStatusParagraph 
-        dirty={this.state.dirty} errorMessage={!error? null : ErrorMessages[error]} 
+      <FormStatusParagraph
+        dirty={this.state.dirty} errorMessage={!error? null : ErrorMessages[error]}
        />
     );
     if (inlineForm) {
@@ -1273,7 +1268,7 @@ var ReportForm = React.createClass({
             {buttonRefresh}&nbsp;&nbsp;{buttonSave}&nbsp;&nbsp;{buttonExport}
           </div>
           {statusParagraph}
-        </form> 
+        </form>
       );
     } else {
       form = (
@@ -1296,13 +1291,13 @@ var ReportForm = React.createClass({
               </div>
             </div>
             <div className="form-group">
-              <label className="col-sm-2 control-label">Group:</label> 
+              <label className="col-sm-2 control-label">Group:</label>
               <div className="col-sm-9">
                 {selectCluster}&nbsp;&nbsp;{selectClusterGroup}
                </div>
             </div>
-          </div></Collapse> 
-          </fieldset> 
+          </div></Collapse>
+          </fieldset>
           <div className="form-group">
             <div className="col-sm-12">
               {buttonRefresh}&nbsp;&nbsp;{buttonSave}&nbsp;&nbsp;{buttonExport}
@@ -1312,7 +1307,7 @@ var ReportForm = React.createClass({
         </form>
       );
     }
-    
+
     return form;
   },
 
@@ -1324,30 +1319,30 @@ var ReportForm = React.createClass({
 
   _setTimespan: function (value) {
     var error = null, timespan = null;
-    
+
     // Validate
     if (_.isString(value)) {
       // Assume a symbolic name is always valid
       timespan = value;
     } else if (_.isArray(value)) {
-      // Check if given timespan is a valid range 
-      console.assert(value.length == 2 && value.every(t => moment.isMoment(t)), 
+      // Check if given timespan is a valid range
+      console.assert(value.length == 2 && value.every(t => moment.isMoment(t)),
         'Expected a pair of moment instances');
       error = checkTimespan(value, this.props.level);
       if (!error)
         timespan = [value[0].valueOf(), value[1].valueOf()];
     }
-    
+
     // If valid, invoke setTimespan()
     if (timespan != null)
       this.props.setTimespan(timespan);
-    
+
     // Update state with a (probably invalid) timespan (to keep track of user input)
     this.setState({dirty: true, timespan: value, error});
-    
+
     return false;
   },
-  
+
   _setPopulation: function (clusterKey, groupKey) {
     var {config} = this.context;
     var p;
@@ -1378,7 +1373,7 @@ var ReportForm = React.createClass({
     this.setState({dirty: false});
     return false;
   },
-  
+
   _saveAsImage: function () {
     console.info('Todo: Saving to image...');
     return false;
@@ -1393,13 +1388,13 @@ var ReportForm = React.createClass({
 
   _markupSummary: function (source, [t0, t1], [clusterKey, groupKey]) {
     var _config = this.context.config.reports.byType.measurements;
-    const openingBracket = (<span>&#91;</span>); 
+    const openingBracket = (<span>&#91;</span>);
     const closingBracket = (<span>&#93;</span>);
     const delimiter = (<span>::</span>);
-    
+
     t0 = moment(t0); t1 = moment(t1);
     var datefmt = (t0.year() == t1.year())? 'D/MMM' : 'D/MMM/YYYY';
-    var formattedTime = sprintf('From %s To %s', t0.format(datefmt), t1.format(datefmt)); 
+    var formattedTime = sprintf('From %s To %s', t0.format(datefmt), t1.format(datefmt));
     return (
       <span className="summary-wrapper">
         {openingBracket}&nbsp;
@@ -1409,10 +1404,10 @@ var ReportForm = React.createClass({
           <span>{formattedTime}</span>
         </span>
         &nbsp;{closingBracket}
-      </span>  
+      </span>
     );
   },
-}); 
+});
 
 var ReportInfo = React.createClass({
   statics: {},
@@ -1427,7 +1422,7 @@ var ReportInfo = React.createClass({
     series: PropTypes.arrayOf(seriesPropType),
     requests: PropTypes.number,
   },
-  
+
   getDefaultProps: function () {
     return {
       requested: null,
@@ -1437,7 +1432,7 @@ var ReportInfo = React.createClass({
 
   shouldComponentUpdate: function (nextProps) {
     if (
-      (nextProps.field != this.props.field) || 
+      (nextProps.field != this.props.field) ||
       (nextProps.level != this.props.level) ||
       (nextProps.reportName != this.props.reportName)
     )
@@ -1449,14 +1444,14 @@ var ReportInfo = React.createClass({
     var {field, level, reportName} = this.props;
     var {errors, series, requests, requested, finished} = this.props;
     var paragraph, message;
-    
-    var n = !series? 0 : series.filter(s => (s.data.length > 0)).length; 
-    
+
+    var n = !series? 0 : series.filter(s => (s.data.length > 0)).length;
+
     if (errors) {
       message = _.first(errors);
       paragraph = (<p className="help text-danger">{message}</p>);
     } else if (!n) {
-      message = _.isNumber(finished)? 
+      message = _.isNumber(finished)?
         ('No data received! Last attempt was at ' + moment(finished).format('HH:mm:ss')):
         ('No data!');
       paragraph = (<p className="help text-warning">{message}</p>);
@@ -1485,35 +1480,35 @@ ReportPanel = ReactRedux.connect(
     var stateProps;
     var {fields} = state.config.reports.byType.measurements;
     var {field, level, reportName} = state.charting;
-    
+
     stateProps = {field, level, reportName};
-    
+
     if (!ownProps.title)
       stateProps.title = fields[field].title;
-     
+
     var key = computeKey(field, level, reportName, REPORT_KEY);
     var r1 = state.reports.measurements[key];
     if (r1) {
       // Found an initialized intance of the report for (field, level, reportName)
       var {source, timespan, population, series, finished} = r1;
       _.extend(stateProps, {source, timespan, population, series, finished});
-          
+
     }
     stateProps.defaultFavouriteValues = state.defaultFavouriteValues;
     stateProps.favouriteChart = state.favourites.selectedFavourite;
     stateProps.favouriteSeries = state.favourites.data;
 
     return stateProps;
-  }, 
+  },
   (dispatch, ownProps) => {
     var {setField, setLevel, setReport} = chartingActions;
-    var {initialize, setSource, setTimespan, setPopulation, 
+    var {initialize, setSource, setTimespan, setPopulation,
          refreshData, addFavourite, updateFavourite} = reportingActions;
     return {
       setField: (field) => (dispatch(setField(field))),
-      setReport: (level, reportName) => (dispatch(setReport(level, reportName))), 
+      setReport: (level, reportName) => (dispatch(setReport(level, reportName))),
       initializeReport: (field, level, reportName, defaults) => (
-        dispatch(initialize(field, level, reportName, REPORT_KEY, defaults))  
+        dispatch(initialize(field, level, reportName, REPORT_KEY, defaults))
       ),
       refreshData: (field, level, reportName) => (
         dispatch(refreshData(field, level, reportName, REPORT_KEY))
@@ -1532,19 +1527,19 @@ ReportPanel = ReactRedux.connect(
       ),
       updateFavourite: (query) => (
         dispatch(updateFavourite(query))
-      )     
+      )
     };
-  }, 
+  },
 )(ReportPanel);
 
 ReportForm = ReactRedux.connect(
   (state, ownProps) => {
     var {field, level, reportName} = ownProps;
     var _state = state.reports.measurements;
-    var key = computeKey(field, level, reportName, REPORT_KEY); 
-    return !(key in _state)? {} : 
+    var key = computeKey(field, level, reportName, REPORT_KEY);
+    return !(key in _state)? {} :
       _.pick(_state[key], ['source', 'timespan', 'population']);
-  }, 
+  },
   (dispatch, ownProps) => {
     var {field, level, reportName} = ownProps;
     var {initialize, setSource, setTimespan, setPopulation, refreshData} = reportingActions;
@@ -1573,7 +1568,7 @@ ReportInfo = ReactRedux.connect(
     var {field, level, reportName} = ownProps;
     var _state = state.reports.measurements;
     var key = computeKey(field, level, reportName, REPORT_KEY);
-    return !(key in _state)? {} : 
+    return !(key in _state)? {} :
       _.pick(_state[key], ['requested', 'finished', 'requests', 'errors', 'series']
     );
   },
@@ -1591,8 +1586,8 @@ var pleaseWork = function(duplicates){
 }
 module.exports = {
   Panel: ReportPanel,
-  Form: ReportForm, 
-  Info: ReportInfo, 
+  Form: ReportForm,
+  Info: ReportInfo,
   Chart: (props) => (
     <ChartContainer {...props} reportKey={REPORT_KEY} />
   ),

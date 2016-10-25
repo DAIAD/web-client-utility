@@ -1,43 +1,44 @@
 var types = require('../constants/ActionTypes');
 
 var initialState = {
-	locale : null,
-	isLoading : false,
-	data : {}
+  locale : null,
+  isLoading : false,
+  data : {}
 };
 
 var i18n = function(state, action) {
-	switch (action.type) {
-	case types.LOCALE_REQUEST_MESSAGES:
-		return Object.assign({}, state, {
-			isLoading : true
-		});
+  switch (action.type) {
+    case types.LOCALE_REQUEST_MESSAGES:
+      return Object.assign({}, state, {
+        isLoading : true
+      });
 
-	case types.LOCALE_RECEIVED_MESSAGES:
-	  if(document) {
-	    document.cookie = 'daiad-utility-locale=' + action.locale + '; max-age=' + (60*60*24*365*10) + '; path=/utility/';
-	  }
-	  
-		var newState = Object.assign({}, {
-			isLoading : false,
-			data : Object.keys(state.data).reduce(function(next, locale) {
-				next[locale] = state.data[locale];
+    case types.LOCALE_RECEIVED_MESSAGES:
+      if (document) {
+        document.cookie = 'daiad-utility-locale=' + action.locale + '; max-age=' + (60 * 60 * 24 * 365 * 10)
+            + '; path=/utility/';
+      }
 
-				return next;
-			}, {}) || {},
-			locale : action.locale
-		});
+      var newState = Object.assign({}, {
+        isLoading : false,
+        data : Object.keys(state.data).reduce(function(next, locale) {
+          next[locale] = state.data[locale];
 
-		newState.data[action.locale] = {
-			messages : action.messages,
-			lastUpdated : new Date()
-		};
+          return next;
+        }, {}) || {},
+        locale : action.locale
+      });
 
-		return newState;
+      newState.data[action.locale] = {
+        messages : action.messages,
+        lastUpdated : new Date()
+      };
 
-	default:
-		return state || initialState;
-	}
+      return newState;
+
+    default:
+      return state || initialState;
+  }
 };
 
 module.exports = i18n;

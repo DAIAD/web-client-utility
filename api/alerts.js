@@ -3,10 +3,10 @@ var api = require('./base');
 var ManageAlertsAPI = {
     getAllUtilities: function(){
       return api.json('/action/utility/fetch/corresponding');
-    },    
-    getTips: function(locale){  
+    },
+    getTips: function(locale){
       return api.json('/action/recommendation/static/' + locale);
-    },   
+    },
     saveActiveTips: function(changedRows){
       return api.json('/action/recommendation/static/status/save/', changedRows);
     },
@@ -19,14 +19,14 @@ var ManageAlertsAPI = {
     getAllUtilityUsers: function() {
       return api.json('/action/admin/trial/activity');
     },
-    getAnnouncements: function(){      
+    getAnnouncements: function(){
       return api.json('/action/announcement/history');
     },
     broadcastAnnouncement: function(users, announcement) {
       var receiverAccountList = [];
       for(var obj in users){
         receiverAccountList.push({accountId : users[obj].id, username : users[obj].username, lastName : users[obj].lastName});
-      }      
+      }
       return api.json('/action/announcement/broadcast', {announcement : announcement, receiverAccountList : receiverAccountList});
     },
     getAllGroups: function(){
@@ -49,7 +49,7 @@ var ManageAlertsAPI = {
     },
     getRecommendationReceivers: function(id, query){
       return api.json('/action/recommendation/dynamic/recommendation/receivers/' + id, query);
-    }     
+    }
 };
 
 module.exports = ManageAlertsAPI;

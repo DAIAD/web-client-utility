@@ -1,5 +1,4 @@
 var types = require('../constants/ActionTypes');
-var passwordAPI = require('../api/password');
 
 var initialState = {
   isLoading : false,

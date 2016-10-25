@@ -5,7 +5,6 @@ var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
 var Breadcrumb = require('../Breadcrumb');
 var Chart = require('../Chart');
-var moment = require('moment');
 var Select = require('react-select');
 var UserSearchTextBox = require('../UserSearchTextBox');
 var { getUtilityData, getUtilityForecast, getUserData, getUserForecast, setUser } = require('../../actions/ForecastingActions');
@@ -13,7 +12,7 @@ var theme = require('../chart/themes/forecast');
 
 var _onUserSelect= function(e) {
   var profile = this.props.profile;
-  
+
   if(e) {
     if(e.value) {
       this.props.actions.getUserData(e.value, e.label, profile.timezone);
@@ -32,48 +31,48 @@ var _onChangeChartType = function(e) {
 };
 
 var Forecasting = React.createClass({
-	contextTypes: {
-	    intl: React.PropTypes.object
-	},
-	
-	getInitialState() {
-		return {
-		  chart: {
-		    type: 'line'
-		  }
-		};
-	},
+  contextTypes: {
+      intl: React.PropTypes.object
+  },
 
-	toggleView(view) {
-		this.setState({map : !this.state.map});
-	},
-  	
+  getInitialState() {
+    return {
+      chart: {
+        type: 'line'
+      }
+    };
+  },
+
+  toggleView(view) {
+    this.setState({map : !this.state.map});
+  },
+
   componentWillMount : function() {
     var profile = this.props.profile;
-    
-    
+
+
     this.props.actions.setUser(null);
 
-		this.props.actions.getUtilityData(profile.utility.key, profile.utility.name, profile.timezone);
-		this.props.actions.getUtilityForecast(profile.utility.key, profile.utility.name, profile.timezone);
-	},
+    this.props.actions.getUtilityData(profile.utility.key, profile.utility.name, profile.timezone);
+    this.props.actions.getUtilityForecast(profile.utility.key, profile.utility.name, profile.timezone);
+  },
 
-	render: function() { 	  	
-		var utilityChart = {
-	    series: []
-		};
+  render: function() {
+    var utilityChart = {
+      series: []
+    };
     var userChart = {
       series: []
     };
 
-		if(this.props.forecasting.data.utility) {
-		  utilityChart.series.push({
-		    legend: 'Actual',
-		    xAxis: 'date',
-		    yAxis: 'volume',
-		    data: this.props.forecasting.data.utility.data
-		  });
-		}
+    if(this.props.forecasting.data.utility) {
+      utilityChart.series.push({
+        legend: 'Actual',
+        xAxis: 'date',
+        yAxis: 'volume',
+        data: this.props.forecasting.data.utility.data
+      });
+    }
     if(this.props.forecasting.forecast.utility) {
       utilityChart.series.push({
         legend: 'Forecast',
@@ -110,33 +109,33 @@ var Forecasting = React.createClass({
         format: 'day'
       }
     };
-        
-		const title = (
-			<span>
-				<i className={'fa fa-bar-chart fa-fw'}></i>
-				<span style={{ paddingLeft: 4 }}>Utility and User Water Consumption Forecasting</span>
-			</span>
-		);
 
-		var chart1 = (<span>Loading ... </span>), chart2 = null;
-		
-		if(utilityChart.series.length > 0) {
-		  chart1 = (
-	      <Chart style={{ width: '100%', height: 450 }} 
+    const title = (
+      <span>
+        <i className={'fa fa-bar-chart fa-fw'}></i>
+        <span style={{ paddingLeft: 4 }}>Utility and User Water Consumption Forecasting</span>
+      </span>
+    );
+
+    var chart1 = (<span>Loading ... </span>), chart2 = null;
+
+    if(utilityChart.series.length > 0) {
+      chart1 = (
+        <Chart style={{ width: '100%', height: 450 }}
                elementClassName='mixin'
                type={this.state.chart.type}
                prefix='chart'
                options={chartOptions}
                data={utilityChart}
-	             theme={theme}
-	      />
-		  );
-		}
-		
-		if(userChart.series.length > 0) {
-		  chart2 = (
-	      <Bootstrap.ListGroupItem>
-          <Chart  style={{ width: '100%', height: 450 }} 
+               theme={theme}
+        />
+      );
+    }
+
+    if(userChart.series.length > 0) {
+      chart2 = (
+        <Bootstrap.ListGroupItem>
+          <Chart  style={{ width: '100%', height: 450 }}
                   elementClassName='mixin'
                   type={this.state.chart.type}
                   prefix='chart'
@@ -144,23 +143,23 @@ var Forecasting = React.createClass({
                   data={userChart}
                   theme={theme}
           />
-	      </Bootstrap.ListGroupItem>
-		  );
-		}
-		
-		var content = (
-			<div className='row'>
-				<div className='col-lg-12'>
-					<Bootstrap.Panel header={title}>
-			      <Bootstrap.ListGroup fill>
-			        <Bootstrap.ListGroupItem>
-			          <div className='row'>
-			            <div className='col-md-3'>
-			              <UserSearchTextBox name='username' onChange={_onUserSelect.bind(this)}/>
-			              <span className='help-block'>Select a single user</span>
-		              </div>
-		              <div className='col-md-2'>
-  		              <Select name='chart-type'
+        </Bootstrap.ListGroupItem>
+      );
+    }
+
+    var content = (
+      <div className='row'>
+        <div className='col-lg-12'>
+          <Bootstrap.Panel header={title}>
+            <Bootstrap.ListGroup fill>
+              <Bootstrap.ListGroupItem>
+                <div className='row'>
+                  <div className='col-md-3'>
+                    <UserSearchTextBox name='username' onChange={_onUserSelect.bind(this)}/>
+                    <span className='help-block'>Select a single user</span>
+                  </div>
+                  <div className='col-md-2'>
+                    <Select name='chart-type'
                       value={ 'line' }
                       options={[
                           { value: 'bar', label: 'Bar' },
@@ -168,36 +167,36 @@ var Forecasting = React.createClass({
                           { value: 'area', label: 'Area' }
                       ]}
                       onChange={_onChangeChartType.bind(this)}
-  		                clearable={false} 
-  		              />
+                      clearable={false}
+                    />
                     <span className='help-block'>Select chart type</span>
                   </div>
-	              </div>
-			        </Bootstrap.ListGroupItem>
-  		        <Bootstrap.ListGroupItem>
-  		          {chart1}
-  		        </Bootstrap.ListGroupItem>
-  		        {chart2}
-  		        <Bootstrap.ListGroupItem className='clearfix'>        
-  		          <Link className='pull-right' to='/scheduler' style={{ paddingLeft : 7, paddingTop: 12 }}>Job Scheduler</Link>
-  		        </Bootstrap.ListGroupItem>
-  		      </Bootstrap.ListGroup>
-					</Bootstrap.Panel>
-				</div>
-			</div>
-		);
-
-		return (
-			<div className='container-fluid' style={{ paddingTop: 10 }}>
-				<div className='row'>
-					<div className='col-md-12'>
-						<Breadcrumb routes={this.props.routes}/>
-					</div>
-				</div>
-				{content}
+                </div>
+              </Bootstrap.ListGroupItem>
+              <Bootstrap.ListGroupItem>
+                {chart1}
+              </Bootstrap.ListGroupItem>
+              {chart2}
+              <Bootstrap.ListGroupItem className='clearfix'>
+                <Link className='pull-right' to='/scheduler' style={{ paddingLeft : 7, paddingTop: 12 }}>Job Scheduler</Link>
+              </Bootstrap.ListGroupItem>
+            </Bootstrap.ListGroup>
+          </Bootstrap.Panel>
+        </div>
       </div>
- 		);
-	}
+    );
+
+    return (
+      <div className='container-fluid' style={{ paddingTop: 10 }}>
+        <div className='row'>
+          <div className='col-md-12'>
+            <Breadcrumb routes={this.props.routes}/>
+          </div>
+        </div>
+        {content}
+      </div>
+     );
+  }
 });
 
 Forecasting.icon = 'line-chart';

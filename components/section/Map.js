@@ -4,16 +4,13 @@ var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
 var Breadcrumb = require('../Breadcrumb');
-var Message = require('../Message');
-var Chart = require('../Chart');
 var LeafletMap = require('../LeafletMap');
 var Select = require('react-select');
 var DateRangePicker = require('react-bootstrap-daterangepicker');
 var FilterTag = require('../chart/dimension/FilterTag');
 var Timeline = require('../Timeline');
 var GroupSearchTextBox = require('../GroupSearchTextBox');
-var {FormattedMessage, FormattedTime, FormattedDate} = require('react-intl');
-var DateRangePicker = require('react-bootstrap-daterangepicker');
+var {FormattedTime} = require('react-intl');
 var moment = require('moment');
 
 var { getTimeline, getFeatures, getChart,
@@ -23,7 +20,7 @@ var { getTimeline, getFeatures, getChart,
 var _getTimelineValues = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps();
-  } 
+  }
   return [];
 };
 
@@ -31,13 +28,13 @@ var _getTimelineLabels = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps().map(function(timestamp) {
       return (
-        <FormattedTime  value={new Date(timestamp)} 
-                        day='numeric' 
-                        month='numeric' 
+        <FormattedTime  value={new Date(timestamp)}
+                        day='numeric'
+                        month='numeric'
                         year='numeric'/>
-      );      
+      );
     });
-  } 
+  }
   return [];
 };
 
@@ -69,10 +66,6 @@ var onPopulationEditorChange = function(e) {
   this.props.actions.setEditorValue('population', e);
 };
 
-var onFavouriteEditorChange = function (e) {
-  this.props.actions.setEditorValue('favourite', e.value);
-};
-
 var _setEditor = function(key) {
   this.props.actions.setEditor(key);
 };
@@ -85,10 +78,8 @@ var _onFeatureChange = function(features) {
   }
 };
 
-var favouriteIcon;
-
 var AnalyticsMap = React.createClass({
-  
+
   contextTypes: {
       intl: React.PropTypes.object
   },
@@ -101,7 +92,7 @@ var AnalyticsMap = React.createClass({
       this.props.defaultFavouriteValues.source = true;
       this.props.defaultFavouriteValues.population = true;
       this.props.defaultFavouriteValues.spatial = true;
-      
+
       this.props.actions.setEditorValuesBatch(isDefault);
     }
     else{
@@ -110,11 +101,11 @@ var AnalyticsMap = React.createClass({
       this.props.defaultFavouriteValues.source = false;
       this.props.defaultFavouriteValues.population = false;
       this.props.defaultFavouriteValues.spatial = false;
-      
+
       this.props.actions.setEditorValuesBatch(isDefault);
-    }      
+    }
   },
-  
+
   componentDidMount : function() {
     var utility = this.props.profile.utility;
 
@@ -131,14 +122,14 @@ var AnalyticsMap = React.createClass({
   },
 
   clickedAddFavourite : function() {
-    
-    var tags = 'Map - ' + 
-      (this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source) + 
-        ' - '+ this.props.interval[0].format("DD/MM/YYYY") + 
-          ' to ' + this.props.interval[1].format("DD/MM/YYYY") + 
-            (this.props.population ? ' - ' + this.props.population.label : '') + 
+
+    var tags = 'Map - ' +
+      (this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source) +
+        ' - '+ this.props.interval[0].format("DD/MM/YYYY") +
+          ' to ' + this.props.interval[1].format("DD/MM/YYYY") +
+            (this.props.population ? ' - ' + this.props.population.label : '') +
               (this.props.geometry ? ' - Custom' : '');
-                    
+
     var namedQuery = this.props.map.query;
     namedQuery.type = 'Map';
     namedQuery.tags = tags;
@@ -150,15 +141,15 @@ var AnalyticsMap = React.createClass({
 
     if(this.props.favourite){
       namedQuery.id = this.props.favourite.id;
-      this.props.actions.updateFavourite(request);  
+      this.props.actions.updateFavourite(request);
     }
     else{
-      this.props.actions.addFavourite(request);    
+      this.props.actions.addFavourite(request);
     }
   },
-  
+
   render: function() {
-    var favouriteIcon, label;
+    var favouriteIcon;
     if(this.props.favourite && this.props.favourite.type == 'CHART'){
       favouriteIcon = 'star-o';
     } else if(this.props.isBeingEdited && !this.props.favourite){
@@ -169,36 +160,36 @@ var AnalyticsMap = React.createClass({
     }
 
     var tags = 'Map - ' +
-      (this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source) + 
-        ' - '+ this.props.interval[0].format("DD/MM/YYYY") + 
-          ' to ' + this.props.interval[1].format("DD/MM/YYYY") + 
-            (this.props.population ? ' - ' + this.props.population.label : '') + 
+      (this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source) +
+        ' - '+ this.props.interval[0].format("DD/MM/YYYY") +
+          ' to ' + this.props.interval[1].format("DD/MM/YYYY") +
+            (this.props.population ? ' - ' + this.props.population.label : '') +
               (this.props.geometry ? ' - Custom' : '');
-    
+
     var _t = this.context.intl.formatMessage;
-    
+
     // Filter configuration
     var intervalLabel ='';
     if(this.props.interval) {
-      var start = this.props.defaultFavouriteValues.interval ? 
+      var start = this.props.defaultFavouriteValues.interval ?
         moment(this.props.favourite.query.time.start).format('DD/MM/YYYY') : this.props.interval[0].format('DD/MM/YYYY');
-      var end = this.props.defaultFavouriteValues.interval ? 
+      var end = this.props.defaultFavouriteValues.interval ?
         moment(this.props.favourite.query.time.end).format('DD/MM/YYYY') : this.props.interval[1].format('DD/MM/YYYY');
-        
+
       intervalLabel = start + ' - ' + end;
       if (start === end) {
         intervalLabel = start;
       }
-    }     
+    }
 
     var intervalEditor = (
-      <div className='col-md-3'> 
-        <DateRangePicker  
-          startDate={this.props.defaultFavouriteValues.interval ? 
-                      moment(this.props.favourite.query.time.start) : this.props.interval[0]} 
-          endDate={this.props.defaultFavouriteValues.interval ? 
-                      moment(this.props.favourite.query.time.end) : this.props.interval[1]} 
-          ranges={this.props.ranges} 
+      <div className='col-md-3'>
+        <DateRangePicker
+          startDate={this.props.defaultFavouriteValues.interval ?
+                      moment(this.props.favourite.query.time.start) : this.props.interval[0]}
+          endDate={this.props.defaultFavouriteValues.interval ?
+                      moment(this.props.favourite.query.time.end) : this.props.interval[1]}
+          ranges={this.props.ranges}
           onEvent={_onIntervalEditorChange.bind(this)}
         >
           <div className='clearfix Select-control' style={{ cursor: 'pointer', padding: '5px 10px', width: '100%'}}>
@@ -208,12 +199,12 @@ var AnalyticsMap = React.createClass({
           <span className='help-block'>Select time interval</span>
       </div>
     );
-   
+
     var populationEditor = (
       <div className='col-md-3'>
-        <GroupSearchTextBox 
-          value={this.props.defaultFavouriteValues.population ? this.props.favourite.query.population : this.props.population} 
-          name='groupname' 
+        <GroupSearchTextBox
+          value={this.props.defaultFavouriteValues.population ? this.props.favourite.query.population : this.props.population}
+          name='groupname'
           onChange={onPopulationEditorChange.bind(this)}/>
         <span className='help-block'>Select a consumer group</span>
       </div>
@@ -221,23 +212,23 @@ var AnalyticsMap = React.createClass({
 
     var addFavouriteText;
     if(this.props.favourite){
-      addFavouriteText = 'Buttons.UpdateFavourite';    
-    }  
+      addFavouriteText = 'Buttons.UpdateFavourite';
+    }
     else{
-      addFavouriteText = 'Buttons.AddFavourite';      
+      addFavouriteText = 'Buttons.AddFavourite';
     }
 
     var favouriteEditor = (
       <div>
         <div className='col-md-3'>
-          <input id='favouriteLabel' name='favouriteLabel' type='favourite' ref='favouriteLabel' autofocus 
+          <input id='favouriteLabel' name='favouriteLabel' type='favourite' ref='favouriteLabel' autoFocus
             defaultValue ={this.props.favourite ? this.props.favourite.title : null}
-            placeholder={this.props.favourite ? this.props.favourite.title : 'Label ...'} 
+            placeholder={this.props.favourite ? this.props.favourite.title : 'Label ...'}
             className='form-control' style={{ marginBottom : 15 }}/>
           <span className='help-block'>Insert a label for this favourite</span>
         </div>
         <div className='col-md-6'>
-          <input  id='name' name='name' type='name' ref='name' autofocus disabled 
+          <input  id='name' name='name' type='name' ref='name' autoFocus disabled
             placeholder={tags} className='form-control' style={{ marginBottom : 15 }}/>
           <span className='help-block'>Auto-generated Identifier</span>
         </div>
@@ -245,10 +236,10 @@ var AnalyticsMap = React.createClass({
           <Bootstrap.Button bsStyle='success' onClick={this.clickedAddFavourite} disabled={!this.props.isBeingEdited}>
             {_t({ id:addFavouriteText})}
           </Bootstrap.Button>
-        </div>              
-      </div> 
+        </div>
+      </div>
     );
-         
+
     var sourceEditor = (
       <div className='col-md-3'>
         <Select name='source'
@@ -258,12 +249,12 @@ var AnalyticsMap = React.createClass({
             { value: 'AMPHIRO', label: 'Amphiro B1' }
           ]}
           onChange={_onSourceEditorChange.bind(this)}
-          clearable={false} 
+          clearable={false}
           searchable={false} className='form-group'/>
           <span className='help-block'>Select a data source</span>
         </div>
     );
-    
+
     var filter = null;
 
     switch(this.props.editor) {
@@ -286,7 +277,7 @@ var AnalyticsMap = React.createClass({
           </Bootstrap.ListGroupItem>
         );
         break;
-        
+
       case 'source':
         filter = (
             <Bootstrap.ListGroupItem>
@@ -304,9 +295,9 @@ var AnalyticsMap = React.createClass({
               </div>
             </Bootstrap.ListGroupItem>
           );
-        break;        
+        break;
     }
-    
+
     // Map configuration
     var mapTitle = (
       <span>
@@ -341,10 +332,10 @@ var AnalyticsMap = React.createClass({
         <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={_setEditor.bind(this, 'favourite')}>
             <i className={'fa fa-' + favouriteIcon + ' fa-fw'}></i>
           </Bootstrap.Button>
-        </span>       
+        </span>
       </span>
     );
-    
+
     var chartData = {
       series: []
     };
@@ -358,8 +349,8 @@ var AnalyticsMap = React.createClass({
           data: this.props.chart.series.meters.data
         });
       }
-  
-      if(this.props.chart.series.devices) {    
+
+      if(this.props.chart.series.devices) {
         chartData.series.push({
           legend: 'Amphiro B1',
           xAxis: 'date',
@@ -369,84 +360,36 @@ var AnalyticsMap = React.createClass({
       }
     }
 
-    var chartOptions = {
-      tooltip: {
-        show: true
-      },
-      dataZoom : {
-        format: 'day'
-      }
-    };
-        
-    var chartTitle = (
-      <span>
-        <i className='fa fa-bar-chart fa-fw'></i>
-        <span style={{ paddingLeft: 4 }}>Last 2 Week Consumption</span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-database fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-map fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-group fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3 }}>
-          <Bootstrap.Button bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-calendar fa-fw'></i>
-          </Bootstrap.Button>
-        </span>      
-      </span>
-    );    
+    var chartFilterTags = [], map, mapFilterTags = [];
 
-    var chart = null, chartFilterTags = [], map, mapFilterTags = [];
-
-    chartFilterTags.push( 
+    chartFilterTags.push(
       <FilterTag key='time' text={intervalLabel} icon='calendar' />
     );
-    chartFilterTags.push( 
+    chartFilterTags.push(
       <FilterTag key='source' text='Meter, Amphiro B1' icon='database' />
     );
 
-    if(chartData.series.length > 0) {
-      chart = (
-        <Bootstrap.ListGroupItem>
-          <Chart  style={{ width: '100%', height: 400 }} 
-              elementClassName='mixin'
-              prefix='chart'
-              options={chartOptions}
-              data={chartData}/>
-        </Bootstrap.ListGroupItem>
-      );
-    }
-
-    mapFilterTags.push( 
+    mapFilterTags.push(
       <FilterTag key='time' text={intervalLabel} icon='calendar' />
     );
-    mapFilterTags.push( 
+    mapFilterTags.push(
       <FilterTag key='population' text={ this.props.population ? this.props.population.label : 'All' } icon='group' />
     );
-    mapFilterTags.push( 
+    mapFilterTags.push(
       <FilterTag key='spatial' text={ this.props.geometry ? 'Custom' : 'Alicante' } icon='map' />
     );
-    mapFilterTags.push( 
+    mapFilterTags.push(
       <FilterTag key='source' text={ this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source} icon='database' />
-    );  
+    );
 
     map = (
       <Bootstrap.ListGroup fill>
         {filter}
         <Bootstrap.ListGroupItem>
-          <LeafletMap style={{ width: '100%', height: 600}} 
+          <LeafletMap style={{ width: '100%', height: 600}}
                       elementClassName='mixin'
                       prefix='map'
-                      center={[38.36, -0.479]} 
+                      center={[38.36, -0.479]}
                       zoom={13}
                       mode={[LeafletMap.MODE_DRAW, LeafletMap.MODE_CHOROPLETH]}
                       draw={{
@@ -466,7 +409,7 @@ var AnalyticsMap = React.createClass({
           />
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem>
-          <Timeline   onChange={_onChangeTimeline.bind(this)} 
+          <Timeline   onChange={_onChangeTimeline.bind(this)}
                       labels={ _getTimelineLabels(this.props.map.timeline) }
                       values={ _getTimelineValues(this.props.map.timeline) }
                       defaultIndex={this.props.map.index}
@@ -489,7 +432,7 @@ var AnalyticsMap = React.createClass({
         {map}
       </Bootstrap.Panel>
     );
-   
+
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>

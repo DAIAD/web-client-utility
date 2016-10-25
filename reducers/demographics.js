@@ -97,31 +97,21 @@ var createPossibleMembersRows = function(possibleMembersInfo){
   return possibleMembers;
 };
 
-var getCandidateMember = function(possibleMembers, memberId){
-  if(possibleMembers.hasOwnProperty(memberId)){
-    return possibleMembers[memberId];
-  } else {
-    return null;
-  }
-};
-
 var demographics = function(state, action) {
   var newGroup = null;
   var possibleMembers = null;
   var currentMembers = null;
   var candidateMembersToAdd = [];
   var candidateMembersToRemove = [];
-  var newCandidateMember = null;
   var index = null;
-  var newFavourite = null;
-  
+
   switch (action.type) {
-  
+
   case types.DEMOGRAPHICS_REQUEST_GROUPS_AND_FAVOURITES:
     return Object.assign({}, state, {
       isLoading : true
     });
-  
+
   case types.DEMOGRAPHICS_RECEIVE_GROUPS:
     action.groupsInfo = action.groupsInfo || [];
 
@@ -142,7 +132,7 @@ var demographics = function(state, action) {
         }
       }
     });
-    
+
   case types.DEMOGRAPHICS_RECEIVE_FAVOURITES:
     return Object.assign({}, state, {
       isLoading : false,
@@ -161,28 +151,28 @@ var demographics = function(state, action) {
         }
       }
     });
-    
+
   case types.DEMOGRAPHICS_SET_GROUPS_FILTER:
     return Object.assign({}, state, {
       groupsFilter : action.groupsFilter
     });
-    
+
   case types.DEMOGRAPHICS_SET_FAVOURITES_FILTER:
     return Object.assign({}, state, {
       favouritesFilter : action.favouritesFilter
     });
-    
+
   case types.DEMOGRAPHICS_SHOW_NEW_GROUP_FORM:
     return Object.assign({}, state, {
       isLoading : true,
       showMessageAlert : false,
       application : 'addNewGroup'
     });
-    
+
   case types.DEMOGRAPHICS_RECEIVE_NEW_GROUP_POSSIBLE_MEMBERS:
     newGroup = Object.assign({}, state.newGroup);
     newGroup.possibleMembers = createPossibleMembersRows(action.possibleMembersInfo);
-    
+
     return Object.assign({}, state, {
       isLoading : false,
       asyncResponse : {
@@ -192,7 +182,7 @@ var demographics = function(state, action) {
       },
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_HIDE_NEW_GROUP_FORM:
     newGroup = {
       showMessageAlert : false,
@@ -203,18 +193,18 @@ var demographics = function(state, action) {
       candidateMembersToAdd : [],
       candidateMembersToRemove : []
     };
-    
+
     return Object.assign({}, state, {
       application : 'default',
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_REQUEST_GROUP_MEMBERS:
     return Object.assign({}, state, {
       isLoading : true
     });
-    
-  case types.DEMOGRAPHICS_RECEIVE_GROUP_MEMBERS:    
+
+  case types.DEMOGRAPHICS_RECEIVE_GROUP_MEMBERS:
     return Object.assign({}, state, {
       isLoading : false,
       asyncResponse : {
@@ -223,14 +213,14 @@ var demographics = function(state, action) {
         errors : action.errors
       },
       possibleMembers : createPossibleMembersRows(action.possibleMembersInfo)
-     
+
     });
-    
+
   case types.DEMOGRAPHICS_TOGGLE_CANDIDATE_GROUP_MEMBER_TO_ADD:
     newGroup = Object.assign({}, state.newGroup);
     candidateMembersToAdd = JSON.parse(JSON.stringify(state.newGroup.candidateMembersToAdd));
     possibleMembers = Object.assign({}, state.newGroup.possibleMembers);
-    
+
     switch (action.selected){
     case false:
       if(candidateMembersToAdd.indexOf(action.memberId) === -1){
@@ -238,7 +228,7 @@ var demographics = function(state, action) {
       }
       possibleMembers[action.memberId].selected = true;
       break;
-      
+
     case true:
       index = candidateMembersToAdd.indexOf(action.memberId);
       if(index > -1){
@@ -246,19 +236,19 @@ var demographics = function(state, action) {
       }
       possibleMembers[action.memberId].selected = false;
     }
-    
+
     newGroup.possibleMembers = possibleMembers;
     newGroup.candidateMembersToAdd = candidateMembersToAdd;
-    
+
     return Object.assign({}, state, {
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_TOGGLE_CANDIDATE_GROUP_MEMBER_TO_REMOVE:
     newGroup = Object.assign({}, state.newGroup);
     candidateMembersToRemove = JSON.parse(JSON.stringify(state.newGroup.candidateMembersToRemove));
     currentMembers = Object.assign({}, state.newGroup.currentMembers);
-    
+
     switch (action.selected){
     case false:
       if(candidateMembersToRemove.indexOf(action.memberId) === -1){
@@ -266,7 +256,7 @@ var demographics = function(state, action) {
       }
       currentMembers[action.memberId].selected = true;
       break;
-      
+
     case true:
       index = candidateMembersToRemove.indexOf(action.memberId);
       if(index > -1){
@@ -274,20 +264,20 @@ var demographics = function(state, action) {
       }
       currentMembers[action.memberId].selected = false;
     }
-    
+
     newGroup.currentMembers = currentMembers;
     newGroup.candidateMembersToRemove = candidateMembersToRemove;
-    
+
     return Object.assign({}, state, {
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_ADD_SELECTED_GROUP_MEMBERS:
     newGroup = Object.assign({}, state.newGroup);
     currentMembers = Object.assign({}, state.newGroup.currentMembers);
     possibleMembers = Object.assign({}, state.newGroup.possibleMembers);
     candidateMembersToAdd = JSON.parse(JSON.stringify(state.newGroup.candidateMembersToAdd));
-   
+
     candidateMembersToAdd.forEach(function(memberId) {
       if (possibleMembers.hasOwnProperty(memberId) && !currentMembers.hasOwnProperty(memberId)){
         currentMembers[memberId] = Object.assign({}, possibleMembers[memberId]);
@@ -295,21 +285,21 @@ var demographics = function(state, action) {
         delete possibleMembers[memberId];
       }
     });
-    
+
     newGroup.currentMembers = currentMembers;
     newGroup.possibleMembers = possibleMembers;
     newGroup.candidateMembersToAdd = [];
-    
+
     return Object.assign({}, state, {
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_REMOVE_SELECTED_GROUP_MEMBERS:
     newGroup = Object.assign({}, state.newGroup);
     currentMembers = Object.assign({}, state.newGroup.currentMembers);
     possibleMembers = Object.assign({}, state.newGroup.possibleMembers);
     candidateMembersToRemove = JSON.parse(JSON.stringify(state.newGroup.candidateMembersToRemove));
-   
+
     candidateMembersToRemove.forEach(function(memberId){
         if(currentMembers.hasOwnProperty(memberId) && !possibleMembers.hasOwnProperty(memberId)){
           possibleMembers[memberId] = Object.assign({}, currentMembers[memberId]);
@@ -317,26 +307,26 @@ var demographics = function(state, action) {
           delete currentMembers[memberId];
         }
     });
-    
+
     newGroup.currentMembers = currentMembers;
     newGroup.possibleMembers = possibleMembers;
     newGroup.candidateMembersToRemove = [];
-    
+
     return Object.assign({}, state, {
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_CREATE_GROUP_SET_NAME:
     newGroup = Object.assign({}, state.newGroup);
     newGroup.newGroupName = action.groupName;
-    
+
     return Object.assign({}, state, {
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_CREATE_GROUP_VALIDATION_ERRORS_OCCURRED:
     newGroup = Object.assign({}, state.newGroup, {showMessageAlert : true});
-    
+
     return Object.assign({}, state, {
       isLoading : false,
       asyncResponse : {
@@ -346,26 +336,26 @@ var demographics = function(state, action) {
       },
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_CREATE_GROUP_HIDE_MESSAGE_ALERT:
     newGroup = Object.assign({}, state.newGroup, {showMessageAlert : false});
     return Object.assign({}, state, {
       newGroup : newGroup
     });
-    
+
   case types.DEMOGRAPHICS_CREATE_GROUP_SET_MAKE_REQUEST:
     return Object.assign({}, state, {
       isLoading : true
     });
-    
+
   case types.DEMOGRAPHICS_CREATE_GROUP_SET_RECEIVE_RESPONSE:
     newGroup = Object.assign({}, state.newGroup);
-    
+
     newGroup.showMessageAlert = true;
-    
+
     if (action.success){
       newGroup.newGroupName = null;
-      
+
       for (let m in newGroup.currentMembers) {
         if (newGroup.currentMembers.hasOwnProperty(m)) {
           newGroup.possibleMembers[m] = newGroup.currentMembers[m];
@@ -382,25 +372,25 @@ var demographics = function(state, action) {
       },
       newGroup : newGroup
     });
-   
+
   case types.DEMOGRAPHICS_SHOW_FAVOURITE_GROUP_FORM:
     return Object.assign({}, state, {
       showMessageAlert : false,
       favouriteGroupId : action.groupId,
       application : 'favouriteGroupForm'
     });
-    
+
   case types.DEMOGRAPHICS_HIDE_FAVOURITE_GROUP_FORM:
     return Object.assign({}, state, {
       application : 'default'
     });
- 
-    
+
+
   case types.DEMOGRAPHICS_RESET_COMPONENT:
     return Object.assign({}, state, {
       application : 'default'
     });
-    
+
   case types.DEMOGRAPHICS_SHOW_MODAL:
     return Object.assign({}, state, {
       ModalForm : {
@@ -413,7 +403,7 @@ var demographics = function(state, action) {
         }
       }
     });
-    
+
   case types.DEMOGRAPHICS_HIDE_MODAL:
     return Object.assign({}, state, {
       ModalForm : {
@@ -423,15 +413,15 @@ var demographics = function(state, action) {
         }
       }
     });
-    
-    
+
+
   case types.DEMOGRAPHICS_DELETE_GROUP_REQUEST_MADE:
     return Object.assign({}, state, {
       isLoading : true
     });
-    
+
   case types.DEMOGRAPHICS_DELETE_GROUP_RESPONSE_RECEIVED:
-    
+
     return Object.assign({}, state, {
       isLoading : false,
       showMessageAlert : true,
@@ -441,14 +431,14 @@ var demographics = function(state, action) {
         errors : action.errors,
       },
     });
-    
+
   case types.DEMOGRAPHICS_DELETE_FAVOURITE_REQUEST_MADE:
     return Object.assign({}, state, {
       isLoading : true
     });
-    
+
   case types.DEMOGRAPHICS_DELETE_FAVOURITE_RESPONSE_RECEIVED:
-    
+
     return Object.assign({}, state, {
       isLoading : false,
       asyncResponse : {
@@ -457,18 +447,18 @@ var demographics = function(state, action) {
         errors : action.errors,
       },
     });
-    
-    
+
+
   case types.DEMOGRAPHICS_HIDE_MESSAGE_ALERT:
     return Object.assign({}, state, {
       showMessageAlert : false
     });
-    
-    
+
+
   default:
     return state || initialState;
   }
-  
+
 };
 
 module.exports = demographics;

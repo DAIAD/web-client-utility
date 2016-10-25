@@ -1,18 +1,15 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Select = require('react-select');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-var $ = require('jquery');
 var moment = require('moment');
 var LeafletMap = require('../../LeafletMap');
 var Timeline = require('../../Timeline');
 
-var {FormattedMessage, FormattedTime, FormattedDate} = require('react-intl');
+var {FormattedTime} = require('react-intl');
 
 var Bootstrap = require('react-bootstrap');
 var Dropzone = require('react-dropzone');
-var moment = require('moment');
 
 var Breadcrumb = require('../../Breadcrumb');
 
@@ -26,7 +23,7 @@ var onChangeTimezone = function(val) {
 var _getTimelineValues = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps();
-  } 
+  }
   return [];
 };
 
@@ -34,40 +31,33 @@ var _getTimelineLabels = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps().map(function(timestamp) {
       return (
-        <FormattedTime  value={new Date(timestamp)} 
-                        day='numeric' 
-                        month='numeric' 
+        <FormattedTime  value={new Date(timestamp)}
+                        day='numeric'
+                        month='numeric'
                         year='numeric'/>
-      );      
+      );
     });
-  } 
-  return [];
-};
-
-var _getFeatures = function(timeline, timestamp, label) {
-  if(timeline) {
-    return timeline.getFeatures(timestamp, label);
   }
-  return null;
+  return [];
 };
 
 var Development = React.createClass({
   contextTypes: {
       intl: React.PropTypes.object
   },
-  
+
   getInitialState() {
     return {
       isLoading: null
     };
   },
-  
+
   createUser: function(e) {
     if(this.refs.password.value) {
       this.props.actions.createUser(this.refs.password.value);
     }
   },
-  
+
   createAmphiro: function(e) {
     this.props.actions.createAmphiro();
   },
@@ -77,54 +67,11 @@ var Development = React.createClass({
   },
 
   executeQuery: function(e) {
-    var end = moment().valueOf();
-    var start = moment().subtract(30, 'days').valueOf();
-    
-    var constraintSpatialFilter = {
-      type: 'CONSTRAINT',
-      operation: 'CONTAINS',
-      geometry: {
-        'type': 'Polygon',
-        'coordinates': [
-          [
-            [
-              -0.525970458984375,
-              38.329537722849636
-            ],
-            [
-              -0.5233955383300781,
-              38.36386812314455
-            ],
-            [
-              -0.4821968078613281,
-              38.37651914591569
-            ],
-            [
-              -0.4440879821777344,
-              38.33963658855894
-            ],
-            [
-              -0.46966552734375,
-              38.31647443592999
-            ],
-            [
-              -0.5089759826660156,
-              38.313511301083466
-            ],
-            [
-              -0.525970458984375,
-              38.329537722849636
-            ]
-          ]
-        ]
-      }
-    };
-
     var groupSpatialFilter = {
       type: 'GROUP',
       group: 'd29f8cb8-7df6-4d57-8c99-0a155cc394c5'
     };
-    
+
     var query = {
         time: {
           type : 'SLIDING',
@@ -156,7 +103,7 @@ var Development = React.createClass({
         source: 'METER',
         metrics: ['SUM']
     };
-    
+
     this.props.actions.submitQuery({ query : query });
   },
 
@@ -164,7 +111,7 @@ var Development = React.createClass({
     if(this.props.debug.isLoading) {
       return;
     }
-   
+
     this.props.actions.generateAmphiroData(this.props.debug.timezone, files);
   },
 
@@ -173,13 +120,11 @@ var Development = React.createClass({
     if((this.props.profile) && (this.props.profile.timezone)) {
       timezone = this.props.profile.timezone;
     }
-    
+
     this.props.actions.setTimezone(timezone);
   },
-  
+
   render: function() {
-    var _t = this.context.intl.formatMessage;
-   
     var spinner = (<i className='fa fa-cloud-upload fa-4x'></i>);
     if(this.props.debug.isLoading   === true) {
       spinner = (<i className='fa fa-cog fa-spin fa-4x'></i>);
@@ -198,7 +143,7 @@ var Development = React.createClass({
             <Bootstrap.Modal.Title>Error</Bootstrap.Modal.Title>
           </Bootstrap.Modal.Header>
           <Bootstrap.Modal.Body>
-            {errors} 
+            {errors}
           </Bootstrap.Modal.Body>
           <Bootstrap.Modal.Footer>
             <Bootstrap.Button onClick={this.clearErrors}>Close</Bootstrap.Button>
@@ -206,35 +151,29 @@ var Development = React.createClass({
         </Bootstrap.Modal>
       );
     }
-    
+
     // Add map
-    var interval = [moment().startOf('month'), moment().endOf('month')];
-    var mapOptions = {
-      center: [38.35, -0.48], 
-      zoom: 13
-    };
-    
     var onChangeTimeline = function(value, label, index) {
       this.props.actions.getFeatures(this.props.query.timeline, value, 'Alicante');
     };
 
     var map = (
       <Bootstrap.ListGroupItem>
-        <LeafletMap style={{ width: '100%', height: 400}} 
+        <LeafletMap style={{ width: '100%', height: 400}}
                     elementClassName='mixin'
                     prefix='map'
-                    center={[38.35, -0.48]} 
+                    center={[38.35, -0.48]}
                     zoom={13}
                     mode={LeafletMap.MODE_CHOROPLETH}
                     data={ this.props.debug.features }
                     colors={['#2166ac', '#67a9cf', '#d1e5f0', '#f7f7f7', '#fddbc7', '#ef8a62', '#b2182b']}
                     urls={['/assets/data/meters.geojson']} />
-  		</Bootstrap.ListGroupItem>
+      </Bootstrap.ListGroupItem>
     );
-   
+
     var timeline = (
       <Bootstrap.ListGroupItem>
-        <Timeline   onChange={onChangeTimeline.bind(this)} 
+        <Timeline   onChange={onChangeTimeline.bind(this)}
                     labels={ _getTimelineLabels(this.props.query.timeline) }
                     values={ _getTimelineValues(this.props.query.timeline) }
                     defaultIndex={0}
@@ -243,7 +182,7 @@ var Development = React.createClass({
         </Timeline>
       </Bootstrap.ListGroupItem>
     );
-        
+
     // End of map
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
@@ -263,10 +202,10 @@ var Development = React.createClass({
                       <label className='control-label' htmlFor='password'>Default Password</label>
                     </div>
                     <div className='col-md-9'>
-                      <input  id='password' name='password' type='password' ref='password' autofocus 
+                      <input  id='password' name='password' type='password' ref='password' autoFocus
                               placeholder='Password ...' className='form-control' style={{ marginBottom : 15 }}/>
-                  		<span className='help-block'>Default password for new accounts</span>
-                		</div>
+                      <span className='help-block'>Default password for new accounts</span>
+                    </div>
                   </div>
                   <div className='row'>
                     <div className='col-md-6'>
@@ -317,14 +256,14 @@ var Development = React.createClass({
                                   { value: 'Europe/Athens', label: 'Athens' }
                               ]}
                               onChange={onChangeTimezone.bind(this)}
-                            clearable={false} 
+                            clearable={false}
                       />
-                      <span className='help-block'>Select time zone of the uploaded data</span>  
+                      <span className='help-block'>Select time zone of the uploaded data</span>
                     </div>
                   </div>
                   <div className='row'>
-                    <div className='form-group col-md-12'>                
-                      <Dropzone onDrop={this.onDropAmphiroData.bind(this)} disableClick={true} multiple={true} 
+                    <div className='form-group col-md-12'>
+                      <Dropzone onDrop={this.onDropAmphiroData.bind(this)} disableClick={true} multiple={true}
                                 style={{ textAlign: 'center', fontSize: '3em', color: '#656565', border: '1px dotted #656565' }}>
                         {spinner}
                       </Dropzone>
@@ -359,7 +298,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { submitQuery, createUser, createAmphiro, 
+    actions : bindActionCreators(Object.assign({}, { submitQuery, createUser, createAmphiro,
                                                      setTimezone, setErrors, generateAmphiroData, getFeatures }) , dispatch)
   };
 }

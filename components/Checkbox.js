@@ -14,7 +14,7 @@ var Checkbox = React.createClass({
     if(typeof this.props.onChange === 'function') {
       this.props.onChange(this.refs.checkbox.checked);
     }
-    if(typeof this.props.onUserClick === 'function') {
+    if(typeof this.props.onUserClick === 'function') {  
       this.props.onUserClick(
         this.props.rowId,
         this.props.propertyName,

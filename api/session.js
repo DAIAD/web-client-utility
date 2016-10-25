@@ -13,7 +13,7 @@ var SessionAPI = {
   saveToProfile: function(data) {
     return api.json('/action/profile/save', data);
   }
-  
+
 };
 
 module.exports = SessionAPI;

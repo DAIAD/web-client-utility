@@ -6,13 +6,10 @@ var Table = require('./Table');
 var Chart = require('./Chart');
 var theme = require('./chart/themes/shine');
 
-var UpsertFavouriteForm = require('./section/demographics/UpsertFavouriteForm');
-
 var { connect } = require('react-redux');
 var { bindActionCreators } = require('redux');
 
 var UserActions = require('../actions/UserActions');
-var UserTablesSchema = require('../constants/UserTablesSchema');
 
 var _viewAmphiroConfiguration = function(device) {
   this.props.showAmphiroConfig(device);
@@ -20,13 +17,13 @@ var _viewAmphiroConfiguration = function(device) {
 
 var _getAmphiroConfig = function(self, device) {
   let configuration = device.configuration;
-  
+
   switch(configuration.title) {
     case 'Off Configuration':
       return (
         <div style={{ marginTop: 5, marginBottom: 5 }} className='log_debug'>
           Disabled
-          <i style={{ textAlign: 'right', cursor: 'pointer' }} 
+          <i style={{ textAlign: 'right', cursor: 'pointer' }}
              className='fa fa-search fa-fw'
              onClick={_viewAmphiroConfiguration.bind(self, device)} />
         </div>);
@@ -34,15 +31,15 @@ var _getAmphiroConfig = function(self, device) {
       return (
         <div style={{ marginTop: 5, marginBottom: 5 }} className='log_info'>
           Enabled (Metric Units)
-          <i style={{ textAlign: 'right', cursor: 'pointer' }} 
-             className='fa fa-search fa-fw' 
+          <i style={{ textAlign: 'right', cursor: 'pointer' }}
+             className='fa fa-search fa-fw'
              onClick={_viewAmphiroConfiguration.bind(self, device)} />
         </div>);
     case 'Enabled Configuration (Imperial Units)':
       return (
         <div style={{ marginTop: 5, marginBottom: 5 }} className='log_info'>
           Enabled (Imperial Units)
-          <i style={{ textAlign: 'right', cursor: 'pointer' }} 
+          <i style={{ textAlign: 'right', cursor: 'pointer' }}
              className='fa fa-search fa-fw'
              onClick={_viewAmphiroConfiguration.bind(self, device)} />
         </div>);
@@ -123,20 +120,20 @@ var _toggleFavorite = function() {
 };
 
 var _exportData = function() {
-  this.props.exportData(this.props.user.id, this.props.user.email);  
+  this.props.exportData(this.props.user.id, this.props.user.email);
 };
 
 var User = React.createClass({
-	contextTypes: {
-	    intl: React.PropTypes.object
-	},
-	
-	componentWillMount : function() {
+  contextTypes: {
+      intl: React.PropTypes.object
+  },
+
+  componentWillMount : function() {
     this.props.showUser(this.props.params.id);
   },
-  
+
   getSimplifiedGroups : function (groups){
-    
+
     var simplifiedGroups = [];
     groups.forEach(function(group){
       simplifiedGroups.push({
@@ -146,28 +143,28 @@ var User = React.createClass({
         createdOn : new Date (group.creationDateMils)
       });
     });
-    
+
     return simplifiedGroups;
   },
-  
+
   membersObjectToArray: function(membersObject){
     var membersArray = [];
-    
+
     for (var id in membersObject) {
       if (membersObject.hasOwnProperty(id)) {
         membersArray.push(membersObject[id]);
       }
     }
-    
+
     return membersArray;
   },
-  
+
   compareGroups : function (a, b){
     return a.name.localeCompare(b.name);
   },
 
-	render: function() {
-	  var groupTableConfig = {
+  render: function() {
+    var groupTableConfig = {
       fields : [{
         name : 'id',
         title : 'Table.Group.id',
@@ -188,22 +185,22 @@ var User = React.createClass({
         icon : 'bar-chart-o',
         handler : (function(field, row) {
           var utility = this.props.profile.utility;
-          
+
           this.props.getGroupSeries(row.id, row.name, utility.timezone);
         }).bind(this)
       }],
       rows : []
     };
-	  
-	  if (this.props.groups) {
-	    groupTableConfig.rows = this.getSimplifiedGroups(this.membersObjectToArray(Object.assign({}, this.props.groups))).sort(this.compareGroups);
-	  }
 
-		const profileTitle = (
-			<span>
-				<i className='fa fa-user fa-fw'></i>
-				<span style={{ paddingLeft: 4 }}>Profile</span>
-				<span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
+    if (this.props.groups) {
+      groupTableConfig.rows = this.getSimplifiedGroups(this.membersObjectToArray(Object.assign({}, this.props.groups))).sort(this.compareGroups);
+    }
+
+    const profileTitle = (
+      <span>
+        <i className='fa fa-user fa-fw'></i>
+        <span style={{ paddingLeft: 4 }}>Profile</span>
+        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
           <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={_toggleFavorite.bind(this)} >
             <i className={ this.props.favorite ? 'fa fa-star fa-lg' : 'fa fa-star-o fa-lg' }
                 title={ this.props.favorite ? 'Remove from favorites' : 'Add to favorites' }></i>
@@ -219,9 +216,9 @@ var User = React.createClass({
             <i className='fa fa-envelope-o fa-lg'></i>
           </Bootstrap.Button>
         </span>
-			</span>
-		);
-		
+      </span>
+    );
+
     const deviceTitle = (
       <span>
         <i className='fa fa-database fa-fw'></i>
@@ -236,19 +233,19 @@ var User = React.createClass({
       </span>
     );
 
-		const groupTitle = (
-			<span>
-				<i className='fa fa-group fa-fw'></i>
-				<span style={{ paddingLeft: 4 }}>Groups</span>
-			</span>
-		);
+    const groupTitle = (
+      <span>
+        <i className='fa fa-group fa-fw'></i>
+        <span style={{ paddingLeft: 4 }}>Groups</span>
+      </span>
+    );
 
-		var applicationElements = [];
+    var applicationElements = [];
 
-		if(this.props.user) {
-		  var mode = this.props.user.mode;
-		  
-		  applicationElements.push(
+    if(this.props.user) {
+      var mode = this.props.user.mode;
+
+      applicationElements.push(
           <Bootstrap.ListGroupItem key={applicationElements.length + 1} className='clearfix'>
             <div className='row'>
               <div className='col-md-6'><b>Utility</b></div>
@@ -265,83 +262,83 @@ var User = React.createClass({
             <div className='row'>
               <div className='col-md-6'><b>Last update</b></div>
               <div className='col-md-6'>
-                <FormattedTime  value={ new Date(mode.updatedOn) } 
-                                day='numeric' 
-                                month='numeric' 
+                <FormattedTime  value={ new Date(mode.updatedOn) }
+                                day='numeric'
+                                month='numeric'
                                 year='numeric'
-                                hour='numeric' 
+                                hour='numeric'
                                 minute='numeric' />
               </div>
             </div>
             <div className='row'>
               <div className='col-md-6'><b>Enabled On</b></div>
               <div className='col-md-6'>
-                { mode.enabledOn ? 
-                  <FormattedTime  value={ new Date(mode.enabledOn) } 
-                                  day='numeric' 
-                                  month='numeric' 
+                { mode.enabledOn ?
+                  <FormattedTime  value={ new Date(mode.enabledOn) }
+                                  day='numeric'
+                                  month='numeric'
                                   year='numeric'
-                                  hour='numeric' 
+                                  hour='numeric'
                                   minute='numeric' /> : '-' }
               </div>
             </div>
             <div className='row'>
               <div className='col-md-6'><b>Acknowledged On</b></div>
               <div className='col-md-6'>
-                { mode.acknowledgedOn ? 
-                  <FormattedTime  value={ new Date(mode.acknowledgedOn) } 
-                                  day='numeric' 
-                                  month='numeric' 
+                { mode.acknowledgedOn ?
+                  <FormattedTime  value={ new Date(mode.acknowledgedOn) }
+                                  day='numeric'
+                                  month='numeric'
                                   year='numeric'
-                                  hour='numeric' 
+                                  hour='numeric'
                                   minute='numeric' /> : '-' }
               </div>
             </div>
           </Bootstrap.ListGroupItem>
       );
-		}
-		
-		var deviceElements = [];
+    }
 
-		if(this.props.meters) {
-		  this.props.meters.forEach( m => {
-		    deviceElements.push(
-	          <Bootstrap.ListGroupItem key={deviceElements.length + 1} className='clearfix'>
-	            <div style={{ width: 24, float : 'left', textAlign : 'center', marginLeft: -5 }}>
-	              <img src='/assets/images/utility/meter.svg' />
+    var deviceElements = [];
+
+    if(this.props.meters) {
+      this.props.meters.forEach( m => {
+        deviceElements.push(
+            <Bootstrap.ListGroupItem key={deviceElements.length + 1} className='clearfix'>
+              <div style={{ width: 24, float : 'left', textAlign : 'center', marginLeft: -5 }}>
+                <img src='/assets/images/utility/meter.svg' />
               </div>
-	            <div style={{ paddingTop: 2, float : 'left' }}>{m.serial}</div>
-	            <div style={{ width: 24, float : 'right' }}>
-	              <i  className={'fa fa-bar-chart-o fa-fw table-action'} onClick={_showChart.bind(this, 'METER', m.deviceKey)}>
-	              </i>
+              <div style={{ paddingTop: 2, float : 'left' }}>{m.serial}</div>
+              <div style={{ width: 24, float : 'right' }}>
+                <i  className={'fa fa-bar-chart-o fa-fw table-action'} onClick={_showChart.bind(this, 'METER', m.deviceKey)}>
+                </i>
               </div>
-	          </Bootstrap.ListGroupItem>
+            </Bootstrap.ListGroupItem>
         );
-		    deviceElements.push(
-	        <Bootstrap.ListGroupItem key={deviceElements.length + 1}>
-	          <div className='row'>
+        deviceElements.push(
+          <Bootstrap.ListGroupItem key={deviceElements.length + 1}>
+            <div className='row'>
               <div className='col-md-6'><b>Current value</b></div>
               <div className='col-md-6'>{m.volume} lt</div>
             </div>
             <div className='row'>
               <div className='col-md-6'><b>Last update</b></div>
               <div className='col-md-6'>
-                <FormattedTime  value={ new Date(m.timestamp) } 
-                                day='numeric' 
-                                month='numeric' 
+                <FormattedTime  value={ new Date(m.timestamp) }
+                                day='numeric'
+                                month='numeric'
                                 year='numeric'
-                                hour='numeric' 
+                                hour='numeric'
                                 minute='numeric' />
               </div>
             </div>
-	        </Bootstrap.ListGroupItem>
-	     );   
-		  });
-		} 
+          </Bootstrap.ListGroupItem>
+       );
+      });
+    }
 
     if(this.props.devices) {
       this.props.devices.forEach( d => {
-        
+
         deviceElements.push(
           <Bootstrap.ListGroupItem key={deviceElements.length + 1} className='clearfix'>
             <div style={{ width: 24, float : 'left', textAlign : 'center', marginLeft: -5 }}>
@@ -363,35 +360,35 @@ var User = React.createClass({
             <div className='row'>
               <div className='col-md-6'><b>Mode Changed On</b></div>
               <div className='col-md-6'>
-                    <FormattedTime  value={ new Date(d.configuration.createdOn) } 
-                                    day='numeric' 
-                                    month='numeric' 
+                    <FormattedTime  value={ new Date(d.configuration.createdOn) }
+                                    day='numeric'
+                                    month='numeric'
                                     year='numeric'
-                                    hour='numeric' 
+                                    hour='numeric'
                                     minute='numeric' />
               </div>
             </div>
             <div className='row'>
               <div className='col-md-6'><b>Enabled On</b></div>
               <div className='col-md-6'>
-                    { d.configuration.enabledOn ? 
-                    <FormattedTime  value={ new Date(d.configuration.enabledOn) } 
-                                    day='numeric' 
-                                    month='numeric' 
+                    { d.configuration.enabledOn ?
+                    <FormattedTime  value={ new Date(d.configuration.enabledOn) }
+                                    day='numeric'
+                                    month='numeric'
                                     year='numeric'
-                                    hour='numeric' 
+                                    hour='numeric'
                                     minute='numeric' /> : '-' }
               </div>
             </div>
             <div className='row'>
               <div className='col-md-6'><b>Acknowledged On</b></div>
               <div className='col-md-6'>
-                    { d.configuration.acknowledgedOn ? 
-                      <FormattedTime  value={ new Date(d.configuration.acknowledgedOn) } 
-                                      day='numeric' 
-                                      month='numeric' 
+                    { d.configuration.acknowledgedOn ?
+                      <FormattedTime  value={ new Date(d.configuration.acknowledgedOn) }
+                                      day='numeric'
+                                      month='numeric'
                                       year='numeric'
-                                      hour='numeric' 
+                                      hour='numeric'
                                       minute='numeric' /> : '-' }
               </div>
             </div>
@@ -408,32 +405,32 @@ var User = React.createClass({
               <div className='row'>
                 <div className='col-md-6'><b>Last update</b></div>
                 <div className='col-md-6'>
-                      <FormattedTime  value={ new Date(s.timestamp) } 
-                                      day='numeric' 
-                                      month='numeric' 
+                      <FormattedTime  value={ new Date(s.timestamp) }
+                                      day='numeric'
+                                      month='numeric'
                                       year='numeric'
-                                      hour='numeric' 
+                                      hour='numeric'
                                       minute='numeric' />
                 </div>
               </div>
             </Bootstrap.ListGroupItem>
-          );   
+          );
         }
       });
     }
 
-		var chartTitleText = (
-	    <span>
+    var chartTitleText = (
+      <span>
         <span>
           <i className='fa fa-bar-chart fa-fw'></i>
           <span style={{ paddingLeft: 4 }}>Consumption - Last 30 days</span>
         </span>
       </span>
     );
-		
-		var chartConfig = null, chart = (<span>No meter data found.</span>), data = [];
 
-    if(this.props.data.meters) {     
+    var chartConfig = null, chart = (<span>No meter data found.</span>), data = [];
+
+    if(this.props.data.meters) {
       chartTitleText = (
         <span>
           <span>
@@ -447,7 +444,7 @@ var User = React.createClass({
           </span>
         </span>
       );
-      
+
       chartConfig = {
         options: {
           tooltip: {
@@ -463,7 +460,7 @@ var User = React.createClass({
         },
         type: 'line'
       };
-      
+
       var v, meters = this.props.data.meters;
 
       for(var m=0; m<meters.length; m++) {
@@ -485,7 +482,7 @@ var User = React.createClass({
           yAxisName: 'Volume (lt)'
         });
       }
-      
+
       for(var key in this.props.data.groups) {
         var group = this.props.data.groups[key];
         if((group.points) && (group.points.length > 0)) {
@@ -507,7 +504,7 @@ var User = React.createClass({
           });
         }
       }
-      
+
       chart = (
         <Chart  style={{ width: '100%', height: 400 }}
                 elementClassName='mixin'
@@ -516,7 +513,7 @@ var User = React.createClass({
                 options={chartConfig.options}
                 data={chartConfig.data}
                 theme={theme}/>
-  		);
+      );
     } else if(this.props.data.devices) {
       chartConfig = {
         options: {
@@ -532,7 +529,7 @@ var User = React.createClass({
         },
         type: 'bar'
       };
-      
+
       var devices = this.props.data.devices, deviceIndex = 0, d;
 
       for(d = 0; d< devices.length; d++) {
@@ -569,7 +566,7 @@ var User = React.createClass({
         data: data,
         yAxisName: 'Volume (lt)'
       });
-      
+
       chart = (
         <Chart  style={{ width: '100%', height: 400 }}
                 elementClassName='mixin'
@@ -580,31 +577,24 @@ var User = React.createClass({
       );
     }
 
-    const chartTitle = (
-      <span>
-        <i className='fa fa-bar-chart fa-fw'></i>
-        <span style={{ paddingLeft: 4 }}>{ chartTitleText }</span>
-      </span>
-    );
-
-		var deviceListGroup = (
-	    <Bootstrap.ListGroup fill>
+    var deviceListGroup = (
+      <Bootstrap.ListGroup fill>
         {deviceElements.length === 0 ? null : deviceElements}
       </Bootstrap.ListGroup>
     );
-		
-		var applicationModeGroup = (
+
+    var applicationModeGroup = (
       <Bootstrap.ListGroup fill>
         {applicationElements.length === 0 ? null : applicationElements}
       </Bootstrap.ListGroup>
     );
-		
-		var amphiroConfigurationModal = (<div />);
-		if (this.props.activeDevice) {
-		  let activeDevice = this.props.activeDevice;
-		  let config = activeDevice.configuration;
 
-		  amphiroConfigurationModal = (
+    var amphiroConfigurationModal = (<div />);
+    if (this.props.activeDevice) {
+      let activeDevice = this.props.activeDevice;
+      let config = activeDevice.configuration;
+
+      amphiroConfigurationModal = (
         <Bootstrap.Modal show={true} onHide={this.props.hideAmphiroConfig}>
           <Bootstrap.Modal.Header closeButton>
             <Bootstrap.Modal.Title>{activeDevice.name + ' - ' + activeDevice.deviceKey}</Bootstrap.Modal.Title>
@@ -613,7 +603,7 @@ var User = React.createClass({
             <div className='row'>
               <div className='col-md-4'><b>Title</b></div>
               <div className='col-md-8'>{config.title}</div>
-            </div>          
+            </div>
             <div className='row'>
               <div className='col-md-4'><b>Version</b></div>
               <div className='col-md-8'>{config.version}</div>
@@ -646,24 +636,24 @@ var User = React.createClass({
           </Bootstrap.Modal.Footer>
         </Bootstrap.Modal>
       );
-		}
-		if (this.props.user) {
-		  var imageSource = '/assets/images/utility/profile.png';
+    }
+    if (this.props.user) {
+      var imageSource = '/assets/images/utility/profile.png';
 
-		  if(this.props.user.photo) {
-		    imageSource = "data:image/jpg;base64," + this.props.user.photo;
-		  }
+      if(this.props.user.photo) {
+        imageSource = "data:image/jpg;base64," + this.props.user.photo;
+      }
 
       var userImage = (
         <img src={imageSource} style={{borderRadius: '50%', width: '100%', height: '100%'}} />
       );
 
-  		return (
-    		<div className='container-fluid' style={{ paddingTop: 10 }}>
-    		  {amphiroConfigurationModal}
-    		  <div className='row'>
-    		    <div className='col-md-7'>
-      		    <Bootstrap.Panel header={profileTitle}>
+      return (
+        <div className='container-fluid' style={{ paddingTop: 10 }}>
+          {amphiroConfigurationModal}
+          <div className='row'>
+            <div className='col-md-7'>
+              <Bootstrap.Panel header={profileTitle}>
                 <Bootstrap.ListGroup fill>
                   <Bootstrap.ListGroupItem>
                     <div className='row'>
@@ -710,7 +700,7 @@ var User = React.createClass({
                             <tr>
                               <td>Postal code</td>
                               <td>{this.props.user.postalCode}</td>
-                            </tr> 
+                            </tr>
                             <tr>
                               <td>Smart Phone OS</td>
                               <td>{ _getOsView(this.props.user.smartPhoneOs) }</td>
@@ -729,8 +719,8 @@ var User = React.createClass({
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
               </Bootstrap.Panel>
-    		    </div>
-    		    <div className='col-md-5'>
+            </div>
+            <div className='col-md-5'>
               <Bootstrap.Panel header={groupTitle}>
                 <Bootstrap.ListGroup fill>
                   <Bootstrap.ListGroupItem>
@@ -741,17 +731,17 @@ var User = React.createClass({
                   </Bootstrap.ListGroupItem>
                 </Bootstrap.ListGroup>
               </Bootstrap.Panel>
-    		    </div>
-    		  </div>
-    		  <div className='row'>
-    		    <div className='col-md-4'>
+            </div>
+          </div>
+          <div className='row'>
+            <div className='col-md-4'>
               <Bootstrap.Panel header={deviceTitle}>
                 {deviceListGroup}
               </Bootstrap.Panel>
               <Bootstrap.Panel header={applicationTitle}>
                 {applicationModeGroup}
               </Bootstrap.Panel>
-    		    </div>
+            </div>
             <div className='col-md-8'>
               <Bootstrap.Panel header={chartTitleText}>
                 <Bootstrap.ListGroup fill>
@@ -762,12 +752,12 @@ var User = React.createClass({
               </Bootstrap.Panel>
             </div>
           </div>
-    		</div>
-  		);
-		} else {
-		  return null;
-		}
-	}
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
 });
 
 function mapStateToProps(state) {

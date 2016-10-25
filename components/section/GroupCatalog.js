@@ -1,20 +1,18 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-var { Link } = require('react-router');
 var Select = require('react-select');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
 var Chart = require('../Chart');
 var theme = require('../chart/themes/shine');
 
-var { getGroups, changeIndex, deleteGroup, 
+var { getGroups, changeIndex, deleteGroup,
       getChart, clearChart, setChartMetric,
       removeFavorite, addFavorite,
       filterByType, filterByName, clearFilter } = require('../../actions/GroupCatalogActions');
-  
+
 var _handleKeyPress = function(e) {
   if (e.key === 'Enter') {
     this.refresh();
@@ -42,7 +40,7 @@ var GroupCatalog  = React.createClass({
   contextTypes: {
       intl: React.PropTypes.object
   },
-  
+
   componentWillMount : function() {
     if(this.props.groupCatalog.groups == null) {
       this.props.actions.getGroups();
@@ -56,10 +54,8 @@ var GroupCatalog  = React.createClass({
   refresh: function(e) {
     this.props.actions.getGroups();
   },
-  
+
   render: function() {
-    var _t = this.context.intl.formatMessage;
-      
     var tableConfiguration = {
       fields: [{
         name: 'id',
@@ -107,7 +103,7 @@ var GroupCatalog  = React.createClass({
         icon : 'bar-chart-o',
         handler : (function(field, row) {
           var utility = this.props.profile.utility;
-          
+
           this.props.actions.getChart(row.key, row.text, utility.timezone);
         }).bind(this)
       }, {
@@ -131,15 +127,15 @@ var GroupCatalog  = React.createClass({
         size: 10,
         count: this.props.groupCatalog.data.filtered.length || 0,
         mode: Table.PAGING_CLIENT_SIDE
-      }    
+      }
     };
-    
+
     var tableStyle = {
       row : {
         rowHeight: 50
       }
-    }; 
-    
+    };
+
     var resetButton = ( <div />);
 
     if((this.props.groupCatalog.query.text) ||
@@ -163,17 +159,17 @@ var GroupCatalog  = React.createClass({
                       { value: 'SET', label: 'Set' }
                     ]}
                     onChange={_filterByType.bind(this)}
-                    clearable={false} 
+                    clearable={false}
                     searchable={false} className='form-group'/>
-            <span className='help-block'>Filter group type</span>  
+            <span className='help-block'>Filter group type</span>
           </div>
           <div className="col-md-3">
-            <Bootstrap.Input 
-              type='text' 
+            <Bootstrap.Input
+              type='text'
                id='nameFilter' name='nameFilter' ref='nameFilter'
-               placeholder='Name ...' 
+               placeholder='Name ...'
                onChange={_filterByName.bind(this)}
-               onKeyPress={_handleKeyPress.bind(this)} 
+               onKeyPress={_handleKeyPress.bind(this)}
                value={this.props.groupCatalog.query.name || ''} />
               <span className='help-block'>Filter by name</span>
           </div>
@@ -200,18 +196,18 @@ var GroupCatalog  = React.createClass({
                       { value: 'MAX', label: 'Max' }
                     ]}
                     onChange={_setChartMetric.bind(this)}
-                    clearable={false} 
+                    clearable={false}
                     searchable={false} className='form-group'/>
-            <span className='help-block'>Select value to display ....</span>  
+            <span className='help-block'>Select value to display ....</span>
           </div>
         </div>
       </Bootstrap.ListGroupItem>
     );
-    
+
     const dataNotFound = (
         <span>{ this.props.groupCatalog.isLoading ? 'Loading data ...' : 'No data found.' }</span>
     );
-    
+
     const filterTitle = (
       <span>
         <i className='fa fa-search fa-fw'></i>
@@ -219,7 +215,7 @@ var GroupCatalog  = React.createClass({
         <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}></span>
       </span>
     );
-    
+
     var v, chartTitleText, chartConfig = null, chart = (<span>Select a group ...</span>), data = [];
 
     if(!Object.keys(this.props.groupCatalog.charts).length) {
@@ -243,7 +239,7 @@ var GroupCatalog  = React.createClass({
           </span>
         </span>
       );
-        
+
       chartConfig = {
         options: {
           tooltip: {
@@ -259,20 +255,20 @@ var GroupCatalog  = React.createClass({
         },
         type: 'line'
       };
-        
+
       for(var key in this.props.groupCatalog.charts) {
         var c = this.props.groupCatalog.charts[key];
 
         if((c.points) && (c.points.length > 0)) {
           data = [];
-  
+
           for(v=0; v < c.points.length; v++) {
             data.push({
               volume: c.points[v][this.props.groupCatalog.metric],
               date: new Date(c.points[v].timestamp)
             });
           }
-  
+
           chartConfig.data.series.push({
             legend: c.label,
             xAxis: 'date',
@@ -282,7 +278,7 @@ var GroupCatalog  = React.createClass({
           });
         }
       }
-    
+
       chart = (
         <Chart  style={{ width: '100%', height: 400 }}
                 elementClassName='mixin'
@@ -306,15 +302,15 @@ var GroupCatalog  = React.createClass({
             <Bootstrap.Panel header={filterTitle}>
               <Bootstrap.ListGroup fill>
                 {filterOptions}
-                <Bootstrap.ListGroupItem> 
-                  <Table  data={tableConfiguration} 
+                <Bootstrap.ListGroupItem>
+                  <Table  data={tableConfiguration}
                           onPageIndexChange={this.onPageIndexChange}
                           template={{empty : dataNotFound}}
                           style={tableStyle}
                   ></Table>
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
-                  {chartTitleText}  
+                  {chartTitleText}
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem>
                   {chartViewOptions}
@@ -345,7 +341,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(
-      Object.assign({}, {getGroups, changeIndex, deleteGroup, 
+      Object.assign({}, {getGroups, changeIndex, deleteGroup,
                          getChart, clearChart, setChartMetric,
                          removeFavorite, addFavorite,
                          filterByType, filterByName, clearFilter }) , dispatch

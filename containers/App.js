@@ -1,5 +1,4 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var { connect } = require('react-redux');
 var ReactIntl = require('react-intl');
 
@@ -21,7 +20,7 @@ var App = React.createClass({
     if((!this.props.isAuthenticated) && (this.props.routes)) {
       for(var index in this.props.routes) {
         if(this.props.routes[index].path == '/password/reset/:token') {
-          // Reset password          
+          // Reset password
           return (
             <ReactIntl.IntlProvider locale={this.props.locale} messages={this.props.messages} >
               {this.props.children}

@@ -1,9 +1,6 @@
-
-var ActionTypes = require('../action-types');
-
 var initialState = {
-  
-  // Note 
+
+  // Note
   //  * These are all monthly reports at a detail level of week.
   //  * The report names refer to config.reports.measurements
   reports: [
@@ -13,7 +10,7 @@ var initialState = {
       reportName: 'avg',
       startsAt: 'month',
       duration: [+1, 'month'],
-    }, 
+    },
     {
       title: 'Average weekly max/min water consumption',
       level: 'week',
@@ -42,7 +39,7 @@ var initialState = {
 };
 
 var reduce = function (state, action) {
-  
+
   // Note This part of configuration does not ever change
   return initialState;
 

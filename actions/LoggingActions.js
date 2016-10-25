@@ -26,13 +26,6 @@ var changeIndex = function(index) {
   };
 };
 
-var filterAccount = function(account) {
-  return {
-    type : types.LOG_EVENT_FILTER_ACCOUNT,
-    account : account
-  };
-};
-
 var filterLevel = function(level) {
   return {
     type : types.LOG_EVENT_FILTER_LEVEL,

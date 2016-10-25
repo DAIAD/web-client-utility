@@ -1,12 +1,9 @@
 var $ = require('jquery');
 
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-var { Link } = require('react-router');
-var Select = require('react-select');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
 var LeafletMap = require('../LeafletMap');
@@ -18,7 +15,7 @@ var { getAccounts, changeIndex, filterText, filterSerial, clearFilter, getMeter,
       setSearchModeText, setSearchModeMap, setGeometry,
       removeFavorite, addFavorite,
       setSelectionMode, discardBagOfConsumers, toggleConsumer, saveBagOfConsumers } = require('../../actions/UserCatalogActions');
-  
+
 var _setSelectionMode = function(e) {
   this.props.actions.setSelectionMode(!this.props.userCatalog.selection.enabled);
 };
@@ -35,7 +32,7 @@ var _hide = function() {
 
 var _setTitle =  function(key, text) {
   _hide.bind(this)();
-  
+
   if((text) && (key==='save')) {
     _saveBagOfConsumers.bind(this)(text, Object.keys(this.props.userCatalog.selection.selected));
   }
@@ -65,9 +62,9 @@ var _setSearchMode = function(e) {
 
 var _featureRenderer = function(feature) {
   var container = $('<div style="margin: 10px" />');
-  
+
   var self = this;
-  
+
   container.on('click', '.add-meter-chart', function(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -89,10 +86,10 @@ var _featureRenderer = function(feature) {
   if(this.props.userCatalog.selection.enabled) {
     content.push('<span class="add-consumer-to-collection" style="cursor: pointer; text-decoration: underline; font-size: 14px;">');
     content.push('<i class="fa fa-shopping-basket fa-fw">&nbsp</i>');
-    content.push('</span>');  
+    content.push('</span>');
   }
   content.push('</span>');
-  
+
   content.push('<br/>');
   content.push('<br/>');
   content.push('<span style="font-weight: bold;">Address</span>');
@@ -106,8 +103,8 @@ var _featureRenderer = function(feature) {
   content.push('<br/>');
   content.push('<span class="add-meter-chart" style="cursor: pointer; text-decoration: underline; font-size: 14px;">');
   content.push(feature.properties.meter.serial);
-  content.push('</span>'); 
-    
+  content.push('</span>');
+
   container.html(content.join(''));
 
   return container[0];
@@ -129,13 +126,13 @@ var UserCatalog = React.createClass({
   contextTypes: {
       intl: React.PropTypes.object
   },
-  
+
   getInitialState: function() {
     return {
       modal: false
     };
   },
-  
+
   componentWillMount : function() {
     if(this.props.userCatalog.accounts == null) {
       this.props.actions.getAccounts();
@@ -149,22 +146,20 @@ var UserCatalog = React.createClass({
   filterText: function(e) {
     this.props.actions.filterText(this.refs.accountFilter.getValue());
   },
-  
+
   filterSerial: function(e) {
     this.props.actions.filterSerial(this.refs.serialFilter.getValue());
   },
-  
+
   clearFilter: function(e) {
     this.props.actions.clearFilter();
   },
-  
+
   refresh: function(e) {
     this.props.actions.getAccounts();
   },
-  
+
   render: function() {
-    var _t = this.context.intl.formatMessage;
-      
     var tableConfiguration = {
       fields: [{
         name: 'id',
@@ -224,9 +219,9 @@ var UserCatalog = React.createClass({
         size: this.props.userCatalog.data.size || 10,
         count:this.props.userCatalog.data.total || 0,
         mode: Table.PAGING_SERVER_SIDE
-      }    
+      }
     };
-    
+
     if(this.props.userCatalog.selection.enabled) {
       tableConfiguration.fields.splice(1, 0, {
         name: 'selected',
@@ -243,8 +238,8 @@ var UserCatalog = React.createClass({
       row : {
         rowHeight: 50
       }
-    }; 
-    
+    };
+
     var resetButton = ( <div />);
 
     if((this.props.userCatalog.query.text) ||
@@ -260,22 +255,22 @@ var UserCatalog = React.createClass({
       <Bootstrap.ListGroupItem>
         <div className="row">
           <div className="col-md-4">
-            <Bootstrap.Input 
-              type='text' 
+            <Bootstrap.Input
+              type='text'
                id='accountFilter' name='accountFilter' ref='accountFilter'
-               placeholder='Account or Name  ...' 
+               placeholder='Account or Name  ...'
                onChange={this.filterText}
-               onKeyPress={_handleKeyPress.bind(this)} 
+               onKeyPress={_handleKeyPress.bind(this)}
                value={this.props.userCatalog.query.text || ''} />
               <span className='help-block'>Filter by name or account</span>
           </div>
           <div className="col-md-4">
-            <Bootstrap.Input 
-              type='text' 
+            <Bootstrap.Input
+              type='text'
                id='serialFilter' name='serialFilter' ref='serialFilter'
-               placeholder='SWM Serial Number  ...' 
+               placeholder='SWM Serial Number  ...'
                onChange={this.filterSerial}
-               onKeyPress={_handleKeyPress.bind(this)} 
+               onKeyPress={_handleKeyPress.bind(this)}
                value={this.props.userCatalog.query.serial || ''} />
               <span className='help-block'>Filter meter serial number</span>
           </div>
@@ -292,7 +287,7 @@ var UserCatalog = React.createClass({
     const dataNotFound = (
         <span>{ this.props.userCatalog.isLoading ? 'Loading data ...' : 'No data found.' }</span>
     );
-    
+
     var filterTitle;
     if(this.props.userCatalog.selection.enabled) {
       filterTitle = (
@@ -342,21 +337,15 @@ var UserCatalog = React.createClass({
       </span>
     );
 
-    const mapOptions = {
-        center: [51.75692, -0.32678], 
-        zoom: 13,
-        draw: true
-      };
-
     var map = null;
 
     switch(this.props.userCatalog.search) {
       case 'map':
         map = (
-          <LeafletMap style={{ width: '100%', height: 600}} 
+          <LeafletMap style={{ width: '100%', height: 600}}
                       elementClassName='mixin'
                       prefix='map'
-                      center={[38.35, -0.48]} 
+                      center={[38.35, -0.48]}
                       zoom={13}
                       mode={[LeafletMap.MODE_DRAW, LeafletMap.MODE_VECTOR]}
                       draw={{
@@ -369,13 +358,13 @@ var UserCatalog = React.createClass({
           />
         );
         break;
-        
+
       default:
         map = (
-          <LeafletMap style={{ width: '100%', height: 600}} 
+          <LeafletMap style={{ width: '100%', height: 600}}
                       elementClassName='mixin'
                       prefix='map'
-                      center={[38.35, -0.48]} 
+                      center={[38.35, -0.48]}
                       zoom={13}
                       mode={LeafletMap.MODE_VECTOR}
                       vector={{
@@ -403,7 +392,7 @@ var UserCatalog = React.createClass({
           </span>
         </span>
       );
-        
+
       chartConfig = {
         options: {
           tooltip: {
@@ -419,19 +408,19 @@ var UserCatalog = React.createClass({
         },
         type: 'line'
       };
-        
+
       for(var key in this.props.userCatalog.charts) {
         var c = this.props.userCatalog.charts[key];
         if((c.values) && (c.values.length > 0)) {
           data = [];
-  
+
           for(v=0; v < c.values.length; v++) {
             data.push({
               volume: c.values[v].difference,
               date: new Date(c.values[v].timestamp)
             });
           }
-  
+
           chartConfig.data.series.push({
             legend: c.label,
             xAxis: 'date',
@@ -441,7 +430,7 @@ var UserCatalog = React.createClass({
           });
         }
       }
-    
+
       chart = (
         <Chart  style={{ width: '100%', height: 400 }}
                 elementClassName='mixin'
@@ -455,7 +444,7 @@ var UserCatalog = React.createClass({
 
     return (
       <div className="container-fluid" style={{ paddingTop: 10 }}>
-        <InputTextModal 
+        <InputTextModal
           onHide={_hide.bind(this)}
           title='Create Group'
           visible={this.state.modal}
@@ -477,8 +466,8 @@ var UserCatalog = React.createClass({
             <Bootstrap.Panel header={filterTitle}>
               <Bootstrap.ListGroup fill>
                 {filterOptions}
-                <Bootstrap.ListGroupItem> 
-                  <Table  data={tableConfiguration} 
+                <Bootstrap.ListGroupItem>
+                  <Table  data={tableConfiguration}
                           onPageIndexChange={this.onPageIndexChange}
                           template={{empty : dataNotFound}}
                           style={tableStyle}

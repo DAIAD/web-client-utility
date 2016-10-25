@@ -1,5 +1,4 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
@@ -46,9 +45,7 @@ var Logging = React.createClass({
     this.props.actions.getEvents();
   },
   
-  render: function() {
-    var _t = this.context.intl.formatMessage;
-      
+  render: function() {     
     var tableConfiguration = {
       fields: [{
         name: 'id',

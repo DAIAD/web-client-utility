@@ -1,9 +1,8 @@
 var React = require('react');
 var Bootstrap = require('react-bootstrap');
-var {FormattedMessage, FormattedTime, FormattedDate} = require('react-intl');
+var {FormattedDate} = require('react-intl');
 var { Link } = require('react-router');
 var Table = require('./Table');
-var Chart = require('./Chart');
 
 var UpsertFavouriteForm = require('./section/demographics/UpsertFavouriteForm');
 
@@ -15,46 +14,46 @@ var GroupTablesSchema = require('../constants/GroupTablesSchema');
 
 
 var Group = React.createClass({
-	contextTypes: {
-	    intl: React.PropTypes.object
-	},
-	
-	componentWillMount : function() {
+  contextTypes: {
+      intl: React.PropTypes.object
+  },
+
+  componentWillMount : function() {
     this.props.showGroup(this.props.params.id);
-	},
-	
-	componentWillUnmount : function() {
+  },
+
+  componentWillUnmount : function() {
     this.props.resetGroup();
   },
-	
-	compareGroupMembers : function (a, b){
+
+  compareGroupMembers : function (a, b){
     return a.user.localeCompare(b.user);
   },
-  
+
   membersObjectToArray: function(membersObject){
     var membersArray = [];
-    
+
     for (var id in membersObject) {
       if (membersObject.hasOwnProperty(id)) {
         membersArray.push(membersObject[id]);
       }
     }
-    
+
     return membersArray;
   },
-  
 
-	render: function() {
-	  
-	  var self = this;
-	  var _t = this.context.intl.formatMessage;
-	  
-	  var currentMembersFields = GroupTablesSchema.Members.fields;
-	  
-	  var currentMembers = null;
-	  var rows = this.membersObjectToArray(Object.assign({}, this.props.currentMembers)).sort(this.compareGroupMembers);
-	  if (this.props.currentMembers) {
-  	  currentMembers = {
+
+  render: function() {
+
+    var self = this;
+    var _t = this.context.intl.formatMessage;
+
+    var currentMembersFields = GroupTablesSchema.Members.fields;
+
+    var currentMembers = null;
+    var rows = this.membersObjectToArray(Object.assign({}, this.props.currentMembers)).sort(this.compareGroupMembers);
+    if (this.props.currentMembers) {
+      currentMembers = {
           fields : currentMembersFields,
           rows : rows,
           pager: {
@@ -64,48 +63,48 @@ var Group = React.createClass({
             mode: Table.PAGING_CLIENT_SIDE
           }
       };
-  	  
-  	  currentMembers.fields.forEach(function(field){
+
+      currentMembers.fields.forEach(function(field){
         if(field.hasOwnProperty('name') && field.name === 'bookmark'){
           field.handler = function (){
             self.props.showFavouriteAccountForm(this.props.row.id);
           };
         }
       });
-	  }
-	  
-	  
-	  
-	    
-			var groupTitle = null;
-			if (this.props.groupInfo) {
-  			groupTitle = (
-					<span>
-						<i className='fa fa-group fa-fw'></i>
-						<span style={{ paddingLeft: 4 }}>{this.props.groupInfo.name ? this.props.groupInfo.name : ''}</span>
-					</span>
-				);
-			}
+    }
 
-			const memberTitle = (
-					<span>
-						<i className='fa fa-user fa-fw'></i>
-						<span style={{ paddingLeft: 4 }}>{_t({id : 'Group.Members'})}</span>
-					</span>
-				);
-			
-			if (this.props.application === 'favouriteGroupForm'){
-			  return (
-			      <UpsertFavouriteForm
-			      type = 'GROUP'
+
+
+
+      var groupTitle = null;
+      if (this.props.groupInfo) {
+        groupTitle = (
+          <span>
+            <i className='fa fa-group fa-fw'></i>
+            <span style={{ paddingLeft: 4 }}>{this.props.groupInfo.name ? this.props.groupInfo.name : ''}</span>
+          </span>
+        );
+      }
+
+      const memberTitle = (
+          <span>
+            <i className='fa fa-user fa-fw'></i>
+            <span style={{ paddingLeft: 4 }}>{_t({id : 'Group.Members'})}</span>
+          </span>
+        );
+
+      if (this.props.application === 'favouriteGroupForm'){
+        return (
+            <UpsertFavouriteForm
+            type = 'GROUP'
             itemId = {this.props.params.id}
-			      actions = {{
+            actions = {{
               cancelAction : this.props.hideFavouriteGroupForm,
               refreshParentForm : function (){}
             }}
           />
-			  );
-			} else if (this.props.application === 'favouriteAccountForm'){
+        );
+      } else if (this.props.application === 'favouriteAccountForm'){
         return (
             <UpsertFavouriteForm
             type = 'ACCOUNT'
@@ -117,10 +116,10 @@ var Group = React.createClass({
           />
         );
       } else  if (this.props.groupInfo && this.props.currentMembers){
-			  
-    		return (
-    		  
-    		  <div className='container-fluid' style={{ paddingTop: 10 }}>
+
+        return (
+
+          <div className='container-fluid' style={{ paddingTop: 10 }}>
             <div className='row'>
               <div className='col-md-4'>
                 <Bootstrap.Panel header={groupTitle}>
@@ -144,7 +143,7 @@ var Group = React.createClass({
                             <tr>
                               <td>Size</td>
                               <td>{this.props.groupInfo.size ? this.props.groupInfo.size : 0}</td>
-                            </tr> 
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -168,17 +167,17 @@ var Group = React.createClass({
                 </Bootstrap.Panel>
               </div>
             </div>
-          </div>  
-      	);
-			} else {
-			  return (
-			    <div>
+          </div>
+        );
+      } else {
+        return (
+          <div>
             <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
             <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
           </div>
-			  );
-			}
-	}
+        );
+      }
+  }
 });
 
 function mapStateToProps(state) {
@@ -194,13 +193,13 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     showGroup: bindActionCreators(GroupActions.showGroup, dispatch),
-    
+
     showFavouriteGroupForm : bindActionCreators(GroupActions.showFavouriteGroupForm, dispatch),
     hideFavouriteGroupForm : bindActionCreators(GroupActions.hideFavouriteGroupForm, dispatch),
     resetGroup : bindActionCreators(GroupActions.resetDemograhpics, dispatch),
-    
+
     showFavouriteAccountForm : bindActionCreators(GroupActions.showFavouriteAccountForm, dispatch),
-    hideFavouriteAccountForm : bindActionCreators(GroupActions.hideFavouriteAccountForm, dispatch),    
+    hideFavouriteAccountForm : bindActionCreators(GroupActions.hideFavouriteAccountForm, dispatch),
   };
 }
 

@@ -125,7 +125,7 @@ var ManageAlertsActions = {
     return function (dispatch, getState) {
       dispatch(requestAddTip);
       return alertsAPI.insertTip(tip).then(function (response) {
-        dispatch(addTipResponse(response.success, response.errors));          
+        dispatch(addTipResponse(response.success, response.errors));
         var locale;
         if (utility.label == "DAIAD") {
           locale = "en";
@@ -133,13 +133,13 @@ var ManageAlertsActions = {
           locale = "es";
         } else {
           locale = "en";
-        } 
+        }
         dispatch(requestedTips(locale));
         return alertsAPI.getTips(locale).then(function (response) {
           dispatch(receivedTips(response.success, response.errors, response.messages));
         }, function (error) {
           dispatch(receivedTips(false, error, null));
-        });             
+        });
       }, function (error) {
         dispatch(addTipResponse(false, error, null));
       });
@@ -149,27 +149,27 @@ var ManageAlertsActions = {
     return function (dispatch, getState) {
       dispatch(requestDeleteTip);
       return alertsAPI.deleteTip(getState(event).alerts.currentTip).then(function (response) {
-        dispatch(deleteTipResponse(response.success, response.errors));   
+        dispatch(deleteTipResponse(response.success, response.errors));
         var utility = getState(event).alerts.utility;
-        var locale;        
+        var locale;
         if (utility.label == "DAIAD") {
           locale = "en";
         } else if (utility.label == "Alicante") {
           locale = "es";
         } else {
           locale = "en";
-        } 
+        }
         dispatch(requestedTips(locale));
         return alertsAPI.getTips(locale).then(function (response) {
           dispatch(receivedTips(response.success, response.errors, response.messages));
         }, function (error) {
           dispatch(receivedTips(false, error, null));
-        });                
+        });
       }, function (error) {
         dispatch(deleteTipResponse(false, error, null));
       });
     };
-  },  
+  },
    cancelDelete: function () {
     return{
       type: types.ADMIN_CANCEL_DELETE_TIP,
@@ -183,7 +183,7 @@ var ManageAlertsActions = {
       currentTip: null,
       saveOff: false
     };
-  }, 
+  },
   cancelAddTip: function () {
     return{
       type: types.ADMIN_CANCEL_ADD_TIP_SHOW,
@@ -228,17 +228,17 @@ var ManageAlertsActions = {
           locale = "es";
         } else {
           locale = "en";
-        } 
+        }
         dispatch(requestedTips(locale));
         return alertsAPI.getTips(locale).then(function (response) {
           dispatch(receivedTips(response.success, response.errors, response.messages));
         }, function (error) {
           dispatch(receivedTips(false, error, null));
-        });  
+        });
       }, function (error) {
         dispatch(saveActiveStatusButtonResponse(false, error, null));
-      });   
-    };   
+      });
+    };
   },
   showModal : function(currentTip){
     return {
@@ -246,7 +246,7 @@ var ManageAlertsActions = {
       currentTip : currentTip,
       showModal: true
     };
-  }, 
+  },
   hideModal : function(){
     return {
       type : types.MESSAGES_DELETE_MODAL_HIDE,

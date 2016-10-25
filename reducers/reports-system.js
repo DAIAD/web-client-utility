@@ -5,14 +5,13 @@ var ActionTypes = require('../action-types');
 var reports = require('../reports');
 
 var assertInitialized = (r, key) => (
-  console.assert(_.isObject(r), 
-    'Expected an initialized entry for report: ' + key)
+  console.assert(_.isObject(r), 'Expected an initialized entry for report: ' + key)
 );
 
 var reduce = function (state={}, action={}) {
- 
+
   var type = _.find(ActionTypes.reports.system, v => (v == action.type));
-  
+
   if (!type)
     return state; // not interested
 
@@ -21,11 +20,11 @@ var reduce = function (state={}, action={}) {
     return state; // malformed action; dont touch state
 
   var key = reports.system.computeKey(level, reportName);
-  var r = null; 
+  var r = null;
   if (key in state) {
     // Clone existing state for (level, reportName)
     r = _.extend({}, state[key]);
-  } 
+  }
 
   switch (type) {
     case 'INITIALIZE':
@@ -40,7 +39,7 @@ var reduce = function (state={}, action={}) {
           finished: null,   // time of last successfull update of series
         };
       } else {
-        r = null; // already initialized; dont touch state 
+        r = null; // already initialized; dont touch state
       }
       break;
     case 'REQUEST_DATA':
@@ -74,7 +73,7 @@ var reduce = function (state={}, action={}) {
       r = null; // unknown action; dont touch state
       break;
   }
-  
+
   // Compute new state, if r is touched
   return r? _.extend({}, state, {[key]: r}) : state;
 };

@@ -1,7 +1,5 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Bootstrap = require('react-bootstrap');
-var {FormattedDate} = require('react-intl');
 var Table = require('../../Table');
 var MessageAlert = require('../../AlertDismissable');
 
@@ -14,11 +12,11 @@ var DemographicsTablesSchema = require('../../../constants/DemographicsTablesSch
 
 
 var CreateGroupForm = React.createClass({
-  
+
   contextTypes: {
     intl: React.PropTypes.object
   },
-  
+
   getDefaultProps: function() {
     return {
       newGroupName: null,
@@ -39,86 +37,86 @@ var CreateGroupForm = React.createClass({
         getGroupsAndFavourites: function(){},
         setGroupName: function(){},
         createGroupSet: function(){},
-        addGroupValidationErrorsOccurred: function(){} 
+        addGroupValidationErrorsOccurred: function(){}
       }
      };
   },
-  
+
   handleCurrentMembersCheckboxChange: function (rowId, propertyName, currentValue){
     this.props.actions.toggleCandidateGroupMemberToRemove(rowId, currentValue);
   },
-  
+
   handlePossibleMembersCheckboxChange: function (rowId, propertyName, currentValue){
     this.props.actions.toggleCandidateGroupMemberToAdd(rowId, currentValue);
   },
-  
+
   membersObjectToArray: function(membersObject){
     var membersArray = [];
-    
+
     for (var id in membersObject) {
       if (membersObject.hasOwnProperty(id)) {
         membersArray.push(membersObject[id]);
       }
     }
-    
+
     return membersArray;
   },
-  
+
   compareGroupMembers : function (a, b){
     return a.name.localeCompare(b.name);
   },
-  
+
   updateGroupName : function (){
     this.props.actions.setGroupName(this.refs.groupName.getValue());
   },
-  
+
   validateAddNewGroupForm : function (groupName, groupMembersIds){
     var errors = [];
-    
+
     if(!groupName){
       errors.push({code: errorsCodes['ValidationError.Group.NO_GROUP_NAME']});
     }
-    
+
     if (groupMembersIds.length === 0){
       errors.push({code: errorsCodes['ValidationError.Group.NO_GROUP_MEMBERS']});
     }
-    
+
     return errors;
   },
-  
+
   processAddNewGroupForm : function (){
     var groupName = this.refs.groupName.getValue();
     var groupMembersIds = Helpers.pluck(this.membersObjectToArray(this.props.currentMembers),'id');
-    
+
     var errors = this.validateAddNewGroupForm(groupName, groupMembersIds);
-    
+
     if (errors.length === 0){
       this.props.actions.setGroupName(groupName);
       var groupInfo = {
           name : groupName,
           members : groupMembersIds
       };
-      
+
       this.props.actions.createGroupSet(groupInfo);
-      
+
     } else {
       this.props.actions.addGroupValidationErrorsOccurred(errors);
     }
   },
-  
+
   render : function(){
-    
+
     var self = this;
     var _t = this.context.intl.formatMessage;
-    
-    
+
+
     const newGroupInfoFormTitle = (
         <span>
           <i className='fa fa-group fa-fw'></i>
           <span style={{ paddingLeft: 4 }}>{_t({ id:'Demographics.NewGroup.NewGroup'})}</span>
         </span>
       );
-    
+
     var membersTitle = (
         <span className='clearfix'>
           <span>
@@ -132,7 +130,7 @@ var CreateGroupForm = React.createClass({
           </span>
         </span>
       );
-    
+
     var nonMembersTitle = (
         <span className='clearfix'>
           <span style={{ float: 'left', marginTop: -3, marginLeft: 5 }}>
@@ -146,11 +144,11 @@ var CreateGroupForm = React.createClass({
           </span>
         </span>
       );
-    
+
     var currentMembersFields = JSON.parse(JSON.stringify(DemographicsTablesSchema.GroupMembers.fields));
     var possibleMembersFields = JSON.parse(JSON.stringify(DemographicsTablesSchema.GroupMembers.fields));
-    
-    
+
+
     currentMembersFields.forEach(function (field){
       if (field.hasOwnProperty('name') && field.name === 'selected'){
         field.handler = self.handleCurrentMembersCheckboxChange;
@@ -164,7 +162,7 @@ var CreateGroupForm = React.createClass({
     });
 
     var rows = this.membersObjectToArray(this.props.currentMembers).sort(this.compareGroupMembers);
-    
+
     var currentMembers = {
         fields : currentMembersFields,
         rows : rows,
@@ -184,7 +182,7 @@ var CreateGroupForm = React.createClass({
           count : rows.length //Math.ceil(this.props.possibleMembers.length / DemographicsTablesSchema.GroupMembers.pager.size)
         }
     };
-    
+
     return (
       <div className='row'>
         <div className='col-md-12'>
@@ -193,16 +191,16 @@ var CreateGroupForm = React.createClass({
               <Bootstrap.ListGroupItem>
                 <Bootstrap.Row>
                   <Bootstrap.Col xs={4}>
-                      
-                        <Bootstrap.Input 
-                          type='text' 
+
+                        <Bootstrap.Input
+                          type='text'
                           value={this.props.newGroupName}
-                          label={_t({ id:'Demographics.NewGroup.Name'}) + ' (*)'} 
-                          ref='groupName' 
+                          label={_t({ id:'Demographics.NewGroup.Name'}) + ' (*)'}
+                          ref='groupName'
                           placeholder={_t({ id:'Demographics.NewGroup.NamePlaceholder'})}
                           onChange={this.updateGroupName}
                         />
-                      
+
                    </Bootstrap.Col>
                  </Bootstrap.Row>
               </Bootstrap.ListGroupItem>
@@ -211,7 +209,7 @@ var CreateGroupForm = React.createClass({
               <div className='col-md-6 equal-height-col'>
                 <Bootstrap.Panel header={membersTitle}>
                   <Bootstrap.ListGroup fill>
-                    <Bootstrap.ListGroupItem> 
+                    <Bootstrap.ListGroupItem>
                       <Table data={currentMembers}></Table>
                     </Bootstrap.ListGroupItem>
                   </Bootstrap.ListGroup>
@@ -220,14 +218,14 @@ var CreateGroupForm = React.createClass({
               <div className='col-md-6 equal-height-col'>
                 <Bootstrap.Panel header={nonMembersTitle}>
                   <Bootstrap.ListGroup fill>
-                    <Bootstrap.ListGroupItem> 
+                    <Bootstrap.ListGroupItem>
                       <Table data={possibleMembers}></Table>
                     </Bootstrap.ListGroupItem>
                   </Bootstrap.ListGroup>
                 </Bootstrap.Panel>
               </div>
             </div>
-            
+
             <div className='row'>
               <div className='col-md-6'>
                   <MessageAlert
@@ -239,7 +237,7 @@ var CreateGroupForm = React.createClass({
                     messages={!this.props.messageAlert.success ? this.props.messageAlert.errors : [{code: successCodes['GroupSuccess.GROUP_CREATED']}]}
                     dismissFunc={this.props.messageAlert.dismissFunc}
                   />
-              </div> 
+              </div>
             </div>
             <div className='row'>
               <div style={{ float: 'left'}}>
@@ -262,11 +260,11 @@ var CreateGroupForm = React.createClass({
           </Bootstrap.Panel>
         </div>
       </div>
-        
+
     );
   }
-  
-  
+
+
 });
 
 module.exports = CreateGroupForm;

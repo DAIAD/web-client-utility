@@ -115,7 +115,7 @@ var AdminActions = {
       type : types.ADMIN_ADD_USER_HIDE
     };
   },
-  
+
   addUserSelectGenderMale: function() {
     return{
       type : types.ADMIN_ADD_USER_SELECT_GENDER_MALE,
@@ -136,8 +136,8 @@ var AdminActions = {
         value : utility.value
       }
     };
-  },  
-  
+  },
+
   addUserFillForm: function(inputFormFields) {
     return{
       type : types.ADMIN_ADD_USER_FILL_FORM,
@@ -149,27 +149,27 @@ var AdminActions = {
       postalCode : inputFormFields.postalCode
     };
   },
-  
+
   addUserValidationsErrorsOccurred: function(errors) {
     return {
       type : types.ADMIN_ADD_USER_VALIDATION_ERRORS_OCCURRED,
       errors : errors
     };
   },
-  
+
   addUserShowMessageAlert: function(errors) {
     return{
       type : types.ADMIN_ADD_USER_SHOW_MESSAGE_ALERT,
       errors: errors
     };
   },
-  
+
   addUserHideErrorAlert: function() {
     return{
       type : types.ADMIN_ADD_USER_HIDE_MESSAGE_ALERT
     };
   },
-  
+
   addUser : function(userInfo) {
     return function(dispatch, getState) {
       dispatch(addUserMakeRequest());
@@ -191,7 +191,7 @@ var AdminActions = {
       });
     };
   },
-    
+
   getActivity : function() {
     return function(dispatch, getState) {
       dispatch(requestedActivity());

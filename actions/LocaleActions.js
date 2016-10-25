@@ -23,7 +23,7 @@ var localeNeedsLoading = function(i18n, locale, force) {
 		}
 		return force;
 	}
-	
+
 	return true;
 };
 
@@ -34,7 +34,7 @@ var requestedMessages = function(locale) {
 	};
 };
 
-var receivedMessages = function(locale, messages) { 
+var receivedMessages = function(locale, messages) {
 	return {
 		type: types.LOCALE_RECEIVED_MESSAGES,
 		locale: locale,
@@ -47,12 +47,12 @@ var LocaleActions = {
 		return function(dispatch, getState) {
 			if((!force) && (!localeNeedsLoading(getState().i18n, locale, force))) {
 				dispatch(receivedMessages(locale, getState().i18n.data[locale].messages));
-				
+
 				return;
 			}
-			
+
 			dispatch(requestedMessages(locale));
-			
+
 			return localeAPI.fetchMessages(locale).then(
 				function(messages) {
 					dispatch(receivedMessages(locale, flattenMessages(messages)));

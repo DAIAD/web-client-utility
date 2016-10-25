@@ -122,10 +122,10 @@ var DataExportActions = {
           });
     };
   },
-  
+
   download : function(key) {
     var content = [], src = `/action/export/download/${key}`
-   
+
     content.push('<div id="export-download-frame" style="display: none">');
     content.push('<iframe src="' + src + '"></iframe>');
     content.push('</div>');

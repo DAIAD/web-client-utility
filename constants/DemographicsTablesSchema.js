@@ -20,14 +20,12 @@ var DemographicsTablesSchema = {
             type:'action',
             icon: 'map-o',
             handler: function() {
-              console.log(this);
             }
       }, {
             name: 'message',
             type:'action',
             icon: 'envelope-o',
             handler: function() {
-              console.log(this);
             }
       }, {
             name: 'add-favourite',
@@ -39,14 +37,12 @@ var DemographicsTablesSchema = {
             type:'action',
             icon: 'bar-chart',
             handler: function() {
-              console.log(this);
             }
       }, {
         name: 'remove',
         type:'action',
         icon: 'remove',
         handler: function() {
-          console.log(this);
         }
       }],
       
@@ -89,28 +85,24 @@ var DemographicsTablesSchema = {
         type:'action',
         icon: 'map-o',
         handler: function() {
-          console.log(this);
         }
       }, {
         name: 'message',
         type:'action',
         icon: 'envelope-o',
         handler: function() {
-          console.log(this);
         }
       }, {
         name: 'chart',
         type:'action',
         icon: 'bar-chart',
         handler: function() {
-          console.log(this);
         }
       }, {
         name: 'remove',
         type:'action',
         icon: 'remove',
         handler: function() {
-          console.log(this);
         }
       }],
       

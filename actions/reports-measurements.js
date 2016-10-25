@@ -31,7 +31,7 @@ var addFavouriteResponse = function (success, errors) {
 var actions = {
 
   // Plain actions
-  
+
   initialize: (field, level, reportName, key, defaults={}) => ({
     type: ActionTypes.reports.measurements.INITIALIZE,
     field,
@@ -42,7 +42,7 @@ var actions = {
     timespan: defaults.timespan,
     population: defaults.population,
   }),
-  
+
   requestData: (field, level, reportName, key, t=null) => ({
     type: ActionTypes.reports.measurements.REQUEST_DATA,
     field,
@@ -51,7 +51,7 @@ var actions = {
     key,
     timestamp: (t || new Date()).getTime(),
   }),
-  
+
   setData: (field, level, reportName, key, data, t=null) => ({
     type: ActionTypes.reports.measurements.SET_DATA,
     field,
@@ -80,7 +80,7 @@ var actions = {
     key,
     timespan,
   }),
-  
+
   setSource: (field, level, reportName, key, source) => ({
     type: ActionTypes.reports.measurements.SET_SOURCE,
     field,
@@ -98,7 +98,7 @@ var actions = {
     key,
     population
   }),
-  
+
   addFavourite : function(favourite) {
     return function(dispatch, getState) {
       dispatch(addFavouriteRequest());
@@ -117,30 +117,30 @@ var actions = {
       }, function (error) {
         dispatch(addFavouriteResponse(false, error));
       });
-    };  
+    };
   },
   // Complex actions: functions processed by thunk middleware
-  
+
   refreshData: (field, level, reportName, key) => (dispatch, getState) => {
     var state = getState();
-    
+
     var _state = state.reports.measurements;
-    
+
     var {config} = state;
     var {metrics, levels} = config.reports.byType.measurements;
-    
+
     var k = computeKey(field, level, reportName, key);
     var report = levels[level].reports[reportName];
-    
+
     var {timespan: ts, source, requested, population: target} = _state[k];
 
     // Throttle requests
     var now = new Date();
     if (requested && (now.getTime() - requested < 1e+3)) {
-      console.info('Skipping refresh requests arriving too fast...');
+      console.warn('Skipping refresh requests arriving too fast...');
       return Promise.resolve();
-    } 
-    
+    }
+
     // Prepare population target
     if (!target) {
       // Assume target is the entire utility
@@ -151,14 +151,14 @@ var actions = {
         .find(c => (c.key == target.key))
           .groups.map(g => (new population.ClusterGroup(target.key, g.key)));
     } else {
-      console.assert(target instanceof population.Group, 
+      console.assert(target instanceof population.Group,
         'Expected an instance of population.Group');
     }
-    
+
     // Prepare literal time range, re-order if needed
     var t0, t1, timezone = 'Etc/GMT';
     if (_.isString(ts)) {
-      // Interpret this named range, as if you were at UTC+0 
+      // Interpret this named range, as if you were at UTC+0
       [t0, t1] = TimeSpan.fromName(ts, 0).toRange();
     } else {
       // Set global timezone, move to UTC while keeping local time
@@ -171,18 +171,18 @@ var actions = {
     }
     console.assert(
       moment.isMoment(t0) && t0.isUTC() && moment.isMoment(t1) && t1.isUTC(),
-      'Expected 2 moment instances both flagged as UTC!'); 
+      'Expected 2 moment instances both flagged as UTC!');
     t1.add(1, level); // a closure time slot
 
     // Prepare the entire query
     var q = {
       granularity: report.granularity,
-      timespan: [t0.valueOf(), t1.valueOf()], 
+      timespan: [t0.valueOf(), t1.valueOf()],
       metrics: report.metrics,
       ranking: report.ranking,
       population: _.flatten([target]),
     };
-   
+
     // Dispatch, return promise
     dispatch(actions.requestData(field, level, reportName, key, now));
     var pq = queryMeasurements(source, field, q, {metrics, timezone})

@@ -1,17 +1,11 @@
-
-var _ = require('lodash');
-var moment = require('moment');
-
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Redux = require('react-redux');
-var Bootstrap = require('react-bootstrap');
 var Breadcrumb = require('../../Breadcrumb');
 
 var {MeasurementsReportPanel} = require('../../reports');
 
 var PropTypes = React.PropTypes;
-var {configPropType} = require('../../../prop-types'); 
+var {configPropType} = require('../../../prop-types');
 
 var Page = React.createClass({
   displayName: 'Analytics.ReportPanel',
@@ -25,7 +19,7 @@ var Page = React.createClass({
     intl: React.PropTypes.object
   },
 
-  render: function() {  
+  render: function() {
     var {routes, config} = this.props;
     return (
       <div className="container-fluid">

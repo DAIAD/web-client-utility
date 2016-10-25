@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var React = require('react');
 var {connect} = require('react-redux');
 var Breadcrumb = require('../../Breadcrumb');

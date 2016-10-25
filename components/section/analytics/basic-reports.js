@@ -1,10 +1,5 @@
-var _ = require('lodash');
-var moment = require('moment');
-
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Redux = require('react-redux');
-var Bootstrap = require('react-bootstrap');
 var Breadcrumb = require('../../Breadcrumb');
 
 var PropTypes = React.PropTypes;
