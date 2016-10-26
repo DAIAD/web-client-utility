@@ -1,6 +1,5 @@
 var React = require('react');
 var bs = require('react-bootstrap');
-var { Link } = require('react-router');
 var Select = require('react-select');
 var moment = require('moment');
 var DatetimeInput = require('react-datetime');
@@ -43,7 +42,7 @@ var WhoItem = React.createClass({
     }
   },
   validate: function() {
-    const { getValue, setValue, id } = this.props;
+    const { getValue } = this.props;
     const value = getValue();
 
     if (Array.isArray(value)) {
@@ -56,9 +55,9 @@ var WhoItem = React.createClass({
     }
   },
   render: function() {
-    const { groups, clusters, setValue, getValue, id } = this.props;
-    const who = getValue();
-    const { error, selectedCluster, selectedGroups } = this.state;
+    const { groups, clusters, setValue, id } = this.props;
+    //const who = getValue();
+    const { selectedCluster, selectedGroups } = this.state;
     return (
       <div>
         <bs.ButtonGroup vertical block>
@@ -183,9 +182,9 @@ var WhereItem = React.createClass({
     }
   },
   render: function() {
-    const { getValue, setValue, clusters, groups, id } = this.props;
-    const where = getValue();
-    const { error, selectedCluster, selectedGroups } = this.state;
+    const { setValue, clusters, groups, id } = this.props;
+    //const where = getValue();
+    const { selectedCluster, selectedGroups } = this.state;
     return (
       <div>
         <bs.ButtonGroup vertical block>
@@ -270,9 +269,9 @@ var WhenItem = React.createClass({
     return [moment().subtract(1, 'year').startOf('year').valueOf(), moment().subtract(1, 'year').endOf('year').valueOf()];
   },
   render: function() {
-    const { getValue, setValue, id } = this.props;
-    const when = getValue();
-    const { error } = this.state;
+    const { setValue, id } = this.props;
+    //const when = getValue();
+    //const { error } = this.state;
     return (
       <div>
         <bs.ButtonGroup vertical block>
@@ -348,7 +347,7 @@ var DistributionItem = React.createClass({
     
   },
   render: function() {
-    const { getValue, setValue, id } = this.props;
+    const { setValue, id } = this.props;
     return (
       <div>
         <bs.ButtonGroup vertical block>
@@ -436,8 +435,8 @@ var SelectBudgetType = React.createClass({
     }
   },
   render: function() {
-    const { getValue, setValue, id } = this.props;
-    const value = getValue() ? getValue().value : null;
+    const { setValue, id } = this.props;
+    //const value = getValue() ? getValue().value : null;
     return (
       <div>
         <bs.Button bsStyle='primary' bsSize='large' style={{marginBottom: 10}} onClick={() => { setValue(id, {value: 'savings', label: 'Savings'}); }} block>Savings scenario</bs.Button>

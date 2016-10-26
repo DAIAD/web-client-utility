@@ -93,7 +93,7 @@ var Wizard = React.createClass({
       catch(err) {
         this.props.onValidationFail(err);
         return Promise.reject(err);
-      };
+      }
   },
   showConfirmation: function() {
     this.setState({ showConfirmation: true });
@@ -214,8 +214,8 @@ var Wizard = React.createClass({
 
 
 function WizardItem (props) {
-  const { id, idx, active, title, description, item, value, activateMe, clearedIdx, cleared, showAll, children } = props;
-  const labels = Array.isArray(value) ? value.map(x => x.label || '-') : (value.label ? [value.label] : ['-']);
+  const { idx, active, title, description, value, activateMe, clearedIdx, cleared, showAll, children } = props;
+  //const labels = Array.isArray(value) ? value.map(x => x.label || '-') : (value.label ? [value.label] : ['-']);
   const activeLink = clearedIdx >= idx ? true : false;
   return (
     <div className='wizard-item' style={{ margin: '20px 0' }}>
@@ -261,7 +261,7 @@ function WizardItem (props) {
     </bs.Row>
   </div>
   );
-};
+}
 
 module.exports = Wizard;
  

@@ -3,7 +3,6 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var bs = require('react-bootstrap');
 var { push } = require('react-router-redux');
-var echarts = require('react-echarts');
 
 var Actions = require('../../../actions/SavingsActions');
 var Table = require('../../../components/Table');

@@ -1,8 +1,6 @@
 var React = require('react');
 var bs = require('react-bootstrap');
 
-var Actions = require('../../../actions/SavingsActions');
-
 var Modal = require('../../Modal');
 var Table = require('../../Table');
 
@@ -35,7 +33,7 @@ function RemoveConfirmation (props) {
 }
 
 function SavingsPotentialList (props) {
-  const { groups, clusters, segments, areas, tableData, tableStyle, actions, removeScenario, searchFilter } = props;
+  const { tableData, tableStyle, actions, removeScenario, searchFilter } = props;
   const { removeSavingsScenario, confirmRemoveScenario, setSearchFilter, goToAddView } = actions;
   return (
     <div>

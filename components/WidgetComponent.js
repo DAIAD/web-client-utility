@@ -19,7 +19,7 @@ function WidgetPanel (props) {
 
 function Widget (props) {
   const widget = props.widget;
-  const { id, error, period, type, display, displays, time, title, footer } = widget;
+  const { error, display,title, footer } = widget;
   //const _t = intl.formatMessage;
   return (
     <div className='infobox'>
@@ -28,9 +28,9 @@ function Widget (props) {
       </div>
       <div className='infobox-body'>
          {
-           (()=>{
+           (() => {
              if (error) {
-               return (<ErrorDisplay errors={error} />);
+               return (<div />);
                }
              else {
                if (display==='stat') {
@@ -56,7 +56,7 @@ function Widget (props) {
 }
 
 function StatBox (props) {
-  const { id, title, highlight, info, footer } = props;
+  const { highlight, info } = props;
 
   //const arrowClass = better?"fa-arrow-down green":"fa-arrow-up red";
   //const bow = (better==null || comparePercentage == null) ? false : true;

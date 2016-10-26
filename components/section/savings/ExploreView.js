@@ -7,7 +7,7 @@ var theme = require('../../chart/themes/blue');
 
 function ExploreScenario (props) {
   const { scenario, clusters, groups } = props;
-  const { name, potential, user, createdOn, completedOn, paramsLong } = scenario;
+  const { potential, user, createdOn, completedOn, paramsLong } = scenario;
   const completed = scenario.completedOn != null;
   
   const widgets = [{
@@ -78,7 +78,7 @@ function ExploreScenario (props) {
 
 var SavingsPotentialExplore = React.createClass({ 
   render: function() {
-    const { scenarios, groups, clusters, segments, areas, actions, params } = this.props;
+    const { scenarios, groups, clusters, actions, params } = this.props;
     const { goToListView } = actions;
     const { id } = params;
     const scenario = scenarios.find(scenario => scenario.id === parseInt(id));
