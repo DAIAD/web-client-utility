@@ -5,7 +5,7 @@ var moment = require('moment');
 var DatetimeInput = require('react-datetime');
 var CheckboxGroup = require('react-checkbox-group');
 
-var LeafletMap = require('./LeafletMap');
+var LeafletMap = require('../LeafletMap');
 
 
 var SetNameItem = React.createClass({

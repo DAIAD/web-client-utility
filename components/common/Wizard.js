@@ -2,7 +2,7 @@ var React = require('react');
 var bs = require('react-bootstrap');
 var Select = require('react-select');
 
-var util = require('../helpers/wizard');
+var util = require('../../helpers/wizard');
 
 var Wizard = React.createClass({ 
   
@@ -192,8 +192,8 @@ var Wizard = React.createClass({
             <div style={{fontFamily: 'monospace', margin: 20}}>
               <ul>
                 {
-                  util.getFriendlyParams(this.state.values).map(value =>
-                    <li>
+                  util.getFriendlyParams(this.state.values).map((value, i) =>
+                    <li key={i}>
                       <b>{value.key}: </b> <span>{value.value}</span>
                     </li>
                   )

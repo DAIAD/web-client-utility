@@ -1,8 +1,8 @@
 var React = require('react');
 var bs = require('react-bootstrap');
 var Modal = require('../../Modal');
-var Wizard = require('../../WizardComponent');
-var { SetNameItem, WhoItem, WhereItem, WhenItem } = require('../../WizardReusableItems');
+var Wizard = require('../../common/Wizard');
+var { SetNameItem, WhoItem, WhereItem, WhenItem } = require('../../common/WizardReusableItems');
 
 function ValidationError (props) {
   const { validationError, setValidationError } = props;
