@@ -170,7 +170,7 @@ var Favourites = React.createClass({
                              prefix='map'
                              center={[38.36, -0.479]}
                              zoom={13}
-                             mode={[LeafletMap.MODE_DRAW, LeafletMap.MODE_CHOROPLETH]}
+                             mode={[LeafletMap.MODE_CHOROPLETH]}
                              choropleth= {{
                                colors : ['#2166ac', '#67a9cf', '#d1e5f0', '#fddbc7', '#ef8a62', '#b2182b'],
                                min : this.props.map.timeline ? this.props.map.timeline.min : 0,
