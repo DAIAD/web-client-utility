@@ -59,7 +59,7 @@ var ContentRoot = React.createClass({
               </span>
               <i className='fa fa-sign-out fa-fw' style={{color : '#d9534f', cursor : 'pointer'}} onClick={this.props.actions.logout}></i>
             </div>
-            <NavigationTree />
+            <NavigationTree roles={this.props.session.roles} />
           </nav>
           <div className='page-wrapper'>
             {this.props.children}
@@ -102,7 +102,8 @@ function mapStateToProps(state) {
       session: {
         errors: state.session.errors,
         isLoading: state.session.isLoading,
-        username: (state.session.profile ? state.session.profile.username : '')
+        username: (state.session.profile ? state.session.profile.username : ''),
+        roles: state.session.roles
       },
       routing: state.routing
   };

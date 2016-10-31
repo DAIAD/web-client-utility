@@ -4,6 +4,7 @@ var React = require('react');
 var {Link} = require('react-router');
 
 var Collapsible = require('./Collapsible');
+var {ROLE} = require('../constants/Constants');
 
 var NavigationTree = React.createClass({
   contextTypes: {
@@ -48,6 +49,27 @@ var NavigationTree = React.createClass({
           <Link to='/support/development'>
             <span  style={{paddingLeft: 18}}>
               <i className='fa fa-bug fa-fw'></i>{' ' + _t({ id: 'Section.Support.Development'})}
+            </span>
+          </Link>
+        </li>
+      );
+    }
+
+    var scheduler = null, log = null;
+    if(this.props.roles.indexOf(ROLE.ROLE_SYSTEM_ADMIN) !== -1) {
+      scheduler = (
+        <li>
+          <Link to='/scheduler'>
+            <i className='fa fa-clock-o fa-fw'></i>{' ' + _t({ id: 'Section.Scheduler'})}
+          </Link>
+        </li>
+      );
+
+      log = (
+        <li>
+          <Link to='/support/logging'>
+            <span  style={{paddingLeft: 18}}>
+              <i className='fa fa-history fa-fw'></i>{' ' + _t({ id: 'Section.Support.Logging'})}
             </span>
           </Link>
         </li>
@@ -132,11 +154,7 @@ var NavigationTree = React.createClass({
                 </ul>
               </Collapsible>
             </li>
-            <li>
-              <Link to='/scheduler'>
-                <i className='fa fa-clock-o fa-fw'></i>{' ' + _t({ id: 'Section.Scheduler'})}
-              </Link>
-            </li>
+            {scheduler}
             <li>
               <a href='#' onClick={() => this._toggleExpand('alerts')}>
                 <i className='fa fa-commenting-o fa-fw'></i>
@@ -195,13 +213,7 @@ var NavigationTree = React.createClass({
               </a>
               <Collapsible open={this.state.expand.support}>
                 <ul className='nav'>
-                  <li>
-                    <Link to='/support/logging'>
-                      <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-history fa-fw'></i>{' ' + _t({ id: 'Section.Support.Logging'})}
-                      </span>
-                    </Link>
-                  </li>
+                  {log}
                   <li>
                     <Link to='/mode/management'>
                       <span  style={{paddingLeft: 18}}>

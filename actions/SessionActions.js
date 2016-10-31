@@ -7,11 +7,12 @@ var requestedLogin = function() {
   };
 };
 
-var receivedLogin = function(status, errors, profile) {
+var receivedLogin = function(status, errors, roles, profile) {
   return {
     type : types.USER_RECEIVED_LOGIN,
     status : status,
     errors : errors,
+    roles : roles,
     profile : profile
   };
 };
@@ -37,8 +38,7 @@ var SessionActions = {
 
       return sessionAPI.login(username, password).then(
           function(response) {
-            dispatch(receivedLogin(response.success,
-                response.errors, response.profile));
+            dispatch(receivedLogin(response.success, response.errors, response.roles, response.profile));
           }, function(error) {
             dispatch(receivedLogin(false, error, null));
           });
@@ -51,8 +51,7 @@ var SessionActions = {
 
       return sessionAPI.logout().then(
           function(response) {
-            dispatch(receivedLogout(
-                response.success, response.errors));
+            dispatch(receivedLogout(response.success, response.errors));
           }, function(error) {
             dispatch(receivedLogout(false, error));
           });
@@ -63,8 +62,7 @@ var SessionActions = {
     return function(dispatch, getState) {
       return sessionAPI.getProfile().then(
           function(response) {
-            dispatch(receivedLogin(response.success,
-                response.errors, response.profile));
+            dispatch(receivedLogin(response.success, response.errors, response.roles, response.profile));
           }, function(error) {
             dispatch(receivedLogin(false, error, {}));
           });
