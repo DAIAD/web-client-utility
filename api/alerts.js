@@ -2,7 +2,7 @@ var api = require('./base');
 
 var ManageAlertsAPI = {
     getAllUtilities: function(){
-      return api.json('/action/utility/fetch/corresponding');
+      return api.json('/action/utility/current');
     },
     getTips: function(locale){
       return api.json('/action/recommendation/static/' + locale);

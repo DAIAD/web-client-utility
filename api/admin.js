@@ -4,7 +4,7 @@ var api = require('./base');
 
 var AdminAPI = {
   getActivity : function() {
-    return api.json('/action/admin/trial/activity');
+    return api.json('/action/admin/user/activity');
   },
 
   getSessions : function(userKey) {
@@ -41,7 +41,7 @@ var AdminAPI = {
   },
 
   getAllUtilities : function() {
-    return api.json('/action/utility/fetch/all');
+    return api.json('/action/utility/all');
   },
 
   createNewUser : function(userInfo) {
