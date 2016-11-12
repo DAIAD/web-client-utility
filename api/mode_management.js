@@ -15,11 +15,7 @@ var ModeManagementAPI = {
 
 		deactivateUser : function(user){
 			return api.json('/action/profile/deactivate', user);
-		},
-
-		testCall : function(user){
-			return api.json('/action/profile/deactivate', user);
-		},
+		}
 	};
 
 module.exports = ModeManagementAPI;

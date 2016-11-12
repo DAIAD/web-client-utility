@@ -168,6 +168,7 @@
 			"currentMode": "Τρέχουσα Κατάσταση",
 			"viewInfoOnAmphiro": "b1",
 			"viewInfoOnMobile": "Mobile",
+			"viewInfoOnWeb": "Web",
 			"allowSocial": "Social",
 			"deactivateUser": "Απενεργοποίηση Χρήστη",
 			"searchUsers": "Αναζητήστε χρήστες..."
