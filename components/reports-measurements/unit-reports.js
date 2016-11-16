@@ -442,7 +442,7 @@ class _Report extends React.Component {
             },
             // Forecast (2nd half)
             {
-              data: data? padArray(data.get(k1r).points.map(v => v[1]), 2 * N) : null,
+              data: data? padArrayLeft(data.get(k1r).points.map(v => v[1]), 2 * N) : null,
               name: 'Forecast'
             },
           ]}
@@ -612,7 +612,7 @@ class ReportByDay extends _Report {
       },
     });
   }
-};
+}
 
 ReportByDay.defaultProps = _.extend({}, _Report.defaultProps, {
   formatDate: (m, brief=false) => (
@@ -648,7 +648,7 @@ class ReportByWeek extends _Report {
       },
     });
   }
-};
+}
 
 ReportByWeek.defaultProps = _.extend({}, _Report.defaultProps, {
   formatDate: (m, brief=false) => {
@@ -690,7 +690,7 @@ class ReportByMonth extends _Report {
       },
     });
   }
-};
+}
 
 ReportByMonth.defaultProps = _.extend({}, _Report.defaultProps, {
   formatDate: (m, brief=false) => (
@@ -726,7 +726,7 @@ class ReportByYear extends _Report {
       },
     });
   }
-};
+}
 
 ReportByYear.defaultProps = _.extend({}, _Report.defaultProps, {
   formatDate: (m, brief=false) => (

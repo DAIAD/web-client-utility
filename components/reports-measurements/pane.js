@@ -399,7 +399,9 @@ var ReportPanel = React.createClass({
   render: function () {
     var {defaults} = this.constructor;
     var {dirty, draw, error} = this.state;
-    if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'
+    
+    var chartProps = this.props;
+    if (this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'
        && this.props.defaultFavouriteValues.source
        && this.props.defaultFavouriteValues.timespan
        && this.props.defaultFavouriteValues.population
@@ -413,12 +415,11 @@ var ReportPanel = React.createClass({
       else{
         this.props.favouriteChart.series = this.props.series;
       }
-      var {field, title, level, reportName, finished, series} = this.props.favouriteChart;
-    } else {
-
-      var {field, title, level, reportName, finished, series} = this.props;
-
-    }
+      chartProps = this.props.favouriteChart;
+    } 
+    
+    var {field, title, level, reportName, finished, series} = chartProps;
+    
     var toolbarSpec = this._specForToolbar();
     var header = (
       <div className="header-wrapper">
@@ -476,10 +477,8 @@ var ReportPanel = React.createClass({
     switch (groupKey) {
       case 'parameters':
         return this._switchToFormFragment(key);
-        break;
       case 'actions':
         return this._performAction(key);
-        break;
     }
   },
 
@@ -654,13 +653,13 @@ var ReportPanel = React.createClass({
           fragment1 = (
             <div>
               <div className='col-md-3'>
-                <input  id='label' name='favourite' type='favourite' ref='favourite' autofocus
+                <input  id='label' name='favourite' type='favourite' ref='favourite' autoFocus
                   defaultValue ={this.props.favouriteChart ? this.props.favouriteChart.title : null}
                   placeholder='Label ...' className='form-control' style={{ marginBottom : 15 }}/>
                 <span className='help-block'>Insert a label for this favourite</span>
               </div>
             <div className='col-md-6'>
-              <input  id='name' name='name' type='name' ref='name' autofocus disabled
+              <input  id='name' name='name' type='name' ref='name' autoFocus disabled
                 placeholder={tags} className='form-control' style={{ marginBottom : 15 }}/>
               <span className='help-block'>Auto-generated Identifier</span>
             </div>
@@ -1581,9 +1580,6 @@ ReportInfo = ReactRedux.connect(
 
 var ChartContainer = require('./chart-container');
 
-var pleaseWork = function(duplicates){
-  return _.uniq(duplicates)
-}
 module.exports = {
   Panel: ReportPanel,
   Form: ReportForm,
