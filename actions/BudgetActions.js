@@ -84,7 +84,6 @@ const setSearchFilter = function(searchFilter) {
 
 
 module.exports = {
-  setValidationError,
   addBudgetScenario,
   removeBudgetScenario,
   setActiveBudget,
