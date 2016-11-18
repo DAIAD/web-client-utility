@@ -318,7 +318,11 @@ var Demographics = React.createClass({
                   <Bootstrap.Panel header={groupTitle}>
                     <Bootstrap.ListGroup fill>
                       <Bootstrap.ListGroupItem>
-                        <Table data={visibleGroups}></Table>
+                        <Table 
+                          fields={visibleGroups.fields}
+                          data={visibleGroups.rows}
+                          pager={visibleGroups.pager}
+                        />
                       </Bootstrap.ListGroupItem>
                     </Bootstrap.ListGroup>
                   </Bootstrap.Panel>
@@ -327,7 +331,11 @@ var Demographics = React.createClass({
                   <Bootstrap.Panel header={favouriteTitle}>
                     <Bootstrap.ListGroup fill>
                       <Bootstrap.ListGroupItem>
-                        <Table data={visibleFavourites}></Table>
+                        <Table 
+                          fields={visibleFavourites.fields}
+                          data={visibleFavourites.rows}
+                          pager={visibleFavourites.pager}
+                        />
                       </Bootstrap.ListGroupItem>
                     </Bootstrap.ListGroup>
                   </Bootstrap.Panel>

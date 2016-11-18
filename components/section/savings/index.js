@@ -99,8 +99,7 @@ function mapDispatchToProps(dispatch) {
 function mergeProps(stateProps, dispatchProps, ownProps) {
   const filteredScenarios = stateProps.searchFilter ? stateProps.scenarios.filter(s => matches(s.name, stateProps.searchFilter) || matches(s.user, stateProps.searchFilter)) : stateProps.scenarios;
 
-  const tableData = {
-    fields: [{
+  const tableFields = [{
       name: 'id',
       title: 'Id',
       hidden: true
@@ -169,16 +168,10 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         dispatchProps.actions.confirmRemoveScenario(row.id);
       }),
       visible : true 
-    }],
-    rows: filteredScenarios || [],
-    pager: {
-      index: 0,
-      size: 10,
-      count: filteredScenarios.length || 0,
-      mode: Table.PAGING_CLIENT_SIDE
-    }    
-  };
-  
+    }];
+
+    const tableData = filteredScenarios || [];
+
   const tableStyle = {
     row : {
       rowHeight: 70
@@ -190,6 +183,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     ...dispatchProps,
     ...stateProps,
     tableData,
+    tableFields,
     tableStyle,
   };
 }

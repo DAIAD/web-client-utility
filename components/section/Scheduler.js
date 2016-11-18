@@ -68,111 +68,111 @@ var Scheduler = React.createClass({
       ]);
     }
 
-    var jobTableConfig = {
-      fields: [{
-        name: 'id',
-        title: 'Id',
-        hidden: true
-      }, {
-        name: 'category',
-        title: 'Category'
-      }, {
-        name: 'container',
-        title: 'Framwork'
-      }, {
-        name: 'name',
-        title: 'Name'
-      }, {
-        name: 'description',
-        title: 'Description'
-      }, {
-        name: 'lastExecution',
-        title: 'Last Execution',
-        type: 'datetime'
-      }, {
-        name: 'nextExecution',
-        title: 'Next Execution',
-        type: 'datetime'
-      }, {
-        name: 'enable',
-        type:'action',
-        icon: function(field, row) {
-          return 'clock-o';
-        },
-        color: function(field, row) {
-          if(!row.schedule) {
-            return '#000000';
-          }
-          switch(row.schedule.type) {
-            case 'CRON': case 'PERIOD':
-              if(row.enabled) {
-                return '#000000';
-              } else {
-                return '#9E9E9E';
-              }
-            default:
-              return '#000000';
-          }
-        },
-        handler: (function(field, row) {
-          switch(row.schedule.type) {
-            case 'CRON': case 'PERIOD':
-              if(row.enabled) {
-                this.props.actions.disableJob(row.id);
-              } else {
-                this.props.actions.enableJob(row.id);
-              }
-              break;
-            default:
-              // No action is required
-              break;
-          }
-        }).bind(this),
-        visible: function(field, row) {
-          if(!row.schedule) {
-            return false;
-          }
-          switch(row.schedule.type) {
-            case 'CRON': case 'PERIOD':
-              return true;
-            default:
-              return false;
-          }
-        }
-      }, {
-        name: 'execute',
-        type:'action',
-        icon: function(field, row) {
-          if(row.running) {
-            return 'cogs';
-          }
-          return 'play';
-        },
-        color: function(field, row) {
-          if(row.running) {
-            return '#51A351';
-          }
+    var jobTableFields = [{
+      name: 'id',
+      title: 'Id',
+      hidden: true
+    }, {
+      name: 'category',
+      title: 'Category'
+    }, {
+      name: 'container',
+      title: 'Framwork'
+    }, {
+      name: 'name',
+      title: 'Name'
+    }, {
+      name: 'description',
+      title: 'Description'
+    }, {
+      name: 'lastExecution',
+      title: 'Last Execution',
+      type: 'datetime'
+    }, {
+      name: 'nextExecution',
+      title: 'Next Execution',
+      type: 'datetime'
+    }, {
+      name: 'enable',
+      type:'action',
+      icon: function(field, row) {
+        return 'clock-o';
+      },
+      color: function(field, row) {
+        if(!row.schedule) {
           return '#000000';
-        },
-        handler: (function(field, row) {
-          if(!row.running) {
-            this.props.actions.launchJob(row.id);
-          }
-        }).bind(this)
-      }],
-      rows: jobs.items || [],
-      pager: {
-        index: jobs.index || 0,
-        size: jobs.size || 10,
-        count:jobs.total || 0,
-        mode: Table.PAGING_CLIENT_SIDE
+        }
+        switch(row.schedule.type) {
+          case 'CRON': case 'PERIOD':
+            if(row.enabled) {
+              return '#000000';
+            } else {
+              return '#9E9E9E';
+            }
+          default:
+            return '#000000';
+        }
+      },
+      handler: (function(field, row) {
+        switch(row.schedule.type) {
+          case 'CRON': case 'PERIOD':
+            if(row.enabled) {
+              this.props.actions.disableJob(row.id);
+            } else {
+              this.props.actions.enableJob(row.id);
+            }
+            break;
+          default:
+            // No action is required
+            break;
+        }
+      }).bind(this),
+      visible: function(field, row) {
+        if(!row.schedule) {
+          return false;
+        }
+        switch(row.schedule.type) {
+          case 'CRON': case 'PERIOD':
+            return true;
+          default:
+            return false;
+        }
       }
-    };
+    }, {
+      name: 'execute',
+      type:'action',
+      icon: function(field, row) {
+        if(row.running) {
+          return 'cogs';
+        }
+        return 'play';
+      },
+      color: function(field, row) {
+        if(row.running) {
+          return '#51A351';
+        }
+        return '#000000';
+      },
+      handler: (function(field, row) {
+        if(!row.running) {
+          this.props.actions.launchJob(row.id);
+        }
+      }).bind(this)
+    }];
+
+    const jobTableData = jobs.items || [];
+
+    const jobTablePager = {
+      //index: jobs.index || 0,
+        //size: jobs.size || 10,
+        // count:jobs.total || 0,
+        onPageIndexChange: this.onJobPageIndexChange,
+        //    mode: Table.PAGING_CLIENT_SIDE
+    }
 
     var executions = this.props.scheduler.data.executions;
 
-    var executionTableConfig = {
-      fields: [{
+    var executionTableFields = [{
         name: 'jobId',
         title: 'jobId',
         hidden: true
@@ -237,15 +237,18 @@ var Scheduler = React.createClass({
         handler: function(field, row) {
 
         }
-      }],
-      rows: executions.items || [],
-      pager: {
+      }];
+
+      const executionTableData = executions.items || [];
+
+      const executionTablePager = {
         index: executions.index || 0,
         size: executions.size || 10,
         count: executions.total || 0,
+        onPageIndexChange: this.onExecutionPageIndexChange,
         mode: Table.PAGING_SERVER_SIDE
-      }
-    };
+      };
+      //};
 
     const jobDataNotFound = (
       <span>No jobs found.</span>
@@ -298,10 +301,11 @@ var Scheduler = React.createClass({
             <Bootstrap.Panel header={jobTableHeader}>
               <Bootstrap.ListGroup fill>
                 <Bootstrap.ListGroupItem>
-                  <Table  data={jobTableConfig}
-                          onPageIndexChange={this.onJobPageIndexChange}
-                          template={{empty : jobDataNotFound}}
-                  ></Table>
+                  <Table  
+                    fields={jobTableFields}
+                    data={jobTableData}
+                    template={{empty : jobDataNotFound}}
+                  />
                 </Bootstrap.ListGroupItem>
               </Bootstrap.ListGroup>
             </Bootstrap.Panel>
@@ -347,10 +351,12 @@ var Scheduler = React.createClass({
                   </div>
                 </Bootstrap.ListGroupItem>
                   <Bootstrap.ListGroupItem>
-                  <Table  data={executionTableConfig}
-                          onPageIndexChange={this.onExecutionPageIndexChange}
-                          template={{empty : executionDataNotFound}}
-                  ></Table>
+                    <Table
+                      fields={executionTableFields}
+                      data={executionTableData}
+                      pager={executionTablePager}
+                      template={{empty : executionDataNotFound}}
+                    />
                 </Bootstrap.ListGroupItem>
               </Bootstrap.ListGroup>
             </Bootstrap.Panel>

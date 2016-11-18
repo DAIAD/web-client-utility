@@ -161,25 +161,25 @@ var CreateGroupForm = React.createClass({
       }
     });
 
-    var rows = this.membersObjectToArray(this.props.currentMembers).sort(this.compareGroupMembers);
+    const currentMembersData = this.membersObjectToArray(this.props.currentMembers).sort(this.compareGroupMembers);
 
     var currentMembers = {
         fields : currentMembersFields,
-        rows : rows,
+        rows : currentMembersData,
         pager : {
           index : DemographicsTablesSchema.GroupMembers.pager.index,
           size : DemographicsTablesSchema.GroupMembers.pager.size,
-          count : rows.length//Math.ceil(this.props.currentMembers.length / DemographicsTablesSchema.GroupMembers.pager.size)
+          //count : rows.length//Math.ceil(this.props.currentMembers.length / DemographicsTablesSchema.GroupMembers.pager.size)
         }
     };
-    rows = this.membersObjectToArray(this.props.possibleMembers).sort(this.compareGroupMembers);
+    const possibleMembersData = this.membersObjectToArray(this.props.possibleMembers).sort(this.compareGroupMembers);
     var possibleMembers = {
         fields : possibleMembersFields,
-        rows : rows,
+        rows : possibleMembersData,
         pager : {
           index : DemographicsTablesSchema.GroupMembers.pager.index,
           size : DemographicsTablesSchema.GroupMembers.pager.size,
-          count : rows.length //Math.ceil(this.props.possibleMembers.length / DemographicsTablesSchema.GroupMembers.pager.size)
+          //count : rows.length //Math.ceil(this.props.possibleMembers.length / DemographicsTablesSchema.GroupMembers.pager.size)
         }
     };
 
@@ -210,7 +210,10 @@ var CreateGroupForm = React.createClass({
                 <Bootstrap.Panel header={membersTitle}>
                   <Bootstrap.ListGroup fill>
                     <Bootstrap.ListGroupItem>
-                      <Table data={currentMembers}></Table>
+                      <Table 
+                        fields={currentMembersFields}
+                        data={currentMembersData}
+                      />
                     </Bootstrap.ListGroupItem>
                   </Bootstrap.ListGroup>
                 </Bootstrap.Panel>
@@ -219,7 +222,10 @@ var CreateGroupForm = React.createClass({
                 <Bootstrap.Panel header={nonMembersTitle}>
                   <Bootstrap.ListGroup fill>
                     <Bootstrap.ListGroupItem>
-                      <Table data={possibleMembers}></Table>
+                      <Table 
+                        fields={possibleMembersFields}
+                        data={possibleMembersData}
+                      />
                     </Bootstrap.ListGroupItem>
                   </Bootstrap.ListGroup>
                 </Bootstrap.Panel>

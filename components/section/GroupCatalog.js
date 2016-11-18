@@ -56,83 +56,86 @@ var GroupCatalog  = React.createClass({
   },
 
   render: function() {
-    var tableConfiguration = {
-      fields: [{
-        name: 'id',
-        title: 'Id',
-        hidden: true
-      }, {
-        name: 'type',
-        title: 'Type',
-        width: 100
-      }, {
-        name: 'text',
-        title: 'Name',
-        link: function(row) {
-          if(row.key) {
-            return '/group/{key}/';
-          }
-          return null;
+    
+    const tableFields = [{
+      name: 'id',
+      title: 'Id',
+      hidden: true
+    }, {
+      name: 'type',
+      title: 'Type',
+      width: 100
+    }, {
+      name: 'text',
+      title: 'Name',
+      link: function(row) {
+        if(row.key) {
+          return '/group/{key}/';
         }
-      }, {
-        name: 'size',
-        title: '# of members'
-      }, {
-        name: 'createdOn',
-        title: 'Updated On',
-        type: 'datetime'
-      }, {
-        name : 'favorite',
-        type : 'action',
-        icon : function(field, row) {
-          return (row.favorite ? 'star' : 'star-o');
-        },
-        handler : (function(field, row) {
-          if(row.favorite) {
-            this.props.actions.removeFavorite(row.key);
-          } else {
-            this.props.actions.addFavorite(row.key);
-          }
-        }).bind(this),
-        visible : (function(field, row) {
-          return (row.type == 'SET');
-        }).bind(this)
-      }, {
-        name : 'chart',
-        type : 'action',
-        icon : 'bar-chart-o',
-        handler : (function(field, row) {
-          var utility = this.props.profile.utility;
-
-          this.props.actions.getChart(row.key, row.text, utility.timezone);
-        }).bind(this)
-      }, {
-        name : 'delete',
-        type : 'action',
-        icon : function(field, row) {
-          return (row.type == 'SET' ? 'remove' : null);
-        },
-        handler : (function(field, row) {
-          if(row.type == 'SET') {
-            this.props.actions.deleteGroup(row.key);
-          }
-        }).bind(this),
-        visible : (function(field, row) {
-          return (row.type == 'SET');
-        }).bind(this)
-      }],
-      rows: this.props.groupCatalog.data.filtered || [],
-      pager: {
-        index: 0,
-        size: 10,
-        count: this.props.groupCatalog.data.filtered.length || 0,
-        mode: Table.PAGING_CLIENT_SIDE
+        return null;
       }
+    }, {
+      name: 'size',
+      title: '# of members'
+    }, {
+      name: 'createdOn',
+      title: 'Updated On',
+      type: 'datetime'
+    }, {
+      name : 'favorite',
+      type : 'action',
+      icon : function(field, row) {
+        return (row.favorite ? 'star' : 'star-o');
+      },
+      handler : (function(field, row) {
+        if(row.favorite) {
+          this.props.actions.removeFavorite(row.key);
+        } else {
+          this.props.actions.addFavorite(row.key);
+        }
+      }).bind(this),
+      visible : (function(field, row) {
+        return (row.type == 'SET');
+      }).bind(this)
+    }, {
+      name : 'chart',
+      type : 'action',
+      icon : 'bar-chart-o',
+      handler : (function(field, row) {
+        var utility = this.props.profile.utility;
+
+        this.props.actions.getChart(row.key, row.text, utility.timezone);
+      }).bind(this)
+    }, {
+      name : 'delete',
+      type : 'action',
+      icon : function(field, row) {
+        return (row.type == 'SET' ? 'remove' : null);
+      },
+      handler : (function(field, row) {
+        if(row.type == 'SET') {
+          this.props.actions.deleteGroup(row.key);
+        }
+      }).bind(this),
+      visible : (function(field, row) {
+        return (row.type == 'SET');
+      }).bind(this)
+    
+    }];
+    
+    const tableData = this.props.groupCatalog.data.filtered || [];
+    
+    const tablePager =  {
+      index: 0,
+      size: 10,
+      count: this.props.groupCatalog.data.filtered.length || 0,
+      //onPageIndexChange: this.onPageIndexChange,
+      mode: Table.PAGING_CLIENT_SIDE
     };
 
-    var tableStyle = {
+    const tableStyle = {
       row : {
-        rowHeight: 50
+        height: 50
       }
     };
 
@@ -303,11 +306,13 @@ var GroupCatalog  = React.createClass({
               <Bootstrap.ListGroup fill>
                 {filterOptions}
                 <Bootstrap.ListGroupItem>
-                  <Table  data={tableConfiguration}
-                          onPageIndexChange={this.onPageIndexChange}
-                          template={{empty : dataNotFound}}
-                          style={tableStyle}
-                  ></Table>
+                  <Table
+                    fields={tableFields}
+                    data={tableData}
+                    pager={tablePager} 
+                    template={{ empty: dataNotFound }}
+                    style={tableStyle}
+                  />
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
                   {chartTitleText}

@@ -164,37 +164,34 @@ var User = React.createClass({
   },
 
   render: function() {
-    var groupTableConfig = {
-      fields : [{
-        name : 'id',
-        title : 'Table.Group.id',
-        hidden : true
-      }, {
-        name : 'name',
-        title : 'Table.Group.name',
-        link : '/group/{id}'
-      }, {
-        name : 'size',
-        title : 'Table.Group.size'
-      }, {
-        name : 'createdOn',
-        title : 'Table.Group.createdOn'
-      }, {
-        name : 'chart',
-        type : 'action',
-        icon : 'bar-chart-o',
-        handler : (function(field, row) {
-          var utility = this.props.profile.utility;
+    //var groupTableConfig = {
+    const groupFields = [{
+      name : 'id',
+      title : 'Table.Group.id',
+      hidden : true
+    }, {
+      name : 'name',
+      title : 'Table.Group.name',
+      link : '/group/{id}'
+    }, {
+      name : 'size',
+      title : 'Table.Group.size'
+    }, {
+      name : 'createdOn',
+      type: 'datetime',
+      title : 'Table.Group.createdOn'
+    }, {
+      name : 'chart',
+      type : 'action',
+      icon : 'bar-chart-o',
+      handler : (function(field, row) {
+        var utility = this.props.profile.utility;
 
-          this.props.getGroupSeries(row.id, row.name, utility.timezone);
-        }).bind(this)
-      }],
-      rows : []
-    };
+        this.props.getGroupSeries(row.id, row.name, utility.timezone);
+      }).bind(this)
+    }];
 
-    if (this.props.groups) {
-      groupTableConfig.rows = this.getSimplifiedGroups(this.membersObjectToArray(Object.assign({}, this.props.groups))).sort(this.compareGroups);
-    }
+    const groupData = this.props.groups ? this.getSimplifiedGroups(this.membersObjectToArray(Object.assign({}, this.props.groups))).sort(this.compareGroups) : [];
 
     const profileTitle = (
       <span>
@@ -724,7 +721,10 @@ var User = React.createClass({
               <Bootstrap.Panel header={groupTitle}>
                 <Bootstrap.ListGroup fill>
                   <Bootstrap.ListGroupItem>
-                    <Table data={groupTableConfig}></Table>
+                    <Table 
+                      fields={groupFields}
+                      data={groupData}
+                    />
                   </Bootstrap.ListGroupItem>
                   <Bootstrap.ListGroupItem className='clearfix'>
                     <Link className='pull-right' to='/groups' style={{ paddingLeft : 7, paddingTop: 12 }}>Browse all groups</Link>

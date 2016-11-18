@@ -33,15 +33,12 @@ function RemoveConfirmation (props) {
 }
 
 function SavingsPotentialList (props) {
-  const { tableData, tableStyle, actions, removeScenario, searchFilter } = props;
+  const { tableData, tableFields, tableStyle, actions, removeScenario, searchFilter } = props;
   const { removeSavingsScenario, confirmRemoveScenario, setSearchFilter, goToAddView } = actions;
   return (
-    <div>
+    <bs.Panel header='Scenarios'>
       <bs.Row>
-        <bs.Col sm={3} md={2}>
-          <h4>Savings list</h4>
-        </bs.Col>
-        <bs.Col sm={4} md={3}>
+        <bs.Col sm={4} md={5}>
         <bs.Input 
           type='text'
           placeholder='Search...'
@@ -60,6 +57,7 @@ function SavingsPotentialList (props) {
         <hr/>
         <Table  
           data={tableData} 
+          fields={tableFields}
           template={{empty : (<span>{ 'No data found.' }</span>)}}
           style={tableStyle}
         />
@@ -69,7 +67,7 @@ function SavingsPotentialList (props) {
         removeSavingsScenario={removeSavingsScenario}
         confirmRemoveScenario={confirmRemoveScenario}
       />
-    </div>
+    </bs.Panel>
   );
 }
 
