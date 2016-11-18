@@ -272,66 +272,71 @@ var Favourites = React.createClass({
      );
    }
 
-    var favs = {
-        fields: [{
-           name: 'id',
-           hidden: true
-        }, {
-           name: 'title',
-           title: 'Label'
-        }, {
-           name: 'tags',
-           title: 'Tags'
-        }, {
-           name: 'createdOn',
-           title: 'Date',
-           type: 'datetime'
-        }, {
-           name: 'view',
-           type:'action',
-           icon: 'eye',
-           handler: function() {
-         self.clickedOpenFavourite(this.props.row);
-           }
-        }, {
-           name: 'edit',
-           type:'action',
-           icon: 'pencil',
-           handler: function() {
-         self.editFavourite(this.props.row);
-           }
-        }, {
-           name: 'copy',
-           type:'action',
-           icon: 'copy',
-           handler: function() {
-         self.duplicateFavourite(this.props.row);
-           }
-        }, {
-           name: 'link',
-           type:'action',
-           icon: 'link',
-           handler: function() {
-           }
-        }, {
-           name: 'remove',
-           type:'action',
-           icon: 'remove',
-           handler: function() {
-             self.clickedDeleteFavourite(this.props.row);
-           }
-        }],
-        rows: this.props.favourites ? this.props.favourites : [],
-        pager: {
-           index: 0,
-           size: 5,
-           count: this.props.favourites ? this.props.favourites.length : 0
-        }
-     };
+   //var favs = {
+   const favsFields = [{
+       name: 'id',
+       hidden: true
+    }, {
+       name: 'title',
+       title: 'Label'
+    }, {
+       name: 'tags',
+       title: 'Tags'
+    }, {
+       name: 'createdOn',
+       title: 'Date',
+       type: 'datetime'
+    }, {
+       name: 'view',
+       type:'action',
+       icon: 'eye',
+       handler: function() {
+     self.clickedOpenFavourite(this.props.row);
+       }
+    }, {
+       name: 'edit',
+       type:'action',
+       icon: 'pencil',
+       handler: function() {
+     self.editFavourite(this.props.row);
+       }
+    }, {
+       name: 'copy',
+       type:'action',
+       icon: 'copy',
+       handler: function() {
+     self.duplicateFavourite(this.props.row);
+       }
+    }, {
+       name: 'link',
+       type:'action',
+       icon: 'link',
+       handler: function() {
+       }
+    }, {
+       name: 'remove',
+       type:'action',
+       icon: 'remove',
+       handler: function() {
+         self.clickedDeleteFavourite(this.props.row);
+       }
+    }];
+    const favsData = this.props.favourites || [];
+
+    const favsPager = {
+       index: 0,
+       size: 5,
+       count: this.props.favourites ? this.props.favourites.length : 0
+    };
 
      var favouriteContent = (
        <div style={{ padding: 10}}>
-           <Table data={favs}></Table>
+         <Table 
+           fields={favsFields}
+           data={favsData}
+           pager={favsPager}
+           template={{empty : (<span>No favorites found.</span>)}}
+         />
          </div>
      );
 

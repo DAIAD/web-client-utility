@@ -140,6 +140,7 @@ var UserCatalog = React.createClass({
   },
 
   onPageIndexChange: function(index) {
+    console.log('on page index change user catalog with', index);
     this.props.actions.changeIndex(index);
   },
 
@@ -160,8 +161,7 @@ var UserCatalog = React.createClass({
   },
 
   render: function() {
-    var tableConfiguration = {
-      fields: [{
+    const tableFields = [{
         name: 'id',
         title: 'Id',
         hidden: true
@@ -212,18 +212,19 @@ var UserCatalog = React.createClass({
         visible : (function(field, row) {
           return (row.meter !== null);
         }).bind(this)
-      }],
-      rows: this.props.userCatalog.data.accounts || [],
-      pager: {
+      }];
+
+      const tableData = this.props.userCatalog.data.accounts || [];
+      const tablePager = {
         index: this.props.userCatalog.data.index || 0,
         size: this.props.userCatalog.data.size || 10,
-        count:this.props.userCatalog.data.total || 0,
+        count: this.props.userCatalog.data.total || 0,
+        onPageIndexChange: this.onPageIndexChange,
         mode: Table.PAGING_SERVER_SIDE
-      }
-    };
+      };
 
     if(this.props.userCatalog.selection.enabled) {
-      tableConfiguration.fields.splice(1, 0, {
+      tableFields.splice(1, 0, {
         name: 'selected',
         title: '',
         type: 'alterable-boolean',
@@ -235,9 +236,11 @@ var UserCatalog = React.createClass({
     }
 
     var tableStyle = {
-      row : {
-        rowHeight: 50
-      }
+      //border: '1px #666 solid'
+      //row : {
+      //  height: 50,
+      //  rowHeight: 50
+      //}
     };
 
     var resetButton = ( <div />);
@@ -467,10 +470,14 @@ var UserCatalog = React.createClass({
               <Bootstrap.ListGroup fill>
                 {filterOptions}
                 <Bootstrap.ListGroupItem>
-                  <Table  data={tableConfiguration}
-                          onPageIndexChange={this.onPageIndexChange}
-                          template={{empty : dataNotFound}}
-                          style={tableStyle}
+                  <Table  
+                    fields={tableFields}
+                    data={tableData}
+                    pager={tablePager} 
+                    template={{empty : dataNotFound}}
+                    style={{
+                      table: tableStyle,
+                    }}
                   ></Table>
                 </Bootstrap.ListGroupItem>
               </Bootstrap.ListGroup>

@@ -101,43 +101,44 @@ var DataExport = React.createClass({
   render: function() {
     var files = this.props.files;
 
-    var executionTableConfig = {
-      fields: [{
-        name: 'key',
-        title: 'key',
-        hidden: true
-      }, {
-        name: 'utility',
-        title: 'Utility'
-      }, {
-        name: 'filename',
-        title: 'Name'
-      }, {
-        name: 'description',
-        title: 'Description'
-      }, {
-        name: 'size',
-        title: 'Size'
-      }, {
-        name: 'completedOn',
-        title: 'Created On',
-        type: 'datetime'
-      }, {
-        name: 'download',
-        type:'action',
-        icon: 'cloud-download',
-        handler: (function(field, row) {
-          this.props.actions.download(row.key);
-        }).bind(this)
-      }],
-      rows: files.items || [],
-      pager: {
-        index: files.index || 0,
-        size: files.size || 10,
-        count: files.total || 0,
-        mode: Table.PAGING_SERVER_SIDE
-      }
-    };
+    const executionFields = [{
+      name: 'key',
+      title: 'key',
+      hidden: true
+    }, {
+      name: 'utility',
+      title: 'Utility'
+    }, {
+      name: 'filename',
+      title: 'Name'
+    }, {
+      name: 'description',
+      title: 'Description'
+    }, {
+      name: 'size',
+      title: 'Size'
+    }, {
+      name: 'completedOn',
+      title: 'Created On',
+      type: 'datetime'
+    }, {
+      name: 'download',
+      type:'action',
+      icon: 'cloud-download',
+      handler: (function(field, row) {
+        this.props.actions.download(row.key);
+      }).bind(this)
+    }];
+
+    const executionData = files.items || [];
+    const executionPager = {
+      index: files.index || 0,
+      size: files.size || 10,
+      count: files.total || 0,
+      onPageIndexChange: this.onFilePageIndexChange,
+      mode: Table.PAGING_SERVER_SIDE
+    }
+    //};
 
     const fileNotFound = (
       <span>No files found.</span>
@@ -157,10 +158,12 @@ var DataExport = React.createClass({
             <Bootstrap.Panel header={header}>
               <Bootstrap.ListGroup fill>
                   <Bootstrap.ListGroupItem>
-                  <Table  data={executionTableConfig}
-                          onPageIndexChange={this.onFilePageIndexChange}
-                          template={{empty : fileNotFound}}
-                  ></Table>
+                    <Table  
+                      fields={executionFields}
+                      data={executionData}
+                      pager={executionPager}
+                      template={{empty : fileNotFound}}
+                    /> 
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
                   <i className='fa fa-life-ring fa-fw'></i>
