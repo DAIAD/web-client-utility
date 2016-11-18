@@ -34,6 +34,12 @@ var SavingsPotentialList = require('../components/section/savings/ListView');
 var SavingsPotentialAdd = require('../components/section/savings/AddView');
 var SavingsPotentialExplore = require('../components/section/savings/ExploreView');
 
+var Budget = require('../components/section/budget');
+var BudgetList = require('../components/section/budget/ListView');
+var BudgetAdd = require('../components/section/budget/AddView');
+var BudgetExplore = require('../components/section/budget/ExploreView');
+var BudgetActiveList = require('../components/section/budget/ActiveList');
+
 module.exports = (
   <Route path="/" component={App} >
     <IndexRoute component={Dashboard} />
@@ -70,6 +76,13 @@ module.exports = (
       <Route path="/savings/list" component={SavingsPotentialList} />
       <Route path="/savings/add" component={SavingsPotentialAdd} />
       <Route path="/savings/:id" component={SavingsPotentialExplore} />
+    </Route>
+    <Route path="/budgets" component={Budget}>
+      <IndexRoute component={BudgetList} />
+      <Route path="/budgets/list" component={BudgetList} />
+      <Route path="/budgets/active" component={BudgetActiveList} />
+      <Route path="/budgets/add" component={BudgetAdd} />
+      <Route path="/budgets/:id" component={BudgetExplore} />
     </Route>
 
   </Route>
