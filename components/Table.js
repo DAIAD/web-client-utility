@@ -1,6 +1,6 @@
 var React = require('react');
 
-var { FormattedTime, FormattedDate} = require('react-intl');
+var { injectIntl, FormattedTime, FormattedDate} = require('react-intl');
 var { Link } = require('react-router');
 
 var Bootstrap = require('react-bootstrap');
@@ -12,10 +12,6 @@ const PAGING_SERVER_SIDE = 'server';
 const DEFAULT_PAGE = 1;
 
 var Table = React.createClass({
-  contextTypes: {
-      intl: React.PropTypes.object
-  },
-
   getInitialState: function() {
     return {
       activePage: this.props.defaultPage 
@@ -115,8 +111,8 @@ var Table = React.createClass({
         return null; 
       }
     }
-    const pager = this.getPager();
 
+    const pager = this.getPager();
     const style = this.getStyle();
 
     const totalPages = (pager && pager.count && pager.size) ?
@@ -144,7 +140,7 @@ var Table = React.createClass({
           >
             <Table.Header 
               fields={visibleFields} 
-              intl={this.context.intl}
+              intl={intl}
               style={style.header}
             />
             <Table.Body 
@@ -407,4 +403,4 @@ Table.Pager = Pager;
 Table.PAGING_CLIENT_SIDE = PAGING_CLIENT_SIDE;
 Table.PAGING_SERVER_SIDE = PAGING_SERVER_SIDE;
 
-module.exports = Table;
+module.exports = injectIntl(Table);
