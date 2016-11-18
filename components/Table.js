@@ -82,7 +82,7 @@ var Table = React.createClass({
   getPager: function() {
     return {
       size: 10,
-      //index: DEFAULT_PAGE-1,
+      index: DEFAULT_PAGE-1,
       mode: PAGING_CLIENT_SIDE,
       count: Array.isArray(this.props.data) ? this.props.data.length : 0, 
       ...this.props.pager
@@ -138,12 +138,12 @@ var Table = React.createClass({
             hover
             style={style.table}
           >
-            <Table.Header 
+            <Header 
               fields={visibleFields} 
               intl={intl}
               style={style.header}
             />
-            <Table.Body 
+            <Body 
               fields={visibleFields}
               data={filteredData}
               bodyStyle={style.body}
@@ -152,7 +152,7 @@ var Table = React.createClass({
           </Bootstrap.Table>
         </div>
         <div style={style.footer}>
-          <Table.Pager
+          <Pager
             pager={pager != null}
             totalPages={totalPages}
             activePage={activePage}
@@ -167,6 +167,7 @@ var Table = React.createClass({
 
 function Pager (props) {
   const { pager, totalPages, activePage, onPageIndexChange, style } = props;
+
   if (!pager) {
     return <div />;
   }
@@ -219,11 +220,11 @@ function Body (props) {
     <tbody style={bodyStyle}>
       {
         data.map((row, rowIndex, total) => (
-          <Table.Row
+          <Row
             key={rowIndex}
             fields={fields}
             row={row}
-            style={typeof rowStyle === 'function' ? rowStyle(row, rowIndex, total.length) : rowStyle}
+            style={getPropertyValue(rowStyle, row, rowIndex, total.length)}
           />
           ))
       }
@@ -238,7 +239,7 @@ function Row (props) {
       {
         fields
         .map((field, columnIdx) => (
-          <Table.Cell
+          <Cell
             key={columnIdx}
             row={row}
             field={field}
@@ -252,16 +253,11 @@ function Row (props) {
 function Cell (props) {
   const { row, field, style:tableStyle } = props;
 
-  const content = wrapWithLink(getCell(field, row), field, row);
-  const style = typeof field.style === 'function' ? 
-    field.style(field, row)
-      :
-        field.style;
-  const className = (typeof field.className === 'function') ? 
-    field.className(field, row) 
-    //field.className(value)
-      : 
-        field.className;
+  const content = wrapWithLink(getCell(field, row), field.link, row);
+
+  const style = getPropertyValue(field.style, field, row);
+  const className = getPropertyValue(field.className, field, row);
+
   return (
     <td
       style={style} 
@@ -276,6 +272,7 @@ function getCell (field, row) {
 
   const value = row[field.name];
 
+  //only action, alterable boolean allowed to have falsy value
   if (field.type !== 'action' && field.type !== 'alterable-boolean' && !value) {
     return <span />;
   }
@@ -285,13 +282,13 @@ function getCell (field, row) {
   }
   else if (field.type === 'action') {
     
-    const visible = (typeof field.visible === 'function') ? field.visible(field, row) : true;
+    const visible = getPropertyValue(field.visible, field, row) || true;
 
     if (visible) {
-      const icon = (typeof field.icon === 'function') ? field.icon(field, row) : field.icon;
-      const image = (typeof field.image === 'function') ? field.image(field, row) : field.image;
+      const icon = getPropertyValue(field.icon, field, row);
+      const image = getPropertyValue(field.image, field, row);
       const className = icon ? 'fa fa-' + icon + ' fa-fw' : '';
-      const clickHandler = (typeof field.handler === 'function') ? () => field.handler(field, row) : null;
+      const clickHandler = () => getPropertyValue(field.handler, field, row);
       const style = clickHandler ? ({ cursor: 'pointer' })  : ({});
 
       return (
@@ -372,33 +369,25 @@ function getCell (field, row) {
   }
 }
 
-function wrapWithLink(text, field, row) {
-  if(field.hasOwnProperty('link')) {
-    if(typeof field.link === 'function') {
-      var href = field.link(row);
-      if(href) {
-        return <Link to={formatLink(field.link(row), row)}>{text}</Link>;
-      }
-    } else {
-      return <Link to={formatLink(field.link, row)}>{text}</Link>;
-    }
-  }
-  else { 
-    return text;
-  }
+function getPropertyValue(property) {
+  //get all args after first
+  const args = Array.prototype.slice.call(arguments, 1);
+  return typeof property === 'function' ?
+    property.apply(null, args) : property;
+}
+
+function wrapWithLink(content, link, row) {
+  return link ? 
+    <Link to={formatLink(getPropertyValue(link, row), row)}>{content}</Link>
+    :
+      content;
 }
 
 function formatLink (route, row) {
-  return Object.keys(row).reduce(function(link, key) {
-    return link.replace(new RegExp('\{' + key + '\}'), row[key]);
-  }, route);
+  return Object.keys(row).reduce((link, key) => 
+          link.replace(new RegExp('\{' + key + '\}'), row[key])
+          , route);
 }
-
-Table.Header = Header;
-Table.Body = Body;
-Table.Row = Row;
-Table.Cell = Cell;
-Table.Pager = Pager;
 
 Table.PAGING_CLIENT_SIDE = PAGING_CLIENT_SIDE;
 Table.PAGING_SERVER_SIDE = PAGING_SERVER_SIDE;
