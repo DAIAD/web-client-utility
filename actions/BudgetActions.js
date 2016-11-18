@@ -1,13 +1,5 @@
 var types = require('../constants/BudgetActionTypes');
 
-
-const setValidationError  = function (error) {
-  return {
-    type: types.BUDGET_SET_VALIDATION_ERROR,
-    error
-  }
-};
-
 const addBudgetScenario = function (values) {
   return function(dispatch, getState) {
     const profile = getState().session.profile;
@@ -90,12 +82,6 @@ const setSearchFilter = function(searchFilter) {
   };
 }
 
-const setAddBudgetWizardType = function(wizardType) {
-  return {
-    type: types.BUDGET_ADD_SET_WIZARD_TYPE,
-    wizardType
-  };
-}
 
 module.exports = {
   setValidationError,
@@ -107,5 +93,4 @@ module.exports = {
   confirmSetBudget,
   confirmResetBudget,
   setSearchFilter,
-  setAddBudgetWizardType
 };

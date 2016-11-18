@@ -2,9 +2,7 @@ var types = require('../constants/BudgetActionTypes');
 
 const initialState = {
   budgetToRemove: null,
-  validationError: null,
   searchFilter: null,
-  wizardType: 'savings',
   confirmSetBudget: null,
   confirmResetBudget: null,
   scenarios: [{
@@ -56,10 +54,6 @@ var budget = function (state=initialState, action) {
        confirmResetBudget: action.id 
       }); 
 
-    case types.BUDGET_SET_VALIDATION_ERROR: 
-      return Object.assign({}, state, {
-        validationError: action.error
-      });
 
     case types.BUDGET_ADD_SCENARIO: { 
       const newScenarios = [...state.scenarios, {...action.options}];
@@ -90,11 +84,6 @@ var budget = function (state=initialState, action) {
         searchFilter: action.searchFilter
       });
 
-    case types.BUDGET_ADD_SET_WIZARD_TYPE:
-      const initialActiveIdx = action.activeIdx != null ? action.activeIdx : state.initialActiveIdx;
-      return Object.assign({}, state, {
-        wizardType: action.wizardType,
-      });
 
     default:
       return state;
