@@ -4,66 +4,65 @@ var Select = require('react-select');
 var moment = require('moment');
 var DatetimeInput = require('react-datetime');
 var CheckboxGroup = require('react-checkbox-group');
-
 var LeafletMap = require('../LeafletMap');
+var { FormattedMessage } = require('react-intl');
 
+var util = require('../../helpers/wizard');
 
-var SetNameItem = React.createClass({
-  validate: function() {
-    const value = this.props.getValue() ? this.props.getValue().value : null;
-    if (!value) {
-      throw 'A name must be selected for scenario';
-    }
-  },
-  render: function() {
-    const { getValue, setValue, id } = this.props;
-    const value = getValue() ? getValue().value : null;
-    return (
-      <div>
-        <bs.Input type="text" placeholder='Enter scenario name' value={value} onChange={(e) => setValue(id, {value: e.target.value, label: e.target.value })}/>
-      </div>
-    );
-  }
-});
+function SetNameItem (props) {
+  const { value, setValue, intl } = props;
+  return (
+    <bs.Col md={5}>
+      <bs.Input type="text" placeholder={intl.formatMessage({ id: 'Wizard.items.name.help' })} value={value.value} onChange={(e) => setValue({value: e.target.value, label: e.target.value })}/>
+    </bs.Col>
+  );
+}
 
 var WhoItem = React.createClass({
   getInitialState: function() {
     return {
       showModal: false,
-      validationFail: false,
-      selectedCluster: null,
-      selectedGroups: Array.isArray(this.props.getValue()) ? this.props.getValue() : []
-      //who: this.props.who 
+      selectedCluster: Array.isArray(this.props.clusters) && this.props.clusters[0] ? this.props.clusters[0].value : null,
+      selectedGroups: Array.isArray(this.props.value) ? this.props.value : []
     };
   },
   componentWillReceiveProps: function(nextProps) {
-    if (nextProps.clusters) {
-      this.setState({ selectedCluster: Array.isArray(nextProps.clusters) && nextProps.clusters[0] ? nextProps.clusters[0].value : null });
-    }
-  },
-  validate: function() {
-    const { getValue } = this.props;
-    const value = getValue();
-
-    if (Array.isArray(value)) {
-      if (value.length < 1) {
-        throw 'Who not set';
-      }
-    }
-    else if (!value || !value.value || value.value != 'all') {
-      throw 'Who not set';
+    if (Array.isArray(nextProps.clusters) && nextProps.clusters[0]) {
+      this.setState({ selectedCluster: nextProps.clusters[0].value });
     }
   },
   render: function() {
-    const { groups, clusters, setValue, id } = this.props;
-    //const who = getValue();
+    const { groups, clusters, setValue, value, noAll, intl } = this.props;
     const { selectedCluster, selectedGroups } = this.state;
+
+    const all = intl.formatMessage({ id: 'Wizard.common.all' });
     return (
       <div>
-        <bs.ButtonGroup vertical block>
-          <bs.Button bsStyle='primary' style={{marginBottom: 10}} onClick={() => { setValue(id, {value:'all', label: 'All'}); }}>All</bs.Button>
-          <bs.Button style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>Custom</bs.Button>
-        </bs.ButtonGroup>
+        <bs.Col md={5}>
+          <bs.ButtonGroup vertical block>
+            { !noAll ? 
+              <bs.Button bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => { setValue({value:'all', label: all}); }}>{all}</bs.Button>
+              : 
+                <div />
+            }
+            <bs.Button bsStyle={Array.isArray(value) ? 'primary' : 'default'}  style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{intl.formatMessage({ id: 'Wizard.common.choose' })}</bs.Button>
+          </bs.ButtonGroup>
+        </bs.Col>
+        <bs.Col md={7}>
+          {
+            Array.isArray(value) ?
+              <Select
+                disabled={true}
+                className='select-hide-arrow'
+                name='user-select'
+                multi={true}
+                options={groups}
+                value={selectedGroups.map(x => x.value)}
+              />
+              :
+                <div />
+          }
+        </bs.Col>
         
         <bs.Modal
           show={this.state.showModal}
@@ -85,7 +84,7 @@ var WhoItem = React.createClass({
             />
           </bs.Modal.Body>
           <bs.Modal.Footer>
-            <bs.Button onClick={() => { setValue(id, selectedGroups);  this.setState({showModal: false}); }}>OK</bs.Button>
+            <bs.Button onClick={() => { setValue(selectedGroups);  this.setState({showModal: false}); }}>OK</bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal>
@@ -102,7 +101,7 @@ function GroupsSelect (props) {
         <bs.Col xs={3} md={3}>
           Cluster
         </bs.Col>
-        <bs.Col xs={3} md={3}>
+        <bs.Col xs={4} md={4}>
           Group
         </bs.Col>
         <bs.Col xs={3} md={4}>
@@ -111,7 +110,7 @@ function GroupsSelect (props) {
       </bs.Row>
       <br/>
       <bs.Row>
-        <bs.Col xs={6} md={2}>
+        <bs.Col xs={3} md={2} lg={3}>
           <bs.Tabs position='left' tabWidth={20} activeKey={selectedCluster} onSelect={(val) => onClusterSelect(val)}>
             {
               clusters.map((cluster, idx) => (
@@ -121,7 +120,7 @@ function GroupsSelect (props) {
           </bs.Tabs>
         </bs.Col>
 
-        <bs.Col xs={6} md={3}>
+        <bs.Col xs={4} md={4} lg={3}>
           <CheckboxGroup name='select-groups' value={selectedGroups.map(group => group.value)} onChange={(newValues => {  onGroupsSelect(groups.filter(group => newValues.includes(group.value))); })}>
             {
               Checkbox => 
@@ -137,7 +136,7 @@ function GroupsSelect (props) {
             }
           </CheckboxGroup>
         </bs.Col>
-        <bs.Col xs={6} md={4}>
+        <bs.Col xs={3} md={4} lg={3}>
           <Select
             disabled={true}
             className='select-hide-arrow'
@@ -156,43 +155,51 @@ var WhereItem = React.createClass({
   getInitialState: function() {
     return {
       showModal: false,
-      validationFail: false,
       selectedCluster: 'area',
-      selectedGroups: Array.isArray(this.props.getValue()) ? this.props.getValue() : []
-      //who: this.props.who 
+      selectedGroups: Array.isArray(this.props.value) ? this.props.value : []
     };
   },
   componentWillReceiveProps: function(nextProps) {
-    if (nextProps.clusters) {
-      this.setState({ selectedCluster: Array.isArray(nextProps.clusters) && nextProps.clusters[0] ? nextProps.clusters[0].value : null });
-    }
-  },
-  validate: function() {
-    const { getValue } = this.props;
-    const value = getValue();
-    if (Array.isArray(value)) {
-      if (value.length < 1) {
-        throw 'Where not set';
-      }
-    }
-    else {
-      if (!value || !value.value || value.value != 'all'){
-        throw 'Where not set';
-      }
+    if (Array.isArray(nextProps.clusters) && nextProps.clusters[0]) {
+      this.setState({ selectedCluster: nextProps.clusters[0].value });
     }
   },
   render: function() {
-    const { setValue, clusters, groups, id } = this.props;
-    //const where = getValue();
+    const { setValue, clusters, groups, value, noAll, intl } = this.props;
     const { selectedCluster, selectedGroups } = this.state;
+    
+    const all = intl.formatMessage({ id: 'Wizard.common.all' });
     return (
       <div>
-        <bs.ButtonGroup vertical block>
-          <bs.Button bsStyle='primary' style={{marginBottom: 10}} onClick={() => setValue(id, {value:'all', label: 'All'})}>All</bs.Button>
-          <bs.Button style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>Custom</bs.Button>
 
-        </bs.ButtonGroup>
-          <bs.Modal
+        <bs.Col md={5}>
+          <bs.ButtonGroup vertical block>
+            { !noAll ? 
+              <bs.Button bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({value:'all', label: all})}>{all}</bs.Button>
+              :
+                <div />
+            }
+            <bs.Button bsStyle={Array.isArray(value) ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{intl.formatMessage({ id: 'Wizard.common.choose'})}</bs.Button>
+
+          </bs.ButtonGroup>
+        </bs.Col>
+        <bs.Col md={7}>
+          {
+            Array.isArray(value) ?
+              <Select
+                disabled={true}
+                className='select-hide-arrow'
+                name='user-select'
+                multi={true}
+                options={groups}
+                value={selectedGroups.map(x => x.value)}
+              />
+              :
+                <div />
+          }
+        </bs.Col>
+        
+        <bs.Modal
           show={this.state.showModal}
           bsSize='large'
           animation={false}
@@ -229,7 +236,7 @@ var WhereItem = React.createClass({
             
           </bs.Modal.Body>
           <bs.Modal.Footer>
-            <bs.Button onClick={() => { setValue(id, selectedGroups);  this.setState({showModal: false})} }>OK</bs.Button>
+            <bs.Button onClick={() => { setValue(selectedGroups);  this.setState({showModal: false})} }>OK</bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal> 
@@ -242,42 +249,34 @@ var WhenItem = React.createClass({
   getInitialState: function() {
     return {       
       showModal: false,
-      timespan: this.props.getValue() || this.getLastYear(),
-      validationFail: false,
-      error: ''
+      timespan: this.props.initialValue.timespan ? this.props.initialValue.timespan : this.getLastYear(),
     };
   },
-  validate: function() {
-    const when = this.props.getValue() ? this.props.getValue().timespan : null;
-    if (!when) {
-      throw 'When not set';
+  componentDidMount: function() {
+    /*
+    if (!this.props.value.value) {
+    this.props.setValue({timespan: this.getLastYear(), value:'lastYear', label: 'Last year'});
     }
-    else if (when.length < 2 || when.length > 2) {
-      throw 'When not set';
-    }
-    else if (isNaN(Date.parse(new Date(when[0])))) {
-      throw 'From date not valid';
-    }
-    else if (isNaN(Date.parse(new Date(when[1])))) {
-      throw 'To date not valid';
-    }
-    else if (when[0] > when[1]) {
-      throw 'From date after To date';
-    }
+    */
   },
   getLastYear: function() {
     return [moment().subtract(1, 'year').startOf('year').valueOf(), moment().subtract(1, 'year').endOf('year').valueOf()];
   },
   render: function() {
-    const { setValue, id } = this.props;
-    //const when = getValue();
-    //const { error } = this.state;
+    const { value, setValue, intl } = this.props;
+
+    const last = intl.formatMessage({ id: 'Wizard.items.when.options.last.value' });
+    const choose = intl.formatMessage({ id: 'Wizard.common.choose' });
+
     return (
       <div>
-        <bs.ButtonGroup vertical block>
-            <bs.Button bsStyle='primary' style={{marginBottom: 10}} onClick={() => setValue(id, {timespan: this.getLastYear(), value:'lastYear', label: 'Last year'} )}>Last year</bs.Button>
-          <bs.Button style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>Custom</bs.Button>
-        </bs.ButtonGroup>
+        <bs.Col md={5}>
+          <bs.ButtonGroup vertical block>
+              <bs.Button bsStyle={value.value === 'lastYear' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({timespan: this.getLastYear(), value:'lastYear', label: last} )}>{last}</bs.Button>
+            <bs.Button bsStyle={value.value === 'custom' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{choose}</bs.Button>
+          </bs.ButtonGroup>
+        </bs.Col>
+
         <bs.Modal
           show={this.state.showModal}
           animation={false}
@@ -312,7 +311,7 @@ var WhenItem = React.createClass({
                         value={t1}
                         onChange={(val) => (this.setState({ timespan: [t0, val] }))} 
                        />
-                      <p className="help text-muted">{'Specify the time range you are interested into.'}</p>
+                      <p className="help text-muted">{'Specify the time range you are interested in'}</p>
                     </div>
                   </div>
                   );
@@ -320,7 +319,7 @@ var WhenItem = React.createClass({
             }
           </bs.Modal.Body>
           <bs.Modal.Footer>
-            <bs.Button onClick={() => { setValue(id, {timespan: this.state.timespan, value: 'custom', label: `${moment(this.state.timespan[0]).format('DD/MM/YYYY')}-${moment(this.state.timespan[1]).format('DD/MM/YYYY')}` });   this.setState({showModal: false})} }>OK</bs.Button>
+            <bs.Button onClick={() => { setValue({timespan: this.state.timespan, value: 'custom', label: `${moment(this.state.timespan[0]).format('DD/MM/YYYY')}-${moment(this.state.timespan[1]).format('DD/MM/YYYY')}` });   this.setState({showModal: false})} }>OK</bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal> 
@@ -329,122 +328,128 @@ var WhenItem = React.createClass({
   }
 });
 
-var DistributionItem = React.createClass({
-  getInitialState: function() {
-    return {       
-      showModal: false,
+function DistributionItem (props) {
+  const { value, setValue, intl } = props;
+  const distributionItems = [
+    {value: 'equally', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.equally.value' })},
+    {value: 'fairly', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.fairly.value' })}
+  ];
+
+  return (
+    <bs.Col md={6}>
+      <bs.ButtonGroup vertical block>
+      {
+        distributionItems.map(item => 
+          <bs.Button 
+            key={item.value}
+            bsStyle={item.value === value.value ? 'primary' : 'default'} 
+            style={{marginBottom: 10}} 
+            onClick={() => setValue(item)}
+            >
+            <FormattedMessage id={`Wizard.items.distribution.options.${item.value}.label`} />
+        </bs.Button>
+        )
+      }
+      </bs.ButtonGroup>
+    </bs.Col>
+  );
+}
+
+function SetGoalItem (props) {
+  const { value, setValue } = props;
+  return (
+    <bs.Col md={6}>
+      <span style={{ float: 'left', fontSize: '3em', height: '100%', marginRight: 10 }}>-</span>
+      <bs.Input 
+        type="number" 
+        min='0'
+        max='100'
+        step='0.01'
+        value={parseFloat(value.value).toFixed(2)} 
+        bsSize="large" 
+        style={{ float: 'left', width: '60%', height: '100%', fontSize: '2.8em' }} 
+        onChange={(e) => setValue({value: e.target.value, label: '-' + e.target.value + ' %'})}
+      />
+      <span style={{ float: 'left', marginLeft: 10, fontSize: '2.2em' }}>%</span>
+    </bs.Col>
+  );
+}
+
+function SelectSavingsScenario (props) {
+  const { value, setValue, items } = props;
+  const scenarios = items.filter(scenario => scenario.completedOn != null)
+  .map(scenario => {
+    //const paramsShort = util.getFriendlyParams(scenario.parameters, 'short')
+    //    .map(x => `${x.key}: ${x.value}`).join(', ');
+    return { 
+      label: scenario.name, 
+      value: scenario.id, 
+      parameters: scenario.parameters 
     };
-  },
-  validate: function() {
-    const distribution = this.props.getValue() ? this.props.getValue().value : null;
-    
-    if (!distribution) {
-      throw 'A method must be selected';
-    }
-    else if (distribution != 'equally' && distribution != 'fairly'){
-      throw 'Select between equally or fairly';
-    }
-    
-  },
-  render: function() {
-    const { setValue, id } = this.props;
-    return (
-      <div>
-        <bs.ButtonGroup vertical block>
-            <bs.Button bsStyle='primary' style={{marginBottom: 10}} onClick={() => setValue(id, {value: 'equally', label: 'Equally'})}>Equally</bs.Button>
-            <bs.Button bsStyle='success' style={{marginBottom: 10}} onClick={() => setValue(id, {value: 'fairly', label: 'Fairly'})}>Fairly</bs.Button>
-        </bs.ButtonGroup>
-      </div>
-    );
-  }
-});
+    });
+  return (
+    <bs.Col md={6}>
+      <Select
+        bsSize="large"
+        name='scenario-select'
+        multi={false}
+        options={scenarios}
+        value={value}
+        onChange={(val) => val != null ? setValue(val) : setValue({}) }
+      />
+    </bs.Col>
+  );
+}
 
-var SetGoalItem = React.createClass({
-  validate: function() {
-    const { getValue } = this.props;
-    const value = getValue() ? getValue().value : null; 
-    if (isNaN(value)) {
-      throw 'Goal needs to be a number';
-    }
-    else if (value >= 0) {
-      throw 'Goal needs to be negative';
-    }
-  },
-  render: function() {
-    const { getValue, setValue, id } = this.props;
-    const goal = getValue() ? getValue().value : null; 
-    return (
-      <div>
-        <bs.Input type="text" placeholder='Enter goal percentage' value={goal} onChange={(e) => setValue(id, {value: e.target.value, label: e.target.value + ' %'})}/>
-      </div>
-    );
-  }
-});
-
-var SelectSavingsPotentialItem = React.createClass({
-  validate: function() {
-    const { getValue } = this.props;
-    const value = getValue() ? getValue().value : null;
-    if (!value) {
-      throw 'A predefined scenario must be selected';
-    }
-  },
-  render: function() {
-    const { getValue, setValue, items, id } = this.props;
-    const value = getValue(); 
-    const scenarios = items.filter(scenario => scenario.completedOn != null).map(scenario => ({ label: scenario.name + ' ('+scenario.parameters +')', value: scenario.id, parameters: scenario.parameters }));
-    return (
-      <div>
-        <Select
-          name='scenario-select'
-          multi={false}
-          options={scenarios}
-          value={value}
-          onChange={(val) => setValue(id, val) }
+function SetSavingsPercentageItem (props) {
+  const { value, setValue } = props;
+  return (
+    <div>
+      <bs.Col md={6}>
+        <bs.Input 
+          type='number'
+          min='0'
+          max='100'
+          step='0.01'
+          value={parseFloat(value.value).toFixed(2)} 
+          bsSize='large'
+          style={{ float: 'left', width: '60%', height: '100%', fontSize: '2.8em' }} 
+          onChange={(e) => setValue({value: e.target.value, label: e.target.value + ' %'})}
         />
-      </div>
-    );
-  }
-});
+      <span style={{ float: 'left', marginLeft: 10, fontSize: '1.8em' }}>%</span>
+    </bs.Col>
+    <bs.Col md={6} style={{ textAlign: 'left' }}>
+      <h3><FormattedMessage id='Wizard.items.savings.help' /></h3>
+    </bs.Col>
+    </div>
+  );
+}
 
-var SetSavingsPercentageItem = React.createClass({
-  validate: function() {
-    const { getValue } = this.props;
-    const value = getValue() ? getValue().value : null;
-    if (value <= 0 || value > 100) {
-      throw 'Savings expectation needs to be between 0 and 100';
-    }
-  },
-  render: function() {
-    const { getValue, setValue, id } = this.props;
-    const value = getValue() ? getValue().value : null;
-    return (
-      <div>
-        <bs.Input type="text" placeholder='Enter savings percentage' value={value} onChange={(e) => setValue(id, {value: e.target.value, label: e.target.value + ' %'} )}/>
-      </div>
-    );
-  }
-});
-
-var SelectBudgetType = React.createClass({
-  validate: function() {
-    const { getValue } = this.props;
-    const value = getValue() ? getValue().value : null;
-    if (!value) {
-      throw 'A budget type must be selected';
-    }
-  },
-  render: function() {
-    const { setValue, id } = this.props;
-    //const value = getValue() ? getValue().value : null;
-    return (
-      <div>
-        <bs.Button bsStyle='primary' bsSize='large' style={{marginBottom: 10}} onClick={() => { setValue(id, {value: 'savings', label: 'Savings'}); }} block>Savings scenario</bs.Button>
-        <bs.Button bsStyle='success' bsSize='large' style={{marginBottom: 10}} onClick={() => { setValue(id, {value:'estimate', label:'Estimate'}); }} block>Estimate budget</bs.Button>
-      </div>
-    );
-  }
-});
+function SelectBudgetType (props) {
+  const { value, setValue, intl } = props;
+  const budgetTypes = [
+    {value: 'scenario', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.scenario.value' })}, 
+    {value: 'estimate', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.estimate.value' })}
+  ];
+  return (
+    <bs.Col md={5}>
+      {
+        budgetTypes.map(budget =>  
+          <bs.Button 
+            key={budget.value}
+            bsStyle={budget.value === value.value ? 'primary' : 'default'} 
+            bsSize='large' 
+            style={{marginBottom: 10}} 
+            onClick={() => setValue(budget)} 
+            block
+            >
+            <FormattedMessage id={`Wizard.items.budgetType.options.${budget.value}.label`} />
+          </bs.Button>
+          )
+      }
+    </bs.Col>
+  );
+}
 
 module.exports = {
   SetNameItem,
@@ -453,7 +458,7 @@ module.exports = {
   WhenItem,
   DistributionItem,
   SetGoalItem,
-  SelectSavingsPotentialItem,
+  SelectSavingsScenario,
   SetSavingsPercentageItem,
-  SelectBudgetType
+  SelectBudgetType,
 }; 
