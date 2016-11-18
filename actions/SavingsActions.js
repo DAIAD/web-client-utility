@@ -1,13 +1,6 @@
 var types = require('../constants/SavingsActionTypes');
 
 
-const setValidationError  = function (error) {
-  return {
-    type: types.SAVINGS_SET_VALIDATION_ERROR,
-    error
-  }
-};
-
 const addSavingsScenario = function (values) {
   return function(dispatch, getState) {
     const profile = getState().session.profile;
@@ -28,7 +21,7 @@ const addSavingsScenario = function (values) {
     const newScenario = {
       type: types.SAVINGS_ADD_SCENARIO,
       options: {
-        name: values.name.value,
+        name: values.name.label,
         id,
         user,
         parameters:values,
@@ -63,7 +56,6 @@ const setSearchFilter = function(searchFilter) {
 }
 
 module.exports = {
-  setValidationError,
   addSavingsScenario,
   removeSavingsScenario,
   confirmRemoveScenario,

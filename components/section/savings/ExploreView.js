@@ -2,12 +2,13 @@ var React = require('react');
 var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
 
-var { WidgetPanel } = require('../../WidgetComponent');
+var { Widget } = require('../../WidgetComponent');
 var theme = require('../../chart/themes/blue');
 
 function ExploreScenario (props) {
   const { scenario, clusters, groups } = props;
-  const { potential, user, createdOn, completedOn, paramsLong } = scenario;
+  const { potential, user, createdOn, completedOn, paramsLong, params } = scenario;
+  console.log('params::', typeof(params));
   const completed = scenario.completedOn != null;
   
   const widgets = [{
@@ -17,12 +18,21 @@ function ExploreScenario (props) {
     highlight: null,
     info: [
       <span><b>User:</b> { user } </span>,
-      <span><b>Parameters:</b> { paramsLong } </span>,
       <span><b>Created on:</b> { createdOn ? createdOn.toString() : '-'}</span>,
       <span><b>Completed on:</b> { completedOn ? completedOn.toString() : '-'}</span>,
       <span><b>Completed:</b> {completed ? 'Yes' : 'No'}</span>
     ]
-  }];
+  },
+  {
+    id: 2,
+    display: 'stat',
+    title: 'Parameters',
+    highlight: null,
+    info: params.map(p =>
+      <span><b>{p.key}:</b> {p.value}</span>
+    )
+  }
+  ];
 
   if (completed) {
     widgets.push({
@@ -38,7 +48,13 @@ function ExploreScenario (props) {
   return (
     <div>
       <bs.Row>
-        <WidgetPanel widgets={widgets} />
+        {
+          widgets.map(widget => (
+            <div key={widget.id} style={{float: 'left', width: '40%', margin: 20}}>
+              <Widget widget={widget} />
+            </div>
+          ))
+        }
       </bs.Row>
 
       <bs.Row> 
@@ -84,7 +100,7 @@ var SavingsPotentialExplore = React.createClass({
     const scenario = scenarios.find(scenario => scenario.id === parseInt(id));
     if (scenario == null) {
       return (
-        <div>
+        <bs.Panel header='Oops'>
           <bs.Row>
             <bs.Col md={6}>
               <h4>Sorry, savings scenario not found.</h4>
@@ -93,14 +109,13 @@ var SavingsPotentialExplore = React.createClass({
               <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
             </bs.Col>
           </bs.Row> 
-        </div>
+        </bs.Panel>
       );
     } 
     return (
-      <div>
+      <bs.Panel header={`Explore ${scenario.name}`}>
         <bs.Row>
           <bs.Col md={6}>
-            <h4>Explore {scenario.name}</h4> 
         </bs.Col>
         <bs.Col md={6} style={{textAlign: 'right'}}>
           <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
@@ -112,7 +127,7 @@ var SavingsPotentialExplore = React.createClass({
           groups={groups}
           scenario={scenario}
         />
-        </div>
+      </bs.Panel>
     );
   }
 });

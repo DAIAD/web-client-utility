@@ -3,6 +3,7 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var bs = require('react-bootstrap');
 var { push } = require('react-router-redux');
+var { injectIntl } = require('react-intl');
 
 var Actions = require('../../../actions/SavingsActions');
 var Table = require('../../../components/Table');
@@ -22,11 +23,9 @@ function SavingsPotential (props) {
       </div>
       <div className='row'>
         <div className='col-md-12 col-sm-12' style={{marginTop: 10}}>
-          <bs.Panel header='Savings scenarios'>
-            {
-              React.cloneElement(children, props)
-            }
-        </bs.Panel>
+          {
+            React.cloneElement(children, props)
+          }
         </div>
       </div> 
     </div>
@@ -76,9 +75,9 @@ function mapStateToProps(state) {
        paramsShort: util.getFriendlyParams(scenario.parameters, 'short')
         .map(x => `${x.key}: ${x.value}`).join(', '),
        paramsLong: util.getFriendlyParams(scenario.parameters, 'long')
-       .map(x => `${x.key}: ${x.value}`).join(', ')
+       .map(x => `${x.key}: ${x.value}`).join(', '),
+       params: util.getFriendlyParams(scenario.parameters, 'long')
      })),
-
      removeScenario: state.savings.scenarios.find(s => s.id === state.savings.removeScenario),
      searchFilter: state.savings.searchFilter,
      validationError: state.savings.validationError,
@@ -127,44 +126,39 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     {
       name: 'paramsShort',
       title: 'Parameters',
-    //  width: 150
     },
     {
       name: 'createdOn',
-      title: 'Created on',
+      title: 'Created',
       type: 'datetime',
-      width: 100
     }, 
     {
       name: 'completedOn',
-      title: 'Finished on',
+      title: 'Finished',
       type: 'datetime',
-      width: 100
-    }, 
-    {
-      name: 'completed',
-      title: 'Completed',
-      type: 'action',
-      icon: function(field, row) {
-        return row.completedOn !=null ? 'check' : '';
-      },
-      handler: function(field, row) { return; }
     }, 
     {
       name : 'explore',
       title: 'Explore',
       type : 'action',
       icon : 'info-circle',
+      style: {
+        textAlign: 'center',
+        fontSize: '1.3em'
+      },
       handler : (function(field, row) {
         dispatchProps.actions.goToExploreView(row.id);
       }),
-      visible : true
-    }, 
+    },
     {
       name : 'delete',
       title: 'Delete',
       type : 'action',
       icon : 'remove',
+      style: {
+        textAlign: 'center',
+        fontSize: '1.0em'
+      },
       handler : (function(field, row) {
         dispatchProps.actions.confirmRemoveScenario(row.id);
       }),
@@ -176,12 +170,12 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       size: 10,
       count: filteredScenarios.length || 0,
       mode: Table.PAGING_CLIENT_SIDE
-    }    
+      } 
   };
   
   const tableStyle = {
     row : {
-      rowHeight: 70
+      rowHeight: 70,
     }
   }; 
     
@@ -201,4 +195,5 @@ function matches(str1, str2) {
 SavingsPotential.icon = 'percent';
 SavingsPotential.title = 'Section.Savings';
 
-module.exports = connect(mapStateToProps, mapDispatchToProps, mergeProps)(SavingsPotential);
+const SavingsPotentialContainer = connect(mapStateToProps, mapDispatchToProps, mergeProps)(SavingsPotential);
+module.exports = injectIntl(SavingsPotentialContainer);

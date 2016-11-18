@@ -2,7 +2,6 @@ var mirrorToPath = require('../helpers/path-mirror.js');
 
 var types = mirrorToPath({
 
-  SAVINGS_SET_VALIDATION_ERROR: null,
   SAVINGS_ADD_SCENARIO: null,
   SAVINGS_REMOVE_SCENARIO: null,
   SAVINGS_UPDATE_SCENARIO: null,

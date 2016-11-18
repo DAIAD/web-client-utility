@@ -1,31 +1,50 @@
 var React = require('react');
 
 function WidgetPanel (props) {
-  const { widgets, intl } = props;
+  const { rows, intl } = props;
   return (
-    <div className='report-widgets'>
+    <table>
+      <tr>
+        <th>Goal</th>
+        <th>Savings</th>
+        <th>Affected</th>
+      </tr>
        {
-         widgets.map(function(widget) {
+         rows.map(function(row) {
            return (
-             <div key={widget.id} className='widget'>
-               <Widget widget={widget} intl={intl} /> 
-           </div>
-           );
+             <tr key={row.id}>
+               {row.title}
+               {
+                 row.widgets.map(function(widget) {
+                   return (
+                     <td key={widget.id}>
+                       <Widget widget={widget} intl={intl} /> 
+                   </td>
+                   );
+                })
+               }
+             </tr>
+             );
          })
        }
-     </div>
+     </table>
   );
 }
 
 function Widget (props) {
   const widget = props.widget;
-  const { error, display,title, footer } = widget;
+  const { error, display, title, footer } = widget;
   //const _t = intl.formatMessage;
   return (
     <div className='infobox'>
-      <div className='infobox-header'>
-        <h4>{title}</h4>
-      </div>
+        {
+          title ? 
+           <div className='infobox-header'>
+             <h4>{title}</h4>
+           </div>
+           :
+            <div />
+        }
       <div className='infobox-body'>
          {
            (() => {
@@ -57,9 +76,6 @@ function Widget (props) {
 
 function StatBox (props) {
   const { highlight, info } = props;
-
-  //const arrowClass = better?"fa-arrow-down green":"fa-arrow-up red";
-  //const bow = (better==null || comparePercentage == null) ? false : true;
   return (
     <div>  
       <div style={{float: 'left', width: highlight ? (info && info.length > 0 ? '33%' : '100%') : '0%'}}>
@@ -81,5 +97,6 @@ function StatBox (props) {
 }
 
 module.exports = {
-  WidgetPanel
+  WidgetPanel,
+  Widget
 };

@@ -1,7 +1,6 @@
 var types = require('../constants/SavingsActionTypes');
 
 const initialState = {
-  validationError: null,
   searchFilter: null,
   removeScenario: null,
   scenarios: [{
@@ -18,7 +17,7 @@ const initialState = {
        id: 2,
        name: 'Scenario 2',
        user: 'foofootos',
-       parameters: {who: {value: 'all', label: 'All'}, where: [{value: 'blabla', label: 'Bla'}], when: {value: 'last', label:'Last year'}},
+       parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'Nowhere'}, when: {value: 'last', label:'Last year'}},
        createdOn: new Date('1990-01-01'),
        completedOn: new Date('1999-01-01'),
        potential: '25M lt'
@@ -33,11 +32,6 @@ var savings = function (state=initialState, action) {
       return Object.assign({}, state, {
        removeScenario: action.id
       }); 
-
-    case types.SAVINGS_SET_VALIDATION_ERROR: 
-      return Object.assign({}, state, {
-        validationError: action.error
-      });
 
     case types.SAVINGS_ADD_SCENARIO: { 
       const newScenarios = [...state.scenarios, {...action.options}];
