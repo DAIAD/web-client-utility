@@ -199,6 +199,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
 
     const activeBudgets = stateProps.budgets.filter(b => b.active);
 
+
     //active budgets schema
     const activeBudgetsFields = [
       {

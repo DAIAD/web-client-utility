@@ -172,19 +172,19 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
 
     const tableData = filteredScenarios || [];
 
-  const tableStyle = {
-    row : {
-      rowHeight: 70
-    }
-  }; 
-    
+
+    const tableSorter = {
+      defaultSort: 'completedOn',
+      defaultOrder: 'desc'
+    };
+
   return {
     ...ownProps,
     ...dispatchProps,
     ...stateProps,
     tableData,
     tableFields,
-    tableStyle,
+    tableSorter,
   };
 }
 
