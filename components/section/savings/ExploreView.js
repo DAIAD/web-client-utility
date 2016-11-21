@@ -1,16 +1,16 @@
 var React = require('react');
 var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
+var { FormattedTime } = require('react-intl');
 
 var { Widget } = require('../../WidgetComponent');
 var theme = require('../../chart/themes/blue');
 
 function ExploreScenario (props) {
   const { scenario, clusters, groups } = props;
-  const { potential, user, createdOn, completedOn, paramsLong, params } = scenario;
-  console.log('params::', typeof(params));
+  const { potential, user, createdOn, completedOn, params } = scenario;
   const completed = scenario.completedOn != null;
-  
+
   const widgets = [{
     id: 1,
     display: 'stat',
@@ -18,9 +18,8 @@ function ExploreScenario (props) {
     highlight: null,
     info: [
       <span><b>User:</b> { user } </span>,
-      <span><b>Created on:</b> { createdOn ? createdOn.toString() : '-'}</span>,
-      <span><b>Completed on:</b> { completedOn ? completedOn.toString() : '-'}</span>,
-      <span><b>Completed:</b> {completed ? 'Yes' : 'No'}</span>
+      <span><b>Created on:</b> { createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
+      <span><b>Completed on:</b> { completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
     ]
   },
   {
@@ -36,7 +35,7 @@ function ExploreScenario (props) {
 
   if (completed) {
     widgets.push({
-      id: 2,
+      id: 3,
       display: 'stat',
       title: 'Savings Potential',
       highlight: potential,
@@ -60,8 +59,9 @@ function ExploreScenario (props) {
       <bs.Row> 
       {
         completed ?
-          clusters.map(cluster =>  
+          clusters.map((cluster, idx) =>  
             <echarts.LineChart
+              key={idx}
               width='100%'
               height={200}
               theme={theme}

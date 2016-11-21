@@ -1,6 +1,7 @@
 var React = require('react');
 var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
+var { FormattedTime } = require('react-intl');
 
 var { WidgetPanel, Widget } = require('../../WidgetComponent');
 var Modal = require('../../Modal');
@@ -9,7 +10,7 @@ var theme = require('../../chart/themes/blue');
 function ExploreBudget (props) {
   const { budget, clusters, groups, actions } = props;
   const { confirmSetBudget, confirmResetBudget, goToActiveView } = actions;
-  const { id, name, potential, user, createdOn, completedOn, parameters, paramsLong, active } = budget;
+  const { id, name, potential, user, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
   const goal = parameters.goal;
   const completed = budget.completedOn != null;
 
@@ -19,14 +20,22 @@ function ExploreBudget (props) {
     title: 'Details',
     highlight: goal && goal.values ? goal.values.label : null,
     info: [
-      <span><b>User:</b> { user } </span>,
-      <span><b>Active:</b> { active ? 'Yes' : 'No' } </span>,
-      <span><b>Parameters:</b> { paramsLong } </span>,
-      <span><b>Created on:</b> { createdOn ? createdOn.toString() : '-'}</span>,
-      <span><b>Completed on:</b> { completedOn ? completedOn.toString() : '-'}</span>,
-      <span><b>Completed:</b> {completed ? 'Yes' : 'No'}</span>
+      <span><b>Created by:</b> { user } </span>,
+      <span><b>Created on:</b> { createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
+      <span><b>Completed on:</b> { completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
+      <span><b>Activated on:</b> { activatedOn ? <FormattedTime value={activatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
     ]
-  }];
+  },
+  {
+    id: 2,
+    display: 'stat',
+    title: 'Parameters',
+    highlight: null,
+    info: params.map(p =>
+      <span><b>{p.key}:</b> {p.value}</span>
+    )
+  }
+  ];
 
   return (
     <div>
@@ -45,6 +54,7 @@ function ExploreBudget (props) {
       {
         active && completed ?
           <div>            
+            <span style={{ float: 'left', fontSize: '2em', marginLeft: 25 }}>Active</span>
             <bs.Button 
               bsStyle='danger' 
               style={{float: 'right', marginRight: 25}}
