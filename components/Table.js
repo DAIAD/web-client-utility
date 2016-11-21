@@ -139,7 +139,11 @@ var Table = React.createClass({
     const visibleFields = fields.filter(field => !field.hidden);
 
     const filteredData = (pager && pager.size && pager.mode && pager.mode === PAGING_CLIENT_SIDE) ? 
-      data.sort((a, b) => order === 'asc' ? a[sort] > b[sort] : a[sort] <= b[sort])
+      data.sort((a, b) => {
+        const compA = normalize(a);
+        const compB = normalize(b);
+        return order === 'asc' ? compA[sort] > compB[sort] : compA[sort] <= compB[sort];
+      })
       .filter((row, idx) => (
         idx >= (activePage - 1) * pager.size && 
         idx < (activePage) * pager.size))
@@ -417,6 +421,7 @@ function getPropertyValue(property) {
     property.apply(null, args) : property;
 }
 
+
 function wrapWithLink(content, link, row) {
   return link ? 
     <Link to={formatLink(getPropertyValue(link, row), row)}>{content}</Link>
@@ -430,6 +435,12 @@ function formatLink (route, row) {
           , route);
 }
 
+function normalize (input) {
+  if (typeof input === 'string') {
+    return input.toLowerCase();
+  }
+  return input;
+}
 
 const IntlTable =  injectIntl(Table);
 
