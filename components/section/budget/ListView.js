@@ -33,7 +33,7 @@ function RemoveConfirmation (props) {
 }
 
 function BudgetsList (props) {
-  const { groups, clusters, segments, areas, budgetFields, budgetData, actions, budgetToRemove, searchFilter } = props;
+  const { groups, clusters, segments, areas, budgetFields, budgetData, budgetSorter, actions, budgetToRemove, searchFilter } = props;
   const { removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView } = actions;
   return (
     <bs.Panel header='Budgets'>
@@ -57,7 +57,9 @@ function BudgetsList (props) {
      </bs.Row>
         <hr/>
         <Table  
+          sortable
           fields={budgetFields}
+          sorter={budgetSorter}
           data={budgetData} 
           template={{empty : (<span>{ 'No data found.' }</span>)}}
         />

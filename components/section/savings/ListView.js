@@ -33,7 +33,7 @@ function RemoveConfirmation (props) {
 }
 
 function SavingsPotentialList (props) {
-  const { tableData, tableFields, tableStyle, actions, removeScenario, searchFilter } = props;
+  const { tableData, tableFields, tableStyle, tableSorter, actions, removeScenario, searchFilter } = props;
   const { removeSavingsScenario, confirmRemoveScenario, setSearchFilter, goToAddView } = actions;
   return (
     <bs.Panel header='Scenarios'>
@@ -56,10 +56,11 @@ function SavingsPotentialList (props) {
      </bs.Row>
         <hr/>
         <Table  
+          sortable
           data={tableData} 
           fields={tableFields}
+          sorter={tableSorter}
           template={{empty : (<span>{ 'No data found.' }</span>)}}
-          style={tableStyle}
         />
         
       <RemoveConfirmation

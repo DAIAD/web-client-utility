@@ -166,29 +166,18 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
 
     const tableData = filteredScenarios || [];
 
-    /*
-    pager: {
-      index: 0,
-      size: 10,
-      count: filteredScenarios.length || 0,
-      mode: Table.PAGING_CLIENT_SIDE
-      } 
-      */   
-    //};
-  
-  const tableStyle = {
-    row : {
-      rowHeight: 70,
-    }
-  }; 
-    
+    const tableSorter = {
+      defaultSort: 'completedOn',
+      defaultOrder: 'desc'
+    };
+
   return {
     ...ownProps,
     ...dispatchProps,
     ...stateProps,
     tableData,
     tableFields,
-    tableStyle,
+    tableSorter,
   };
 }
 

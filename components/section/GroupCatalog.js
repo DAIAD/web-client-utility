@@ -125,13 +125,16 @@ var GroupCatalog  = React.createClass({
     
     const tableData = this.props.groupCatalog.data.filtered || [];
     
-    const tablePager =  {
+    const tablePager = {
       index: 0,
       size: 10,
-      count: this.props.groupCatalog.data.filtered.length || 0,
+      //count: this.props.groupCatalog.data.filtered.length || 0,
       //onPageIndexChange: this.onPageIndexChange,
-      mode: Table.PAGING_CLIENT_SIDE
     };
+    const tableSorter = {
+      defaultSort: 'size',
+      defaultOrder: 'desc'
+    }; 
 
     const tableStyle = {
       row : {
@@ -307,9 +310,11 @@ var GroupCatalog  = React.createClass({
                 {filterOptions}
                 <Bootstrap.ListGroupItem>
                   <Table
+                    sortable 
                     fields={tableFields}
                     data={tableData}
                     pager={tablePager} 
+                    sorter={tableSorter}
                     template={{ empty: dataNotFound }}
                     style={tableStyle}
                   />

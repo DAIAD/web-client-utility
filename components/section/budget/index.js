@@ -176,7 +176,6 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       }),
       visible : (function(field, row) {
         return true;
-      //  return (row.type == 'SET');
       })
     }, 
     {
@@ -191,6 +190,11 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     }];
 
     const budgetData = filteredBudgets || [];
+
+    const budgetSorter = {
+      defaultSort: 'completedOn',
+      defaultOrder: 'desc'
+    };
 
     const active = stateProps.budgets
     .filter(b => b.active)
@@ -260,6 +264,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       filteredBudgets,
       budgetFields,
       budgetData,
+      budgetSorter,
       activeBudgetsFields,
       activeBudgetsData,
       activeBudgetsStyle,
