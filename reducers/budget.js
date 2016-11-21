@@ -9,10 +9,9 @@ const initialState = {
        id: 1,
        name: 'Budget 1',
        user: 'foofootos',
-       active: true,
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}, goal: {value: -5, label: '-5 %'}},
        createdOn: new Date("1990-01-01"),
-       setOn: new Date("1999-01-01"),
+       activatedOn: new Date("1999-01-01"),
        completedOn: new Date()
      },
      {
@@ -30,7 +29,7 @@ const initialState = {
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}, goal: {value: -3, label: '-3 %'}},
        createdOn: new Date('1990-01-01'),
        completedOn: new Date('1999-01-01'),
-       setOn: new Date("1992-01-01"),
+       activatedOn: null,
      }
   ] 
 };
@@ -66,14 +65,14 @@ var budget = function (state=initialState, action) {
     }
 
     case types.BUDGET_SET_ACTIVE: {
-      const budgets = [...state.scenarios].map(budget => budget.id === action.id ? ({...budget, active:true}) : budget);
+      const budgets = [...state.scenarios].map(budget => budget.id === action.id ? ({...budget, activatedOn:action.date}) : budget);
       return Object.assign({}, state, {
         scenarios: budgets
       });
     }
 
     case types.BUDGET_SET_INACTIVE: {
-      const budgets = [...state.scenarios].map(budget => budget.id === action.id ? ({...budget, active:false}) : budget);
+      const budgets = [...state.scenarios].map(budget => budget.id === action.id ? ({...budget, activatedOn: null}) : budget);
       return Object.assign({}, state, {
         scenarios: budgets
       });

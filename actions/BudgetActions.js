@@ -43,7 +43,8 @@ const removeBudgetScenario = function(id) {
 const setActiveBudget = function(id) {
   return {
     type: types.BUDGET_SET_ACTIVE,
-    id
+    id,
+    date: new Date()
   };
 };
 

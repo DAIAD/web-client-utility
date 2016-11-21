@@ -8,7 +8,7 @@ var util = require('../../../helpers/wizard');
 var { injectIntl, FormattedDate } = require('react-intl');
 
 var Table = require('../../../components/Table');
-var { Widget } = require('../../WidgetComponent');
+//var { Widget } = require('../../WidgetComponent');
 var BudgetActions = require('../../../actions/BudgetActions');
 var Breadcrumb = require('../../../components/Breadcrumb');
 
@@ -81,10 +81,12 @@ function mapStateToProps(state) {
      savings: state.savings.scenarios,
      budgets: state.budget.scenarios.map(scenario => ({
        ...scenario, 
+       active: scenario.activatedOn != null,
        paramsShort: util.getFriendlyParams(scenario.parameters, 'short')
         .map(x => `${x.key}: ${x.value}`).join(', '),
        paramsLong: util.getFriendlyParams(scenario.parameters, 'long')
-       .map(x => `${x.key}: ${x.value}`).join(', ')
+       .map(x => `${x.key}: ${x.value}`).join(', '),
+       params: util.getFriendlyParams(scenario.parameters, 'long')
      })),
      wizardType: state.budget.wizardType,
      initialActiveIdx: state.budget.initialActiveIdx,
@@ -158,7 +160,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       type: 'datetime',
     }, 
     {
-      name: 'setOn',
+      name: 'activatedOn',
       title: 'Activated',
       type: 'datetime',
     },
@@ -196,45 +198,27 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       defaultOrder: 'desc'
     };
 
-    const active = stateProps.budgets
-    .filter(b => b.active)
-    .map(b => ({ 
-      name: b.name,
-      goal: (
-        <Widget widget={{
-            display: 'stat', 
-            title: null,
-            highlight: b.parameters.goal ? b.parameters.goal.label : null, 
-            info: ['12M lt less than 2014', 'Max 16% | Min 2%', 'Group: Pilot A', '12300 Consumers'],
-            footer: <span>Set: <FormattedDate value={b.setOn} day='numeric' month='numeric' year='numeric' /></span>
-          }} 
-        />
-      ),
-      savings: (
-        <Widget widget={{
-          display: 'stat',
-          title: null,
-          highlight: '-2%',
-          info: ['6M lt less than 2014', 'Max 22% | Min -10%', 'Active for 4.6 months'],
-          footer: 'Updated: 16/3/2016'
-        }}
-      />
-     ),
-     affected: (
-       <Widget widget={{
-         display: 'stat',
-         title: null,
-         highlight: '-5%',
-         info: ['300 Consumers changed to other budgets', 'Original: 10000', 'Current: 9700'],
-         footer: 'Updated: 16/3/2016'
-       }}
-     />
-     )
-    })
-        
-    );
+    const activeBudgets = stateProps.budgets.filter(b => b.active);
+
     //active budgets schema
-    const activeBudgetsFields = [{
+    const activeBudgetsFields = [
+      {
+        name: 'id',
+        title: 'id',
+        hidden: true
+      },
+      {
+        name: 'name',
+        title: 'Name',
+        hidden: true,
+      },
+      {
+        name: 'activatedOn', 
+        title: 'Activated', 
+        type: 'datetime',
+        hidden: true,
+      },
+      {
         name: 'goal',
         title: 'Goal',
         type: 'node',
@@ -250,13 +234,19 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         type: 'node',
       }];
 
-    const activeBudgetsData = active || [];
+      //const activeBudgetsData = active || [];
     
+    const activeBudgetsSorter = {
+      defaultSort: 'activatedOn',
+      defaultOrder: 'desc'
+    };
+
     var activeBudgetsStyle = {
-      row : {
-        height: 140
+      row: {
+        height: 200
       }
     };
+
     return {
       ...ownProps,
       ...dispatchProps,
@@ -266,7 +256,8 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       budgetData,
       budgetSorter,
       activeBudgetsFields,
-      activeBudgetsData,
+      activeBudgets,
+      activeBudgetsSorter,
       activeBudgetsStyle,
       budgetToRemove: stateProps.budgets.find(scenario => scenario.id === stateProps.budgetToRemoveIdx),
       budgetToSet: stateProps.budgets.find(scenario => scenario.id === stateProps.confirmSetBudgetIdx),
