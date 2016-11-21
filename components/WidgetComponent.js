@@ -1,42 +1,12 @@
 var React = require('react');
-
-function WidgetPanel (props) {
-  const { rows, intl } = props;
-  return (
-    <table>
-      <tr>
-        <th>Goal</th>
-        <th>Savings</th>
-        <th>Affected</th>
-      </tr>
-       {
-         rows.map(function(row) {
-           return (
-             <tr key={row.id}>
-               {row.title}
-               {
-                 row.widgets.map(function(widget) {
-                   return (
-                     <td key={widget.id}>
-                       <Widget widget={widget} intl={intl} /> 
-                   </td>
-                   );
-                })
-               }
-             </tr>
-             );
-         })
-       }
-     </table>
-  );
-}
+var echarts = require('react-echarts');
+var theme = require('./chart/themes/blue');
 
 function Widget (props) {
-  const widget = props.widget;
-  const { error, display, title, footer, style } = widget;
+  const { error, display, title, footer, style } = props;
   //const _t = intl.formatMessage;
   return (
-    <div className='infobox' style={style} >
+    <div className='infobox'>
         {
           title ? 
            <div className='infobox-header'>
@@ -54,12 +24,12 @@ function Widget (props) {
              else {
                if (display==='stat') {
                  return (
-                    <StatBox {...widget} />
+                    <Stat {...props} />
                  );
                }
                else if (display==='chart') {
                  return (
-                   <div {...widget} /> 
+                   <BarChart {...props} /> 
                    );
                }
                else return null;
@@ -74,19 +44,54 @@ function Widget (props) {
   );
 }
 
-function StatBox (props) {
-  const { highlight, info } = props;
+function BarChart(props) {
+  const { xAxis, yAxis, series, grid, style } = props;
   return (
-    <div>  
+    <echarts.LineChart
+      width={style.width ? style.width : '100%'}
+      height={style.height ? style.height : '100%'}
+      theme={theme}
+      xAxis={{
+        boundaryGap: true,
+        ...xAxis
+      }}
+      yAxis={{
+        formatter: y => (y.toString() + '%'),
+        numTicks: 3,
+        min: 0,
+        ...yAxis
+      }}
+      grid={{
+        x: '18%',
+        y: '-10%',
+        x2: '7%',
+        y2: '15%',
+        ...grid
+      }}
+      series={series}
+      invertAxis
+    />
+  );
+}
+
+function Stat (props) {
+  const { highlight, info, style } = props;
+  /*
+  const onlyHighlight = highlight && (!info || info.length === 0);
+  const onlyInfo = !highlight && info && info.length > 0;
+  const highlightAndInfo = highlight && info && info.length > 0;
+  */
+  return (
+    <div style={style}>
       <div style={{float: 'left', width: highlight ? (info && info.length > 0 ? '33%' : '100%') : '0%'}}>
         <h2>{highlight}</h2>
       </div>
       <div style={{float: 'left', width: info && info.length > 0 ? (highlight  ? '65%' : '100%') : '0%'}}>
         <div>
-          <ul style={{listStyle: 'unstyled'}}>
+          <ul style={{listStyle: 'none'}}>
           {
-            info.map(infoLine => (
-              <li>{infoLine}</li>
+            info.map((infoLine, idx) => (
+              <li key={idx}>{infoLine}</li>
               ))
           }
         </ul>
@@ -96,7 +101,4 @@ function StatBox (props) {
   );
 }
 
-module.exports = {
-  WidgetPanel,
-  Widget
-};
+module.exports = Widget;

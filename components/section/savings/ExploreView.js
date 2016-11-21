@@ -3,7 +3,7 @@ var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
 var { FormattedTime } = require('react-intl');
 
-var { Widget } = require('../../WidgetComponent');
+var Widget = require('../../WidgetComponent');
 var theme = require('../../chart/themes/blue');
 
 function ExploreScenario (props) {
@@ -42,6 +42,32 @@ function ExploreScenario (props) {
       info: [],
       footer: 'Set: 1/3/2016',
     });
+  
+    clusters.forEach((cluster, i) => {
+      widgets.push({
+        id: i + 4,
+        display: 'chart',
+        style: {
+          height: 250,
+          width: 450
+        },
+        yAxis: {
+          formatter: y => y.toString() + '%',
+        },
+        xAxis: {
+          name: cluster.label,
+          data: groups.filter(g => g.cluster === cluster.value).map(x => x.label)
+        },
+        series: [
+          {
+            name: '',
+            type: 'bar',
+            fill: 0.8,
+            data: groups.filter(g => g.cluster === cluster.value).map(x => Math.round(Math.random()*50))
+          }
+        ]
+      });
+    });
   }
 
   return (
@@ -49,45 +75,12 @@ function ExploreScenario (props) {
       <bs.Row>
         {
           widgets.map(widget => (
-            <div key={widget.id} style={{float: 'left', width: '40%', margin: 20}}>
-              <Widget widget={widget} />
+            <div key={widget.id} style={{float: 'left', margin: 20}}>
+              <Widget {...widget} />
             </div>
           ))
         }
       </bs.Row>
-
-      <bs.Row> 
-      {
-        completed ?
-          clusters.map((cluster, idx) =>  
-            <echarts.LineChart
-              key={idx}
-              width='100%'
-              height={200}
-              theme={theme}
-              xAxis={{
-                data: groups.filter(g => g.cluster === cluster.value).map(x => x.label),
-                boundaryGap: true, 
-              }}
-              yAxis={{
-                name: 'Savings potential: ' + cluster.label,
-                formatter: (y) => (y.toString() + '%'),
-                numTicks: 3,
-                min: 0,
-              }}
-              series={[
-                {
-                  name: '',
-                  type: 'bar',
-                  fill: 0.8,
-                  data: groups.filter(g => g.cluster === cluster.value).map(x => Math.round(Math.random()*50))
-                }]
-              }
-            />
-            )
-              : <div/>
-      }
-    </bs.Row>
   </div> 
   );
 }

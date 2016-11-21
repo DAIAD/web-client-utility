@@ -8,7 +8,6 @@ var util = require('../../../helpers/wizard');
 var { injectIntl, FormattedDate } = require('react-intl');
 
 var Table = require('../../../components/Table');
-//var { Widget } = require('../../WidgetComponent');
 var BudgetActions = require('../../../actions/BudgetActions');
 var Breadcrumb = require('../../../components/Breadcrumb');
 
@@ -223,7 +222,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         title: 'Goal',
         type: 'node',
         style: {
-          height: 200
+          height: 150
         }
       },
       {
@@ -231,7 +230,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         title: 'Savings',
         type: 'node',
         style: {
-          height: 200
+          height: 150
         }
       },
       {
@@ -239,7 +238,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         title: 'Affected',
         type: 'node',
         style: {
-          height: 200
+          height: 150
         }
       }];
 

@@ -3,7 +3,7 @@ var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
 var { FormattedTime } = require('react-intl');
 
-var { WidgetPanel, Widget } = require('../../WidgetComponent');
+var Widget = require('../../WidgetComponent');
 var Modal = require('../../Modal');
 var theme = require('../../chart/themes/blue');
 
@@ -36,6 +36,35 @@ function ExploreBudget (props) {
     )
   }
   ];
+
+  if (completed) {
+    clusters.forEach((cluster, i) => {
+
+      widgets.push({
+        id: i + 3,
+        display: 'chart',
+        style: {
+          height: 200,
+          width: 300
+        },
+        yAxis: {
+          formatter: y => y.toString() + '%',
+        },
+        xAxis: {
+          name: cluster.label,
+          data: groups.filter(g => g.cluster === cluster.value).map(x => x.label)
+        },
+        series: [
+          {
+            name: '',
+            type: 'bar',
+            fill: 0.8,
+            data: groups.filter(g => g.cluster === cluster.value).map(x => Math.round(Math.random()*50))
+          }
+        ]
+      });
+    });
+  }
 
   return (
     <div>
@@ -79,44 +108,11 @@ function ExploreBudget (props) {
       {
         widgets.map((widget, i) => 
             <div key={widget.id} style={{float: 'left', width: '40%', margin: 20}}>
-              <Widget widget={widget} />
+              <Widget {...widget} />
             </div>
         )
       }
       </bs.Row>
-
-      <bs.Row> 
-      {
-        completed ?
-          clusters.map((cluster, i) =>  
-            <echarts.LineChart
-              key={i}
-              width='100%'
-              height={200}
-              theme={theme}
-              xAxis={{
-                data: groups.filter(g => g.cluster === cluster.value).map(x => x.label),
-                boundaryGap: true, 
-              }}
-              yAxis={{
-                name: 'Savings potential: ' + cluster.label,
-                formatter: (y) => (y.toString() + '%'),
-                numTicks: 3,
-                min: 0,
-              }}
-              series={[
-                {
-                  name: '',
-                  type: 'bar',
-                  fill: 0.8,
-                  data: groups.filter(g => g.cluster === cluster.value).map(x => Math.round(Math.random()*50))
-                }]
-              }
-            />
-            )
-              : <div/>
-      }
-    </bs.Row>
   </div> 
   );
 }
@@ -127,7 +123,6 @@ var BudgetExplore = React.createClass({
     const { goToListView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget } = actions;
     const { id } = params;
     const budget = budgets.find(budget => budget.id === parseInt(id));
-    console.log('confirm set?', budgetToSet);
     if (budget == null) {
       return (
         <bs.Panel header='Oops'>

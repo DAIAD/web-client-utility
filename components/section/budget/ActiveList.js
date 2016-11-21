@@ -6,16 +6,15 @@ var { Link } = require('react-router');
 var Table = require('../../Table');
 var { FormattedDate } = require('react-intl');
 
-var { WidgetPanel, Widget } = require('../../WidgetComponent');
+var Widget = require('../../WidgetComponent');
 
 function Goal (props) {
   const { budget, field } = props;
-  console.log('gpa;', field);
   const { name, id, parameters, activatedOn } = budget;
   return (
     <div>
       <Link to={`/budgets/${id}`}><h3>{name}</h3></Link>
-        <Widget widget={{
+        <Widget {...{
           display: 'stat', 
           title: null,
           highlight: parameters.goal ? parameters.goal.label : null, 
@@ -34,7 +33,7 @@ function Savings (props) {
   return (
     <div>
      <h3>&nbsp; </h3>
-      <Widget widget={{
+      <Widget {...{
         display: 'stat',
         title: null,
         highlight: '-2%',
@@ -53,7 +52,7 @@ function Affected (props) {
   return (
     <div>
        <h3>&nbsp; </h3>
-         <Widget widget={{
+         <Widget {...{
            display: 'stat',
            title: null,
            highlight: '-5%',
