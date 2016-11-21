@@ -222,16 +222,25 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         name: 'goal',
         title: 'Goal',
         type: 'node',
+        style: {
+          height: 200
+        }
       },
       {
         name: 'savings',
         title: 'Savings',
         type: 'node',
+        style: {
+          height: 200
+        }
       },
       {
         name: 'affected',
         title: 'Affected',
         type: 'node',
+        style: {
+          height: 200
+        }
       }];
 
       //const activeBudgetsData = active || [];

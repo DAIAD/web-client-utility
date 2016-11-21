@@ -33,10 +33,10 @@ function WidgetPanel (props) {
 
 function Widget (props) {
   const widget = props.widget;
-  const { error, display, title, footer } = widget;
+  const { error, display, title, footer, style } = widget;
   //const _t = intl.formatMessage;
   return (
-    <div className='infobox'>
+    <div className='infobox' style={style} >
         {
           title ? 
            <div className='infobox-header'>
