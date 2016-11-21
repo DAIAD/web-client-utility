@@ -14,13 +14,16 @@ const DEFAULT_PAGE = 1;
 var Table = React.createClass({
   getInitialState: function() {
     return {
-      activePage: this.props.defaultPage 
+      activePage: this.props.defaultPage,
+      sort: this.getSorter().defaultSort,
+      order: this.getSorter().defaultOrder
     };
   },
   
   getDefaultProps: function() {
     return {
       defaultPage: DEFAULT_PAGE,
+      sortable: false,
       data: [],
       fields: [], 
       template: {
@@ -30,14 +33,14 @@ var Table = React.createClass({
     };
   },
 
-  componentWillMount: function() {
-     
-   },
   componentDidMount: function() {
     if (this.props.pager && this.props.pager.mode === PAGING_SERVER_SIDE) {
       if (typeof this.props.pager.onPageIndexChange !== 'function') {
-        throw `onPageIndexChange function must be provided as property in pager object. Check Table`;
-      }  
+        throw `onPageIndexChange function must be provided as property in pager object for server side paging. Check Table`;
+      }
+      if (this.props.sortable && typeof this.props.sorter.onSortChange !== 'function') {
+        throw `onSortChange function must be provided as property in sorter object with server side paging. Check Table`;
+      }
     }
   },
 
@@ -79,6 +82,15 @@ var Table = React.createClass({
     };
   },
 
+  getSorter: function() {
+    const firstVisible = this.props.fields.find(it => !it.hidden);
+    return {
+      defaultSort: firstVisible ? firstVisible.name : null,
+      defaultOrder: 'asc',
+      ...this.props.sorter
+    };
+  },
+
   getPager: function() {
     return {
       size: 10,
@@ -89,13 +101,33 @@ var Table = React.createClass({
     };
   },
 
-  onPageIndexChange: function (event, selectedEvent) {
+  getSortOrderOnClick: function(key) {
+    if (this.state.sort === key) {
+      return this.state.order === 'asc' ? 'desc' : 'asc';
+    }
+    else {
+      return 'asc';
+    }
+  },
+
+  onSortChange: function(key) {
+    const order = this.getSortOrderOnClick(key);
+
+    if (typeof this.getSorter().onSortChange === 'function') {
+      this.getSorter().onSortChange(key, order);
+    }
+
+    this.setState({ sort: key, order });
+    this.onPageIndexChange(this.props.defaultPage); 
+  },
+
+  onPageIndexChange: function (index) {
     if (typeof this.props.pager.onPageIndexChange === 'function') {
-      this.props.pager.onPageIndexChange(selectedEvent.eventKey-1);
+      this.props.pager.onPageIndexChange(index-1);
     }
 
     this.setState({
-      activePage: selectedEvent.eventKey
+      activePage: index
     });
   },
 
@@ -119,17 +151,27 @@ var Table = React.createClass({
       Math.ceil(pager.count / pager.size) : 1;
       
     const visibleFields = fields.filter(field => !field.hidden);
+
     const filteredData = (pager && pager.size && pager.mode && pager.mode === PAGING_CLIENT_SIDE) ? 
-      data.filter((row, idx) => (
+      data.sort((a, b) => {
+        const compA = normalize(a);
+        const compB = normalize(b);
+        if (compA[sort] > compB[sort]) {
+          return order === 'asc' ? 1 : -1;
+        }
+        else if (compA[sort] < compB[sort]) {
+          return order === 'asc' ? -1 : 1;
+        }
+        return 0;
+      })
+      .filter((row, idx) => (
         idx >= (activePage - 1) * pager.size && 
         idx < (activePage) * pager.size))
         : 
           data;
 
     if((filteredData.length === 0) && (template.empty)) {
-      return(
-        template.empty
-      );
+      return template.empty;
     }
     return (
       <div className='clearfix'>
@@ -142,6 +184,10 @@ var Table = React.createClass({
               fields={visibleFields} 
               intl={intl}
               style={style.header}
+              sortable={sortable}
+              onSortChange={this.onSortChange}
+              activeSort={sort}
+              activeSortOrder={order}
             />
             <Body 
               fields={visibleFields}
@@ -193,25 +239,47 @@ function Pager (props) {
 }
 
 function Header (props) {
-  const { fields, intl, style } = props;
+  const { fields, intl, style, sortable, activeSort, activeSortOrder, onSortChange } = props;
   const _t = intl.formatMessage;
   return (
     <thead>
       <tr>
         {
-          fields.map(field => (
+          fields.map(field => 
             <th 
               key={field.name} 
               style={style}
             >
-              { field.title ? _t({ id: field.title }) : '' }
+            { 
+              wrapWithSort(field.title ? _t({ id: field.title }) : '',
+                     field, sortable, onSortChange, activeSort===field.name, activeSortOrder)
+            }
             </th>
-            ))
-            
+            )
         }
       </tr>
     </thead>
    );
+}
+
+function wrapWithSort (content, field, sortable, onSortChange, active, order) {
+  return (!sortable || field.type === 'action' || field.type === 'alterable-boolean') ? 
+    content
+      :
+        <a 
+          style={{ cursor: 'pointer' }} 
+          onClick={() => onSortChange(field.name)}>
+          {content}&nbsp;
+          {active ? 
+            (order === 'asc' ? 
+             <i className='fa fa-angle-up' /> 
+               : 
+                 <i className='fa fa-angle-down' />
+                 ) 
+                   :
+                     <i />
+          }
+        </a>;
 }
 
 function Body (props) {
@@ -251,7 +319,7 @@ function Row (props) {
 }
 
 function Cell (props) {
-  const { row, field, style:tableStyle } = props;
+  const { row, field } = props;
 
   const content = wrapWithLink(getCell(field, row), field.link, row);
 
@@ -370,11 +438,12 @@ function getCell (field, row) {
 }
 
 function getPropertyValue(property) {
-  //get all args after first
+  //all args after first
   const args = Array.prototype.slice.call(arguments, 1);
   return typeof property === 'function' ?
     property.apply(null, args) : property;
 }
+
 
 function wrapWithLink(content, link, row) {
   return link ? 
@@ -389,7 +458,16 @@ function formatLink (route, row) {
           , route);
 }
 
-Table.PAGING_CLIENT_SIDE = PAGING_CLIENT_SIDE;
-Table.PAGING_SERVER_SIDE = PAGING_SERVER_SIDE;
+function normalize (input) {
+  if (typeof input === 'string') {
+    return input.toLowerCase();
+  }
+  return input;
+}
 
-module.exports = injectIntl(Table);
+const IntlTable =  injectIntl(Table);
+
+IntlTable.PAGING_CLIENT_SIDE = PAGING_CLIENT_SIDE;
+IntlTable.PAGING_SERVER_SIDE = PAGING_SERVER_SIDE;
+
+module.exports = IntlTable;
