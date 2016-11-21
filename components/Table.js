@@ -73,7 +73,7 @@ var Table = React.createClass({
         float: 'right',
         ...this.props.style.pager
       },
-      row: this.props.style.row || (() => {}),
+      row: this.props.style.row,
     };
   },
 
@@ -300,14 +300,11 @@ function Cell (props) {
   const className = getPropertyValue(field.className, field, row);
 
   return (
-    <td>
-      <div 
-        style={style} 
-        className={className}
-      >
+    <td
+      style={style} 
+      className={className}>
         {content}
-      </div>
-  </td>
+    </td>
   );
 }
 
