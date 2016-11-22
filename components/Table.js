@@ -406,7 +406,7 @@ function getCell (field, row) {
       />
     );
   }
-  else if (field.type === 'node') {
+  else if (field.type === 'element') {
     return value;
   }
   else {

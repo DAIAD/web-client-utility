@@ -220,7 +220,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       {
         name: 'goal',
         title: 'Goal',
-        type: 'node',
+        type: 'element',
         style: {
           height: 150
         }
@@ -228,7 +228,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       {
         name: 'savings',
         title: 'Savings',
-        type: 'node',
+        type: 'element',
         style: {
           height: 150
         }
@@ -236,7 +236,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       {
         name: 'affected',
         title: 'Affected',
-        type: 'node',
+        type: 'element',
         style: {
           height: 150
         }
