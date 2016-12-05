@@ -6,10 +6,11 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
-var LeafletMap = require('../LeafletMap');
 var Chart = require('../Chart');
 var theme = require('../chart/themes/shine');
 var InputTextModal = require('../InputTextModal');
+
+var { Map, TileLayer, GeoJSON, FeatureGroup, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
 
 var { getAccounts, changeIndex, filterText, filterSerial, clearFilter, getMeter, clearChart,
       setSearchModeText, setSearchModeMap, setGeometry,
@@ -337,45 +338,34 @@ var UserCatalog = React.createClass({
       </span>
     );
 
-    var map = null;
+    //var map = null;
 
-    switch(this.props.userCatalog.search) {
-      case 'map':
-        map = (
-          <LeafletMap style={{ width: '100%', height: 600}}
-                      elementClassName='mixin'
-                      prefix='map'
-                      center={[38.35, -0.48]}
-                      zoom={13}
-                      mode={[LeafletMap.MODE_DRAW, LeafletMap.MODE_VECTOR]}
-                      draw={{
-                        onFeatureChange: _onFeatureChange.bind(this)
-                      }}
-                      vector={{
-                        data : this.props.userCatalog.data.features,
-                        renderer : _featureRenderer.bind(this)
-                      }}
-          />
+    //    switch(this.props.userCatalog.search) {
+    //  case 'map':
+    console.log('user catalog search', this.props.userCatalog.search, this.props.userCatalog.data.features);
+    var map = (
+              <Map
+                style={{ width: '100%', height: 600}}
+                center={[38.35, -0.48]}
+                zoom={13}
+                >
+                <TileLayer />
+                { 
+                  this.props.userCatalog.search === 'map' ?
+                    <DrawControl
+                      onFeatureChange={_onFeatureChange.bind(this)}
+                    />
+                    : 
+                      <div />
+                  } 
+                  <GeoJSON
+                    name='Users'
+                    data={this.props.userCatalog.data.features}
+                    popupContent={feature => <div><h4>{feature.properties.name}</h4><h5>Address: <span>{feature.properties.address}</span></h5><h5>Meter id: <a href='#' onClick={(e) => { e.preventDefault();  this.props.actions.getMeter(feature.properties.userKey, feature.properties.deviceKey, feature.properties.name); }}>{feature.properties.meter.serial}</a></h5></div>}
+                  />
+              </Map>
         );
-        break;
-
-      default:
-        map = (
-          <LeafletMap style={{ width: '100%', height: 600}}
-                      elementClassName='mixin'
-                      prefix='map'
-                      center={[38.35, -0.48]}
-                      zoom={13}
-                      mode={LeafletMap.MODE_VECTOR}
-                      vector={{
-                        data : this.props.userCatalog.data.features,
-                        renderer : _featureRenderer.bind(this)
-                      }}
-          />
-        );
-        break;
-    }
-
+       
     var v, chartTitleText, chartConfig = null, chart = (<span>Select a meter ...</span>), data = [];
 
     if(Object.keys(this.props.userCatalog.charts).length) {
