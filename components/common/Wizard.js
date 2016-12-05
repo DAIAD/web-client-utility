@@ -218,8 +218,14 @@ function WizardItem (props) {
   //const labels = Array.isArray(value) ? value.map(x => x.label || '-') : (value.label ? [value.label] : ['-']);
   const activeLink = clearedIdx >= idx ? true : false;
   return (
-    <div className='wizard-item' style={{ margin: '20px 0' }}>
+    <div className='wizard-item' style={{ margin: '0 25px' }}>
       <bs.Row>
+        <h2 style={{marginTop: 0}}><FormattedMessage id={`Wizard.items.${id}.title`} /></h2>
+          <h4><i><FormattedMessage id={`Wizard.items.${id}.description`} /></i></h4>
+
+          <br />
+      </bs.Row>
+      <div className='wizard-item-select'>
         {
         <bs.Col md={1}>
           <h4>{idx+1}.</h4>
@@ -247,17 +253,60 @@ function WizardItem (props) {
               <div />
         }
       </bs.Col>
-      <bs.Col md={4} className='wizard-item-view'>
-        <Select
-          disabled={true}
-          placeholder='-'
-          name='user-select'
-          className='select-hide-arrow'
-          multi={Array.isArray(value) ? true : false}
-          options={Array.isArray(value) ? value : [value]}
-          value={Array.isArray(value) ? value.map(x=>x.value) : value.value}
-        />
-      </bs.Col>
+      </div>
+      
+    <bs.Row >
+      <div className='wizard-controls'>
+        <bs.ButtonGroup style={{width: '100%', marginTop: 30 }}>
+          {
+            <bs.Button 
+              style={{float: 'left'}}
+              disabled={!hasPrevious} 
+              onClick={onPreviousClicked}
+            >
+              Previous
+            </bs.Button>
+          }
+          <bs.Button 
+           bsStyle='warning'
+           style={{float: 'left', marginLeft: 10}}
+           onClick={reset}
+         >
+           <i className='fa fa-undo'></i>  Reset
+         </bs.Button>
+         {
+           
+           hasNext ? 
+             <bs.Button 
+               style={{float: 'right'}}
+               onClick={onNextClicked} 
+               >
+                 Next
+                </bs.Button>
+              :
+               <bs.Button 
+                  bsStyle='primary' 
+                  style={{float: 'right'}}
+                  onClick={onComplete}
+                >
+                <i className='fa fa-calculator'></i> Calculate
+              </bs.Button>
+         }
+       </bs.ButtonGroup>
+     </div>
+   </bs.Row>
+   <hr />
+   <bs.Row style={{ margin: '20px 0', fontSize: '1.2em' }}>
+       {
+         errors ? 
+           <span style={{ fontSize: '1.3em', color: '#CD4D3E' }} >
+             <i className='fa fa-warning' style={{ marginRight: 5 }}/>
+             <FormattedMessage id={`Wizard.validation.${errors}`} />
+           </span> 
+             : 
+               <DisplayParams params={values} />
+       }
+>>>>>>> d1c493f... location filtering wizard item supports real utility areas, created map select component and updated savings & budgets wizards
     </bs.Row>
   </div>
   );
