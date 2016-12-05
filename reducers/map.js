@@ -11,7 +11,7 @@ var _createMapInitialState = function(interval) {
     devices : null,
     timeline : null,
     features : null,
-    favourite: null
+    favourite: null,
   };
 };
 
@@ -58,7 +58,8 @@ var _createInitialState = function() {
       source : false,
       population : false,
       spatial : false
-    }
+    },
+    metersLocations: null
   };
 };
 
@@ -416,6 +417,15 @@ var map = function(state, action) {
       });       
     case types.USER_RECEIVED_LOGOUT:
       return _createInitialState();
+
+    case types.MAP_METERS_LOCATIONS_REQUEST:
+      return state;
+
+    case types.MAP_METERS_LOCATIONS_RESPONSE:
+      if (action.errors) return state;
+      return Object.assign({}, state, {
+        metersLocations: action.data
+      });
 
     default:
       return state || _createInitialState();

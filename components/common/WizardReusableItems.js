@@ -4,8 +4,9 @@ var Select = require('react-select');
 var moment = require('moment');
 var DatetimeInput = require('react-datetime');
 var CheckboxGroup = require('react-checkbox-group');
-var LeafletMap = require('../LeafletMap');
 var { FormattedMessage } = require('react-intl');
+
+var { Map, TileLayer, GeoJSON  } = require('react-leaflet-wrapper');
 
 var util = require('../../helpers/wizard');
 
@@ -209,7 +210,7 @@ var WhereItem = React.createClass({
             Custom area selection
           </bs.Modal.Header>
           <bs.Modal.Body>
-            
+ 
             <GroupsSelect
               clusters={clusters}
               groups={groups}
@@ -218,21 +219,15 @@ var WhereItem = React.createClass({
               onClusterSelect={(val) => { this.setState({ selectedCluster: val }); }}
               onGroupsSelect={(values) => { this.setState({ selectedGroups: values }); }}
             />
-            
-            <LeafletMap style={{ width: '100%', height: 300}} 
-              elementClassName='mixin'
-              prefix='map'
+ 
+            <Map
+              style={{ width: '100%', height: 300}}
               center={[38.35, -0.48]} 
               zoom={13}
-              mode={[LeafletMap.MODE_CHOROPLETH]}
-              draw={{
-                //onFeatureChange: _onFeatureChange.bind(this)
-              }}
-              vector={{
-                //data : this.props.userCatalog.data.features,
-                //renderer : _featureRenderer.bind(this)
-              }}
-            />
+              >
+              <TileLayer />
+            </Map>
+
             
           </bs.Modal.Body>
           <bs.Modal.Footer>

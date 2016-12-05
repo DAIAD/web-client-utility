@@ -5,12 +5,13 @@ var Bootstrap = require('react-bootstrap');
 var Breadcrumb = require('../../Breadcrumb');
 var Modal = require('../../Modal');
 var Timeline = require('../../Timeline');
-var LeafletMap = require('../../LeafletMap');
 var Table = require('../../Table');
 var {FormattedTime} = require('react-intl');
 var { Link } = require('react-router');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
+
+var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl } = require('react-leaflet-wrapper');
 
 var Chart = require('../../reports-measurements/chart');
 var {configPropType} = require('../../../prop-types');
@@ -20,6 +21,8 @@ var { setTimezone, fetchFavouriteQueries, openFavourite,
       addCopy, deleteFavourite, openWarning,
       closeWarning, resetMapState, getFavouriteMap,
       getFavouriteChart, getFeatures} = require('../../../actions/FavouritesActions');
+      
+var { getMetersLocations } = require('../../../actions/MapActions');
 
 //var ViewChart = require('../../../report-measurements/pane');
 
@@ -70,7 +73,12 @@ var Favourites = React.createClass({
   componentWillMount : function() {
     this.props.actions.resetMapState();
     this.props.actions.fetchFavouriteQueries();
-      this.setState({points : createPoints()});
+    this.setState({points : createPoints()});
+  
+    if (!this.props.metersLocations) {
+      this.props.actions.getMetersLocations();
+    }
+
    },
 
   componentDidMount : function() {
@@ -165,31 +173,59 @@ var Favourites = React.createClass({
            title = 'Map: ' + this.props.selectedFavourite.title;
            dataContent = (
               <Bootstrap.ListGroupItem>
-                 <LeafletMap style={{ width: '100%', height: 400}}
-                             elementClassName='mixin'
-                             prefix='map'
-                             center={[38.36, -0.479]}
-                             zoom={13}
-                             mode={[LeafletMap.MODE_CHOROPLETH]}
-                             choropleth= {{
-                               colors : ['#2166ac', '#67a9cf', '#d1e5f0', '#fddbc7', '#ef8a62', '#b2182b'],
-                               min : this.props.map.timeline ? this.props.map.timeline.min : 0,
-                               max : this.props.map.timeline ? this.props.map.timeline.max : 0,
-                               data : this.props.map.features
-                             }}
-                             overlays={[
-                               { url : '/assets/data/meters.geojson',
-                                 popupContent : 'serial'
-                               }
-                             ]} />
-                 <Timeline   onChange={_onChangeTimeline.bind(this)}
-                             labels={ _getTimelineLabels(this.props.map.timeline) }
-                             values={ _getTimelineValues(this.props.map.timeline) }
-                             defaultIndex={this.props.map.index}
-                             speed={1000}
-                             animate={false}>
-                 </Timeline>
-              </Bootstrap.ListGroupItem>
+                <Map
+                  center={[38.36, -0.479]}
+                  zoom={13}
+                  style={{ width: '100%', height: 600 }}
+                  info='topright'
+                  >
+                  <LayersControl position='topright'> 
+                    <TileLayer  />
+                    <InfoControl position='bottomleft'> 
+                      <Choropleth
+                        name='Areas'
+                        data={this.props.map.features}
+                        legend='bottomright'
+                        valueProperty='value'
+                        scale={['white', 'red']}
+                        limits={[ this.props.map.timeline ? this.props.map.timeline.min : 0, this.props.map.timeline ? this.props.map.timeline.max : 1000 ]}
+                        steps={6}
+                        mode='e'
+                        infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
+                        highlightStyle={{ weight: 4 }}
+                        style={{
+                          fillColor: "#ffff00",
+                          color: "#000",
+                          weight: 3,
+                          opacity: 1,
+                          fillOpacity: 0.5
+                        }}
+                      />
+                    </InfoControl>
+                    <GeoJSON
+                      name='Meters'
+                      data={this.props.metersLocations}
+                      popupContent={feature => <div><h5>Serial:</h5><h5>{feature.properties.serial}</h5></div>}
+                      circleMarkers
+                      style={{
+                        radius: 8,
+                        fillColor: "#ff7800",
+                        color: "#000",
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                      }}
+                    />
+                  </LayersControl>
+                </Map>
+               <Timeline   onChange={_onChangeTimeline.bind(this)}
+                           labels={ _getTimelineLabels(this.props.map.timeline) }
+                           values={ _getTimelineValues(this.props.map.timeline) }
+                           defaultIndex={this.props.map.index}
+                           speed={1000}
+                           animate={false}>
+               </Timeline>
+            </Bootstrap.ListGroupItem>
            );
 
              footerContent = (
@@ -428,7 +464,8 @@ function mapStateToProps(state) {
     config: state.config,
     draw: state.favourites.draw,
     finished: state.favourites.finished,
-    data: state.favourites.data
+    data: state.favourites.data,
+    metersLocations: state.map.metersLocations
   };
 }
 
@@ -438,7 +475,7 @@ function mapDispatchToProps(dispatch) {
                                                      openFavourite, closeFavourite, setActiveFavourite,
                                                      addCopy, deleteFavourite, openWarning, closeWarning,
                                                      resetMapState, getFavouriteMap, getFavouriteChart,
-                                                     getFeatures}) , dispatch)
+                                                     getFeatures, getMetersLocations }) , dispatch)
   };
 }
 

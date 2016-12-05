@@ -3,7 +3,6 @@ var Select = require('react-select');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var moment = require('moment');
-var LeafletMap = require('../../LeafletMap');
 var Timeline = require('../../Timeline');
 
 var {FormattedTime} = require('react-intl');
@@ -15,6 +14,9 @@ var Breadcrumb = require('../../Breadcrumb');
 
 var { submitQuery } = require('../../../actions/QueryActions');
 var { createUser, createAmphiro, generateAmphiroData, setTimezone, setErrors, getFeatures } = require('../../../actions/DebugActions');
+var { getMetersLocations } = require('../../../actions/MapActions');
+
+var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl } = require('react-leaflet-wrapper');
 
 var onChangeTimezone = function(val) {
   this.props.actions.setTimezone(val.value);
@@ -115,6 +117,14 @@ var Development = React.createClass({
     this.props.actions.generateAmphiroData(this.props.debug.timezone, files);
   },
 
+  componentWillMount: function() {
+    //fetch meter geojson data
+    if (!this.props.metersLocations) {
+      this.props.actions.getMetersLocations();
+    }
+    
+  },
+
   componentDidMount : function() {
     var timezone = 'UTC';
     if((this.props.profile) && (this.props.profile.timezone)) {
@@ -156,18 +166,49 @@ var Development = React.createClass({
     var onChangeTimeline = function(value, label, index) {
       this.props.actions.getFeatures(this.props.query.timeline, value, 'Alicante');
     };
+    console.log('debug features:', this.props.debug.features);
 
     var map = (
       <Bootstrap.ListGroupItem>
-        <LeafletMap style={{ width: '100%', height: 400}}
-                    elementClassName='mixin'
-                    prefix='map'
-                    center={[38.35, -0.48]}
-                    zoom={13}
-                    mode={LeafletMap.MODE_CHOROPLETH}
-                    data={ this.props.debug.features }
-                    colors={['#2166ac', '#67a9cf', '#d1e5f0', '#f7f7f7', '#fddbc7', '#ef8a62', '#b2182b']}
-                    urls={['/assets/data/meters.geojson']} />
+         <Map
+          style={{ width: '100%', height: 400}}
+          center={[38.35, -0.48]}
+          zoom={13}
+          >
+          <TileLayer />
+          <Choropleth
+            name='Areas'
+            data={this.props.debug.features}
+            legend='bottomright'
+            valueProperty='value'
+            scale={['white', 'red']}
+            steps={4}
+            mode='e'
+            popupContent={feature => <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div>}
+            highlightStyle={{ weight: 4 }}
+            style={{
+              fillColor: "#ffff00",
+              color: "#000",
+              weight: 3,
+              opacity: 1,
+              fillOpacity: 0.5
+            }}
+          />
+          <GeoJSON
+            name='Meters'
+            data={this.props.metersLocations}
+            popupContent={feature => <div><h5>Serial:</h5><h5>{feature.properties.serial}</h5></div>}
+            circleMarkers
+            style={{
+              radius: 8,
+              fillColor: "#ff7800",
+              color: "#000",
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.8
+            }}
+          />
+        </Map>
       </Bootstrap.ListGroupItem>
     );
 
@@ -292,14 +333,15 @@ function mapStateToProps(state) {
       query: state.query,
       debug: state.debug,
       profile: state.session.profile,
-      routing: state.routing
+      routing: state.routing,
+      metersLocations: state.map.metersLocations
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { submitQuery, createUser, createAmphiro,
-                                                     setTimezone, setErrors, generateAmphiroData, getFeatures }) , dispatch)
+                                                     setTimezone, setErrors, generateAmphiroData, getFeatures, getMetersLocations }) , dispatch)
   };
 }
 
