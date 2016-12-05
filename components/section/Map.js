@@ -109,9 +109,7 @@ var AnalyticsMap = React.createClass({
     if (!this.props.metersLocations) {
       this.props.actions.getMetersLocations();
     }
-  },
 
-  componentDidMount : function() {
     var utility = this.props.profile.utility;
 
     this.props.actions.setTimezone(utility.timezone);
@@ -124,6 +122,9 @@ var AnalyticsMap = React.createClass({
       };
       this.props.actions.getTimeline(population);
     }
+  },
+
+  componentDidMount : function() {
   },
 
   clickedAddFavourite : function() {
