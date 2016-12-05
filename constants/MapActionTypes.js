@@ -16,7 +16,10 @@ var types = mirrorToPath({
   MAP_SELECT_EDITOR : null,
   MAP_SET_EDITOR_VALUE : null,
   MAP_ADD_FAVOURITE_REQUEST : null,
-  MAP_ADD_FAVOURITE_RESPONSE : null  
+  MAP_ADD_FAVOURITE_RESPONSE : null,
+
+  MAP_METERS_LOCATIONS_REQUEST: null,
+  MAP_METERS_LOCATIONS_RESPONSE: null 
 });
 
 module.exports = types;
