@@ -6,15 +6,20 @@ var { Link } = require('react-router');
 var Breadcrumb = require('../Breadcrumb');
 var Counter = require('../Counter');
 var Chart = require('../Chart');
-var LeafletMap = require('../LeafletMap');
+
 var FilterTag = require('../chart/dimension/FilterTag');
 var Timeline = require('../Timeline');
 var {FormattedTime} = require('react-intl');
+
+var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl } = require('react-leaflet-wrapper');
+
+var fetch = require('isomorphic-fetch');
 
 var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 
 var { getTimeline, getFeatures, getCounters, getChart } = require('../../actions/DashboardActions');
+var { getMetersLocations } = require('../../actions/MapActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
@@ -53,6 +58,13 @@ var Dashboard = React.createClass({
       intl: React.PropTypes.object
   },
 
+  componentWillMount: function() {
+    //fetch meter geojson data
+    if (!this.props.metersLocations) {
+      this.props.actions.getMetersLocations();
+    }
+    
+  },
   componentDidMount : function() {
     var utility = this.props.profile.utility;
 
@@ -66,6 +78,7 @@ var Dashboard = React.createClass({
   },
 
   render: function() {
+
     var chartData = {
       series: []
     };
@@ -194,36 +207,62 @@ var Dashboard = React.createClass({
       <FilterTag key='source' text='Meter' icon='database' />
     );
 
-    map = (
+     map = (
       <Bootstrap.ListGroup fill>
         <Bootstrap.ListGroupItem>
-          <LeafletMap style={{ width: '100%', height: 600}}
-                      elementClassName='mixin'
-                      prefix='map'
-                      center={[38.36, -0.479]}
-                      zoom={13}
-                      mode={LeafletMap.MODE_CHOROPLETH}
-                      choropleth= {{
-                        colors : ['#2166ac', '#67a9cf', '#d1e5f0', '#fddbc7', '#ef8a62', '#b2182b'],
-                        min : this.props.map.timeline ? this.props.map.timeline.min : 0,
-                        max : this.props.map.timeline ? this.props.map.timeline.max : 0,
-                        data : this.props.map.features
-                      }}
-                      overlays={[
-                        { url : '/assets/data/meters.geojson',
-                          popupContent : 'serial'
-                        }
-                      ]}
+          <Map
+            center={[38.36, -0.479]}
+            zoom={13}
+            style={{ width: '100%', height: 600 }}
+            info='topright'
+            >
+            <TileLayer />
+            <InfoControl position='topright'> 
+              <Choropleth
+                name='Areas'
+                data={this.props.map.features}
+                legend='bottomright'
+                valueProperty='value'
+                scale={['white', 'red']}
+                limits={[ this.props.map.timeline ? this.props.map.timeline.min : 0, this.props.map.timeline ? this.props.map.timeline.max : 0 ]}
+                steps={6}
+                mode='e'
+                infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
+                highlightStyle={{ weight: 4 }}
+                style={{
+                  fillColor: "#ffff00",
+                  color: "#000",
+                  weight: 3,
+                  opacity: 1,
+                  fillOpacity: 0.5
+                }}
+              />
+            </InfoControl>
+            <GeoJSON
+              name='Meters'
+              data={this.props.metersLocations}
+              popupContent={feature => <div><h5>Serial:</h5><h5>{feature.properties.serial}</h5></div>}
+              circleMarkers
+              style={{
+                radius: 8,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+              }}
+            />
+          </Map>
+    </Bootstrap.ListGroupItem>
+    <Bootstrap.ListGroupItem>
+          <Timeline   
+            onChange={_onChangeTimeline.bind(this)}
+            labels={_getTimelineLabels(this.props.map.timeline)}
+            values={_getTimelineValues(this.props.map.timeline)}
+            defaultIndex={this.props.map.index}
+            speed={1000}
+            animate={false}
           />
-        </Bootstrap.ListGroupItem>
-        <Bootstrap.ListGroupItem>
-          <Timeline   onChange={_onChangeTimeline.bind(this)}
-                      labels={ _getTimelineLabels(this.props.map.timeline) }
-                      values={ _getTimelineValues(this.props.map.timeline) }
-                      defaultIndex={this.props.map.index}
-                      speed={1000}
-                      animate={false}>
-          </Timeline>
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem className='clearfix'>
           <div className='pull-left'>
@@ -350,13 +389,14 @@ function mapStateToProps(state) {
       chart: state.dashboard.chart,
       counters: state.dashboard.statistics.counters,
       profile: state.session.profile,
-      routing: state.routing
+      routing: state.routing,
+      metersLocations: state.map.metersLocations
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters, getChart }) , dispatch)
+    actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters, getChart, getMetersLocations }) , dispatch)
   };
 }
 
