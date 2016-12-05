@@ -65,10 +65,47 @@ const validateName = function ({value}) {
 };
 
 var BudgetsAdd = React.createClass ({
+  componentWillMount: function() {
+
+    //TODO: temp way to load areas in state
+    const utility = this.props.profile.utility;
+    if(!this.props.areas) {
+      const population = {
+          utility: utility.key,
+          label: utility.name,
+          type: 'UTILITY'
+      };
+      this.props.actions.getTimeline(population);
+    }
+  },
+//TODO: have to create geojson from areas object since API not ready yet
+  getGeoJSON: function(areasObj) {
+    if (!areasObj) return {};
+    const areas = Object.keys(areasObj).map(key => areasObj[key]);
+    return {
+      type : 'FeatureCollection',
+      features : areas.map(area => ({
+        'type' : 'Feature',
+        'geometry' : area.geometry,
+        'properties' : {
+          'label' : area.label,
+          'cluster': 'area'
+        }
+      })),
+      crs : {
+        type : 'name',
+        properties : {
+          name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
+        }
+      }
+    };
+  },
+
   render: function() {
     const { groups, clusters, segments, areas, actions, wizardType, validationError, savings, intl } = this.props;
     const _t = intl.formatMessage;
     const { setValidationError, setAddBudgetWizardType, goToListView, addBudgetScenario } = actions;
+    const geojson = this.getGeoJSON(areas);
     return (
       <bs.Panel header='Add new budget'>
         <bs.Row>
@@ -125,7 +162,7 @@ var BudgetsAdd = React.createClass ({
                  id='where'
                  intl={intl}
                  clusters={segments}
-                 groups={areas}
+                 geojson={geojson}
                  initialValue={{}}
                  validate={validateWhere}
                 />
@@ -141,7 +178,7 @@ var BudgetsAdd = React.createClass ({
                   id='excludeWhere'
                   intl={intl}
                   initialValue={{}}
-                  groups={areas}
+                  geojson={geojson}
                   clusters={segments}
                   noAll
                 />

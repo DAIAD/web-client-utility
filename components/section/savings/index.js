@@ -6,6 +6,8 @@ var { push } = require('react-router-redux');
 var { injectIntl } = require('react-intl');
 
 var Actions = require('../../../actions/SavingsActions');
+var { getTimeline } = require('../../../actions/MapActions');
+
 var Table = require('../../../components/Table');
 var util = require('../../../helpers/wizard');
 
@@ -55,21 +57,6 @@ function mapStateToProps(state) {
        value: 'area',
        label: 'Area'
      }],
-     areas: [{
-       value: 'kallithea',
-       label: 'Kallithea',
-       cluster: 'area',
-     },
-     {
-       value: 'pangkrati',
-       label: 'Pangkrati',
-       cluster: 'area',
-     },
-     {
-       value: 'lykavittos',
-       label: 'Lykavittos',
-       cluster: 'area',
-     }],
      scenarios: state.savings.scenarios.map(scenario => ({
        ...scenario, 
        paramsShort: util.getFriendlyParams(scenario.parameters, 'short')
@@ -81,16 +68,20 @@ function mapStateToProps(state) {
      removeScenario: state.savings.scenarios.find(s => s.id === state.savings.removeScenario),
      searchFilter: state.savings.searchFilter,
      validationError: state.savings.validationError,
+     areas: state.map.map.areas,
+     profile: state.session.profile,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : {
-      ...bindActionCreators(Actions, dispatch), 
+      ...bindActionCreators({...Actions, getTimeline}, dispatch), 
       goToAddView: () => dispatch(push('/savings/add')),
       goToExploreView: (id) => dispatch(push(`/savings/${id}`)),
-      goToListView: () => dispatch(push('/savings'))
+      goToListView: () => dispatch(push('/savings')),
+      
+
     }
   };
 }

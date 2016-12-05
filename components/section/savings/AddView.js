@@ -53,18 +53,52 @@ const validateName = function (value) {
   }
 };
 
-
-
-var SavingsPotentialAdd = React.createClass ({
+var SavingsPotentialAdd = React.createClass({
+  componentWillMount: function() {
+    const utility = this.props.profile.utility;
+    //TODO: temp way to load areas in state
+    if(!this.props.areas) {
+      const population = {
+          utility: utility.key,
+          label: utility.name,
+          type: 'UTILITY'
+      };
+      this.props.actions.getTimeline(population);
+    }
+  },
+  //TODO: have to create geojson from areas object since API not ready yet
+  getGeoJSON: function(areasObj) {
+    if (!areasObj) return {};
+    const areas = Object.keys(areasObj).map(key => areasObj[key]);
+    return {
+      type : 'FeatureCollection',
+      features : areas.map(area => ({
+        'type' : 'Feature',
+        'geometry' : area.geometry,
+        'properties' : {
+          'label' : area.label,
+          'cluster': 'area'
+        }
+      })),
+      crs : {
+        type : 'name',
+        properties : {
+          name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
+        }
+      }
+    };
+  },
   render: function() {
-    const { groups, clusters, segments, areas, actions, validationError, scenarios, intl } = this.props;
-    const { addSavingsScenario, goToListView } = actions;
+    const { groups, clusters, segments, areas, actions, validationError, intl } = this.props;
+    const { setValidationError, addSavingsScenario, goToListView } = actions;
+    const geojson = this.getGeoJSON(areas);
     return (
-      <bs.Panel header='Add new scenario'>
+      <div>
         <bs.Row>
-          <bs.Col sm={4} md={5}>
-          </bs.Col>
-        <bs.Col md={7} style={{textAlign: 'right'}}>
+        <bs.Col md={6}>
+          <h4>Add new Scenario</h4> 
+        </bs.Col>
+        <bs.Col md={6} style={{textAlign: 'right'}}>
           <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
         </bs.Col>
       </bs.Row>
@@ -72,43 +106,50 @@ var SavingsPotentialAdd = React.createClass ({
         <Wizard
           onComplete={(values) => { addSavingsScenario(values); goToListView(); }}
           validateLive
-          >
+          > 
           <WhoItem
             id='who'
-            intl={intl}
+            title='Who'
+            description='Select all population or narrow savings potential calculation to selected groupsn'
             groups={groups}
             clusters={clusters}
             initialValue={{}}
             validate={validateWho}
+            intl={intl}
           />
           <WhereItem
             id='where'
-            intl={intl}
+            title='Where'
+            description='Select all areas or narrow savings potential calculation to selected areas'
+            clusters={segments}
+            geojson={geojson}
             initialValue={{}}
             validate={validateWhere}
-            clusters={segments}
-            groups={areas}
+            intl={intl}
           />
           <WhenItem
             id='when'
-            intl={intl}
+            title='Data'
+            description='Data to be used for savings potential calculation, last year or custom'
             initialValue={{}}
             validate={validateWhen}
+            intl={intl}
           />
           <SetNameItem
+            title='Name'
+            description='Select a descriptive name for your scenario'
             id='name'
-            intl={intl}
-            initialValue={{}}
+            initialValue=''
             validate={validateName.bind(this)}
+            intl={intl}
           />
-
           <div
             id='confirmation'
             initialValue={{}}
           />
         </Wizard>
 
-    </bs.Panel>
+    </div>
     );
   }
 });

@@ -31,17 +31,15 @@ function WizardItem (props) {
 
           <br />
       </bs.Row>
-      <bs.Row>
-        <bs.Col md={9} className='wizard-item-select'>
+      <div className='wizard-item-select'>
         {
           children  
         }
-      </bs.Col>
+      </div>
       
-    </bs.Row> 
-    <bs.Row>
-      <div className='wizard-controls' style={{ marginTop: 30 }}>
-        <bs.ButtonGroup style={{width: '100%'}}>
+    <bs.Row >
+      <div className='wizard-controls'>
+        <bs.ButtonGroup style={{width: '100%', marginTop: 30 }}>
           {
             <bs.Button 
               style={{float: 'left'}}

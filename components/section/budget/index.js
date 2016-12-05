@@ -8,13 +8,13 @@ var util = require('../../../helpers/wizard');
 var { injectIntl, FormattedDate } = require('react-intl');
 
 var Table = require('../../../components/Table');
-var BudgetActions = require('../../../actions/BudgetActions');
+var Actions = require('../../../actions/BudgetActions');
+var { getTimeline } = require('../../../actions/MapActions');
+
 var Breadcrumb = require('../../../components/Breadcrumb');
 
 var Budgets = React.createClass({ 
   render: function() {
-    const { groups, clusters, segments, areas, savings, validationError, tableData, tableStyle, searchFilter, budgetType, children } = this.props;
-    const { setErrorModal, resetErrorModal, setValidationError, switchMode, addBudgetScenario, removeBudgetScenario, toggleRemoveConfirmation, setSearchFilter, setBudgetType } = this.props.actions;
     return (
 			<div className='container-fluid' style={{ paddingTop: 10 }}>
 				<div className='row'>
@@ -25,7 +25,7 @@ var Budgets = React.createClass({
         <div className='row'>
           <div className='col-md-12' style={{marginTop: 10}}>
             {
-              React.cloneElement(children, this.props)
+              React.cloneElement(this.props.children, this.props)
             }
           </div>
         </div>
@@ -57,21 +57,6 @@ function mapStateToProps(state) {
        value: 'area',
        label: 'Area'
      }],
-     areas: [{
-       value: 'kallithea',
-       label: 'Kallithea',
-       cluster: 'area',
-     },
-     {
-       value: 'pangkrati',
-       label: 'Pangkrati',
-       cluster: 'area',
-     },
-     {
-       value: 'lykavittos',
-       label: 'Lykavittos',
-       cluster: 'area',
-     }],
      validationError: state.budget.validationError,
      budgetToRemoveIdx: state.budget.budgetToRemove,
      confirmSetBudgetIdx: state.budget.confirmSetBudget,
@@ -89,13 +74,16 @@ function mapStateToProps(state) {
      })),
      wizardType: state.budget.wizardType,
      initialActiveIdx: state.budget.initialActiveIdx,
+     areas: state.map.map.areas,
+     profile: state.session.profile,
+
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : {
-      ...bindActionCreators(BudgetActions, dispatch),
+      ...bindActionCreators({...Actions, getTimeline}, dispatch), 
       goToAddView: () => dispatch(push('/budgets/add')),
       goToExploreView: (id) => dispatch(push(`/budgets/${id}`)),
       goToListView: () => dispatch(push('/budgets')),
