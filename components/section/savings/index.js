@@ -8,14 +8,16 @@ var { injectIntl } = require('react-intl');
 var Actions = require('../../../actions/SavingsActions');
 var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
 
-var Table = require('../../../components/Table');
+var Modal = require('../../Modal');
+var Table = require('../../Table');
 var util = require('../../../helpers/wizard');
 
 var Breadcrumb = require('../../../components/Breadcrumb');
 
 
 function SavingsPotential (props) {
-  const { routes, children } = props;
+  const { routes, children, actions, scenarioToRemove } = props;
+  const { goToListView, confirmRemoveScenario, removeSavingsScenario } = actions;
   return (
     <div className='container-fluid' style={{ paddingTop: 10 }}>
       <div className='row'>
@@ -29,11 +31,47 @@ function SavingsPotential (props) {
             React.cloneElement(children, props)
           }
         </div>
+  
+        <RemoveConfirmation
+          goToListView={goToListView}
+          scenario={scenarioToRemove}
+          removeSavingsScenario={removeSavingsScenario}
+          confirmRemoveScenario={confirmRemoveScenario}
+        />
       </div> 
     </div>
   );
 }
 
+//components used in more than one savings sub-sections
+
+function RemoveConfirmation (props) {
+  const { scenario, confirmRemoveScenario, removeSavingsScenario, goToListView } = props;
+  const reset = () => confirmRemoveScenario(null);
+  if (scenario == null) {
+    return <div/>;
+  }
+  const { id, name } = scenario;
+  return (
+    <Modal
+      title='Confirmation'
+      show={true}
+      text={<span>Are you sure you want to delete <b>{name}</b> (id:{id})</span>}
+      onClose={reset}
+      actions={[
+        {
+          name: 'Cancel',
+          action: reset,
+        },
+        {
+          name: 'Delete',
+          action: () => { removeSavingsScenario(id); confirmRemoveScenario(null); goToListView(); },
+          style: 'danger',
+        },
+      ]}
+    />
+  );
+}
 function mapStateToProps(state) {
   return {
     routing: state.routing,
@@ -65,9 +103,8 @@ function mapStateToProps(state) {
        .map(x => `${x.key}: ${x.value}`).join(', '),
        params: util.getFriendlyParams(scenario.parameters, 'long')
      })),
-     removeScenario: state.savings.scenarios.find(s => s.id === state.savings.removeScenario),
+     scenarioToRemove: state.savings.scenarios.find(s => s.id === state.savings.scenarioToRemove),
      searchFilter: state.savings.searchFilter,
-     validationError: state.savings.validationError,
      areas: state.map.map.areas,
      profile: state.session.profile,
      metersLocations: state.map.metersLocations,
@@ -81,104 +118,13 @@ function mapDispatchToProps(dispatch) {
       goToAddView: () => dispatch(push('/savings/add')),
       goToExploreView: (id) => dispatch(push(`/savings/${id}`)),
       goToListView: () => dispatch(push('/savings')),
-      
-
     }
   };
 }
 
-function mergeProps(stateProps, dispatchProps, ownProps) {
-  const filteredScenarios = stateProps.searchFilter ? stateProps.scenarios.filter(s => matches(s.name, stateProps.searchFilter) || matches(s.user, stateProps.searchFilter)) : stateProps.scenarios;
-
-  const tableFields = [{
-      name: 'id',
-      title: 'Id',
-      hidden: true
-    }, 
-    {
-      name: 'name',
-      title: 'Name',
-      width: 120,
-      link: function(row) {
-        if(row.id) {
-          return '/savings/{id}/';
-        }
-        return null;
-      }
-    }, 
-    {
-      name: 'potential',
-      title: 'Potential',
-    }, 
-    {
-      name: 'user',
-      title: 'User',
-    }, 
-    {
-      name: 'paramsShort',
-      title: 'Parameters',
-    },
-    {
-      name: 'createdOn',
-      title: 'Created',
-      type: 'datetime',
-    }, 
-    {
-      name: 'completedOn',
-      title: 'Finished',
-      type: 'datetime',
-    }, 
-    {
-      name : 'explore',
-      title: 'Explore',
-      type : 'action',
-      icon : 'info-circle',
-      style: {
-        textAlign: 'center',
-        fontSize: '1.3em'
-      },
-      handler : (function(field, row) {
-        dispatchProps.actions.goToExploreView(row.id);
-      }),
-    },
-    {
-      name : 'delete',
-      title: 'Delete',
-      type : 'action',
-      icon : 'remove',
-      style: {
-        textAlign: 'center',
-        fontSize: '1.0em'
-      },
-      handler : (function(field, row) {
-        dispatchProps.actions.confirmRemoveScenario(row.id);
-      }),
-      visible : true 
-    }];
-
-    const tableData = filteredScenarios || [];
-
-    const tableSorter = {
-      defaultSort: 'completedOn',
-      defaultOrder: 'desc'
-    };
-
-  return {
-    ...ownProps,
-    ...dispatchProps,
-    ...stateProps,
-    tableData,
-    tableFields,
-    tableSorter,
-  };
-}
-
-function matches(str1, str2) {
-  return str1.toLowerCase().indexOf(str2.toLowerCase()) != -1;
-}
 
 SavingsPotential.icon = 'percent';
 SavingsPotential.title = 'Section.Savings';
 
-const SavingsPotentialContainer = connect(mapStateToProps, mapDispatchToProps, mergeProps)(SavingsPotential);
+const SavingsPotentialContainer = connect(mapStateToProps, mapDispatchToProps)(SavingsPotential);
 module.exports = injectIntl(SavingsPotentialContainer);

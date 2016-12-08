@@ -1,40 +1,22 @@
 var React = require('react');
 var bs = require('react-bootstrap');
 
-var Modal = require('../../Modal');
+var { savingsSchema } = require('../../../schemas/savings');
+
 var Table = require('../../Table');
 
-function RemoveConfirmation (props) {
-  const { scenario, confirmRemoveScenario, removeSavingsScenario } = props;
-  const reset = () => confirmRemoveScenario(null);
-  if (scenario == null) {
-    return <div/>;
-  }
-  const { id, name } = scenario;
-  return (
-    <Modal
-      title='Confirmation'
-      show={true}
-      text={<span>Are you sure you want to delete <b>{name}</b> (id:{id})</span>}
-      onClose={reset}
-      actions={[
-        {
-          name: 'Cancel',
-          action: reset,
-        },
-        {
-          name: 'Delete',
-          action: () => { removeSavingsScenario(id); confirmRemoveScenario(null); },
-          style: 'danger',
-        },
-      ]}
-    />
-  );
-}
 
 function SavingsPotentialList (props) {
-  const { tableData, tableFields, tableStyle, tableSorter, actions, removeScenario, searchFilter } = props;
+  const { actions, removeScenario, searchFilter , scenarios} = props;
   const { removeSavingsScenario, confirmRemoveScenario, setSearchFilter, goToAddView } = actions;
+  
+
+  const savingsScenarios = searchFilter ? scenarios.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : (Array.isArray(scenarios) ? scenarios : [])
+
+  const tableSorter = {
+    defaultSort: 'completedOn',
+    defaultOrder: 'desc'
+  };
   return (
     <bs.Panel header='Scenarios'>
       <bs.Row>
@@ -57,19 +39,18 @@ function SavingsPotentialList (props) {
         <hr/>
         <Table  
           sortable
-          data={tableData} 
-          fields={tableFields}
+          data={savingsScenarios} 
+          fields={savingsSchema(actions)}
           sorter={tableSorter}
           template={{empty : (<span>{ 'No data found.' }</span>)}}
         />
         
-      <RemoveConfirmation
-        scenario={removeScenario}
-        removeSavingsScenario={removeSavingsScenario}
-        confirmRemoveScenario={confirmRemoveScenario}
-      />
     </bs.Panel>
   );
+}
+
+function matches(str1, str2) {
+  return str1.toLowerCase().indexOf(str2.toLowerCase()) != -1;
 }
 
 module.exports = SavingsPotentialList;

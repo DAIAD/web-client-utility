@@ -81,8 +81,6 @@ function ExploreScenario (props) {
       data: metersLocations && metersLocations.features ? 
         metersLocations.features.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0], Math.abs(Math.random()-0.8)]) : []
     });
-
-
   }
 
   return (
@@ -110,8 +108,9 @@ var SavingsPotentialExplore = React.createClass({
   },
   render: function() {
     const { scenarios, groups, clusters, actions, metersLocations, params } = this.props;
-    const { goToListView } = actions;
+    const { goToListView, confirmRemoveScenario } = actions;
     const { id } = params;
+    //TODO: normally this would be fetched from API at componentWIllMount
     const scenario = scenarios.find(scenario => scenario.id === id);
     if (scenario == null) {
       return (
@@ -130,10 +129,23 @@ var SavingsPotentialExplore = React.createClass({
     return (
       <bs.Panel header={`Explore ${scenario.name}`}>
         <bs.Row>
-          <bs.Col md={6}>
-        </bs.Col>
-        <bs.Col md={6} style={{textAlign: 'right'}}>
-          <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
+        <bs.Col md={6} style={{ float: 'right' }}>
+
+          <bs.Button 
+            style={{ float: 'right' }}
+            bsStyle='success' 
+            onClick={() => { goToListView(); }}
+            >
+            <i className='fa fa-chevron-left'></i> Back to all
+          </bs.Button>
+          <bs.Button
+            bsStyle='danger'
+            style={{ float: 'right', marginRight: 25 }}
+            onClick={() => confirmRemoveScenario(id)}
+            >
+            Delete scenario
+          </bs.Button>
+
         </bs.Col>
       </bs.Row>
          <hr/>
@@ -148,5 +160,4 @@ var SavingsPotentialExplore = React.createClass({
   }
 });
                
-
 module.exports = SavingsPotentialExplore;
