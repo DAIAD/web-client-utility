@@ -5,7 +5,7 @@ var bs = require('react-bootstrap');
 var { push } = require('react-router-redux');
 
 var Actions = require('../../../actions/SavingsActions');
-var { getTimeline } = require('../../../actions/MapActions');
+var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
 
 var Table = require('../../../components/Table');
 var util = require('../../../helpers/wizard');
@@ -56,7 +56,7 @@ function mapStateToProps(state) {
         .sort((s1, s2) => (s2.label == s1.label) ? 0 : ((s2.label < s1.label) ? 1 : -1)),
      segments: [{
        value: 'area',
-       label: 'Area'
+       label: 'Areas'
      }],
      scenarios: state.savings.scenarios.map(scenario => ({
        ...scenario, 
@@ -71,13 +71,14 @@ function mapStateToProps(state) {
      validationError: state.savings.validationError,
      areas: state.map.map.areas,
      profile: state.session.profile,
+     metersLocations: state.map.metersLocations,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : {
-      ...bindActionCreators({...Actions, getTimeline}, dispatch), 
+      ...bindActionCreators({...Actions, getTimeline, getMetersLocations}, dispatch), 
       goToAddView: () => dispatch(push('/savings/add')),
       goToExploreView: (id) => dispatch(push(`/savings/${id}`)),
       goToListView: () => dispatch(push('/savings')),

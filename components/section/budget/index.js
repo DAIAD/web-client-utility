@@ -55,14 +55,8 @@ function mapStateToProps(state) {
         .sort((s1, s2) => (s2.label == s1.label) ? 0 : ((s2.label < s1.label) ? 1 : -1)),
      segments: [{
        value: 'area',
-       label: 'Area'
+       label: 'Areas'
      }],
-     validationError: state.budget.validationError,
-     budgetToRemoveIdx: state.budget.budgetToRemove,
-     confirmSetBudgetIdx: state.budget.confirmSetBudget,
-     confirmResetBudgetIdx: state.budget.confirmResetBudget,
-     searchFilter: state.budget.searchFilter,
-     savings: state.savings.scenarios,
      budgets: state.budget.scenarios.map(scenario => ({
        ...scenario, 
        active: scenario.activatedOn != null,
