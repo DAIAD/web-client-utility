@@ -91,7 +91,7 @@ var Table = React.createClass({
       size: 10,
       index: DEFAULT_PAGE-1,
       mode: PAGING_CLIENT_SIDE,
-      count: this.props.data.length, 
+      count: Array.isArray(this.props.data) ? this.props.data.length : 0, 
       ...this.props.pager
     };
   },
@@ -130,6 +130,14 @@ var Table = React.createClass({
     const { activePage, sort, order } = this.state;
     const { fields, data, template, intl, sortable } = this.props;
     
+    if (!Array.isArray(data)) { 
+      if (template.empty) {
+        return template.empty;
+      }
+      else {
+        return null; 
+      }
+    }
     const pager = this.getPager();
     const style = this.getStyle();
 
@@ -208,7 +216,7 @@ function Pager (props) {
         items={totalPages}
         maxButtons={7}
         activePage={activePage}
-        onSelect={(event, selectedEvent) => onPageIndexChange(selectedEvent.eventKey)} 
+        onSelect={(event, selectedEvent) => { event.preventDefault(); onPageIndexChange(selectedEvent.eventKey)}} 
         style={style}
       />
     </div>
