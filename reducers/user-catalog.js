@@ -1,6 +1,7 @@
 var moment = require('moment');
-
 var types = require('../constants/UserCatalogActionTypes');
+
+var { extractFeatures } = require('../helpers/common');
 
 var _createInitialSelectionState = function() {
   return {
@@ -107,44 +108,6 @@ var _fillMeterSeries = function(interval, data) {
   return data;
 };
 
-var _extractFeatures = function(accounts) {
-  var geojson = {
-    type : 'FeatureCollection',
-    features : [],
-    crs : {
-      type : 'name',
-      properties : {
-        name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
-      }
-    }
-  };
-
-  accounts = accounts || [];
-
-  for ( var index in accounts) {
-    if (accounts[index].location) {
-      var meter = accounts[index].hasOwnProperty('meter') ? accounts[index].meter : null;
-
-      geojson.features.push({
-        'type' : 'Feature',
-        'geometry' : accounts[index].location,
-        'properties' : {
-          'userKey' : accounts[index].id,
-          'deviceKey' : meter.key,
-          'name' : accounts[index].fullname,
-          'address' : accounts[index].address,
-          'meter' : {
-            'key' : meter.key,
-            'serial' : meter.serial
-          }
-        }
-      });
-    }
-  }
-
-  return geojson;
-};
-
 var selectionReducer = function(state, action) {
   switch (action.type) {
     case types.USER_CATALOG_TOGGLE_CONSUMER:
@@ -219,7 +182,7 @@ var dataReducer = function(state, action) {
           index : action.index || 0,
           size : action.size || 10,
           accounts : action.accounts || [],
-          features : _extractFeatures(action.accounts || [])
+          features : extractFeatures(action.accounts || [])
         });
       } else {
         return Object.assign({}, state, {
@@ -227,7 +190,7 @@ var dataReducer = function(state, action) {
           index : 0,
           size : 10,
           accounts : [],
-          features : _extractFeatures([])
+          features : extractFeatures([])
         });
       }
 

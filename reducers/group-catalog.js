@@ -1,6 +1,6 @@
 var moment = require('moment');
-
 var types = require('../constants/GroupCatalogActionTypes');
+var { extractFeatures } = require('../helpers/common');
 
 var _createInitialGroupState = function() {
   return {
@@ -119,44 +119,6 @@ var _fillGroupSeries = function(interval, label, data) {
   return data;
 };
 
-var _extractFeatures = function(groups) {
-  var geojson = {
-    type : 'FeatureCollection',
-    features : [],
-    crs : {
-      type : 'name',
-      properties : {
-        name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
-      }
-    }
-  };
-
-  groups = groups || [];
-
-  for ( var index in groups) {
-    if (groups[index].location) {
-      var meter = groups[index].hasOwnProperty('meter') ? groups[index].meter : null;
-
-      geojson.features.push({
-        'type' : 'Feature',
-        'geometry' : groups[index].location,
-        'properties' : {
-          'groupKey' : groups[index].id,
-          'deviceKey' : meter.key,
-          'name' : groups[index].fullname,
-          'address' : groups[index].address,
-          'meter' : {
-            'key' : meter.key,
-            'serial' : meter.serial
-          }
-        }
-      });
-    }
-  }
-
-  return geojson;
-};
-
 var dataReducer = function(state, action) {
   switch (action.type) {
     case types.GROUP_CATALOG_ADD_FAVORITE_RESPONSE:
@@ -181,7 +143,7 @@ var dataReducer = function(state, action) {
       return {
         groups : state.groups || [],
         filtered : _filterRows(state.groups || [], action.groupType, action.name),
-        features : _extractFeatures(state.groups || [])
+        features : extractFeatures(state.groups || [])
       };
     
     case types.GROUP_CATALOG_RESPONSE:
@@ -212,7 +174,7 @@ var dataReducer = function(state, action) {
           size : action.size || 10,
           groups : action.groups || [],
           filtered : _filterRows(action.groups || [], action.groupType, action.name),
-          features : _extractFeatures(action.groups || [])
+          features : extractFeatures(action.groups || [])
         };
       } else {
         return {
@@ -221,7 +183,7 @@ var dataReducer = function(state, action) {
           size : 10,
           groups : [],
           filtered: [],
-          features : _extractFeatures([])
+          features : extractFeatures([])
         };
       }
 
