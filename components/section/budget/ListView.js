@@ -1,40 +1,18 @@
 var React = require('react');
 var bs = require('react-bootstrap');
-
-var Modal = require('../../Modal');
 var Table = require('../../Table');
-
-function RemoveConfirmation (props) {
-  const { scenario, confirmRemoveScenario, removeScenario } = props;
-  const reset = () => confirmRemoveScenario(null);
-  if (scenario == null) {
-    return <div/>;
-  }
-  const { id, name } = scenario;
-  return (
-    <Modal
-      title='Confirmation'
-      show={true}
-      text={<span>Are you sure you want to delete <b>{name}</b> (id:{id})</span>}
-      onClose={reset}
-      actions={[
-        {
-          name: 'Cancel',
-          action: reset,
-        },
-        {
-          name: 'Delete',
-          action: () => { removeScenario(id); confirmRemoveScenario(null); },
-          style: 'danger',
-        },
-      ]}
-    />
-  );
-}
+var { budgetSchema } = require('../../../schemas/budget'); 
 
 function BudgetsList (props) {
-  const { groups, clusters, segments, areas, budgetFields, budgetData, budgetSorter, actions, budgetToRemove, searchFilter } = props;
+  const { groups, clusters, segments, areas, budgets, actions, budgetToRemove, searchFilter } = props;
   const { removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView } = actions;
+  const budgetFields = budgetSchema(actions);
+  const budgetSorter = {
+    defaultSort: 'completedOn',
+    defaultOrder: 'desc'
+  };
+  const budgetData  = searchFilter ? budgets.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : ( Array.isArray(budgets) ? budgets : []);
+
   return (
     <bs.Panel header='Budgets'>
       <bs.Row>
@@ -64,13 +42,13 @@ function BudgetsList (props) {
           template={{empty : (<span>{ 'No data found.' }</span>)}}
         />
         
-      <RemoveConfirmation
-        scenario={budgetToRemove}
-        removeScenario={removeBudgetScenario}
-        confirmRemoveScenario={confirmRemoveBudgetScenario}
-      />
+      
     </bs.Panel>
   );
+}
+
+function matches(str1, str2) {
+  return str1.toLowerCase().indexOf(str2.toLowerCase()) != -1;
 }
 
 module.exports = BudgetsList;

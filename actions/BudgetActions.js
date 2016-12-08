@@ -2,6 +2,7 @@ var types = require('../constants/BudgetActionTypes');
 var userAPI = require('../api/user');
 var { extractFeatures, nameToId } = require('../helpers/common');
 
+
 const addBudgetScenario = function (values) {
   return function(dispatch, getState) {
     const profile = getState().session.profile;
@@ -187,11 +188,14 @@ const requestExploreData = function() {
 }
 
 module.exports = {
+  //add
   addBudgetScenario,
+  //common
   removeBudgetScenario,
-  setActiveBudget,
-  resetActiveBudget,
   confirmRemoveBudgetScenario,
+  //explore
+  resetActiveBudget,
+  setActiveBudget,
   confirmSetBudget,
   confirmResetBudget,
   setSearchFilter,
@@ -206,5 +210,5 @@ module.exports = {
   setQueryText,
   setQuery,
   resetQuery,
-  requestExploreData
+  requestExploreData,
 };

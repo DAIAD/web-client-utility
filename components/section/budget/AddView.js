@@ -1,4 +1,5 @@
 var React = require('react');
+var { connect } = require('react-redux');
 var bs = require('react-bootstrap');
 var Modal = require('../../Modal');
 //var Wizard = require('../../common/Wizard');
@@ -200,4 +201,12 @@ var BudgetsAdd = React.createClass ({
   }
 });
 
-module.exports = BudgetsAdd;
+function mapStateToProps(state) {
+  return {
+    savings: state.savings.scenarios,
+    areas: state.map.map.areas,
+    profile: state.session.profile,
+  };
+}
+
+module.exports = connect(mapStateToProps)(BudgetsAdd);

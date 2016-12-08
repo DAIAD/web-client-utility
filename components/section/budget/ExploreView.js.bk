@@ -1,5 +1,4 @@
 var React = require('react');
-var { connect } = require('react-redux');
 var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
 var { FormattedTime, FormattedDate } = require('react-intl');
@@ -314,10 +313,8 @@ var BudgetExplore = React.createClass({
   },
   render: function() {
     const { budgets, groups, clusters, segments, areas, actions, params, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreData, explorePager, exploreQuery } = this.props;
-    const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario } = actions;
-    
+    const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget } = actions;
     const { id } = params;
-    //TODO: here normally the budget will be fetched from API in componentWillMount
     const budget = budgets.find(budget => budget.id === id);
     if (budget == null) {
       return (
@@ -342,7 +339,7 @@ var BudgetExplore = React.createClass({
       <bs.Panel header={`${budget.name} Overview`}>
         <bs.Row>
 
-        <bs.Col md={9} style={{ float: 'right' }}>
+        <bs.Col md={6} style={{ float: 'right' }}>
 
           <bs.Button 
             bsStyle='success' 
@@ -350,13 +347,6 @@ var BudgetExplore = React.createClass({
             onClick={() => { goToListView(); }}
             >
             <i className='fa fa-chevron-left' /> Back to all
-          </bs.Button>
-          <bs.Button
-            bsStyle='danger'
-            style={{ float: 'right', marginRight: 25 }}
-            onClick={() => confirmRemoveBudgetScenario(id)}
-            >
-            Delete budget
           </bs.Button>
           {
               !active && completed ? 
@@ -372,14 +362,15 @@ var BudgetExplore = React.createClass({
             {
               active && completed ?
                 <div>            
-                                    
+                  
                   <bs.Button 
-                    bsStyle='warning' 
+                    bsStyle='danger' 
                     style={{float: 'right', marginRight: 25}}
                     onClick={() => { confirmResetBudget(id); }}
                   >
                     Reset Budget
                   </bs.Button>
+                  
                   <bs.Button 
                     bsStyle='primary' 
                     style={{float: 'right', marginRight: 25}}
@@ -408,11 +399,11 @@ var BudgetExplore = React.createClass({
         />
 
       {
-        budgetToSet === id ? 
+        budgetToSet != null ? 
           <Modal
             show
             title='Confirmation'
-            text={<span>Are you sure you want to <i>set</i> <b>{name}</b> (id}) ?</span>}
+            text={<span>Are you sure you want to <i>set</i> <b>{budgetToSet.name}</b> (id:{budgetToSet.id}) ?</span>}
             onClose={() => confirmSetBudget(null)}
             actions={[
               {
@@ -422,7 +413,7 @@ var BudgetExplore = React.createClass({
               {
                 name: 'Set Budget',
                 style: 'primary',
-                action: () => { setActiveBudget(id); confirmSetBudget(null); }
+                action: () => { setActiveBudget(budgetToSet.id); confirmSetBudget(null); }
               },
             ]}
           />
@@ -430,11 +421,11 @@ var BudgetExplore = React.createClass({
             <div />
       }
       {
-        budgetToReset === id ? 
+        budgetToReset != null ? 
           <Modal
             show
             title='Confirmation'
-            text={<span>Are you sure you want to <i>reset</i> <b>{name}</b> (id:{id}) ?</span>}
+            text={<span>Are you sure you want to <i>reset</i> <b>{budgetToReset.name}</b> (id:{budgetToReset.id}) ?</span>}
             onClose={() => confirmResetBudget(null)}
             actions={[
               {
@@ -443,8 +434,8 @@ var BudgetExplore = React.createClass({
               },
               {
                 name: 'Reset budget',
-                style: 'warning',
-                action: () => { resetActiveBudget(id); confirmResetBudget(null); }
+                style: 'danger',
+                action: () => { resetActiveBudget(budgetToReset.id); confirmResetBudget(null); }
               },
             ]}
           />
@@ -477,62 +468,4 @@ var BudgetExplore = React.createClass({
   }
 });
 
-function mapStateToProps(state) {
-  return {
-    budgetToSet: state.budget.budgetToSet,
-    budgetToReset: state.budget.budgetToReset,
-    metersLocations: state.map.metersLocations,
-    exploreQuery: state.budget.explore.query,
-    exploreData: state.budget.explore.data,
-  };
-}
-
-function mergeProps(stateProps, dispatchProps, ownProps) {
-  
-    const exploreFields = [{
-        name: 'id',
-        title: 'Id',
-        hidden: true
-      }, {
-        name: 'email',
-        title: 'User',
-        link: function(row) {
-          if(row.id) {
-            return '/user/{id}/';
-          }
-          return null;
-        }
-      }, {
-        name: 'fullname',
-        title: 'Name'
-      }, {
-        name: 'serial',
-        title: 'SWM'
-      }, {
-        name: 'registrationDateMils',
-        title: 'Registered On',
-        type: 'datetime'
-      }, {
-        name: 'savings',
-        title: 'Savings',
-      }
-    ];
-
-    const explorePager = {
-      index: stateProps.exploreQuery.index || 0,
-      size: stateProps.exploreQuery.size || 10,
-      count: stateProps.exploreData.total || 0,
-      onPageIndexChange: index => { ownProps.actions.setQueryIndex(index); ownProps.actions.requestExploreData(); },
-      mode: Table.PAGING_SERVER_SIDE
-    };
-
-  return {
-    ...stateProps,
-    ...dispatchProps,
-    ...ownProps,
-    exploreFields,
-    explorePager
-  };
-}
-module.exports = connect(mapStateToProps, null, mergeProps)(BudgetExplore);
-
+module.exports = BudgetExplore;

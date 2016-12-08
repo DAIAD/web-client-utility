@@ -7,7 +7,8 @@ var { push } = require('react-router-redux');
 var util = require('../../../helpers/wizard');
 var { injectIntl, FormattedDate } = require('react-intl');
 
-var Table = require('../../../components/Table');
+var Modal = require('../../Modal');
+var Table = require('../../Table');
 var Actions = require('../../../actions/BudgetActions');
 var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
 
@@ -15,28 +16,67 @@ var Breadcrumb = require('../../../components/Breadcrumb');
 
 var Budgets = React.createClass({ 
   render: function() {
+    const { routes, children, budgetToRemove, actions, clusters, groups, segments, budgets } = this.props;
+    const { removeBudgetScenario, confirmRemoveBudgetScenario, goToListView } = actions;
     return (
 			<div className='container-fluid' style={{ paddingTop: 10 }}>
 				<div className='row'>
 					<div className='col-md-12'>
-            <Breadcrumb routes={this.props.routes}/>
+            <Breadcrumb routes={routes}/>
           </div>
         </div>
         <div className='row'>
           <div className='col-md-12' style={{marginTop: 10}}>
             {
-              React.cloneElement(this.props.children, this.props)
+              React.cloneElement(children, { clusters, groups, segments, budgets, actions })
             }
           </div>
+          
+          <RemoveConfirmation
+            goToListView={goToListView}
+            scenario={budgetToRemove}
+            removeScenario={removeBudgetScenario}
+            confirmRemoveScenario={confirmRemoveBudgetScenario}
+          />
         </div>
       </div>
     );
   }
 });
 
+//common components for more than one budget sub-sections
+function RemoveConfirmation (props) {
+  const { scenario, confirmRemoveScenario, removeScenario, goToListView } = props;
+  const reset = () => confirmRemoveScenario(null);
+  if (scenario == null) {
+    return <div/>;
+  }
+  const { id, name } = scenario;
+  return (
+    <Modal
+      title='Confirmation'
+      show={true}
+      text={<span>Are you sure you want to delete <b>{name}</b> (id:{id})</span>}
+      onClose={reset}
+      actions={[
+        {
+          name: 'Cancel',
+          action: reset,
+        },
+        {
+          name: 'Delete',
+          action: () => { removeScenario(id); confirmRemoveScenario(null); goToListView(); },
+          style: 'danger',
+        },
+      ]}
+    />
+  );
+}
+
 //mockup values for spatial clusters/groups
 function mapStateToProps(state) {
   return {
+    //common
     routing: state.routing,
     clusters: !state.config.utility.clusters ? [] :
       state.config.utility.clusters.map(cluster => ({
@@ -66,20 +106,9 @@ function mapStateToProps(state) {
        .map(x => `${x.key}: ${x.value}`).join(', '),
        params: util.getFriendlyParams(scenario.parameters, 'long')
      })),
-     //list
      budgetToRemoveIdx: state.budget.budgetToRemove,
+     //list
      searchFilter: state.budget.searchFilter,
-     //explore
-     confirmSetBudgetIdx: state.budget.confirmSetBudget,
-     confirmResetBudgetIdx: state.budget.confirmResetBudget,
-     metersLocations: state.map.metersLocations,
-     exploreQuery: state.budget.explore.query,
-     exploreData: state.budget.explore.data,
-     //add
-     savings: state.savings.scenarios,
-     areas: state.map.map.areas,
-     profile: state.session.profile,
-     
   };
 }
 
@@ -96,215 +125,13 @@ function mapDispatchToProps(dispatch) {
 }
 
 function mergeProps(stateProps, dispatchProps, ownProps) {
-  
-  const filteredBudgets = stateProps.searchFilter ? stateProps.budgets.filter(s => matches(s.name, stateProps.searchFilter) || matches(s.user, stateProps.searchFilter)) : stateProps.budgets;
+  return {
+    ...ownProps,
+    ...dispatchProps,
+    ...stateProps,
+    budgetToRemove: stateProps.budgets.find(scenario => scenario.id === stateProps.budgetToRemoveIdx),
 
-  //all budgets table schema
-  const budgetFields = [{
-      name: 'id',
-      title: 'Id',
-      hidden: true
-    }, 
-    {
-      name: 'name',
-      title: 'Name',
-      style: {
-        width: 100
-      },
-      link: function(row) {
-        if(row.id) {
-          return '/budgets/{id}/';
-        }
-        return null;
-      },
-    }, 
-    {
-      name: 'active',
-      title: 'Active',
-      type: 'action',
-      style: {
-        textAlign: 'center',
-        fontSize: '1.2em'
-      },
-      icon: function(field, row) {
-        return row.active ? 'check' : '';
-      },
-      handler: null, 
-    }, 
-    {
-      name: 'paramsShort',
-      title: 'Parameters',
-    },
-    {
-      name: 'user',
-      title: 'User',
-    },
-    {
-      name: 'createdOn',
-      title: 'Created',
-      type: 'datetime',
-    }, 
-    {
-      name: 'completedOn',
-      title: 'Finished',
-      type: 'datetime',
-    }, 
-    {
-      name: 'activatedOn',
-      title: 'Activated',
-      type: 'datetime',
-    },
-    {
-      name : 'explore',
-      title: 'Explore',
-      type : 'action',
-      icon : 'info-circle',
-      style: {
-        textAlign: 'center',
-        fontSize: '1.3em'
-      },
-      handler : (function(field, row) {
-        dispatchProps.actions.goToExploreView(row.id);
-      }),
-      visible : (function(field, row) {
-        return true;
-      })
-    }, 
-    {
-      name : 'delete',
-      title: 'Delete',
-      type : 'action',
-      icon : 'remove',
-      handler : (function(field, row) {
-        dispatchProps.actions.confirmRemoveBudgetScenario(row.id);
-      }),
-      visible : true 
-    }];
-
-    const budgetData = filteredBudgets || [];
-
-    const budgetSorter = {
-      defaultSort: 'completedOn',
-      defaultOrder: 'desc'
-    };
-
-    const activeBudgets = stateProps.budgets.filter(b => b.active);
-
-    //active budgets schema
-    const activeBudgetsFields = [
-      {
-        name: 'id',
-        title: 'id',
-        hidden: true
-      },
-      {
-        name: 'name',
-        title: 'Name',
-        hidden: true,
-      },
-      {
-        name: 'activatedOn', 
-        title: 'Activated', 
-        type: 'datetime',
-        hidden: true,
-      },
-      {
-        name: 'goal',
-        title: 'Goal',
-        type: 'element',
-        style: {
-          height: 150
-        }
-      },
-      {
-        name: 'savings',
-        title: 'Savings',
-        type: 'element',
-        style: {
-          height: 150
-        }
-      },
-      {
-        name: 'affected',
-        title: 'Affected',
-        type: 'element',
-        style: {
-          height: 150
-        }
-      }];
-
-      //const activeBudgetsData = active || [];
-    
-    const activeBudgetsSorter = {
-      defaultSort: 'activatedOn',
-      defaultOrder: 'desc'
-    };
-
-    var activeBudgetsStyle = {
-      row: {
-        height: 200
-      }
-    };
-
-    //explore
-    const exploreFields = [{
-        name: 'id',
-        title: 'Id',
-        hidden: true
-      }, {
-        name: 'email',
-        title: 'User',
-        link: function(row) {
-          if(row.id) {
-            return '/user/{id}/';
-          }
-          return null;
-        }
-      }, {
-        name: 'fullname',
-        title: 'Name'
-      }, {
-        name: 'serial',
-        title: 'SWM'
-      }, {
-        name: 'registrationDateMils',
-        title: 'Registered On',
-        type: 'datetime'
-      }, {
-        name: 'savings',
-        title: 'Savings',
-      }
-    ];
-
-    const explorePager = {
-      index: stateProps.exploreQuery.index || 0,
-      size: stateProps.exploreQuery.size || 10,
-      count: stateProps.exploreData.total || 0,
-      onPageIndexChange: index => { dispatchProps.actions.setQueryIndex(index); dispatchProps.actions.requestExploreData(); },
-      mode: Table.PAGING_SERVER_SIDE
-    };
-    
-    return {
-      ...ownProps,
-      ...dispatchProps,
-      ...stateProps,
-      filteredBudgets,
-      budgetFields,
-      budgetData,
-      budgetSorter,
-      activeBudgetsFields,
-      activeBudgets,
-      activeBudgetsSorter,
-      activeBudgetsStyle,
-      exploreFields,
-      explorePager,
-      budgetToRemove: stateProps.budgets.find(scenario => scenario.id === stateProps.budgetToRemoveIdx),
-      budgetToSet: stateProps.budgets.find(scenario => scenario.id === stateProps.confirmSetBudgetIdx),
-      budgetToReset: stateProps.budgets.find(scenario => scenario.id === stateProps.confirmResetBudgetIdx),
-    };
-}
-function matches(str1, str2) {
-  return str1.toLowerCase().indexOf(str2.toLowerCase()) != -1;
+  };
 }
 
 Budgets.icon = 'percent';

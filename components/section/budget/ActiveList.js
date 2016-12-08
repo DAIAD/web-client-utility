@@ -6,6 +6,7 @@ var { Link } = require('react-router');
 var Table = require('../../Table');
 var { FormattedDate } = require('react-intl');
 
+var { activeBudgetsSchema } = require('../../../schemas/budget');
 var Widget = require('../../WidgetComponent');
 
 function Goal (props) {
@@ -67,8 +68,21 @@ function Affected (props) {
 
 var ActiveBudgets = React.createClass({ 
   render: function() {
-    const { activeBudgetsFields, activeBudgetsSorter, activeBudgets, activeBudgetsStyle } = this.props;
-    const activeBudgetsData = activeBudgets
+    const { budgets } = this.props;
+
+    const activeBudgetsFields = activeBudgetsSchema(this.props.actions);
+    const activeBudgetsSorter = {
+      defaultSort: 'activatedOn',
+      defaultOrder: 'desc'
+    };
+
+    var activeBudgetsStyle = {
+      row: {
+        height: 200
+      }
+    };
+    const activeBudgetsData = budgets
+    .filter(b => b.active)
     .map(b => ({ 
       id: b.id,
       name: b.name,
