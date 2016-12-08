@@ -52,6 +52,11 @@ var Table = React.createClass({
        ) {
          this.setState({ activePage: this.props.defaultPage }); 
     }
+    if (nextProps.pager &&
+        nextProps.pager.index != this.props.pager.index
+       ) {
+         this.setState({ activePage: nextProps.pager.index+1 });
+       }
   },
 
   getStyle: function() {
