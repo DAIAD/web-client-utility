@@ -3,8 +3,8 @@ var types = require('../constants/BudgetActionTypes');
 const initialState = {
   budgetToRemove: null,
   searchFilter: null,
-  confirmSetBudget: null,
-  confirmResetBudget: null,
+  budgetToSet: null,
+  budgetToReset: null,
   scenarios: [{
        id: 'budget-1',
        name: 'Budget 1',
@@ -63,12 +63,12 @@ var budget = function (state=initialState, action) {
 
     case types.BUDGET_CONFIRM_SET: 
       return Object.assign({}, state, {
-       confirmSetBudget: action.id 
+       budgetToSet: action.id 
       }); 
 
     case types.BUDGET_CONFIRM_RESET: 
       return Object.assign({}, state, {
-       confirmResetBudget: action.id 
+       budgetToReset: action.id 
       }); 
 
 
