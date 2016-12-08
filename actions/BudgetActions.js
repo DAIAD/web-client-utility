@@ -1,16 +1,23 @@
 var types = require('../constants/BudgetActionTypes');
+var { nameToId } = require('../helpers/common');
 
 const addBudgetScenario = function (values) {
   return function(dispatch, getState) {
     const profile = getState().session.profile;
     const scenarios = getState().budget.scenarios;
-    
-    const lastId = scenarios[scenarios.length - 1] ? parseInt(scenarios[scenarios.length - 1].id) : -1;
-    const id = parseInt(lastId) != null ? lastId+1 : -1;
-    console.log('id:', id);
-    if (id == -1) {
-      throw 'oops, cant get valid last savings scenario id!';
+
+    const name = values.name.label;
+
+    if (!values.name || !values.name.label) {
+      throw 'Oops, no name provided to add savings scenario';
     }
+
+    const id = nameToId(name);
+
+    if (scenarios.map(scenario => scenario.id).includes(id)) {
+      throw `Oops, scenario with id ${id} already exists`;
+    }
+
     const user = profile.username;
     const createdOn = new Date().valueOf();
     const completedOn = null;
@@ -20,7 +27,7 @@ const addBudgetScenario = function (values) {
     const newScenario = {
       type: types.BUDGET_ADD_SCENARIO,
       options: {
-        name: values.name.label,
+        name,
         id,
         user,
         parameters,

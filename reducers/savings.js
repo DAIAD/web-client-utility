@@ -4,7 +4,7 @@ const initialState = {
   searchFilter: null,
   removeScenario: null,
   scenarios: [{
-       id: 1,
+       id: 'scenario-1',
        name: 'Scenario 1',
        user: 'foofootos',
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}},
@@ -14,7 +14,7 @@ const initialState = {
        //completedOn: null
      },
      {
-       id: 2,
+       id: 'scenario-2',
        name: 'Scenario 2',
        user: 'foofootos',
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'Nowhere'}, when: {value: 'last', label:'Last year'}},

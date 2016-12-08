@@ -4,6 +4,7 @@ var Modal = require('../../Modal');
 var Wizard = require('../../common/Wizard');
 var { SetNameItem, WhoItem, WhereItem, WhenItem } = require('../../common/WizardReusableItems');
 var util = require('../../../helpers/wizard');
+var { nameToId } = require('../../../helpers/common');
 
 const initialEmpty = {};
 
@@ -43,12 +44,11 @@ const validateWhen = ({timespan:value}) => {
 };
 
 const validateName = function (value) { 
-  const existing = this.props.scenarios.map(scenario => scenario.name);
-
+  const existing = this.props.scenarios.map(scenario => nameToId(scenario.name));
   if (!value.value) {
     throw 'noName';
   }
-  else if (existing.includes(value.value)) {
+  else if (existing.includes(nameToId(value.value))) {
     throw 'nameExists';
   }
 };

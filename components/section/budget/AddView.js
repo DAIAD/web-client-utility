@@ -5,6 +5,7 @@ var Modal = require('../../Modal');
 var Wizard = require('../../common/Wizard');
 var { FormattedMessage } = require('react-intl');
 var { SetNameItem, WhoItem, WhereItem, WhenItem, SelectBudgetType, SelectSavingsScenario, SetSavingsPercentageItem, SetGoalItem, DistributionItem  } = require('../../common/WizardReusableItems');
+var { nameToId } = require('../../../helpers/common');
 
 const validateBudgetType = ({value}) => {
   if (!value) {
@@ -54,12 +55,12 @@ const validateSavingsPotentialSelect = ({value}) => {
 };
 
 const validateName = function ({value}) { 
-  const existing = this.props.budgets.map(budget => budget.name);
+  const existing = this.props.budgets.map(budget => nameToId(budget.name));
 
   if (!value) {
     throw 'noName';
   }
-  else if (existing.includes(value)) {
+  else if (existing.includes(nameToId(value))) {
     throw 'nameExists';
   }
 };

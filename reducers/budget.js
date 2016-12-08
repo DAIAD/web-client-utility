@@ -6,7 +6,7 @@ const initialState = {
   confirmSetBudget: null,
   confirmResetBudget: null,
   scenarios: [{
-       id: 1,
+       id: 'budget-1',
        name: 'Budget 1',
        user: 'foofootos',
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}, goal: {value: -5, label: '-5 %'}},
@@ -15,7 +15,7 @@ const initialState = {
        completedOn: new Date()
      },
      {
-       id: 2,
+       id: 'budget-2',
        name: 'Budget 2',
        user: 'foofootos',
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}, excludeWho: [{value: 'age:18-21', label: 'Age 18-21'}, {value: 'age:21-55', label: 'Age 21-55'}], method: {value: 'fairly', label: 'Fairly'}},
@@ -23,7 +23,7 @@ const initialState = {
        completedOn: null,
      },
      {
-       id: 3,
+       id: 'budget-3',
        name: 'Budget 3',
        user: 'foofootos',
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}, goal: {value: -3, label: '-3 %'}},
