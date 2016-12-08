@@ -2,7 +2,7 @@ var types = require('../constants/SavingsActionTypes');
 
 const initialState = {
   searchFilter: null,
-  removeScenario: null,
+  scenarioToRemove: null,
   scenarios: [{
        id: 'scenario-1',
        name: 'Scenario 1',
@@ -30,7 +30,7 @@ var savings = function (state=initialState, action) {
     
     case types.SAVINGS_CONFIRM_REMOVE_SCENARIO: 
       return Object.assign({}, state, {
-       removeScenario: action.id
+       scenarioToRemove: action.id
       }); 
 
     case types.SAVINGS_ADD_SCENARIO: { 
