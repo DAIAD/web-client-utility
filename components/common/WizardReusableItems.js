@@ -36,6 +36,7 @@ var WhoItem = React.createClass({
     const { groups, clusters, setValue, value, noAll, intl } = this.props;
     const { selectedCluster, selectedGroups } = this.state;
     const all = intl.formatMessage({ id: 'Wizard.common.all' });
+    const clusterGroups = groups.filter(group => group.cluster === selectedCluster);
 
     return (
       <div>
@@ -87,15 +88,14 @@ var WhoItem = React.createClass({
               </bs.Tabs>
             </bs.Row>
             
-            <bs.Row style={{ marginTop: 30 }}>
+            <bs.Row style={{ marginTop: 15 }}>
               <bs.Col md={4}>
                 <CheckboxGroup name='select-groups' value={selectedGroups.map(group => group.value)} onChange={newValues => this.setState({ selectedGroups: groups.filter(group => newValues.includes(group.value)) })}>
                 {
                   Checkbox => 
                   <ul style={{listStyle: 'none'}}>
                     {
-                      groups
-                      .filter(group => group.cluster === selectedCluster) 
+                      clusterGroups 
                       .map((group, idx) => (
                         <li key={idx}><label><Checkbox value={group.value}/> {group.label} </label></li>
                       ))
@@ -106,6 +106,12 @@ var WhoItem = React.createClass({
               </bs.Col>
             
               <bs.Col xs={3} md={8}>
+  
+                <div style={{ marginBottom: 10, textAlign: 'right' }}>
+                  <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.cluster !== selectedCluster), ...clusterGroups] }); }}>All</bs.Button>
+                  <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.cluster !== selectedCluster) }); }}>None</bs.Button>
+                </div>
+
                 <Select
                   disabled={true}
                   className='select-hide-arrow'
@@ -152,8 +158,9 @@ var WhereItem = React.createClass({
         : 
           [];
     const { selectedCluster, selectedGroups } = this.state;
-    
+    const clusterGroups = groups.filter(group => group.cluster === selectedCluster);
     const all = intl.formatMessage({ id: 'Wizard.common.all' });
+
     return (
       <div>
 
@@ -186,7 +193,7 @@ var WhereItem = React.createClass({
         
         <bs.Modal
           show={this.state.showModal}
-          bsSize='large'
+          dialogClassName='map-modal'
           backdrop='static'
           animation={false}
           onHide={() => this.setState({showModal: false})}
@@ -206,64 +213,68 @@ var WhereItem = React.createClass({
               </bs.Tabs>
             </bs.Row>
             <bs.Row>
+              <bs.Col md={8}>
               <Map
-                style={{ width: '100%', height: 500 }}
+                style={{ width: '100%', height: 600 }}
                 center={[38.35, -0.48]} 
                 zoom={12.55}
                 >
                 <TileLayer />
 
                 <InfoControl position='topright'> 
-                <GeoJSON
-                  data={geojson}
-                  infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
-                  onClick={(map, layer, feature) => { 
-                    if (this.state.selectedGroups.map(g => g.value).includes(feature.properties.label)) {
-                      this.setState({ selectedGroups: this.state.selectedGroups.filter(group => group.label !== feature.properties.label) });
-                    }
-                    else {
-                      this.setState({ selectedGroups: [...this.state.selectedGroups, ({ cluster: feature.properties.cluster, label: feature.properties.label, value: feature.properties.label })] });
-                    }
-                  }}
-
-                  style={feature => this.state.selectedGroups.map(g => g.value).includes(feature.properties.label) ? ({
-                    fillColor: "#ff0000",
-                    color: "#000",
-                    weight: 3,
-                    opacity: 1,
-                    fillOpacity: 0.5
-                  }) : ({
-                    fillColor: "#fff",
-                    color: "#000",
-                    weight: 3,
-                    opacity: 1,
-                    fillOpacity: 0.5
-                  })}
-                  highlightStyle={{ weight: 4 }}
-                />
-              </InfoControl>
+                  <GeoJSON
+                    data={geojson}
+                    infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
+                    onClick={(map, layer, feature) => { 
+                      if (this.state.selectedGroups.map(g => g.value).includes(feature.properties.label)) {
+                        this.setState({ selectedGroups: this.state.selectedGroups.filter(group => group.label !== feature.properties.label) });
+                      }
+                      else {
+                        this.setState({ selectedGroups: [...this.state.selectedGroups, ({ cluster: feature.properties.cluster, label: feature.properties.label, value: feature.properties.label })] });
+                      }
+                    }}
+                    style={feature => this.state.selectedGroups.map(g => g.value).includes(feature.properties.label) ? ({
+                      fillColor: "#ff0000",
+                      color: "#000",
+                      weight: 3,
+                      opacity: 1,
+                      fillOpacity: 0.5
+                    }) : ({
+                      fillColor: "#fff",
+                      color: "#000",
+                      weight: 3,
+                      opacity: 1,
+                      fillOpacity: 0.5
+                    })}
+                    highlightStyle={{ weight: 4 }}
+                  />
+                </InfoControl>
               </Map>
+            </bs.Col>
+            <bs.Col md={4}>
+              <div style={{ margin: 15, textAlign: 'right' }}>
+                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.cluster !== selectedCluster), ...clusterGroups] }); }}>All</bs.Button>
+
+                <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.cluster !== selectedCluster) }); }}>None</bs.Button>
+              </div>
+
+              <div style={{ margin: 20 }}>
+                <Select
+                  disabled={true}
+                  className='select-hide-arrow'
+                  name='user-select'
+                  multi={true}
+                  options={groups}
+                  value={selectedGroups.map(x => x.value)}
+                />
+              </div>
+            </bs.Col>
             </bs.Row>
                 
-            <div style={{ margin: 20 }}>
-              <Select
-                disabled={true}
-                className='select-hide-arrow'
-                name='user-select'
-                multi={true}
-                options={groups}
-                value={selectedGroups.map(x => x.value)}
-              />
-            </div>
-
+            
           </bs.Modal.Body>
           <bs.Modal.Footer>
             
-            <bs.ButtonGroup style={{ float: 'left' }}>
-            <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: groups }); }}>All</bs.Button>
-            <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: [] }); }}>None</bs.Button>
-          </bs.ButtonGroup>
-
             <bs.Button onClick={() => { setValue(selectedGroups);  this.setState({showModal: false})} }>OK</bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
           </bs.Modal.Footer>
