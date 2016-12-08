@@ -1,6 +1,7 @@
 var React = require('react');
 var echarts = require('react-echarts');
 var theme = require('./chart/themes/blue');
+var { Map, TileLayer, HeatLayer, LayersControl, InfoControl } = require('react-leaflet-wrapper');
 
 function Widget (props) {
   const { error, display, title, footer, style } = props;
@@ -32,6 +33,11 @@ function Widget (props) {
                    <BarChart {...props} /> 
                    );
                }
+               else if (display === 'map') {
+                 return (
+                   <Heatmap {...props} />
+                   );
+               }
                else return null;
              }
            })()
@@ -41,6 +47,24 @@ function Widget (props) {
         {footer}
        </div>
     </div>
+  );
+}
+
+function Heatmap(props) {
+  const { style, data, map } = props;
+  return (
+    <Map
+      center={[38.36, -0.479]}
+      zoom={12}
+      style={{ width: style.width || '100%', height: style.height || 600 }}
+      >
+      <TileLayer />
+      <HeatLayer
+        data={data}
+        radius={10}
+      />
+
+    </Map>
   );
 }
 

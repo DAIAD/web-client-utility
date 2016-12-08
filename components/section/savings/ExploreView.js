@@ -7,7 +7,7 @@ var Widget = require('../../WidgetComponent');
 var theme = require('../../chart/themes/blue');
 
 function ExploreScenario (props) {
-  const { scenario, clusters, groups } = props;
+  const { scenario, clusters, groups, metersLocations } = props;
   const { potential, user, createdOn, completedOn, params } = scenario;
   const completed = scenario.completedOn != null;
 
@@ -67,7 +67,22 @@ function ExploreScenario (props) {
           }
         ]
       });
+    
     });
+    
+    widgets.push({
+      id: 25,
+      display: 'map',
+      style: {
+        height: 250,
+        width: 450
+      },
+      map: {},
+      data: metersLocations && metersLocations.features ? 
+        metersLocations.features.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0], Math.abs(Math.random()-0.8)]) : []
+    });
+
+
   }
 
   return (
@@ -86,11 +101,18 @@ function ExploreScenario (props) {
 }
 
 var SavingsPotentialExplore = React.createClass({ 
+  componentWillMount: function() {
+
+    if (!this.props.metersLocations) {
+      this.props.actions.getMetersLocations();
+    }
+
+  },
   render: function() {
-    const { scenarios, groups, clusters, actions, params } = this.props;
+    const { scenarios, groups, clusters, actions, metersLocations, params } = this.props;
     const { goToListView } = actions;
     const { id } = params;
-    const scenario = scenarios.find(scenario => scenario.id === parseInt(id));
+    const scenario = scenarios.find(scenario => scenario.id === id);
     if (scenario == null) {
       return (
         <bs.Panel header='Oops'>
@@ -119,6 +141,7 @@ var SavingsPotentialExplore = React.createClass({
           clusters={clusters}
           groups={groups}
           scenario={scenario}
+          metersLocations={metersLocations}
         />
       </bs.Panel>
     );
