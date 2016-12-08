@@ -112,10 +112,10 @@ var _featureRenderer = function(feature) {
 };
 
 var _onFeatureChange = function(features) {
-  if((!features) || (features.length===0)){
+  if(!features || !features.features || !Array.isArray(features.features) || features.features.length===0){
     this.props.actions.setGeometry(null);
   } else {
-    this.props.actions.setGeometry(features[0].geometry);
+    this.props.actions.setGeometry(features.features[0].geometry);
   }
 };
 
@@ -141,7 +141,6 @@ var UserCatalog = React.createClass({
   },
 
   onPageIndexChange: function(index) {
-    console.log('on page index change user catalog with', index);
     this.props.actions.changeIndex(index);
   },
 
@@ -345,7 +344,6 @@ var UserCatalog = React.createClass({
 
     //    switch(this.props.userCatalog.search) {
     //  case 'map':
-    console.log('user catalog search', this.props.userCatalog.search, this.props.userCatalog.data.features);
     var map = (
               <Map
                 style={{ width: '100%', height: 600}}

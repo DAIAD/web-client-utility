@@ -72,10 +72,10 @@ var _setEditor = function(key) {
 };
 
 var _onFeatureChange = function(features) {
-  if((!features) || (features.length===0)){
+  if(!features || !features.features || !Array.isArray(features.features) || features.features.length===0){
     this.props.actions.setEditorValue('spatial', null);
   } else {
-    this.props.actions.setEditorValue('spatial', features[0].geometry);
+    this.props.actions.setEditorValue('spatial', features.features[0].geometry);
   }
 };
 
