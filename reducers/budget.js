@@ -31,7 +31,25 @@ const initialState = {
        completedOn: new Date('1999-01-01'),
        activatedOn: null,
      }
-  ] 
+  ],
+  explore: {
+    query: {
+      cluster: 'none',
+      group: 'all',
+      geometry: null,
+      index: 0,
+      size: 10,
+      serial: null,
+      text: null,
+      loading: false
+    },
+    data: {
+      total: null,
+      accounts: null,
+      features: null,
+    },
+    errors: null,
+  }
 };
 
 var budget = function (state=initialState, action) {
@@ -83,9 +101,50 @@ var budget = function (state=initialState, action) {
         searchFilter: action.searchFilter
       });
 
+    case types.BUDGET_EXPLORE_SET_QUERY:
+      return {
+        ...state,
+        explore: {
+          ...state.explore,
+          query: {
+            ...state.explore.query,
+            ...action.query
+          }
+        }
+      };
 
-    default:
-      return state;
+    case types.BUDGET_EXPLORE_REQUEST_DATA:
+      return {
+        ...state,
+        explore: {
+          ...state.explore,
+          query: {
+            ...state.explore.query,
+            loading: true
+          }
+        }
+      };
+
+    case types.BUDGET_EXPLORE_SET_DATA:
+      return {
+        ...state,
+        explore: {
+          ...state.explore,
+          query: {
+            ...state.explore.query,
+            loading: false
+          },
+          data: {
+            accounts: action.data.accounts,
+            features: action.data.features,
+            total: action.data.total
+          },
+          errors: action.errors
+        }
+      };
+
+   default:
+    return state;
   }
 };
 

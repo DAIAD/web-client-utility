@@ -12,6 +12,10 @@ var types = mirrorToPath({
   BUDGET_CONFIRM_RESET: null,
   BUDGET_SET_SEARCH_FILTER: null,
 
+  BUDGET_EXPLORE_SET_QUERY: null,
+  BUDGET_EXPLORE_REQUEST_DATA: null,
+  BUDGET_EXPLORE_SET_DATA: null,
+
 });
 
 module.exports = types;

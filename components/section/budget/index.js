@@ -9,7 +9,7 @@ var { injectIntl, FormattedDate } = require('react-intl');
 
 var Table = require('../../../components/Table');
 var Actions = require('../../../actions/BudgetActions');
-var { getTimeline } = require('../../../actions/MapActions');
+var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
 
 var Breadcrumb = require('../../../components/Breadcrumb');
 
@@ -72,18 +72,27 @@ function mapStateToProps(state) {
        .map(x => `${x.key}: ${x.value}`).join(', '),
        params: util.getFriendlyParams(scenario.parameters, 'long')
      })),
-     wizardType: state.budget.wizardType,
-     initialActiveIdx: state.budget.initialActiveIdx,
+     //list
+     budgetToRemoveIdx: state.budget.budgetToRemove,
+     searchFilter: state.budget.searchFilter,
+     //explore
+     confirmSetBudgetIdx: state.budget.confirmSetBudget,
+     confirmResetBudgetIdx: state.budget.confirmResetBudget,
+     metersLocations: state.map.metersLocations,
+     exploreQuery: state.budget.explore.query,
+     exploreData: state.budget.explore.data,
+     //add
+     savings: state.savings.scenarios,
      areas: state.map.map.areas,
      profile: state.session.profile,
-
+     
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : {
-      ...bindActionCreators({...Actions, getTimeline}, dispatch), 
+      ...bindActionCreators({...Actions, getTimeline, getMetersLocations}, dispatch), 
       goToAddView: () => dispatch(push('/budgets/add')),
       goToExploreView: (id) => dispatch(push(`/budgets/${id}`)),
       goToListView: () => dispatch(push('/budgets')),
@@ -243,6 +252,44 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       }
     };
 
+    //explore
+    const exploreFields = [{
+        name: 'id',
+        title: 'Id',
+        hidden: true
+      }, {
+        name: 'email',
+        title: 'User',
+        link: function(row) {
+          if(row.id) {
+            return '/user/{id}/';
+          }
+          return null;
+        }
+      }, {
+        name: 'fullname',
+        title: 'Name'
+      }, {
+        name: 'serial',
+        title: 'SWM'
+      }, {
+        name: 'registrationDateMils',
+        title: 'Registered On',
+        type: 'datetime'
+      }, {
+        name: 'savings',
+        title: 'Savings',
+      }
+    ];
+
+    const explorePager = {
+      index: stateProps.exploreQuery.index || 0,
+      size: stateProps.exploreQuery.size || 10,
+      count: stateProps.exploreData.total || 0,
+      onPageIndexChange: index => { dispatchProps.actions.setQueryIndex(index); dispatchProps.actions.requestExploreData(); },
+      mode: Table.PAGING_SERVER_SIDE
+    };
+    
     return {
       ...ownProps,
       ...dispatchProps,
@@ -255,10 +302,11 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       activeBudgets,
       activeBudgetsSorter,
       activeBudgetsStyle,
+      exploreFields,
+      explorePager,
       budgetToRemove: stateProps.budgets.find(scenario => scenario.id === stateProps.budgetToRemoveIdx),
       budgetToSet: stateProps.budgets.find(scenario => scenario.id === stateProps.confirmSetBudgetIdx),
       budgetToReset: stateProps.budgets.find(scenario => scenario.id === stateProps.confirmResetBudgetIdx),
-      //exploreScenario: stateProps.scenarios.find(scenario => scenario.id === stateProps.exploreId)
     };
 }
 function matches(str1, str2) {

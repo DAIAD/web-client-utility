@@ -1,5 +1,6 @@
 var types = require('../constants/BudgetActionTypes');
-var { nameToId } = require('../helpers/common');
+var userAPI = require('../api/user');
+var { extractFeatures, nameToId } = require('../helpers/common');
 
 const addBudgetScenario = function (values) {
   return function(dispatch, getState) {
@@ -90,6 +91,100 @@ const setSearchFilter = function(searchFilter) {
   };
 }
 
+const setQuery = function(query) {
+  return {
+    type: types.BUDGET_EXPLORE_SET_QUERY,
+    query
+  };
+}
+
+const resetQuery = function() {
+  return setQuery({
+    cluster: 'none',
+    group: 'all',
+    geometry: null,
+    index: 0,
+    size: 10,
+    serial: null,
+    text: null,
+  });
+};
+
+const setQueryCluster = function(cluster) {
+  return setQuery({ cluster });
+}
+
+const setQueryGroup = function(group) {
+  return setQuery({ group });
+}
+
+const resetQueryCluster = function() {
+  return setQuery({ cluster: 'none' });
+}
+
+const resetQueryGroup = function() {
+  return setQuery({ group: 'all' });
+}
+
+const setQueryGeometry = function(geometry) {
+  return setQuery({ geometry });
+}
+
+const setQueryIndex = function(index) {
+  return setQuery({ index });
+}
+
+const setQuerySize = function(size) {
+  return setQuery({ size });
+}
+
+const setQuerySerial = function(serial) {
+  return setQuery({ serial });
+}
+
+const setQueryText = function(text) {
+  return setQuery({ text });
+}
+
+const requestData = function() {
+  return {
+    type: types.BUDGET_EXPLORE_REQUEST_DATA
+  };
+}
+
+const setData = function(data, errors) {
+  return {
+    type: types.BUDGET_EXPLORE_SET_DATA,
+    data,
+    errors
+  };
+}
+
+const requestExploreData = function() {
+  return function(dispatch, getState) {
+    dispatch(requestData());
+    const { query } = getState().budget.explore;
+
+    return userAPI.getAccounts(query).then(response => {
+      if (Array.isArray(response.errors) && response.errors.length > 0) {
+        dispatch(setData(response, response.errors));
+      }
+      //TODO: for now set a random number as savings for current budget
+      const accounts = response.accounts.map(account => ({ ...account, savings: Math.round(Math.random()*10) }));
+      dispatch(setData({ 
+        total: response.total, 
+        accounts,
+        features: extractFeatures(accounts)
+      }, null));
+    },
+    error => {
+      console.log('error:', error);
+      dispatch(setData(null, error));
+
+    });
+      
+  };
+}
 
 module.exports = {
   addBudgetScenario,
@@ -100,4 +195,16 @@ module.exports = {
   confirmSetBudget,
   confirmResetBudget,
   setSearchFilter,
+  setQueryIndex,
+  setQuerySize,
+  setQueryGroup,
+  setQueryCluster,
+  resetQueryGroup,
+  resetQueryCluster,
+  setQueryGeometry,
+  setQuerySerial,
+  setQueryText,
+  setQuery,
+  resetQuery,
+  requestExploreData
 };
