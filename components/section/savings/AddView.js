@@ -93,7 +93,7 @@ var SavingsPotentialAdd = React.createClass({
     const { setValidationError, addSavingsScenario, goToListView } = actions;
     const geojson = this.getGeoJSON(areas);
     return (
-      <div>
+      <bs.Panel header='Add Scenario'>
         <bs.Row>
         <bs.Col md={6}>
           <h4>Add new Scenario</h4> 
@@ -111,7 +111,6 @@ var SavingsPotentialAdd = React.createClass({
             id='who'
             title='Who'
             description='Select all population or narrow savings potential calculation to selected groupsn'
-            groups={groups}
             clusters={clusters}
             initialValue={{}}
             validate={validateWho}
@@ -121,8 +120,15 @@ var SavingsPotentialAdd = React.createClass({
             id='where'
             title='Where'
             description='Select all areas or narrow savings potential calculation to selected areas'
-            clusters={segments}
-            geojson={geojson}
+            clusters={segments.map(segment => ({ 
+              ...segment, 
+              groups: geojson.features ? geojson.features.map(f => ({ 
+                feature: f,
+                clusterKey: f.properties.cluster, 
+                name: f.properties.label, 
+                key: f.properties.label 
+              })) : [] 
+            }))}
             initialValue={{}}
             validate={validateWhere}
             intl={intl}
@@ -148,8 +154,7 @@ var SavingsPotentialAdd = React.createClass({
             initialValue={{}}
           />
         </Wizard>
-
-    </div>
+      </bs.Panel>
     );
   }
 });

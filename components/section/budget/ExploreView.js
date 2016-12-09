@@ -78,15 +78,15 @@ function BudgetOverview (props) {
           formatter: y => y.toString() + '%',
         },
         xAxis: {
-          name: cluster.label,
-          data: groups.filter(g => g.cluster === cluster.value).map(x => x.label)
+          name: cluster.name,
+          data: cluster.groups.map(x => x.name)
         },
         series: [
           {
             name: '',
             type: 'bar',
             fill: 0.8,
-            data: groups.filter(g => g.cluster === cluster.value).map(x => Math.round(Math.random()*50))
+            data: cluster.groups.map(x => Math.round(Math.random()*50))
           }
         ]
       });
@@ -114,25 +114,6 @@ function BudgetOverview (props) {
 
     //const clusterKey = 'none', groupKey = 'all';
 
-    var clusterOptions = [{
-      label: 'None',
-      value: 'none'
-    },
-    ...clusters
-    ];
-    
-    var groupOptions = selectedCluster === 'none' ? [{
-      label: 'Everyone',
-      value: 'all'
-    }] 
-    : 
-      [{
-      label: 'All',
-      value: 'all'
-    },
-    ...groups.filter(group => group.cluster === selectedCluster)
-    ];
-
   return (
     <bs.Row style={{ marginLeft: 10 }}>
     {
@@ -158,11 +139,12 @@ function BudgetDetails (props) {
       <span>{ loading ? 'Loading data ...' : 'No data found.' }</span>
   );
 
+  const activeCluster = clusters.find(cluster => cluster.key === selectedCluster);
   var clusterOptions = [{
     label: 'None',
     value: 'none'
   },
-  ...clusters
+  ...clusters.map(cluster => ({ ...cluster, label: cluster.name, value: cluster.key }))
   ];
   
   var groupOptions = selectedCluster === 'none' ? [{
@@ -174,17 +156,19 @@ function BudgetDetails (props) {
     label: 'All',
     value: 'all'
   },
-  ...groups.filter(group => group.cluster === selectedCluster)
+  ...activeCluster.groups.map(group => ({ ...group, label: activeCluster.name + ': ' + group.name, value: group.key }))
   ];
 
   return (
     <div>
+      <form onSubmit={e => { e.preventDefault(); requestExploreData(); }}>
       <bs.Row>
-        <bs.Col md={2}>
+        <bs.Col md={1}>
           <label>Group:</label>
         </bs.Col>
-        <bs.Col md={10}>
-        <div style={{ display: 'inline-block', width: '40%' }}>
+
+        <bs.Col md={4}>
+          <div className='form-group'>
           <Select className='select-cluster'
             value={selectedCluster}
             onChange={(val) => { 
@@ -195,14 +179,16 @@ function BudgetDetails (props) {
               else {  
                 setQueryCluster(val.value); 
               }
-              //requestExploreData();
             }}
             options={clusterOptions}
           />
         </div>
-          &nbsp;&nbsp;
 
-        <div style={{ display: 'inline-block', width: '40%' }}>
+        <span className="help-block text-muted">Target a group (or cluster of groups) of consumers.</span>
+        </bs.Col>
+
+        <bs.Col md={4}>
+          <div className='form-group'>
           <Select className='select-cluster-group'
             value={selectedGroup}
             onChange={(val) => { 
@@ -212,21 +198,19 @@ function BudgetDetails (props) {
               else {
                 setQueryGroup(val.value);
               }
-              //requestExploreData();
             }}
             options={groupOptions}
            />
         </div>
-        <div style={{ display: 'inline-block', width: '10%' }}>
-          <bs.Button style={{ float: 'right' }} bsStyle='default' onClick={() => { resetQuery(); requestExploreData();}}>Reset</bs.Button>
-        </div>
-          <p className="help text-muted">Target a group (or cluster of groups) of consumers.</p>
-      </bs.Col>
+        </bs.Col>
+        <bs.Col md={3}>
+          <bs.Button  style={{ marginRight: 20 }} bsStyle='primary' type="submit">Refresh</bs.Button>
+          <bs.Button bsStyle='default' onClick={() => { resetQuery(); requestExploreData();}}>Reset</bs.Button>
+        </bs.Col>
     </bs.Row>
 
-    <form onSubmit={e => { e.preventDefault(); requestExploreData(); }}>
       <bs.Row>
-        <bs.Col md={2}>
+        <bs.Col md={1}>
           <label>Search:</label>
         </bs.Col>
         <bs.Col md={4}>
@@ -252,13 +236,8 @@ function BudgetDetails (props) {
           />
           <span className='help-block'>Filter meter serial number</span>
         </bs.Col>
-        <bs.Col md={2}>
-          <bs.Button bsStyle='primary' type="submit">Refresh</bs.Button>
-        </bs.Col>
       </bs.Row>
      
-    </form>
-
     <br />
     <Map
       style={{ width: '100%', height: 300}}
@@ -300,7 +279,9 @@ function BudgetDetails (props) {
           :
             <div />
       }
-    <br />
+      <br />
+
+    </form>
   </div> 
   );
 }
@@ -319,6 +300,8 @@ var BudgetExplore = React.createClass({
     const { id } = params;
     //TODO: here normally the budget will be fetched from API in componentWillMount
     const budget = budgets.find(budget => budget.id === id);
+
+    if (!clusters) return null;
     if (budget == null) {
       return (
         <bs.Panel header='Oops'>
@@ -412,7 +395,7 @@ var BudgetExplore = React.createClass({
           <Modal
             show
             title='Confirmation'
-            text={<span>Are you sure you want to <i>set</i> <b>{name}</b> (id}) ?</span>}
+            text={<span>Are you sure you want to <i>set</i> <b>{name}</b> (id:{id}) ?</span>}
             onClose={() => confirmSetBudget(null)}
             actions={[
               {

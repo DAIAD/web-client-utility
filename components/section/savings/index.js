@@ -76,24 +76,10 @@ function mapStateToProps(state) {
   return {
     routing: state.routing,
     user: state.session.profile ? {value: state.session.profile.username, label: state.session.profile.firstname + ' ' + state.session.profile.lastname} : null,
-    clusters: !state.config.utility.clusters ? [] :
-      state.config.utility.clusters.map(cluster => ({
-        label: cluster.name,
-        value: cluster.key
-      })),
-    groups: !state.config.utility.clusters ? [] :
-      state.config.utility.clusters
-      .reduce((p, c) => [...p, ...c.groups.map(
-        g => ({
-          value: c.name + ':' + g.name,
-          cluster: g.clusterKey,
-          group: g.key,
-          label: c.name + ': ' + g.name
-        }))], [])
-        .sort((s1, s2) => (s2.label == s1.label) ? 0 : ((s2.label < s1.label) ? 1 : -1)),
-     segments: [{
-       value: 'area',
-       label: 'Areas'
+    clusters: state.config.utility.clusters,
+    segments: [{
+       key: 'area',
+       name: 'Areas'
      }],
      scenarios: state.savings.scenarios.map(scenario => ({
        ...scenario, 

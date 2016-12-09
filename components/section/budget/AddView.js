@@ -163,8 +163,15 @@ var BudgetsAdd = React.createClass ({
                 <WhereItem
                  id='where'
                  intl={intl}
-                 clusters={segments}
-                 geojson={geojson}
+                 clusters={segments.map(segment => ({ 
+                   ...segment, 
+                   groups: geojson.features ? geojson.features.map(f => ({ 
+                      feature: f,
+                      clusterKey: f.properties.cluster, 
+                      name: f.properties.label, 
+                      key: f.properties.label 
+                    })) : [] 
+                  }))}
                  initialValue={{}}
                  validate={validateWhere}
                 />
@@ -179,9 +186,16 @@ var BudgetsAdd = React.createClass ({
                 <WhereItem
                   id='excludeWhere'
                   intl={intl}
+                  clusters={segments.map(segment => ({ 
+                   ...segment, 
+                   groups: geojson.features ? geojson.features.map(f => ({ 
+                      feature: f,
+                      clusterKey: f.properties.cluster, 
+                      name: f.properties.label, 
+                      key: f.properties.label 
+                    })) : [] 
+                  }))}
                   initialValue={{}}
-                  geojson={geojson}
-                  clusters={segments}
                   noAll
                 />
                 <SetNameItem

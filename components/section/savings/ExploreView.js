@@ -55,15 +55,15 @@ function ExploreScenario (props) {
           formatter: y => y.toString() + '%',
         },
         xAxis: {
-          name: cluster.label,
-          data: groups.filter(g => g.cluster === cluster.value).map(x => x.label)
+          name: cluster.name,
+          data: cluster.groups.map(x => x.name)
         },
         series: [
           {
             name: '',
             type: 'bar',
             fill: 0.8,
-            data: groups.filter(g => g.cluster === cluster.value).map(x => Math.round(Math.random()*50))
+            data: cluster.groups.map(x => Math.round(Math.random()*50))
           }
         ]
       });
@@ -107,11 +107,12 @@ var SavingsPotentialExplore = React.createClass({
 
   },
   render: function() {
-    const { scenarios, groups, clusters, actions, metersLocations, params } = this.props;
+    const { scenarios, clusters, actions, metersLocations, params } = this.props;
     const { goToListView, confirmRemoveScenario } = actions;
     const { id } = params;
     //TODO: normally this would be fetched from API at componentWIllMount
     const scenario = scenarios.find(scenario => scenario.id === id);
+    if (!clusters) return null;
     if (scenario == null) {
       return (
         <bs.Panel header='Oops'>
@@ -151,7 +152,6 @@ var SavingsPotentialExplore = React.createClass({
          <hr/>
         <ExploreScenario
           clusters={clusters}
-          groups={groups}
           scenario={scenario}
           metersLocations={metersLocations}
         />
