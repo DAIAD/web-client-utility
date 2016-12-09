@@ -7,6 +7,7 @@ var CheckboxGroup = require('react-checkbox-group');
 var { FormattedMessage } = require('react-intl');
 
 var { Map, TileLayer, GeoJSON, InfoControl } = require('react-leaflet-wrapper');
+var DisplayParams = require('../DisplayParams');
 
 var util = require('../../helpers/wizard');
 
@@ -18,25 +19,41 @@ function SetNameItem (props) {
     </bs.Col>
   );
 }
-
 var WhoItem = React.createClass({
   getInitialState: function() {
     return {
       showModal: false,
-      selectedCluster: Array.isArray(this.props.clusters) && this.props.clusters[0] ? this.props.clusters[0].value : null,
+      selectedCluster: Array.isArray(this.props.clusters) && this.props.clusters[0] ? this.props.clusters[0] : null,
       selectedGroups: Array.isArray(this.props.value) ? this.props.value : []
     };
   },
   componentWillReceiveProps: function(nextProps) {
     if (Array.isArray(nextProps.clusters) && nextProps.clusters[0]) {
-      this.setState({ selectedCluster: nextProps.clusters[0].value });
+      this.setState({ selectedCluster: nextProps.clusters[0] });
     }
   },
   render: function() {
-    const { groups, clusters, setValue, value, noAll, intl } = this.props;
+    const { clusters, setValue, value, noAll, intl } = this.props;
     const { selectedCluster, selectedGroups } = this.state;
     const all = intl.formatMessage({ id: 'Wizard.common.all' });
-    const clusterGroups = groups.filter(group => group.cluster === selectedCluster);
+
+    if (!clusters) return null;
+
+    const allGroups = clusters.map(cluster => cluster.groups).reduce((p, c) => [...p, ...c], []);
+
+    const selectedParams = clusters.map(cluster => {
+      const selectedClusterGroups = selectedGroups.filter(group => group.clusterKey === cluster.key);
+      return {
+        key: selectedClusterGroups.length > 0 ? cluster.name : null,
+        value: selectedClusterGroups.map(g => g.name)
+      };
+    });
+
+    const displayGroups = selectedGroups.map(group => ({ 
+      ...group, 
+      value: group.key, 
+      label: clusters.find(cluster => cluster.key === group.clusterKey).name + ': ' + group.name
+    }));
 
     return (
       <div>
@@ -51,19 +68,11 @@ var WhoItem = React.createClass({
           </bs.ButtonGroup>
         </bs.Col>
         <bs.Col md={7}>
-          {
-            Array.isArray(value) ?
-              <Select
-                disabled={true}
-                className='select-hide-arrow'
-                name='user-select'
-                multi={true}
-                options={groups}
-                value={selectedGroups.map(x => x.value)}
-              />
-              :
-                <div />
-          }
+          <DisplayParams 
+            params={selectedParams}
+            limit={40}
+            style={{ width: '80%' }}
+          /> 
         </bs.Col>
         
         <bs.Modal
@@ -79,10 +88,10 @@ var WhoItem = React.createClass({
           <bs.Modal.Body>
             
             <bs.Row>
-              <bs.Tabs position='top' tabWidth={20} activeKey={selectedCluster} onSelect={(val) => this.setState({ selectedCluster: val })}>
+              <bs.Tabs position='top' tabWidth={20} activeKey={selectedCluster.key} onSelect={(val) => this.setState({ selectedCluster: clusters.find(cluster => cluster.key === val) })}>
                 {
                   clusters.map((cluster, idx) => (
-                    <bs.Tab key={idx} eventKey={cluster.value} title={cluster.label} />
+                    <bs.Tab key={idx} eventKey={cluster.key} title={cluster.name} />
                     ))
                 }
               </bs.Tabs>
@@ -90,14 +99,14 @@ var WhoItem = React.createClass({
             
             <bs.Row style={{ marginTop: 15 }}>
               <bs.Col md={4}>
-                <CheckboxGroup name='select-groups' value={selectedGroups.map(group => group.value)} onChange={newValues => this.setState({ selectedGroups: groups.filter(group => newValues.includes(group.value)) })}>
+                <CheckboxGroup name='select-groups' value={selectedGroups.map(group => group.key)} onChange={newValues =>  this.setState({ selectedGroups: newValues.map(key => allGroups.find(group => group.key === key))  })}>
                 {
                   Checkbox => 
                   <ul style={{listStyle: 'none'}}>
                     {
-                      clusterGroups 
+                      selectedCluster.groups  
                       .map((group, idx) => (
-                        <li key={idx}><label><Checkbox value={group.value}/> {group.label} </label></li>
+                        <li key={idx}><label><Checkbox value={group.key}/> {group.name} </label></li>
                       ))
                     }
                   </ul>
@@ -105,27 +114,23 @@ var WhoItem = React.createClass({
                 </CheckboxGroup>
               </bs.Col>
             
-              <bs.Col xs={3} md={8}>
-  
-                <div style={{ marginBottom: 10, textAlign: 'right' }}>
-                  <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.cluster !== selectedCluster), ...clusterGroups] }); }}>All</bs.Button>
-                  <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.cluster !== selectedCluster) }); }}>None</bs.Button>
-                </div>
+                <bs.Col md={6}>
+                  <DisplayParams 
+                    params={selectedParams}
+                    limit={40}
+                    style={{ width: '80%' }}
+                  />
+              </bs.Col>
 
-                <Select
-                  disabled={true}
-                  className='select-hide-arrow'
-                  name='user-select'
-                  multi={true}
-                  options={groups}
-                  value={selectedGroups.map(x => x.value)}
-                />
+              <bs.Col xs={3} md={2}>
+                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.clusterKey !== selectedCluster.key), ...selectedCluster.groups] }); }}>All</bs.Button>
+                <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.clusterKey !== selectedCluster.key) }); }}>None</bs.Button>
               </bs.Col>
             </bs.Row>
 
           </bs.Modal.Body>
           <bs.Modal.Footer>
-            <bs.Button onClick={() => { setValue(selectedGroups);  this.setState({showModal: false}); }}>OK</bs.Button>
+            <bs.Button onClick={() => { setValue(displayGroups);  this.setState({showModal: false}); }}>OK</bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal>
@@ -138,29 +143,46 @@ var WhereItem = React.createClass({
   getInitialState: function() {
     return {
       showModal: false,
-      selectedCluster: 'area',
+      selectedCluster: Array.isArray(this.props.clusters) && this.props.clusters[0] ? this.props.clusters[0] : null,
       selectedGroups: Array.isArray(this.props.value) ? this.props.value : []
     };
   },
   componentWillReceiveProps: function(nextProps) {
     if (Array.isArray(nextProps.clusters) && nextProps.clusters[0]) {
-      this.setState({ selectedCluster: nextProps.clusters[0].value });
+      this.setState({ selectedCluster: nextProps.clusters[0] });
     }
   },
   render: function() {
     const { setValue, clusters, value, noAll, intl, geojson } = this.props;
+    /*
     const groups = geojson.features ? 
       geojson.features.map(f => ({ 
-        cluster: f.properties.cluster, 
-        label: f.properties.label, 
-        value: f.properties.label 
+        clusterKey: f.properties.cluster, 
+        name: f.properties.label, 
+        key: f.properties.label 
       }))
         : 
-          [];
-    const { selectedCluster, selectedGroups } = this.state;
-    const clusterGroups = groups.filter(group => group.cluster === selectedCluster);
+        [];
+        */
     const all = intl.formatMessage({ id: 'Wizard.common.all' });
+    const { selectedCluster, selectedGroups } = this.state;
+    if (!clusters) return null;
 
+    const allGroups = clusters.map(cluster => cluster.groups).reduce((p, c) => [...p, ...c], []);
+    const selectedParams = clusters.map(cluster => {
+      const selectedClusterGroups = selectedGroups.filter(group => group.clusterKey === cluster.key);
+      return {
+        key: selectedClusterGroups.length > 0 ? cluster.name : null,
+        value: selectedClusterGroups.map(g => g.name)
+      };
+    });
+
+    const displayGroups = selectedGroups.map(group => ({ 
+      ...group, 
+      value: group.key, 
+      label: clusters.find(cluster => cluster.key === group.clusterKey).name + ': ' + group.name
+    }));
+   
     return (
       <div>
 
@@ -177,17 +199,10 @@ var WhereItem = React.createClass({
         </bs.Col>
         <bs.Col md={7}>
           {
-            Array.isArray(value) ?
-              <Select
-                disabled={true}
-                className='select-hide-arrow'
-                name='user-select'
-                multi={true}
-                options={groups}
-                value={selectedGroups.map(x => x.value)}
-              />
-              :
-                <div />
+            <DisplayParams
+              params={selectedParams}
+              limit={4}
+            />
           }
         </bs.Col>
         
@@ -202,12 +217,11 @@ var WhereItem = React.createClass({
             <h4>Custom area selection</h4>
           </bs.Modal.Header>
           <bs.Modal.Body>
-
             <bs.Row>
-              <bs.Tabs position='top' tabWidth={20} activeKey={selectedCluster} onSelect={(val) =>  this.setState({ selectedCluster: val })}>
+              <bs.Tabs position='top' tabWidth={20} activeKey={selectedCluster.key} onSelect={(val) =>  this.setState({ selectedCluster: clusters.find(cluster => cluster.key === val) })}>
                 {
                   clusters.map((cluster, idx) => (
-                    <bs.Tab key={idx} eventKey={cluster.value} title={cluster.label} />
+                    <bs.Tab key={idx} eventKey={cluster.key} title={cluster.name} />
                     ))
                 }
               </bs.Tabs>
@@ -223,17 +237,17 @@ var WhereItem = React.createClass({
 
                 <InfoControl position='topright'> 
                   <GeoJSON
-                    data={geojson}
+                    data={{ type: 'FeatureCollection', features: selectedCluster.groups.map(g => g.feature)}}
                     infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
                     onClick={(map, layer, feature) => { 
-                      if (this.state.selectedGroups.map(g => g.value).includes(feature.properties.label)) {
-                        this.setState({ selectedGroups: this.state.selectedGroups.filter(group => group.label !== feature.properties.label) });
+                      if (this.state.selectedGroups.map(g => g.key).includes(feature.properties.label)) {
+                        this.setState({ selectedGroups: this.state.selectedGroups.filter(group => group.key !== feature.properties.label) });
                       }
                       else {
-                        this.setState({ selectedGroups: [...this.state.selectedGroups, ({ cluster: feature.properties.cluster, label: feature.properties.label, value: feature.properties.label })] });
+                        this.setState({ selectedGroups: [...this.state.selectedGroups, allGroups.find(group => group.key === feature.properties.label)] });
                       }
                     }}
-                    style={feature => this.state.selectedGroups.map(g => g.value).includes(feature.properties.label) ? ({
+                    style={feature => this.state.selectedGroups.map(g => g.key).includes(feature.properties.label) ? ({
                       fillColor: "#ff0000",
                       color: "#000",
                       weight: 3,
@@ -253,29 +267,24 @@ var WhereItem = React.createClass({
             </bs.Col>
             <bs.Col md={4}>
               <div style={{ margin: 15, textAlign: 'right' }}>
-                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.cluster !== selectedCluster), ...clusterGroups] }); }}>All</bs.Button>
-
-                <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.cluster !== selectedCluster) }); }}>None</bs.Button>
+                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.clusterKey !== selectedCluster.key), ...selectedCluster.groups] }); }}>All</bs.Button>
+                <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.clusterKey !== selectedCluster.key) }); }}>None</bs.Button>
               </div>
 
               <div style={{ margin: 20 }}>
-                <Select
-                  disabled={true}
-                  className='select-hide-arrow'
-                  name='user-select'
-                  multi={true}
-                  options={groups}
-                  value={selectedGroups.map(x => x.value)}
+                <DisplayParams
+                  params={selectedParams}
+                  limit={50}
+                  show={20}
+                  style={{ height: 600, overflow: 'auto' }}
                 />
               </div>
             </bs.Col>
             </bs.Row>
-                
-            
           </bs.Modal.Body>
+          
           <bs.Modal.Footer>
-            
-            <bs.Button onClick={() => { setValue(selectedGroups);  this.setState({showModal: false})} }>OK</bs.Button>
+            <bs.Button onClick={() => { setValue(displayGroups);  this.setState({showModal: false})} }>OK</bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal> 
