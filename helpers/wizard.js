@@ -18,7 +18,7 @@ function getFriendlyParams (dict, details='long') {
         details === 'short' ? 
           'Multiple'
           :
-            dict[key].map(x => x.label).join(', ')
+            dict[key].map(x => x.label)
       )
       :
         dict[key].label || '-'

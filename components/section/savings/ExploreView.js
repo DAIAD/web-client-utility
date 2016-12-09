@@ -16,20 +16,30 @@ function ExploreScenario (props) {
     display: 'stat',
     title: 'Details',
     highlight: null,
-    info: [
-      <span><b>User:</b> { user } </span>,
-      <span><b>Created on:</b> { createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
-      <span><b>Completed on:</b> { completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
-    ]
+    info: [{
+      key: 'User',
+      value: user
+    },
+    {
+      key: 'Created on',
+      value: createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
+    },
+    {
+      key: 'Completed on',
+      value: completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
+    }]
   },
   {
     id: 2,
     display: 'stat',
     title: 'Parameters',
     highlight: null,
-    info: params.map(p =>
-      <span><b>{p.key}:</b> {p.value}</span>
-    )
+    info: params,
+    style: {
+      width: 400
+    },
+    limit: 5
+
   }
   ];
 

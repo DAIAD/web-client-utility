@@ -1,7 +1,9 @@
 var React = require('react');
+var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
 var theme = require('./chart/themes/blue');
 var { Map, TileLayer, HeatLayer, LayersControl, InfoControl } = require('react-leaflet-wrapper');
+var DisplayParams = require('./DisplayParams');
 
 function Widget (props) {
   const { error, display, title, footer, style } = props;
@@ -63,7 +65,6 @@ function Heatmap(props) {
         data={data}
         radius={10}
       />
-
     </Map>
   );
 }
@@ -98,31 +99,26 @@ function BarChart(props) {
   );
 }
 
-function Stat (props) {
-  const { highlight, info, style } = props;
-  /*
-  const onlyHighlight = highlight && (!info || info.length === 0);
-  const onlyInfo = !highlight && info && info.length > 0;
-  const highlightAndInfo = highlight && info && info.length > 0;
-  */
-  return (
-    <div style={style}>
-      <div style={{float: 'left', width: highlight ? (info && info.length > 0 ? '33%' : '100%') : '0%'}}>
-        <h2>{highlight}</h2>
-      </div>
-      <div style={{float: 'left', width: info && info.length > 0 ? (highlight  ? '65%' : '100%') : '0%'}}>
-        <div>
-          <ul style={{listStyle: 'none'}}>
-          {
-            info.map((infoLine, idx) => (
-              <li key={idx}>{infoLine}</li>
-              ))
-          }
-        </ul>
+
+var Stat = React.createClass({
+  render: function() {
+    const { highlight, info, limit, show, style } = this.props;
+    return (
+      <div style={style}>
+        <div style={{float: 'left', width: highlight ? (info && info.length > 0 ? '33%' : '100%') : '0%'}}>
+          <h2>{highlight}</h2>
+        </div>
+        <div style={{float: 'left', width: info && info.length > 0 ? (highlight  ? '65%' : '100%') : '0%'}}>
+          <DisplayParams 
+            params={info} 
+            limit={limit}
+            show={show}
+          /> 
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+});
+
 
 module.exports = Widget;

@@ -20,7 +20,6 @@ function BudgetOverview (props) {
   const completed = budget.completedOn != null;
 
   const widgets = [
-    
     {
       id: 1,
       display: 'stat', 
@@ -29,7 +28,18 @@ function BudgetOverview (props) {
       style: {
         width: 300,
       },
-      info: ['12M lt less than 2014', 'Max 16% | Min 2%', 'Group: Pilot A', '12301 Consumers'],
+      info: [{
+        value: '12M lt less than 2014'
+      },
+      {
+        value: 'Max 16% | Min 2%'
+      },
+      {
+        value: 'Group: Pilot A' 
+      },
+      {
+        value: '12301 Consumers'
+      }],
       footer: <span>{ activatedOn ? <span>Set: <FormattedDate value={activatedOn} day='numeric' month='numeric' year='numeric' /></span> : 'Inactive'}</span>,
     }, 
     {
@@ -40,12 +50,22 @@ function BudgetOverview (props) {
       width: 300,
     },
     highlight: goal && goal.values ? goal.values.label : null,
-    info: [
-      <span><b>Created by:</b> { user } </span>,
-      <span><b>Created on:</b> { createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
-      <span><b>Completed on:</b> { completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
-      <span><b>Activated on:</b> { activatedOn ? <FormattedTime value={activatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</span>,
-    ],
+    info: [{
+      key: 'Created by',
+      value: user
+    },
+    {
+      key: 'Created on',
+      value: createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
+    },
+    {
+      key: 'Completed on',
+      value: completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
+    },
+    {
+      key: 'Activated on',
+      value: activatedOn ? <FormattedTime value={activatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
+    }],
     footer: <span>&nbsp;</span>,
     },
     
@@ -57,10 +77,10 @@ function BudgetOverview (props) {
     style: {
       width: 300,
     },
-    info: params.map(p =>
-      <span><b>{p.key}:</b> {p.value}</span>
-    ),
+    info: params,
     footer: <span>&nbsp;</span>,
+    limit: 5,
+    show: 3
   }
   ];
 
