@@ -16,7 +16,7 @@ var Breadcrumb = require('../../../components/Breadcrumb');
 
 var Budgets = React.createClass({ 
   render: function() {
-    const { routes, children, budgetToRemove, actions, clusters, groups, segments, budgets } = this.props;
+    const { routes, children, budgetToRemove, actions, clusters, groups, segments, budgets, intl } = this.props;
     const { removeBudgetScenario, confirmRemoveBudgetScenario, goToListView } = actions;
     return (
 			<div className='container-fluid' style={{ paddingTop: 10 }}>
@@ -28,7 +28,7 @@ var Budgets = React.createClass({
         <div className='row'>
           <div className='col-md-12' style={{marginTop: 10}}>
             {
-              React.cloneElement(children, { clusters, groups, segments, budgets, actions })
+              React.cloneElement(children, { clusters, groups, segments, budgets, actions, intl })
             }
           </div>
           
