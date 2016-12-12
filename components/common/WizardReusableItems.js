@@ -4,7 +4,7 @@ var Select = require('react-select');
 var moment = require('moment');
 var DatetimeInput = require('react-datetime');
 var CheckboxGroup = require('react-checkbox-group');
-var { FormattedMessage } = require('react-intl');
+var { FormattedMessage, FormattedDate } = require('react-intl');
 
 var { Map, TileLayer, GeoJSON, InfoControl } = require('react-leaflet-wrapper');
 var DisplayParams = require('../DisplayParams');
@@ -44,7 +44,6 @@ var WhoItem = React.createClass({
     const noneLabel = _t('Buttons.None');
 
     if (!clusters) return null;
-    console.log('clusters: ', this.props);
     const allGroups = clusters.map(cluster => cluster.groups).reduce((p, c) => [...p, ...c], []);
 
     const selectedParams = clusters.map(cluster => {
@@ -233,7 +232,7 @@ var WhereItem = React.createClass({
             <bs.Row>
               <bs.Col md={8}>
               <Map
-                style={{ width: '100%', height: 600 }}
+                style={{ width: '100%', height: 450 }}
                 center={[38.35, -0.48]} 
                 zoom={12.55}
                 >
@@ -279,8 +278,8 @@ var WhereItem = React.createClass({
                 <DisplayParams
                   params={selectedParams}
                   limit={50}
-                  show={20}
-                  style={{ height: 600, overflow: 'auto' }}
+                  show={50}
+                  style={{ maxHeight: 450, overflow: 'auto' }}
                 />
               </div>
             </bs.Col>
@@ -317,6 +316,7 @@ var WhenItem = React.createClass({
   render: function() {
     const { value, setValue, intl } = this.props;
 
+    const { timespan } = this.state;
 
     const _t = x => intl.formatMessage({ id: x });
 
@@ -331,10 +331,26 @@ var WhenItem = React.createClass({
             <bs.Button bsStyle={value.value === 'custom' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{chooseLabel}</bs.Button>
           </bs.ButtonGroup>
         </bs.Col>
+        
+        <bs.Col md={7} style={{ textAlign: 'left' }}>
+          {
+            value.value === 'custom' ?
+              <div>
+              <span style={{ fontSize: 16, fontWeight: 500, color: '#666' }}>{_t('Wizard.items.when.modal')}: </span>
+              <b>
+                <FormattedDate value={timespan[0]} /> <span>&nbsp;-&nbsp;</span> <FormattedDate value={timespan[1]} />
+              </b>
+            </div>
+              :
+                <span />
+          }
+        </bs.Col>
+
 
         <bs.Modal
           show={this.state.showModal}
           animation={false}
+          className='confirmation-modal'
           backdrop='static'
           onHide={() => this.setState({showModal: false})}
           > 
@@ -356,18 +372,23 @@ var WhenItem = React.createClass({
 
                 return (
                   <div className="form-group">
-                    <label className="control-label">Date Range:</label>
                     <div>
-                      <DatetimeInput {...datetimeProps} 
-                        value={t0} 
-                        onChange={(val) => (this.setState({ timespan: [val, t1] }))} 
-                       />
-                      &nbsp;-&nbsp;
+                      <label style={{ width: '100%' }}><span>{_t('Wizard.items.when.from')}:</span>
+                        <DatetimeInput {...datetimeProps} 
+                          value={t0} 
+                          className='date-input'
+                          onChange={(val) => (this.setState({ timespan: [val, t1] }))} 
+                        />
+                      </label>
+                      <br />
+                      <label style={{ width: '100%' }}><span style={{ marginRight: 20 }}>{_t('Wizard.items.when.to')}:</span>
                       <DatetimeInput {...datetimeProps} 
                         value={t1}
+                        className='date-input'
                         onChange={(val) => (this.setState({ timespan: [t0, val] }))} 
-                       />
-                      <p className="help text-muted">{'Specify the time range you are interested in'}</p>
+                        />
+                      </label>
+                      <p className="help text-muted">{_t('Wizard.items.when.help')}</p>
                     </div>
                   </div>
                   );
