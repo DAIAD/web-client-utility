@@ -41,37 +41,40 @@ var DisplayParamLine = React.createClass({
     }
   },
   render: function() {
+    const { show } = this.props;
     const { key, value } = this.props.param;
     const { hasMore, showMore } = this.state;
-    const showFront = Math.ceil(this.props.show / 2);
-    const showBack = this.props.show - showFront;
+    //const showFront = Math.ceil(this.props.show / 2);
+    //const showBack = this.props.show - showFront;
     return (
       <div>
         {
           key ? 
-          <b>{key}: </b>
+          <span style={{ fontSize: 16, fontWeight: 500, color: '#666' }}>{key}: </span>
             :
             <span />
             }
+            <b>
           {
             hasMore ? 
               (
                 showMore ?
                   <span>
                     { value.map((v, i, arr) => i == arr.length -1 ? <span key={i}>{v} </span> : <span>{v}, </span>) }
-                    <a href='#' onClick={e => { e.preventDefault(); this.setState({ showMore: false })}}><i>Show less</i></a>
+                    <a href='#' style={{ whiteSpace: 'nowrap' }} onClick={e => { e.preventDefault(); this.setState({ showMore: false })}}>Show less</a>
                   </span>
                   :
                  <span>
                    {
                    value.map((v, i, arr) => {
-                    if (i < showFront) return <span>{v}, </span>;
-                    else if (i == showFront) return <span>... , </span>;
-                    else if (i >= arr.length - showBack && i < arr.length -1) return <span>{v}, </span>;
-                    else if (i == arr.length -1) return <span>{v} </span>;
+                     if (i < show) return <span>{v}, </span>;
+                     else if (i === show) return <span>... , </span>;
+                    //else if (i == showFront) return <span>... , </span>;
+                    //else if (i >= arr.length - showBack && i < arr.length -1) return <span>{v}, </span>;
+                    //else if (i == arr.length -1) return <span>{v} </span>;
                   })
                    }
-                   <a href='#' onClick={e => { e.preventDefault(); this.setState({ showMore: true })}}><i>Show more</i></a>
+                   <a href='#' style={{ whiteSpace: 'nowrap' }} onClick={e => { e.preventDefault(); this.setState({ showMore: true })}}>Show more</a>
                  </span>
                  )
             :
@@ -82,6 +85,7 @@ var DisplayParamLine = React.createClass({
                 <span>{v}, </span>
               ))
           }
+        </b>
       </div>
     );
   }

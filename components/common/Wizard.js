@@ -13,16 +13,29 @@ function WizardItem (props) {
   return (
     <div className='wizard-item' style={{ margin: '0 25px' }}>
       <bs.Row>
-        <h2 style={{marginTop: 0}}><FormattedMessage id={`Wizard.items.${id}.title`} /></h2>
-          <h4><i><FormattedMessage id={`Wizard.items.${id}.description`} /></i></h4>
+        <h2 style={{marginTop: 0, color: '#666'}}><FormattedMessage id={`Wizard.items.${id}.title`} /></h2>
+          <h5 style={{ color: '#666' }}><FormattedMessage id={`Wizard.items.${id}.description`} /></h5>
 
           <br />
       </bs.Row>
+      <bs.Row style={{ margin: 0 }}>
       <div className='wizard-item-select'>
         {
           children  
-        }
+        } 
       </div>
+    </bs.Row>
+    <bs.Row style={{ marginTop: 10, fontSize: '1.3em', marginLeft: 20 }}>
+      {
+          errors ? 
+            <span style={{ color: '#CD4D3E' }} >
+             <i className='fa fa-warning' style={{ marginRight: 5 }}/>
+             <FormattedMessage id={`Wizard.validation.${errors}`} />
+           </span> 
+             :
+               <span>&nbsp;</span>
+        }
+    </bs.Row>
       
     <bs.Row >
       <div className='wizard-controls'>
@@ -65,19 +78,11 @@ function WizardItem (props) {
      </div>
    </bs.Row>
    <hr />
-   <bs.Row style={{ margin: '20px 0', fontSize: '1.2em' }}>
-       {
-         errors ? 
-           <span style={{ fontSize: '1.3em', color: '#CD4D3E' }} >
-             <i className='fa fa-warning' style={{ marginRight: 5 }}/>
-             <FormattedMessage id={`Wizard.validation.${errors}`} />
-           </span> 
-             : 
-               <DisplayParams 
-                params={params}
-                limit={4}
-              />
-       }
+   <bs.Row style={{ margin: '20px 0', fontSize: '1.1em' }}> 
+     <DisplayParams 
+      params={params}
+      limit={4}
+      />
     </bs.Row>
     
   </div>
