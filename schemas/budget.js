@@ -103,7 +103,7 @@ const activeBudgetsSchema = actions => [
       title: 'Goal',
       type: 'element',
       style: {
-        height: 150
+        height: 100
       }
     },
     {
@@ -111,7 +111,7 @@ const activeBudgetsSchema = actions => [
       title: 'Savings',
       type: 'element',
       style: {
-        height: 150
+        height: 100
       }
     },
     {
@@ -119,7 +119,7 @@ const activeBudgetsSchema = actions => [
       title: 'Affected',
       type: 'element',
       style: {
-        height: 150
+        height: 100
       }
     }
 ];
