@@ -72,7 +72,7 @@ function RemoveConfirmation (props) {
     />
   );
 }
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
   return {
     routing: state.routing,
     user: state.session.profile ? {value: state.session.profile.username, label: state.session.profile.firstname + ' ' + state.session.profile.lastname} : null,
@@ -83,11 +83,9 @@ function mapStateToProps(state) {
      }],
      scenarios: state.savings.scenarios.map(scenario => ({
        ...scenario, 
-       paramsShort: util.getFriendlyParams(scenario.parameters, 'short')
-        .map(x => `${x.key}: ${x.value}`).join(', '),
-       paramsLong: util.getFriendlyParams(scenario.parameters, 'long')
-       .map(x => `${x.key}: ${x.value}`).join(', '),
-       params: util.getFriendlyParams(scenario.parameters, 'long')
+       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short')
+       .map(x => <span><b>{x.key}</b> ({x.value}) &nbsp;</span>),
+       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
      })),
      scenarioToRemove: state.savings.scenarios.find(s => s.id === state.savings.scenarioToRemove),
      searchFilter: state.savings.searchFilter,

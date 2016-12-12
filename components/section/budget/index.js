@@ -74,7 +74,7 @@ function RemoveConfirmation (props) {
 }
 
 //mockup values for spatial clusters/groups
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
   return {
     //common
     routing: state.routing,
@@ -86,11 +86,9 @@ function mapStateToProps(state) {
      budgets: state.budget.scenarios.map(scenario => ({
        ...scenario, 
        active: scenario.activatedOn != null,
-       paramsShort: util.getFriendlyParams(scenario.parameters, 'short')
-        .map(x => `${x.key}: ${x.value}`).join(', '),
-       paramsLong: util.getFriendlyParams(scenario.parameters, 'long')
-       .map(x => `${x.key}: ${x.value}`).join(', '),
-       params: util.getFriendlyParams(scenario.parameters, 'long')
+       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short')
+        .map(x => <span><b>{x.key}</b> ({x.value}) &nbsp;</span>),
+       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
      })),
      budgetToRemoveIdx: state.budget.budgetToRemove,
      //list

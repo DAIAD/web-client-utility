@@ -10,13 +10,14 @@
  *                                      or an Array of multiple Objects with value, label Strings
  * @return {Array} The transformed array containing a series of objects with key, value Strings
  */
-function getFriendlyParams (dict, details='long') {
+function getFriendlyParams (dict, intl, details='long') {
+  const _t = x => intl.formatMessage({ id: x });
   return Object.keys(dict).map(key => ({ 
-    key, 
+    key: _t(`Wizard.items.${key}.title`), 
     value: Array.isArray(dict[key]) ? 
       (
         details === 'short' ? 
-          'Multiple'
+          _t('Wizard.common.multiple')
           :
             dict[key].map(x => x.label)
       )
