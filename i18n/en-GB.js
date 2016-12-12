@@ -234,7 +234,9 @@
     "UpdateFavourite" : "Update Favourite",
     "Actions" : "Actions",
     "DeleteGroup" : "Delete Group",
-    "DeleteFavourite" : "Remove Favourite"
+    "DeleteFavourite" : "Remove Favourite",
+    "All": "All",
+    "None": "None"
   },
   "Form" : {
     "ErrorsDetected" : "Errors were detected:",
@@ -280,9 +282,7 @@
 		"Devices" : "Amphiro Devices"
   },
   "Wizard": {
-    "common": {
-      "all": "All",
-      "none": "None",
+    "common": { 
       "choose": "Let me choose",
       "multiple": "Multiple"
     },

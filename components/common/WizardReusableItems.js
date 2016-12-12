@@ -40,8 +40,8 @@ var WhoItem = React.createClass({
     const { selectedCluster, selectedGroups } = this.state;
     const _t = x => intl.formatMessage({ id: x });
 
-    const allLabel = _t('Wizard.common.all');
-    const noneLabel = _t('Wizard.common.none');
+    const allLabel = _t('Buttons.All');
+    const noneLabel = _t('Buttons.None');
 
     if (!clusters) return null;
     console.log('clusters: ', this.props);
@@ -165,8 +165,8 @@ var WhereItem = React.createClass({
     const { setValue, clusters, value, noAll, intl, geojson, id } = this.props;
 
     const _t = x => intl.formatMessage({ id: x });
-    const allLabel = _t('Wizard.common.all');
-    const noneLabel = _t('Wizard.common.none');
+    const allLabel = _t('Buttons.All');
+    const noneLabel = _t('Buttons.None');
 
     const { selectedCluster, selectedGroups } = this.state;
 

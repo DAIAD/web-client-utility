@@ -228,7 +228,9 @@
     "AddFavourite" : "Add Favourite",
     "UpdateFavourite" : "Update Favourite",
     "Actions" : "Actions",
-    "DeleteGroup" : "Delete Group"
+    "DeleteGroup" : "Delete Group",
+    "All": "All",
+    "None": "None"
   },
   "Form" : {
     "ErrorsDetected" : "Errors were detected:",
@@ -268,8 +270,6 @@
   },
   "Wizard": {
     "common": {
-      "all": "All",
-      "none": "None",
       "choose": "Let me choose",
       "multiple": "Multiple"
     },

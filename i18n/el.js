@@ -225,7 +225,9 @@
     "UpdateFavourite" : "Ενημέρωση Αγαπημένου",
     "Actions" : "Ενέργειες",
     "DeleteGroup" : "Διαγραφή Ομάδας",
-    "DeleteFavourite" : "Διαγραφή Αγαπημένου"
+    "DeleteFavourite" : "Διαγραφή Αγα�",
+    "All": "Όλα",
+    "None": "Κανένα"
   },
   "Form" : {
     "ErrorsDetected" : "Εντοπίστηκαν σφάλματα:",
@@ -272,8 +274,6 @@
 	},
   "Wizard": {
     "common": {
-      "all": "All",
-      "none": "None",
       "choose": "Let me choose",
       "multiple": "Multiple"
     },
