@@ -171,7 +171,7 @@ const requestExploreData = function() {
         dispatch(setData(response, response.errors));
       }
       //TODO: for now set a random number as savings for current budget
-      const accounts = response.accounts.map(account => ({ ...account, savings: Math.round(Math.random()*10) }));
+      const accounts = response.accounts.map(account => ({ ...account, budget: Math.round(Math.random()*100), savings: Math.round(Math.random()*10) }));
       dispatch(setData({ 
         total: response.total, 
         accounts,

@@ -15,9 +15,10 @@ function BudgetOverview (props) {
   const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
   const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry } = actions;
   const { cluster: selectedCluster, group: selectedGroup, geometry: selectedGeometry, serial: selectedSerial, text: selectedText, loading } = query;
-  const { id, name, potential, user, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
+  const { id, name, potential, user, createdOn, completedOn, activatedOn, updatedOn, nextUpdateOn, parameters, paramsLong, params, active } = budget;
   const goal = parameters.goal;
   const completed = budget.completedOn != null;
+  //const active = budget.activatedOn != null;
 
   const _t = x => intl.formatMessage({ id: x })
   
@@ -135,28 +136,48 @@ function BudgetOverview (props) {
     //const clusterKey = 'none', groupKey = 'all';
 
   return (
-    <bs.Row style={{ marginLeft: 10 }}>
-    {
-      widgets.map((widget, i) => 
-          <div key={widget.id} style={{float: 'left', margin: 10}}>
-            <Widget {...widget} />
-          </div>
-      )
-    }
-    </bs.Row>
+    <div>
+      <bs.Row>
+        { 
+          active ? 
+            <div>
+              <bs.Col md={4} style={{ float: 'left', textAlign: 'left' }}>
+                <h4>Budget is active</h4>
+              </bs.Col>
+              <bs.Col md={4} style={{ float: 'right', textAlign: 'right' }}>
+                <h5>Updated: {updatedOn ? <FormattedTime value={updatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</h5>
+                <h5>Next update: {nextUpdateOn ? <FormattedTime value={nextUpdateOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</h5>
+              </bs.Col>
+            </div>
+        :
+          <div />
+        }
+      </bs.Row>
+      <bs.Row style={{ marginLeft: 10 }}>
+      {
+        widgets.map((widget, i) => 
+            <div key={widget.id} style={{float: 'left', margin: 10}}>
+              <Widget {...widget} />
+            </div>
+        )
+      }
+      </bs.Row>
+    </div>
   );
 }
 
 function BudgetDetails (props) {
-  const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query } = props;
+  const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
   const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry, resetQuery } = actions;
   const { cluster: selectedCluster, group: selectedGroup, geometry: selectedGeometry, serial: selectedSerial, text: selectedText, loading } = query;
   const { id, name, potential, user, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
   const goal = parameters.goal;
   const completed = budget.completedOn != null;
 
+  const _t = x => intl.formatMessage({ id: x });
+
   const dataNotFound = (
-      <span>{ loading ? 'Loading data ...' : 'No data found.' }</span>
+      <span>{ loading ? _t('Budgets.Explore.loading') : _t('Budgets.Explore.empty') }</span>
   );
 
   const activeCluster = clusters.find(cluster => cluster.key === selectedCluster);
@@ -225,7 +246,7 @@ function BudgetDetails (props) {
         </bs.Col>
         <bs.Col md={3}>
           <bs.Button  style={{ marginRight: 20 }} bsStyle='primary' type="submit">Refresh</bs.Button>
-          <bs.Button bsStyle='default' onClick={() => { resetQuery(); requestExploreData();}}>Reset</bs.Button>
+          <bs.Button bsStyle='default' onClick={() => { resetQuery(); requestExploreData();}}>{_t('Budgets.Explore.resetForm')}</bs.Button>
         </bs.Col>
     </bs.Row>
 
@@ -355,13 +376,18 @@ var BudgetExplore = React.createClass({
             >
             <i className='fa fa-chevron-left' /> Back to all
           </bs.Button>
-          <bs.Button
-            bsStyle='danger'
-            style={{ float: 'right', marginRight: 25 }}
-            onClick={() => confirmRemoveBudgetScenario(id)}
-            >
-            Delete budget
-          </bs.Button>
+          { 
+            !active ? 
+              <bs.Button
+                bsStyle='danger'
+                style={{ float: 'right', marginRight: 25 }}
+                onClick={() => confirmRemoveBudgetScenario(id)}
+                >
+                { _t('Budgets.Explore.delete') }
+              </bs.Button>
+              :
+              <div />
+          }
           {
               !active && completed ? 
                 <bs.Button 
@@ -369,30 +395,32 @@ var BudgetExplore = React.createClass({
                   style={{float: 'right', marginRight: 25}}
                   onClick={() => { confirmSetBudget(id);  }}
                 >
-                  Set Budget
+                { _t('Budgets.Explore.set') }
                 </bs.Button>
                 : <div />
             }
             {
-              active && completed ?
-                <div>            
-                                    
+                active && completed ?
                   <bs.Button 
                     bsStyle='warning' 
                     style={{float: 'right', marginRight: 25}}
                     onClick={() => { confirmResetBudget(id); }}
                   >
-                    Reset Budget
+                  { _t('Budgets.Explore.reset') }
                   </bs.Button>
+                  :
+                  <div />
+            }
+            {
+              this.props.lala ? 
                   <bs.Button 
                     bsStyle='primary' 
                     style={{float: 'right', marginRight: 25}}
                     onClick={() => { goToActiveView(); }}
                   >
-                    Monitor all active
+                    { _t('Budgets.Explore.monitorActive') }
                   </bs.Button>
 
-                </div>
                 :
                   <div />
             }
@@ -439,7 +467,7 @@ var BudgetExplore = React.createClass({
           <Modal
             show
             title='Confirmation'
-            text={<span>Are you sure you want to <i>reset</i> <b>{name}</b> (id:{id}) ?</span>}
+            text={<span>Are you sure you want to <i>deactivate</i> <b>{name}</b> (id:{id}) ?</span>}
             onClose={() => confirmResetBudget(null)}
             actions={[
               {
@@ -447,7 +475,7 @@ var BudgetExplore = React.createClass({
                 action: () => confirmResetBudget(null),
               },
               {
-                name: 'Reset budget',
+                name: 'Deactivate budget',
                 style: 'warning',
                 action: () => { resetActiveBudget(id); confirmResetBudget(null); }
               },
@@ -520,7 +548,11 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         type: 'datetime'
       }, {
         name: 'savings',
-        title: 'Savings',
+        title: 'Savings (%)',
+      },
+      {
+        name: 'budget',
+        title: 'Budget (lt)'
       }
     ];
 

@@ -12,7 +12,9 @@ const initialState = {
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}, goal: {value: -5, label: '-5 %'}},
        createdOn: new Date("1990-01-01"),
        activatedOn: new Date("1999-01-01"),
-       completedOn: new Date()
+       completedOn: new Date(),
+       updatedOn: new Date("2005-01-01"),
+       nextUpdateOn: new Date("2018-12-31")
      },
      {
        id: 'budget-2',
@@ -30,6 +32,8 @@ const initialState = {
        createdOn: new Date('1990-01-01'),
        completedOn: new Date('1999-01-01'),
        activatedOn: null,
+       updatedOn: new Date("2000-01-01"),
+       nextUpdateOn: new Date("2017-12-31")
      }
   ],
   explore: {

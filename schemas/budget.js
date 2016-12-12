@@ -6,7 +6,7 @@ const budgetSchema = actions => [{
   }, 
   {
     name: 'name',
-    title: 'Name',
+    title: 'Budgets.List.name',
     style: {
       width: 100
     },
@@ -19,11 +19,12 @@ const budgetSchema = actions => [{
   }, 
   {
     name: 'active',
-    title: 'Active',
+    title: 'Budgets.List.active',
     type: 'action',
     style: {
       textAlign: 'center',
-      fontSize: '1.2em'
+      fontSize: '1.2em',
+      width: 50
     },
     icon: function(field, row) {
       return row.active ? 'check' : '';
@@ -32,30 +33,30 @@ const budgetSchema = actions => [{
   }, 
   {
     name: 'paramsShort',
-    title: 'Parameters',
+    title: 'Budgets.List.paramsShort'
   },
   {
     name: 'user',
-    title: 'User',
+    title: 'Budgets.List.user'
   },
   {
     name: 'createdOn',
-    title: 'Created',
+    title: 'Budgets.List.createdOn',
     type: 'datetime',
   }, 
   {
     name: 'completedOn',
-    title: 'Finished',
+    title: 'Budgets.List.completedOn',
     type: 'datetime',
   }, 
   {
     name: 'activatedOn',
-    title: 'Activated',
+    title: 'Budgets.List.activatedOn',
     type: 'datetime',
   },
   {
     name : 'explore',
-    title: 'Explore',
+    title: 'Budgets.List.explore',
     type : 'action',
     icon : 'info-circle',
     style: {
@@ -71,7 +72,7 @@ const budgetSchema = actions => [{
   }, 
   {
     name : 'delete',
-    title: 'Delete',
+    title: 'Budgets.List.delete',
     type : 'action',
     icon : 'remove',
     handler : (function(field, row) {

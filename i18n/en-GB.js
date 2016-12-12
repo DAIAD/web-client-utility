@@ -356,7 +356,10 @@
             "value": "Last year"
           }
         },
-        "modal": "Date range"
+        "modal": "Date range",
+        "from": "From",
+        "to": "To",
+        "help": "Specify the time range you are interested in"
       },
       "name": {
         "title": "Name",
@@ -409,14 +412,29 @@
   "Budgets": {
     "List": {
       "title": "Available budgets",
-      "search": "Search..."
+      "search": "Search...",
+      "name": "Name",
+      "active": "Active",
+      "paramsShort": "Parameters",
+      "user": "User",
+      "createdOn": "Created",
+      "completedOn": "Calculated",
+      "activatedOn": "Activated",
+      "explore": "Explore",
+      "delete": "Delete"
+
     },
     "Explore": {
       "notFound": "Sorry, budget not found",
       "details": " details",
       "overview": " overview",
       "loading": "Loading data...",
-      "empty": "No data"
+      "empty": "No data",
+      "set": "Set Budget",
+      "reset": "Deactivate Budget",
+      "delete": "Delete Budget",
+      "monitorActive": "Monitor all active",
+      "resetForm": "Reset"
     },
     "Add": {
       "title": "Add budget"
