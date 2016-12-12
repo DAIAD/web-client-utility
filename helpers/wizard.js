@@ -14,7 +14,7 @@ function getFriendlyParams (dict, intl, details='long') {
   const _t = x => intl.formatMessage({ id: x });
   return Object.keys(dict).map(key => ({ 
     key: _t(`Wizard.items.${key}.title`), 
-    value: Array.isArray(dict[key]) ? 
+    value: Array.isArray(dict[key]) && dict[key].length > 0 ? 
       (
         details === 'short' ? 
           _t('Wizard.common.multiple')

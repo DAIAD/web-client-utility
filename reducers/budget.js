@@ -18,7 +18,7 @@ const initialState = {
        id: 'budget-2',
        name: 'Budget 2',
        user: 'foofootos',
-       parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}, excludeWho: [{value: 'age:18-21', label: 'Age 18-21'}, {value: 'age:21-55', label: 'Age 21-55'}], method: {value: 'fairly', label: 'Fairly'}},
+       parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}, excludeWho: [{value: 'age:18-21', label: 'Age 18-21'}, {value: 'age:21-55', label: 'Age 21-55'}], budgetType: {value: 'fairly', label: 'Fairly'}},
        createdOn: new Date('1990-01-01'),
        completedOn: null,
      },

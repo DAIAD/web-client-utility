@@ -5,7 +5,7 @@ const savingsSchema = actions => [{
   }, 
   {
     name: 'name',
-    title: 'Name',
+    title: 'Savings.list.name',
     width: 120,
     link: function(row) {
       if(row.id) {
@@ -16,29 +16,29 @@ const savingsSchema = actions => [{
   }, 
   {
     name: 'potential',
-    title: 'Potential',
+    title: 'Savings.list.potential', 
   }, 
   {
     name: 'user',
-    title: 'User',
+    title: 'Savings.list.user',
   }, 
   {
     name: 'paramsShort',
-    title: 'Parameters',
+    title: 'Savings.list.paramsShort',
   },
   {
     name: 'createdOn',
-    title: 'Created',
+    title: 'Savings.list.createdOn',
     type: 'datetime',
   }, 
   {
     name: 'completedOn',
-    title: 'Finished',
+    title: 'Savings.list.completedOn',
     type: 'datetime',
   }, 
   {
     name : 'explore',
-    title: 'Explore',
+    title: 'Savings.list.explore',
     type : 'action',
     icon : 'info-circle',
     style: {
@@ -51,7 +51,7 @@ const savingsSchema = actions => [{
   },
   {
     name : 'delete',
-    title: 'Delete',
+    title: 'Savings.list.delete',
     type : 'action',
     icon : 'remove',
     style: {

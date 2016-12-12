@@ -269,7 +269,9 @@
   "Wizard": {
     "common": {
       "all": "All",
-      "choose": "Let me choose"
+      "none": "None",
+      "choose": "Let me choose",
+      "multiple": "Multiple"
     },
     "items": {
       "budgetType": {
@@ -315,28 +317,33 @@
       },
       "who": {
         "title": "Who",
-        "description": "Select all population or narrow savings potential calculation to selected groups"
+        "description": "Select all population or narrow savings potential calculation to selected groups",
+        "modal": "Segmentation filtering"
       },
       "where": {
         "title": "Where",
-        "description": "Select all areas or narrow savings potential calculation to selected areas"
+        "description": "Select all areas or narrow savings potential calculation to selected areas",
+        "modal": "Location filtering"
       },
       "excludeWho": {
         "title": "Exclude groups",
-        "description": " "
+        "description": " ",
+        "modal": "Segmentation exclusions"
       },
       "excludeWhere": {
         "title": "Exclude areas",
-        "description": " "
+        "description": " ",
+        "modal": "Location exclusions"
       },
       "when": {
         "title": "Data",
-        "description": "Data to be used for estimates",
+        "description": "Data reference range",
         "options": {
           "last": {
             "value": "Last year"
           }
-        }
+        },
+        "modal": "Date range"
       },
       "name": {
         "title": "Name",
@@ -361,10 +368,25 @@
       "noWhen": "Date range not set",
       "fromInvalid": "Start date is not valid",
       "toInvalid": "End date is not valid",
-      "fromAfterTo": "Start date is after End date",
+      "fromAfterTo": "Start date is after end date",
       "noFuture": "Date range must be in the past"
     }
   },
+  "Savings": {
+    "list": {
+      "name": "Name",
+      "potential": "Savings Potential",
+      "user": "User",
+      "paramsShort": "Parameters",
+      "createdOn": "Created",
+      "completedOn": "Calculated",
+      "explore": "Explore",
+      "delete": "Delete"
+    },
+    "explore": {
+
+    }
+  }, 
   "Error": {
     "400" : "Bad request",
     "403" : "Authentication has failed",

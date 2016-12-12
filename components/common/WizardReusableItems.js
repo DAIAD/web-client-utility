@@ -31,14 +31,20 @@ var WhoItem = React.createClass({
     if (Array.isArray(nextProps.clusters) && nextProps.clusters[0]) {
       this.setState({ selectedCluster: nextProps.clusters[0] });
     }
+    if (nextProps.value) {
+      this.setState({ selectedGroups: Array.isArray(nextProps.value) ? nextProps.value : [] });
+    }
   },
   render: function() {
-    const { clusters, setValue, value, noAll, intl } = this.props;
+    const { clusters, setValue, value, noAll, intl, id } = this.props;
     const { selectedCluster, selectedGroups } = this.state;
-    const all = intl.formatMessage({ id: 'Wizard.common.all' });
+    const _t = x => intl.formatMessage({ id: x });
+
+    const allLabel = _t('Wizard.common.all');
+    const noneLabel = _t('Wizard.common.none');
 
     if (!clusters) return null;
-
+    console.log('clusters: ', this.props);
     const allGroups = clusters.map(cluster => cluster.groups).reduce((p, c) => [...p, ...c], []);
 
     const selectedParams = clusters.map(cluster => {
@@ -60,11 +66,11 @@ var WhoItem = React.createClass({
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
             { !noAll ? 
-              <bs.Button bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => { setValue({value:'all', label: all}); }}>{all}</bs.Button>
+              <bs.Button bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => { setValue({value:'all', label: allLabel}); }}>{allLabel}</bs.Button>
               : 
                 <div />
             }
-            <bs.Button bsStyle={Array.isArray(value) ? 'primary' : 'default'}  style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{intl.formatMessage({ id: 'Wizard.common.choose' })}</bs.Button>
+            <bs.Button bsStyle={Array.isArray(value) ? 'primary' : 'default'}  style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{_t('Wizard.common.choose')}</bs.Button>
           </bs.ButtonGroup>
         </bs.Col>
         <bs.Col md={7}>
@@ -83,7 +89,7 @@ var WhoItem = React.createClass({
           onHide={() => this.setState({showModal: false})}
           >
           <bs.Modal.Header closeButton>
-            <h4>Custom user selection</h4>
+            <h4>{_t(`Wizard.items.${id}.modal`)}</h4>
           </bs.Modal.Header>
           <bs.Modal.Body>
             
@@ -123,15 +129,15 @@ var WhoItem = React.createClass({
               </bs.Col>
 
               <bs.Col xs={3} md={2}>
-                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.clusterKey !== selectedCluster.key), ...selectedCluster.groups] }); }}>All</bs.Button>
-                <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.clusterKey !== selectedCluster.key) }); }}>None</bs.Button>
+                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.clusterKey !== selectedCluster.key), ...selectedCluster.groups] }); }}>{allLabel}</bs.Button>
+                <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.clusterKey !== selectedCluster.key) }); }}>{noneLabel}</bs.Button>
               </bs.Col>
             </bs.Row>
 
           </bs.Modal.Body>
           <bs.Modal.Footer>
             <bs.Button onClick={() => { setValue(displayGroups);  this.setState({showModal: false}); }}>OK</bs.Button>
-            <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
+            <bs.Button onClick={() => this.setState({showModal: false})}>{_t('Buttons.Cancel')}</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal>
       </div>
@@ -151,23 +157,20 @@ var WhereItem = React.createClass({
     if (Array.isArray(nextProps.clusters) && nextProps.clusters[0]) {
       this.setState({ selectedCluster: nextProps.clusters[0] });
     }
+    if (nextProps.value) {
+      this.setState({ selectedGroups: Array.isArray(nextProps.value) ? nextProps.value : [] });
+    }
   },
   render: function() {
-    const { setValue, clusters, value, noAll, intl, geojson } = this.props;
-    /*
-    const groups = geojson.features ? 
-      geojson.features.map(f => ({ 
-        clusterKey: f.properties.cluster, 
-        name: f.properties.label, 
-        key: f.properties.label 
-      }))
-        : 
-        [];
-        */
-    const all = intl.formatMessage({ id: 'Wizard.common.all' });
-    const { selectedCluster, selectedGroups } = this.state;
-    if (!clusters) return null;
+    const { setValue, clusters, value, noAll, intl, geojson, id } = this.props;
 
+    const _t = x => intl.formatMessage({ id: x });
+    const allLabel = _t('Wizard.common.all');
+    const noneLabel = _t('Wizard.common.none');
+
+    const { selectedCluster, selectedGroups } = this.state;
+
+    if (!clusters) return null;
     const allGroups = clusters.map(cluster => cluster.groups).reduce((p, c) => [...p, ...c], []);
     const selectedParams = clusters.map(cluster => {
       const selectedClusterGroups = selectedGroups.filter(group => group.clusterKey === cluster.key);
@@ -180,7 +183,8 @@ var WhereItem = React.createClass({
     const displayGroups = selectedGroups.map(group => ({ 
       ...group, 
       value: group.key, 
-      label: clusters.find(cluster => cluster.key === group.clusterKey).name + ': ' + group.name
+      //label: clusters.find(cluster => cluster.key === group.clusterKey).name + ': ' + group.name
+      label: group.name
     }));
    
     return (
@@ -189,11 +193,11 @@ var WhereItem = React.createClass({
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
             { !noAll ? 
-              <bs.Button bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({value:'all', label: all})}>{all}</bs.Button>
+              <bs.Button bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({value:'all', label: allLabel})}>{allLabel}</bs.Button>
               :
                 <div />
             }
-            <bs.Button bsStyle={Array.isArray(value) ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{intl.formatMessage({ id: 'Wizard.common.choose'})}</bs.Button>
+            <bs.Button bsStyle={Array.isArray(value) ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{_t('Wizard.common.choose')}</bs.Button>
 
           </bs.ButtonGroup>
         </bs.Col>
@@ -214,7 +218,7 @@ var WhereItem = React.createClass({
           onHide={() => this.setState({showModal: false})}
           >
           <bs.Modal.Header closeButton>
-            <h4>Custom area selection</h4>
+            <h4>{_t(`Wizard.items.${id}.modal`)}</h4>
           </bs.Modal.Header>
           <bs.Modal.Body>
             <bs.Row>
@@ -267,8 +271,8 @@ var WhereItem = React.createClass({
             </bs.Col>
             <bs.Col md={4}>
               <div style={{ margin: 15, textAlign: 'right' }}>
-                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.clusterKey !== selectedCluster.key), ...selectedCluster.groups] }); }}>All</bs.Button>
-                <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.clusterKey !== selectedCluster.key) }); }}>None</bs.Button>
+                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.clusterKey !== selectedCluster.key), ...selectedCluster.groups] }); }}>{allLabel}</bs.Button>
+                <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.clusterKey !== selectedCluster.key) }); }}>{noneLabel}</bs.Button>
               </div>
 
               <div style={{ margin: 20 }}>
@@ -313,15 +317,18 @@ var WhenItem = React.createClass({
   render: function() {
     const { value, setValue, intl } = this.props;
 
-    const last = intl.formatMessage({ id: 'Wizard.items.when.options.last.value' });
-    const choose = intl.formatMessage({ id: 'Wizard.common.choose' });
+
+    const _t = x => intl.formatMessage({ id: x });
+
+    const lastLabel = _t('Wizard.items.when.options.last.value');
+    const chooseLabel = _t('Wizard.common.choose');
 
     return (
       <div>
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
-              <bs.Button bsStyle={value.value === 'lastYear' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({timespan: this.getLastYear(), value:'lastYear', label: last} )}>{last}</bs.Button>
-            <bs.Button bsStyle={value.value === 'custom' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{choose}</bs.Button>
+              <bs.Button bsStyle={value.value === 'lastYear' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({timespan: this.getLastYear(), value:'lastYear', label: lastLabel} )}>{lastLabel}</bs.Button>
+            <bs.Button bsStyle={value.value === 'custom' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{chooseLabel}</bs.Button>
           </bs.ButtonGroup>
         </bs.Col>
 
@@ -332,7 +339,7 @@ var WhenItem = React.createClass({
           onHide={() => this.setState({showModal: false})}
           > 
           <bs.Modal.Header closeButton>
-            <h4>Custom range selection</h4>
+            <h4>{_t('Wizard.items.when.modal')}</h4>
           </bs.Modal.Header>
           <bs.Modal.Body>          
             {
@@ -369,7 +376,7 @@ var WhenItem = React.createClass({
           </bs.Modal.Body>
           <bs.Modal.Footer>
             <bs.Button onClick={() => { setValue({timespan: this.state.timespan, value: 'custom', label: `${moment(this.state.timespan[0]).format('DD/MM/YYYY')}-${moment(this.state.timespan[1]).format('DD/MM/YYYY')}` });   this.setState({showModal: false})} }>OK</bs.Button>
-            <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
+            <bs.Button onClick={() => this.setState({showModal: false})}>{_t('Buttons.Cancel')}</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal> 
       </div>
