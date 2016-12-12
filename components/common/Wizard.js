@@ -6,25 +6,10 @@ var { FormattedMessage } = require('react-intl');
 var createWizard = require('react-wiz');
 var util = require('../../helpers/wizard');
 var DisplayParams = require('../DisplayParams');
-/*
-function DisplayParams (props) {
-  const { params } = props;
-  return (
-    <ul style={{ listStyle: 'none'}}>
-      {
-        util.getFriendlyParams(params).map((value, i) =>
-          <li key={i}>
-            <b><FormattedMessage id={`Wizard.items.${value.key}.title`} />: </b> <span>{value.value}</span>
-          </li>
-        )
-      }
-    </ul>
-  );
-}
-*/
+
 function WizardItem (props) {
-  const { id, title, description, children, hasPrevious, hasNext, isLast, onNextClicked, onPreviousClicked, reset, errors, completed, value, values, step, onComplete, next } = props;
-  const params = util.getFriendlyParams(values);
+  const { id, title, description, children, hasPrevious, hasNext, isLast, onNextClicked, onPreviousClicked, reset, errors, completed, value, values, step, onComplete, next, intl } = props;
+  const params = util.getFriendlyParams(values, intl);
   return (
     <div className='wizard-item' style={{ margin: '0 25px' }}>
       <bs.Row>

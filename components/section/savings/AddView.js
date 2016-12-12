@@ -106,6 +106,7 @@ var SavingsPotentialAdd = React.createClass({
         <Wizard
           onComplete={(values) => { addSavingsScenario(values); goToListView(); }}
           validateLive
+          childrenProps={{ intl }}
           > 
           <WhoItem
             id='who'
@@ -114,7 +115,6 @@ var SavingsPotentialAdd = React.createClass({
             clusters={clusters}
             initialValue={{}}
             validate={validateWho}
-            intl={intl}
           />
           <WhereItem
             id='where'
@@ -131,7 +131,6 @@ var SavingsPotentialAdd = React.createClass({
             }))}
             initialValue={{}}
             validate={validateWhere}
-            intl={intl}
           />
           <WhenItem
             id='when'
@@ -139,7 +138,6 @@ var SavingsPotentialAdd = React.createClass({
             description='Data to be used for savings potential calculation, last year or custom'
             initialValue={{}}
             validate={validateWhen}
-            intl={intl}
           />
           <SetNameItem
             title='Name'
@@ -147,7 +145,6 @@ var SavingsPotentialAdd = React.createClass({
             id='name'
             initialValue=''
             validate={validateName.bind(this)}
-            intl={intl}
           />
           <div
             id='confirmation'

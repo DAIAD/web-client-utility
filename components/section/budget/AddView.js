@@ -121,11 +121,11 @@ var BudgetsAdd = React.createClass ({
               <Wizard
                 onComplete={(values) => { addBudgetScenario({...values}); goToListView();  }}
                 validateLive
+                childrenProps={{ intl }}
               >
                 <SelectBudgetType
                   id='budgetType'
                   initialValue={{}}
-                  intl={intl}
                   next={value => value.value === 'estimate' ? 'goal' : 'scenario'} 
                   validate={validateBudgetType}
                 />
@@ -148,13 +148,11 @@ var BudgetsAdd = React.createClass ({
                 />
                 <DistributionItem
                   id='distribution'
-                  intl={intl}
                   initialValue={{}}
                   validate={validateDistribution}
                 />
                 <WhoItem
                   id='who'
-                  intl={intl}
                   groups={groups}
                   clusters={clusters}
                   initialValue={{}}
@@ -162,7 +160,6 @@ var BudgetsAdd = React.createClass ({
                 />
                 <WhereItem
                  id='where'
-                 intl={intl}
                  clusters={segments.map(segment => ({ 
                    ...segment, 
                    groups: geojson.features ? geojson.features.map(f => ({ 
@@ -177,7 +174,6 @@ var BudgetsAdd = React.createClass ({
                 />
                 <WhoItem
                   id='excludeWho'
-                  intl={intl}
                   initialValue={{}}
                   groups={groups}
                   clusters={clusters}
@@ -185,7 +181,6 @@ var BudgetsAdd = React.createClass ({
                 />
                 <WhereItem
                   id='excludeWhere'
-                  intl={intl}
                   clusters={segments.map(segment => ({ 
                    ...segment, 
                    groups: geojson.features ? geojson.features.map(f => ({ 
@@ -200,7 +195,6 @@ var BudgetsAdd = React.createClass ({
                 />
                 <SetNameItem
                   id='name'
-                  intl={intl}
                   initialValue=''
                   validate={validateName.bind(this)}
                 />
