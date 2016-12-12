@@ -4,7 +4,7 @@ var Table = require('../../Table');
 var { budgetSchema } = require('../../../schemas/budget'); 
 
 function BudgetsList (props) {
-  const { groups, clusters, segments, areas, budgets, actions, budgetToRemove, searchFilter } = props;
+  const { groups, clusters, segments, areas, budgets, actions, budgetToRemove, searchFilter, intl } = props;
   const { removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView } = actions;
   const budgetFields = budgetSchema(actions);
   const budgetSorter = {
@@ -13,14 +13,16 @@ function BudgetsList (props) {
   };
   const budgetData  = searchFilter ? budgets.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : ( Array.isArray(budgets) ? budgets : []);
 
+  const _t = x => intl.formatMessage({ id: x });
+
   return (
-    <bs.Panel header='Budgets'>
+    <bs.Panel header={<h3>{_t('Budgets.List.title')}</h3>}>
       <bs.Row>
         <bs.Col sm={4} md={5}>
           <bs.Input 
             style={{width: '80%', float: 'left'}}
             type='text'
-            placeholder='Search...'
+            placeholder={_t('Budgets.List.search')}
             onChange={(e) => setSearchFilter(e.target.value)}
             value={searchFilter}
           />
@@ -39,7 +41,7 @@ function BudgetsList (props) {
           fields={budgetFields}
           sorter={budgetSorter}
           data={budgetData} 
-          template={{empty : (<span>{ 'No data found.' }</span>)}}
+          template={{empty : (<span>{ _t('Budgets.List.empty') }</span>)}}
         />
         
       

@@ -107,8 +107,10 @@ function mapDispatchToProps(dispatch) {
 }
 
 
-SavingsPotential.icon = 'percent';
-SavingsPotential.title = 'Section.Savings';
 
-const SavingsPotentialContainer = connect(mapStateToProps, mapDispatchToProps)(SavingsPotential);
-module.exports = injectIntl(SavingsPotentialContainer);
+const SavingsPotentialContainer = injectIntl(connect(mapStateToProps, mapDispatchToProps)(SavingsPotential));
+
+SavingsPotentialContainer.icon = 'percent';
+SavingsPotentialContainer.title = 'Section.Savings';
+
+module.exports = SavingsPotentialContainer;

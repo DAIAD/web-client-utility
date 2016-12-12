@@ -56,6 +56,7 @@ function ExploreScenario (props) {
     clusters.forEach((cluster, i) => {
       widgets.push({
         id: i + 4,
+        title: cluster.name,
         display: 'chart',
         style: {
           height: 250,
@@ -65,7 +66,6 @@ function ExploreScenario (props) {
           formatter: y => y.toString() + '%',
         },
         xAxis: {
-          name: cluster.name,
           data: cluster.groups.map(x => x.name)
         },
         series: [
@@ -117,18 +117,19 @@ var SavingsPotentialExplore = React.createClass({
 
   },
   render: function() {
-    const { scenarios, clusters, actions, metersLocations, params } = this.props;
+    const { scenarios, clusters, actions, metersLocations, params, intl } = this.props;
     const { goToListView, confirmRemoveScenario } = actions;
+    const _t = x => intl.formatMessage({ id: x });
     const { id } = params;
     //TODO: normally this would be fetched from API at componentWIllMount
     const scenario = scenarios.find(scenario => scenario.id === id);
     if (!clusters) return null;
     if (scenario == null) {
       return (
-        <bs.Panel header='Oops'>
+        <bs.Panel header={<h3>404</h3>}>
           <bs.Row>
             <bs.Col md={6}>
-              <h4>Sorry, savings scenario not found.</h4>
+              <h4>{_t('Savings.Explore.notFound')}</h4>
             </bs.Col>
             <bs.Col md={6} style={{textAlign: 'right'}}>
               <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
@@ -138,7 +139,7 @@ var SavingsPotentialExplore = React.createClass({
       );
     } 
     return (
-      <bs.Panel header={`Explore ${scenario.name}`}>
+      <bs.Panel header={<h3>{scenario.name + _t('Savings.Explore.title')}</h3>}>
         <bs.Row>
         <bs.Col md={6} style={{ float: 'right' }}>
 

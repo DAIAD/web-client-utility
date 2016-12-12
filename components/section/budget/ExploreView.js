@@ -12,13 +12,15 @@ var Modal = require('../../Modal');
 var theme = require('../../chart/themes/blue');
 
 function BudgetOverview (props) {
-  const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query } = props;
+  const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
   const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry } = actions;
   const { cluster: selectedCluster, group: selectedGroup, geometry: selectedGeometry, serial: selectedSerial, text: selectedText, loading } = query;
   const { id, name, potential, user, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
   const goal = parameters.goal;
   const completed = budget.completedOn != null;
 
+  const _t = x => intl.formatMessage({ id: x })
+  
   const widgets = [
     {
       id: 1,
@@ -89,6 +91,7 @@ function BudgetOverview (props) {
 
       widgets.push({
         id: i + 4,
+        title: cluster.name,
         display: 'chart',
         style: {
           height: 200,
@@ -98,7 +101,6 @@ function BudgetOverview (props) {
           formatter: y => y.toString() + '%',
         },
         xAxis: {
-          name: cluster.name,
           data: cluster.groups.map(x => x.name)
         },
         series: [
@@ -110,8 +112,6 @@ function BudgetOverview (props) {
           }
         ]
       });
-
-
     });
 
       widgets.push({
@@ -129,7 +129,7 @@ function BudgetOverview (props) {
   }
     
     const dataNotFound = (
-        <span>{ loading ? 'Loading data ...' : 'No data found.' }</span>
+        <span>{ loading ? _t('Budgets.Explore.loading') : _t('Budgets.Explore.empty') }</span>
     );
 
     //const clusterKey = 'none', groupKey = 'all';
@@ -314,20 +314,21 @@ var BudgetExplore = React.createClass({
     this.props.actions.requestExploreData();
   },
   render: function() {
-    const { budgets, groups, clusters, segments, areas, actions, params, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreData, explorePager, exploreQuery } = this.props;
+    const { budgets, groups, clusters, segments, areas, actions, params, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreData, explorePager, exploreQuery, intl } = this.props;
     const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario } = actions;
     
     const { id } = params;
     //TODO: here normally the budget will be fetched from API in componentWillMount
     const budget = budgets.find(budget => budget.id === id);
-
+    
+    const _t = x => intl.formatMessage({ id: x });
     if (!clusters) return null;
     if (budget == null) {
       return (
-        <bs.Panel header='Oops'>
+        <bs.Panel header='404'>
           <bs.Row>
             <bs.Col md={6}>
-              <h4>Sorry, budget not found.</h4>
+              <h4>{_t('Budgets.Explore.notFound')}</h4>
             </bs.Col> 
             <bs.Col md={6} style={{textAlign: 'right'}}>
               <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
@@ -342,7 +343,7 @@ var BudgetExplore = React.createClass({
 
     return (
       <div>
-      <bs.Panel header={`${budget.name} Overview`}>
+        <bs.Panel header={<h3>{budget.name + _t('Budgets.Explore.overview')}</h3>}>
         <bs.Row>
 
         <bs.Col md={9} style={{ float: 'right' }}>
@@ -408,6 +409,7 @@ var BudgetExplore = React.createClass({
           tableFields={exploreFields}
           data={exploreData}
           tablePager={explorePager}
+          intl={intl}
         />
 
       {
@@ -458,7 +460,7 @@ var BudgetExplore = React.createClass({
         
         { 
           completed ? 
-            <bs.Panel header={`${budget.name} Details`}>
+            <bs.Panel header={<h3>{budget.name + _t('Budgets.Explore.details')}</h3>}>
               <BudgetDetails
                 clusters={clusters}
                 groups={groups}
@@ -469,6 +471,7 @@ var BudgetExplore = React.createClass({
                 tableFields={exploreFields}
                 data={exploreData}
                 tablePager={explorePager}
+                intl={intl}
               />
             </bs.Panel> 
               : 

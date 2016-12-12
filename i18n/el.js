@@ -377,7 +377,9 @@
     }
   },
   "Savings": {
-    "list": {
+    "List": {
+      "title": "Available scenarios",
+      "empty": "No data",
       "name": "Name",
       "potential": "Savings Potential",
       "user": "User",
@@ -387,10 +389,30 @@
       "explore": "Explore",
       "delete": "Delete"
     },
-    "explore": {
-
+    "Explore": {
+      "notFound": "Sorry, savings scenario not found",
+      "title": " details"
+    },
+    "Add": {
+      "title": "Add scenario" 
     }
-  }, 
+  },
+  "Budgets": {
+    "List": {
+      "title": "Available budgets",
+      "search": "Search..."
+    },
+    "Explore": {
+      "notFound": "Sorry, budget not found",
+      "details": " details",
+      "overview": " overview",
+      "loading": "Loading data...",
+      "empty": "No data"
+    },
+    "Add": {
+      "title": "Add budget"
+    }
+  },
   "Error": {
     "400" : "Bad request",
     "403" : "Authentication has failed",

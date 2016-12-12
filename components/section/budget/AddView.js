@@ -105,11 +105,11 @@ var BudgetsAdd = React.createClass ({
 
   render: function() {
     const { groups, clusters, segments, areas, actions, wizardType, validationError, savings, intl } = this.props;
-    const _t = intl.formatMessage;
     const { setValidationError, setAddBudgetWizardType, goToListView, addBudgetScenario } = actions;
     const geojson = this.getGeoJSON(areas);
+    const _t = x => intl.formatMessage({ id: x });
     return (
-      <bs.Panel header='Add new budget'>
+      <bs.Panel header={<h3>{_t('Budgets.Add.title')}</h3>}>
         <bs.Row>
           <bs.Col md={6}>
           </bs.Col>

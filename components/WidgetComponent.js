@@ -87,14 +87,13 @@ function BarChart(props) {
         ...yAxis
       }}
       grid={{
-        x: '18%',
-        y: '-10%',
+        x: '12%',
+        y: '-20%',
         x2: '7%',
         y2: '15%',
         ...grid
       }}
       series={series}
-      invertAxis
     />
   );
 }

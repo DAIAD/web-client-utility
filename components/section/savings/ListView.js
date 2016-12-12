@@ -7,9 +7,10 @@ var Table = require('../../Table');
 
 
 function SavingsPotentialList (props) {
-  const { actions, removeScenario, searchFilter , scenarios} = props;
+  const { actions, removeScenario, searchFilter , scenarios, intl } = props;
   const { removeSavingsScenario, confirmRemoveScenario, setSearchFilter, goToAddView } = actions;
-  
+
+  const _t = x => intl.formatMessage({ id: x });
 
   const savingsScenarios = searchFilter ? scenarios.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : (Array.isArray(scenarios) ? scenarios : [])
 
@@ -18,7 +19,7 @@ function SavingsPotentialList (props) {
     defaultOrder: 'desc'
   };
   return (
-    <bs.Panel header='Scenarios'>
+    <bs.Panel header={<h3>{_t('Savings.List.title')}</h3>}>
       <bs.Row>
         <bs.Col sm={4} md={5}>
         <bs.Input 
@@ -42,7 +43,7 @@ function SavingsPotentialList (props) {
           data={savingsScenarios} 
           fields={savingsSchema(actions)}
           sorter={tableSorter}
-          template={{empty : (<span>{ 'No data found.' }</span>)}}
+          template={{empty : (<span>{ _t('Savings.List.empty') }</span>)}}
         />
         
     </bs.Panel>

@@ -118,8 +118,9 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   };
 }
 
-Budgets.icon = 'percent';
-Budgets.title = 'Section.Budget';
+const BudgetsContainer = injectIntl(connect(mapStateToProps, mapDispatchToProps, mergeProps)(Budgets));
 
-const BudgetContainer = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Budgets);
-module.exports = injectIntl(BudgetContainer);
+BudgetsContainer.icon = 'percent';
+BudgetsContainer.title = 'Section.Budget';
+
+module.exports = BudgetsContainer;

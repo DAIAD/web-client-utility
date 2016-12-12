@@ -91,14 +91,12 @@ var SavingsPotentialAdd = React.createClass({
   render: function() {
     const { groups, clusters, segments, areas, actions, validationError, intl } = this.props;
     const { setValidationError, addSavingsScenario, goToListView } = actions;
+    const _t = x => intl.formatMessage({ id: x });
     const geojson = this.getGeoJSON(areas);
     return (
-      <bs.Panel header='Add Scenario'>
+      <bs.Panel header={<h3>{_t('Savings.Add.title')}</h3>}>
         <bs.Row>
-        <bs.Col md={6}>
-          <h4>Add new Scenario</h4> 
-        </bs.Col>
-        <bs.Col md={6} style={{textAlign: 'right'}}>
+        <bs.Col md={12} style={{textAlign: 'right'}}>
           <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
         </bs.Col>
       </bs.Row>
