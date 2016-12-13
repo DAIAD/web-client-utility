@@ -10,7 +10,7 @@ const initialState = {
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}},
        createdOn: new Date(),
        completedOn: new Date(),
-       potential: '18M lt'
+       potential: '18 Mlt'
        //completedOn: null
      },
      {
@@ -20,7 +20,7 @@ const initialState = {
        parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'Nowhere'}, when: {value: 'last', label:'Last year'}},
        createdOn: new Date('1990-01-01'),
        completedOn: new Date('1999-01-01'),
-       potential: '25M lt'
+       potential: '25 Mlt'
      }] 
 };
 

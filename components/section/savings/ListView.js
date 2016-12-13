@@ -43,6 +43,7 @@ function SavingsPotentialList (props) {
           data={savingsScenarios} 
           fields={savingsSchema(actions)}
           sorter={tableSorter}
+          style={{ header: { whiteSpace: 'nowrap' }}}
           template={{empty : (<span>{ _t('Savings.List.empty') }</span>)}}
         />
         

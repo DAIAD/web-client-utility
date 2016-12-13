@@ -403,7 +403,10 @@
     },
     "Explore": {
       "notFound": "Sorry, savings scenario not found",
-      "title": " details"
+      "delete": "Delete scenario",
+      "details": " details",
+      "clusters": "Savings per cluster",
+      "maps": "Savings map"
     },
     "Add": {
       "title": "Add scenario" 

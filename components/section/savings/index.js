@@ -9,7 +9,6 @@ var Actions = require('../../../actions/SavingsActions');
 var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
 
 var Modal = require('../../Modal');
-var Table = require('../../Table');
 var util = require('../../../helpers/wizard');
 
 var Breadcrumb = require('../../../components/Breadcrumb');
@@ -55,6 +54,7 @@ function RemoveConfirmation (props) {
   return (
     <Modal
       title='Confirmation'
+      className='confirmation-modal'
       show={true}
       text={<span>Are you sure you want to delete <b>{name}</b> (id:{id})</span>}
       onClose={reset}
@@ -84,7 +84,7 @@ function mapStateToProps(state, ownProps) {
      scenarios: state.savings.scenarios.map(scenario => ({
        ...scenario, 
        paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short')
-       .map(x => <span><b>{x.key}</b> ({x.value}) &nbsp;</span>),
+       .map(x => <span><span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>),
        params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
      })),
      scenarioToRemove: state.savings.scenarios.find(s => s.id === state.savings.scenarioToRemove),

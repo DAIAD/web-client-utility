@@ -6,20 +6,23 @@ const savingsSchema = actions => [{
   {
     name: 'name',
     title: 'Savings.List.name',
-    width: 120,
     link: function(row) {
       if(row.id) {
         return '/savings/{id}/';
       }
       return null;
+    },
+    style: {
+      whiteSpace: 'nowrap'
     }
   }, 
   {
     name: 'potential',
     title: 'Savings.List.potential', 
     style: {
-      paddingLeft: '2%',
-      fontWeight: 'bold'
+      fontWeight: 'bold',
+      fontSize: '1.1em',
+      textAlign: 'center'
     }
   }, 
   {

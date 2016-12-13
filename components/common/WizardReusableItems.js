@@ -201,12 +201,10 @@ var WhereItem = React.createClass({
           </bs.ButtonGroup>
         </bs.Col>
         <bs.Col md={7}>
-          {
-            <DisplayParams
-              params={selectedParams}
-              limit={4}
-            />
-          }
+          <DisplayParams
+            params={selectedParams}
+            limit={4}
+          />
         </bs.Col>
         
         <bs.Modal
@@ -279,7 +277,7 @@ var WhereItem = React.createClass({
                   params={selectedParams}
                   limit={50}
                   show={50}
-                  style={{ maxHeight: 450, overflow: 'auto' }}
+                  style={{ maxHeight: 380, overflow: 'auto' }}
                 />
               </div>
             </bs.Col>
