@@ -404,9 +404,8 @@
     "Explore": {
       "notFound": "Sorry, savings scenario not found",
       "delete": "Delete scenario",
-      "details": " details",
-      "clusters": "Savings per cluster",
-      "maps": "Savings map"
+      "overview": " Overview",
+      "stats": "Savings statistics"
     },
     "Add": {
       "title": "Add scenario" 
@@ -429,8 +428,9 @@
     },
     "Explore": {
       "notFound": "Sorry, budget not found",
-      "details": " details",
-      "overview": " overview",
+      "stats": "Budget statistics",
+      "details": " in detail",
+      "overview": " Overview",
       "loading": "Loading data...",
       "empty": "No data",
       "set": "Set Budget",

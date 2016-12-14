@@ -3,25 +3,10 @@ var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
 var { FormattedTime } = require('react-intl');
 
-var Widget = require('../../WidgetComponent');
+//var Widget = require('../../WidgetComponent');
+var WidgetRow = require('../../WidgetRow');
 var theme = require('../../chart/themes/blue');
 
-
-function WidgetsRow(props) {
-  const { widgets, style } = props;
-  return (
-    <bs.Row>
-      {
-        widgets.map(widget => (
-          <div key={widget.id} style={{float: 'left', margin: 20, ...style}}>
-            <Widget {...widget} />
-          </div>
-        ))
-      }
-    </bs.Row>
-
-  );
-}
 
 var SavingsPotentialExplore = React.createClass({ 
   componentWillMount: function() {
@@ -85,7 +70,7 @@ var SavingsPotentialExplore = React.createClass({
 
     }];
 
-    const charts = [], maps = [];
+    const stats = [];
 
     if (completed) {
       details.push({
@@ -98,13 +83,12 @@ var SavingsPotentialExplore = React.createClass({
       });
       
       clusters.forEach((cluster, i) => {
-        charts.push({
+        stats.push({
           id: i + 4,
           title: cluster.name,
           display: 'chart',
           style: {
-            height: 200,
-            width: '100%'
+            height: 200
           },
           yAxis: {
             formatter: y => y.toString() + '%',
@@ -124,12 +108,11 @@ var SavingsPotentialExplore = React.createClass({
       
       });
       
-      maps.push({
+      stats.push({
         id: 25,
         display: 'map',
         style: {
-          height: 300,
-          width: '100%'
+          height: 238,
         },
         map: {},
         data: metersLocations && metersLocations.features ? 
@@ -139,7 +122,7 @@ var SavingsPotentialExplore = React.createClass({
 
     return (
       <div>
-        <bs.Panel header={<h3>{name + _t('Savings.Explore.details')}</h3>}>
+        <bs.Panel header={<h3>{name + _t('Savings.Explore.overview')}</h3>}>
           <bs.Row>
           <bs.Col md={6} style={{ float: 'right' }}>
             <bs.Button 
@@ -159,26 +142,18 @@ var SavingsPotentialExplore = React.createClass({
           </bs.Col>
         </bs.Row>
         <hr/>
-        <WidgetsRow
+        <WidgetRow
           widgets={details}
-          style={{maxWidth: 450, minWidth: '25%'}}
         />
       </bs.Panel>
 
       { 
         completed ?
           <div>
-            <bs.Panel header={<h3>{_t('Savings.Explore.clusters')}</h3>}>
-              <WidgetsRow
-                widgets={charts}
-                style={{ width: '45%'}}
-              />
-            </bs.Panel>
-
-            <bs.Panel header={<h3>{_t('Savings.Explore.maps')}</h3>}>
-              <WidgetsRow
-                widgets={maps}
-                style={{ width: '95%' }}
+            <bs.Panel header={<h3>{_t('Savings.Explore.stats')}</h3>}>
+              <WidgetRow
+                itemsPerRow={2}
+                widgets={stats}
               />
             </bs.Panel>
           </div>

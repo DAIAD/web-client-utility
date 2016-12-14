@@ -21,7 +21,7 @@ const addSavingsScenario = function (values) {
     const now = new Date();
     const createdOn = now.valueOf();
     const completedOn = null;
-    const potential = completedOn ?  Math.round(Math.random()*50) : null;
+    const potential = null;
 
     const newScenario = {
       type: types.SAVINGS_ADD_SCENARIO,
