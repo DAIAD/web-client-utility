@@ -155,7 +155,13 @@ var Table = React.createClass({
       data.sort((a, b) => {
         const compA = normalize(a);
         const compB = normalize(b);
-        return order === 'asc' ? compA[sort] > compB[sort] : compA[sort] <= compB[sort];
+        if (compA[sort] > compB[sort]) {
+          return order === 'asc' ? 1 : -1;
+        }
+        else if (compA[sort] < compB[sort]) {
+          return order === 'asc' ? -1 : 1;
+        }
+        return 0;
       })
       .filter((row, idx) => (
         idx >= (activePage - 1) * pager.size && 
@@ -309,7 +315,7 @@ function Row (props) {
 }
 
 function Cell (props) {
-  const { row, field, style:tableStyle } = props;
+  const { row, field } = props;
 
   const content = wrapWithLink(getCell(field, row), field.link, row);
 
