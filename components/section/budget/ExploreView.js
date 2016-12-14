@@ -7,164 +7,12 @@ var { FormattedTime, FormattedDate } = require('react-intl');
 var Select = require('react-select');
 var Table = require('../../Table');
 var { Map, TileLayer, GeoJSON, DrawControl } = require('react-leaflet-wrapper');
-var Widget = require('../../WidgetComponent');
+var WidgetRow = require('../../WidgetRow');
 var Modal = require('../../Modal');
 var theme = require('../../chart/themes/blue');
+var { exploreBudgetSchema } = require('../../../schemas/budget');
 
-function BudgetOverview (props) {
-  const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
-  const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry } = actions;
-  const { cluster: selectedCluster, group: selectedGroup, geometry: selectedGeometry, serial: selectedSerial, text: selectedText, loading } = query;
-  const { id, name, potential, user, createdOn, completedOn, activatedOn, updatedOn, nextUpdateOn, parameters, paramsLong, params, active } = budget;
-  const goal = parameters.goal;
-  const completed = budget.completedOn != null;
-  //const active = budget.activatedOn != null;
 
-  const _t = x => intl.formatMessage({ id: x })
-  
-  const widgets = [
-    {
-      id: 1,
-      display: 'stat', 
-      title: 'Budget goal',
-      highlight: goal ? goal.label : null, 
-      style: {
-        width: 300,
-      },
-      info: [{
-        value: '12M lt less than 2014'
-      },
-      {
-        value: 'Max 16% | Min 2%'
-      },
-      {
-        value: 'Group: Pilot A' 
-      },
-      {
-        value: '12301 Consumers'
-      }],
-      footer: <span>{ activatedOn ? <span>Set: <FormattedDate value={activatedOn} day='numeric' month='numeric' year='numeric' /></span> : 'Inactive'}</span>,
-    }, 
-    {
-    id: 2,
-    display: 'stat',
-    title: 'Details',
-    style: {
-      width: 300,
-    },
-    highlight: goal && goal.values ? goal.values.label : null,
-    info: [{
-      key: 'Created by',
-      value: user
-    },
-    {
-      key: 'Created on',
-      value: createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
-    },
-    {
-      key: 'Completed on',
-      value: completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
-    },
-    {
-      key: 'Activated on',
-      value: activatedOn ? <FormattedTime value={activatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
-    }],
-    footer: <span>&nbsp;</span>,
-    },
-    
-  {
-    id: 3,
-    display: 'stat',
-    title: 'Parameters',
-    highlight: null,
-    style: {
-      width: 300,
-    },
-    info: params,
-    footer: <span>&nbsp;</span>,
-    limit: 5,
-    show: 3
-  }
-  ];
-
-  if (completed) {
-    clusters.forEach((cluster, i) => {
-
-      widgets.push({
-        id: i + 4,
-        title: cluster.name,
-        display: 'chart',
-        style: {
-          height: 200,
-          width: 300
-        },
-        yAxis: {
-          formatter: y => y.toString() + '%',
-        },
-        xAxis: {
-          data: cluster.groups.map(x => x.name)
-        },
-        series: [
-          {
-            name: '',
-            type: 'bar',
-            fill: 0.8,
-            data: cluster.groups.map(x => Math.round(Math.random()*50))
-          }
-        ]
-      });
-    });
-
-      widgets.push({
-        id: 25,
-        display: 'map',
-        style: {
-          height: 200,
-          width: 300,
-        },
-        map: {},
-        data: metersLocations && metersLocations.features ? 
-          metersLocations.features.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0], Math.abs(Math.random()-0.8)]) : []
-      });
-
-  }
-    
-    const dataNotFound = (
-        <span>{ loading ? _t('Budgets.Explore.loading') : _t('Budgets.Explore.empty') }</span>
-    );
-
-    //const clusterKey = 'none', groupKey = 'all';
-
-  return (
-    <div>
-      <bs.Row>
-        { 
-          active ? 
-            <div>
-              <bs.Col md={4} style={{ float: 'left', textAlign: 'left' }}>
-                <h4>Budget is active</h4>
-              </bs.Col>
-              <bs.Col md={4} style={{ float: 'right', textAlign: 'right' }}>
-                <h5>Updated: {updatedOn ? <FormattedTime value={updatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</h5>
-                <h5>Next update: {nextUpdateOn ? <FormattedTime value={nextUpdateOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</h5>
-              </bs.Col>
-            </div>
-        :
-          <div />
-        }
-      </bs.Row>
-      <bs.Row style={{ marginLeft: 10 }}>
-      {
-        widgets.map((widget, i) => 
-            <div key={widget.id} style={{float: 'left', margin: 10}}>
-              <Widget {...widget} />
-            </div>
-        )
-      }
-      </bs.Row>
-    </div>
-  );
-}
 
 function BudgetDetails (props) {
   const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
@@ -297,7 +145,7 @@ function BudgetDetails (props) {
         <GeoJSON
           name='Users'
           data={data.features}
-          popupContent={feature => <div><h4>{feature.properties.name}</h4><h5>Address: <span>{feature.properties.address}</span></h5><h5>Meter id: {feature.properties.meter.serial}</h5><h5>Savings: {feature.properties.savings}</h5></div>}
+          popupContent={feature => <div><h4>{feature.properties.name}</h4><h5>Address: <span>{feature.properties.address}</span></h5><h5>Meter id: {feature.properties.meter.serial}</h5><h5>Savings: {feature.properties.savings}%</h5><h5>Budget: {feature.properties.budget} lt</h5></div>}
         />
     </Map>
 
@@ -329,18 +177,21 @@ function BudgetDetails (props) {
 
 var BudgetExplore = React.createClass({ 
   componentWillMount: function() {
-    if (!this.props.metersLocations) {
+    if (!this.props.metersLocations || !this.props.metersLocations.features) {
       this.props.actions.getMetersLocations();
     }
     this.props.actions.requestExploreData();
   },
+  componentWillUnmount: function() {
+    this.props.actions.resetQuery();
+  },
   render: function() {
-    const { budgets, groups, clusters, segments, areas, actions, params, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreData, explorePager, exploreQuery, intl } = this.props;
-    const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario } = actions;
+    const { budget, budgets, groups, clusters, segments, areas, actions, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreData, explorePager, exploreQuery, intl, details, stats } = this.props;
+    const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario, resetQuery } = actions;
     
-    const { id } = params;
+    const { id } = this.props.params;
     //TODO: here normally the budget will be fetched from API in componentWillMount
-    const budget = budgets.find(budget => budget.id === id);
+    //const budget = budgets.find(budget => budget.id === id);
     
     const _t = x => intl.formatMessage({ id: x });
     if (!clusters) return null;
@@ -359,41 +210,40 @@ var BudgetExplore = React.createClass({
       );
     } 
     
-    const { active, completedOn } = budget;
+    const { id:budgetId, name, potential, user, createdOn, completedOn, activatedOn, updatedOn, nextUpdateOn, parameters, params, active } = budget;
+    const goal = parameters.goal;
     const completed = completedOn != null;
 
     return (
       <div>
         <bs.Panel header={<h3>{budget.name + _t('Budgets.Explore.overview')}</h3>}>
         <bs.Row>
-
-        <bs.Col md={9} style={{ float: 'right' }}>
-
-          <bs.Button 
-            bsStyle='success' 
-            style={{ float: 'right' }}
-            onClick={() => { goToListView(); }}
-            >
-            <i className='fa fa-chevron-left' /> Back to all
-          </bs.Button>
-          { 
-            !active ? 
-              <bs.Button
-                bsStyle='danger'
-                style={{ float: 'right', marginRight: 25 }}
-                onClick={() => confirmRemoveBudgetScenario(id)}
-                >
-                { _t('Budgets.Explore.delete') }
-              </bs.Button>
-              :
-              <div />
-          }
-          {
+          <bs.Col md={9} style={{ float: 'right' }}>
+            <bs.Button 
+              bsStyle='success' 
+              style={{ float: 'right' }}
+              onClick={() => { goToListView(); }}
+              >
+              <i className='fa fa-chevron-left' /> Back to all
+            </bs.Button>
+            { 
+              !active ? 
+                <bs.Button
+                  bsStyle='danger'
+                  style={{ float: 'right', marginRight: 25 }}
+                  onClick={() => confirmRemoveBudgetScenario(budgetId)}
+                  >
+                  { _t('Budgets.Explore.delete') }
+                </bs.Button>
+                :
+                <div />
+            }
+            {
               !active && completed ? 
                 <bs.Button 
                   bsStyle='primary' 
                   style={{float: 'right', marginRight: 25}}
-                  onClick={() => { confirmSetBudget(id);  }}
+                  onClick={() => { confirmSetBudget(budgetId);  }}
                 >
                 { _t('Budgets.Explore.set') }
                 </bs.Button>
@@ -404,7 +254,7 @@ var BudgetExplore = React.createClass({
                   <bs.Button 
                     bsStyle='warning' 
                     style={{float: 'right', marginRight: 25}}
-                    onClick={() => { confirmResetBudget(id); }}
+                    onClick={() => { confirmResetBudget(budgetId); }}
                   >
                   { _t('Budgets.Explore.reset') }
                   </bs.Button>
@@ -423,71 +273,42 @@ var BudgetExplore = React.createClass({
 
                 :
                   <div />
-            }
-        </bs.Col>
-      </bs.Row>
-         <hr/>
-        <BudgetOverview
-          clusters={clusters}
-          groups={groups}
-          budget={budget}
-          query={exploreQuery}
-          actions={actions}
-          metersLocations={metersLocations}
-          tableFields={exploreFields}
-          data={exploreData}
-          tablePager={explorePager}
-          intl={intl}
-        />
+              }
+            </bs.Col>
+          </bs.Row>
+          <hr/>
+          { 
+          active ? 
+            <bs.Row>
+              <bs.Col md={4} style={{ float: 'left', textAlign: 'left' }}>
+                <h4>Budget is active</h4>
+              </bs.Col>
+              <bs.Col md={4} style={{ float: 'right', textAlign: 'right', marginBottom: 10 }}>
+                <h5>Updated: {updatedOn ? <FormattedTime value={updatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</h5>
+                <h5>Next update: {nextUpdateOn ? <FormattedTime value={nextUpdateOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</h5>
+              </bs.Col>
+            </bs.Row>
+          :
+            <div />
+          }
 
-      {
-        budgetToSet === id ? 
-          <Modal
-            show
-            title='Confirmation'
-            text={<span>Are you sure you want to <i>set</i> <b>{name}</b> (id:{id}) ?</span>}
-            onClose={() => confirmSetBudget(null)}
-            actions={[
-              {
-                name: 'Cancel',
-                action: () => confirmSetBudget(null),
-              },
-              {
-                name: 'Set Budget',
-                style: 'primary',
-                action: () => { setActiveBudget(id); confirmSetBudget(null); }
-              },
-            ]}
-          />
-          :
-            <div />
-      }
-      {
-        budgetToReset === id ? 
-          <Modal
-            show
-            title='Confirmation'
-            text={<span>Are you sure you want to <i>deactivate</i> <b>{name}</b> (id:{id}) ?</span>}
-            onClose={() => confirmResetBudget(null)}
-            actions={[
-              {
-                name: 'Cancel',
-                action: () => confirmResetBudget(null),
-              },
-              {
-                name: 'Deactivate budget',
-                style: 'warning',
-                action: () => { resetActiveBudget(id); confirmResetBudget(null); }
-              },
-            ]}
-          />
-          :
-            <div />
-      }
+        <WidgetRow
+          itemsPerRow={3}
+          widgets={details}
+        />
+         
         </bs.Panel>
         
-        { 
-          completed ? 
+      { 
+        completed ? 
+          <div>
+            <bs.Panel header={<h3>{_t('Budgets.Explore.stats')}</h3>}>
+              <WidgetRow
+                itemsPerRow={2}
+                widgets={stats}
+              />
+            </bs.Panel>
+            
             <bs.Panel header={<h3>{budget.name + _t('Budgets.Explore.details')}</h3>}>
               <BudgetDetails
                 clusters={clusters}
@@ -502,9 +323,57 @@ var BudgetExplore = React.createClass({
                 intl={intl}
               />
             </bs.Panel> 
+          </div>
               : 
-                null
+               <div />
         }
+        {
+          budgetToSet === budgetId ? 
+            <Modal
+              show
+              className='confirmation-modal'
+              title='Confirmation'
+              text={<span>Are you sure you want to <i>set</i> <b>{name}</b> (id:{budgetId}) ?</span>}
+              onClose={() => confirmSetBudget(null)}
+              actions={[
+                {
+                  name: 'Cancel',
+                  action: () => confirmSetBudget(null),
+                },
+                {
+                  name: 'Set Budget',
+                  style: 'primary',
+                  action: () => { setActiveBudget(budgetId); confirmSetBudget(null); }
+                },
+              ]}
+            />
+            :
+              <div />
+      }
+      {
+        budgetToReset === budgetId ? 
+          <Modal
+            show
+            className='confirmation-modal'
+            title='Confirmation'
+            text={<span>Are you sure you want to <i>deactivate</i> <b>{name}</b> (id:{budgetId}) ?</span>}
+            onClose={() => confirmResetBudget(null)}
+            actions={[
+              {
+                name: 'Cancel',
+                action: () => confirmResetBudget(null),
+              },
+              {
+                name: 'Deactivate budget',
+                style: 'warning',
+                action: () => { resetActiveBudget(budgetId); confirmResetBudget(null); }
+              },
+            ]}
+          />
+          :
+            <div />
+      }
+         
       </div>
 
     );
@@ -523,51 +392,201 @@ function mapStateToProps(state) {
 
 function mergeProps(stateProps, dispatchProps, ownProps) {
   
-    const exploreFields = [{
-        name: 'id',
-        title: 'Id',
-        hidden: true
-      }, {
-        name: 'email',
-        title: 'User',
-        link: function(row) {
-          if(row.id) {
-            return '/user/{id}/';
-          }
-          return null;
-        }
-      }, {
-        name: 'fullname',
-        title: 'Name'
-      }, {
-        name: 'serial',
-        title: 'SWM'
-      }, {
-        name: 'registrationDateMils',
-        title: 'Registered On',
-        type: 'datetime'
-      }, {
-        name: 'savings',
-        title: 'Savings (%)',
-      },
-      {
-        name: 'budget',
-        title: 'Budget (lt)'
-      }
-    ];
+  const exploreFields = exploreBudgetSchema(dispatchProps.actions); 
 
-    const explorePager = {
-      index: stateProps.exploreQuery.index || 0,
-      size: stateProps.exploreQuery.size || 10,
-      count: stateProps.exploreData.total || 0,
-      onPageIndexChange: index => { ownProps.actions.setQueryIndex(index); ownProps.actions.requestExploreData(); },
-      mode: Table.PAGING_SERVER_SIDE
-    };
+  const explorePager = {
+    index: stateProps.exploreQuery.index || 0,
+    size: stateProps.exploreQuery.size || 10,
+    count: stateProps.exploreData.total || 0,
+    onPageIndexChange: index => { ownProps.actions.setQueryIndex(index); ownProps.actions.requestExploreData(); },
+    mode: Table.PAGING_SERVER_SIDE
+  };
+
+  const { metersLocations } = stateProps;
+  const { budgets, clusters=[] } = ownProps;
+  const budget = budgets.find(budget => budget.id === ownProps.params.id);
+  const details = [], stats = [];
+  
+  if (budget) {
+    const { activatedOn, createdOn, completedOn, parameters, params, user, updatedOn, expectation, actual, overlap, consumers } = budget;
+    const completed = completedOn != null;
+    const active = activatedOn != null;
+    
+    //const goal = parameters.goal;
+    const lastYear = 2015;
+    const activeFor = 5.5;
+
+    if (completed) { 
+      details.push({
+          id: 1,
+          display: 'stat', 
+          title: 'Budget goal',
+          highlight: `${expectation.savings}%`, 
+          info: [{
+            value: <span><b>{`${expectation.budget} M liters`}</b> {`${expectation.budget < 0 ? 'less' : 'more'} than ${lastYear}`}</span>
+          },
+          {
+            value: <span><b>{`Max ${expectation.max}% | Min ${expectation.min}%`}</b></span>
+          },
+          {
+            value: <span><b>{`${consumers} Consumers`}</b></span>
+          }],
+          footer: <span>{ activatedOn ? <span>Set: <FormattedDate value={activatedOn} day='numeric' month='numeric' year='numeric' /></span> : 'Inactive'}</span>,
+
+      });
+
+      if (active) {
+        details.push({
+          id: 20,
+          display: 'stat',
+          title: 'Savings',
+          highlight: actual.savings ?  `${actual.savings}%` : '-',
+          info: [{
+            value: <span><b>{`${actual.budget || '-'} M liters`}</b> {`${actual.budget ? (actual.budget < 0 ? 'less' : 'more') : '-'} than ${lastYear}`}</span>
+          },
+          {
+            value: <span><b>{`Max ${actual.max || '-'}% | Min ${actual.min || '-'}%`}</b></span>
+          },
+          {
+            value: <span><b>{`Active for ${activeFor} months`}</b></span>
+          }],
+          footer: updatedOn ? <span>Updated: <FormattedDate value={updatedOn} day='numeric' month='numeric' year='numeric' /></span> : <span>Not estimated yet</span>,
+         
+        })
+
+        if (overlap) {
+          details.push({
+            id: 21,
+            display: 'stat',
+            title: 'Consumers',
+            highlight: `${overlap.savings}%`,
+            info: [{
+              value: <span><b>{`${overlap.original - overlap.current} consumers changed to other budgets`}</b></span>
+            },
+            {
+              value: <b>Original: {overlap.original}</b>
+            },
+            {
+              value: <b>Current: {overlap.current}</b>,
+            },
+            ],
+            footer: updatedOn ? <span>Updated: <FormattedDate value={updatedOn} day='numeric' month='numeric' year='numeric' /></span> : <span>Not estimated yet</span>,
+          
+          })
+        }
+        else {
+          details.push({
+            id: 21,
+            display: 'stat',
+            title: 'Consumers',
+            highlight: 'No change',
+            info: null,
+            footer: updatedOn ? <span>Updated: <FormattedDate value={updatedOn} day='numeric' month='numeric' year='numeric' /></span> : <span>Not estimated yet</span>,
+            style: {
+              color: '#666',
+              textAlign: 'center',
+              paddingTop: 20
+            }
+            })
+
+          //overlap
+        }
+        //active
+      }
+
+      clusters.forEach((cluster, i) => {
+
+        stats.push({
+          id: i,
+          title: cluster.name,
+          display: 'chart',
+          style: {
+            height: 200
+          },
+          yAxis: {
+            formatter: y => y.toString() + '%',
+          },
+          xAxis: {
+            data: cluster.groups.map(x => x.name)
+          },
+          series: [
+            {
+              name: '',
+              type: 'bar',
+              fill: 0.8,
+              data: cluster.groups.map(x => Math.round(Math.random()*10))
+            }
+          ]
+        });
+      });
+
+        stats.push({
+          id: 100,
+          display: 'map',
+          style: {
+            height: 238,
+          },
+          map: {},
+          data: metersLocations && metersLocations.features ? 
+            metersLocations.features.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0], Math.abs(Math.random()-0.8)]) : []
+        });
+        
+        //completed
+    }
+
+    //all
+    details.push({
+        id: 2,
+        display: 'stat',
+        title: 'Details',
+        style: {
+          width: 250,
+          height: 100
+        },
+        highlight: null,
+        info: [{
+          key: 'Created by',
+          value: user
+        },
+        {
+          key: 'Created on',
+          value: createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
+        },
+        {
+          key: 'Completed on',
+          value: completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
+        },
+        {
+          key: 'Activated on',
+          value: activatedOn ? <FormattedTime value={activatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
+        }],
+        footer: <span>&nbsp;</span>,
+    });
+
+    //all
+   details.push({
+        id: 3,
+        display: 'stat',
+        title: 'Parameters',
+        highlight: null,
+        style: {
+          width: 250,
+        },
+        info: params,
+        footer: <span>&nbsp;</span>,
+        limit: 5,
+        show: 3
+   });
+
+  }
 
   return {
     ...stateProps,
     ...dispatchProps,
     ...ownProps,
+    budget,
+    details,
+    stats,
     exploreFields,
     explorePager
   };

@@ -7,15 +7,15 @@ const budgetSchema = actions => [{
   {
     name: 'name',
     title: 'Budgets.List.name',
-    style: {
-      width: 100
-    },
     link: function(row) {
       if(row.id) {
         return '/budgets/{id}/';
       }
       return null;
     },
+    style: {
+      whiteSpace: 'nowrap'
+    }
   }, 
   {
     name: 'active',
@@ -24,7 +24,7 @@ const budgetSchema = actions => [{
     style: {
       textAlign: 'center',
       fontSize: '1.2em',
-      width: 50
+      width: 70
     },
     icon: function(field, row) {
       return row.active ? 'check' : '';
@@ -125,8 +125,43 @@ const activeBudgetsSchema = actions => [
     }
 ];
 
+const exploreBudgetSchema = actions => [
+  {
+    name: 'id',
+    title: 'Id',
+    hidden: true
+  }, {
+    name: 'email',
+    title: 'User',
+    link: function(row) {
+      if(row.id) {
+        return '/user/{id}/';
+      }
+      return null;
+    }
+  }, {
+    name: 'fullname',
+    title: 'Name'
+  }, {
+    name: 'serial',
+    title: 'SWM'
+  }, {
+    name: 'registrationDateMils',
+    title: 'Registered On',
+    type: 'datetime'
+  }, {
+    name: 'savings',
+    title: 'Savings (%)',
+  },
+  {
+    name: 'budget',
+    title: 'Budget (lt)'
+  }
+];
+
 module.exports = {
   budgetSchema,
-  activeBudgetsSchema
+  activeBudgetsSchema,
+  exploreBudgetSchema
 };
 

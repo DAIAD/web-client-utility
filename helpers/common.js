@@ -26,6 +26,7 @@ const extractFeatures = accounts => {
         'properties' : {
           'userKey' : accounts[index].id,
           'savings': accounts[index].savings,
+          'budget': accounts[index].budget,
           'deviceKey' : meter.key,
           'name' : accounts[index].fullname,
           'address' : accounts[index].address,

@@ -55,6 +55,7 @@ function RemoveConfirmation (props) {
   return (
     <Modal
       title='Confirmation'
+      className='confirmation-modal'
       show={true}
       text={<span>Are you sure you want to delete <b>{name}</b> (id:{id})</span>}
       onClose={reset}
@@ -87,7 +88,7 @@ function mapStateToProps(state, ownProps) {
        ...scenario, 
        active: scenario.activatedOn != null,
        paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short')
-        .map(x => <span><b>{x.key}</b> ({x.value}) &nbsp;</span>),
+       .map(x => <span>{x.key} (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>),
        params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
      })),
      budgetToRemoveIdx: state.budget.budgetToRemove,

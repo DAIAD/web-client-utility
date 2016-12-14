@@ -54,7 +54,7 @@ var DisplayParamLine = React.createClass({
             :
             <span />
             }
-            <b>
+            <span>
           {
             hasMore ? 
               (
@@ -85,7 +85,7 @@ var DisplayParamLine = React.createClass({
                 <span>{v}, </span>
               ))
           }
-        </b>
+        </span>
       </div>
     );
   }

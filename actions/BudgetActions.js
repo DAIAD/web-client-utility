@@ -170,8 +170,13 @@ const requestExploreData = function() {
       if (Array.isArray(response.errors) && response.errors.length > 0) {
         dispatch(setData(response, response.errors));
       }
-      //TODO: for now set a random number as savings for current budget
-      const accounts = response.accounts.map(account => ({ ...account, budget: Math.round(Math.random()*100), savings: Math.round(Math.random()*10) }));
+      //TODO: for now set a random number as budget for current budget
+      const accounts = response.accounts.map(account => ({ 
+        ...account, 
+        budget: Math.round(Math.random()*100), 
+        savings: Math.round(Math.random()*10) * (Math.random() < 0.5 ? -1 : 1) 
+      }));
+
       dispatch(setData({ 
         total: response.total, 
         accounts,

@@ -53,7 +53,7 @@ function Widget (props) {
 }
 
 function Heatmap(props) {
-  const { style, data, map } = props;
+  const { style={}, data, map } = props;
   return (
     <Map
       center={[38.36, -0.479]}
@@ -70,7 +70,7 @@ function Heatmap(props) {
 }
 
 function BarChart(props) {
-  const { xAxis, yAxis, series, grid, style } = props;
+  const { xAxis, yAxis, series, grid, style={} } = props;
   return (
     <echarts.LineChart
       width={style.width ? style.width : '100%'}
@@ -101,18 +101,24 @@ function BarChart(props) {
 
 var Stat = React.createClass({
   render: function() {
-    const { highlight, info, limit, show, style } = this.props;
+    const { highlight, info, limit, show, style={} } = this.props;
     return (
-      <div style={style}>
-        <div style={{float: 'left', width: highlight ? (info && info.length > 0 ? '33%' : '100%') : '0%'}}>
-          <h2>{highlight}</h2>
+      <div style={{ height: 120, ...style}}>
+        <div style={{float: 'left', width: highlight ? (Array.isArray(info) && info.length > 0 ? '33%' : '100%') : '0%'}}>
+          <h1 style={{ marginTop: 0, fontSize: '2.5em' }}>{highlight}</h1>
         </div>
-        <div style={{float: 'left', width: info && info.length > 0 ? (highlight  ? '65%' : '100%') : '0%'}}>
-          <DisplayParams 
-            params={info} 
-            limit={limit}
-            show={show}
-          /> 
+        <div style={{float: 'left', width: Array.isArray(info) && info.length > 0 ? (highlight  ? '63%' : '100%') : '0%'}}>
+          { 
+            Array.isArray(info) ?
+            <DisplayParams 
+              params={info} 
+              limit={limit}
+              show={show}
+              style={{ lineHeight: '1.7em' }}
+            /> 
+              : 
+                <div />
+          }
         </div>
       </div>
     );
