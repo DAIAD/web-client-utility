@@ -65,11 +65,11 @@ var WhoItem = React.createClass({
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
             { !noAll ? 
-              <bs.Button bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => { setValue({value:'all', label: allLabel}); }}>{allLabel}</bs.Button>
+              <bs.Button bsSize='large' bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => { setValue({value:'all', label: allLabel}); }}>{allLabel}</bs.Button>
               : 
                 <div />
             }
-            <bs.Button bsStyle={Array.isArray(value) ? 'primary' : 'default'}  style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{_t('Wizard.common.choose')}</bs.Button>
+            <bs.Button bsSize='large' bsStyle={Array.isArray(value) ? 'primary' : 'default'}  style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{_t('Wizard.common.choose')}</bs.Button>
           </bs.ButtonGroup>
         </bs.Col>
         <bs.Col md={7}>
@@ -192,11 +192,11 @@ var WhereItem = React.createClass({
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
             { !noAll ? 
-              <bs.Button bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({value:'all', label: allLabel})}>{allLabel}</bs.Button>
+              <bs.Button bsSize='large' bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({value:'all', label: allLabel})}>{allLabel}</bs.Button>
               :
                 <div />
             }
-            <bs.Button bsStyle={Array.isArray(value) ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{_t('Wizard.common.choose')}</bs.Button>
+            <bs.Button bsSize='large' bsStyle={Array.isArray(value) ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{_t('Wizard.common.choose')}</bs.Button>
 
           </bs.ButtonGroup>
         </bs.Col>
@@ -325,8 +325,8 @@ var WhenItem = React.createClass({
       <div>
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
-              <bs.Button bsStyle={value.value === 'lastYear' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({timespan: this.getLastYear(), value:'lastYear', label: lastLabel} )}>{lastLabel}</bs.Button>
-            <bs.Button bsStyle={value.value === 'custom' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{chooseLabel}</bs.Button>
+              <bs.Button bsSize='large' bsStyle={value.value === 'lastYear' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({timespan: this.getLastYear(), value:'lastYear', label: lastLabel} )}>{lastLabel}</bs.Button>
+            <bs.Button bsSize='large' bsStyle={value.value === 'custom' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{chooseLabel}</bs.Button>
           </bs.ButtonGroup>
         </bs.Col>
         
@@ -417,6 +417,7 @@ function DistributionItem (props) {
         distributionItems.map(item => 
           <bs.Button 
             key={item.value}
+            bsSize='large'
             bsStyle={item.value === value.value ? 'primary' : 'default'} 
             style={{marginBottom: 10}} 
             onClick={() => setValue(item)}
