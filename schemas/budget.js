@@ -82,49 +82,6 @@ const budgetSchema = actions => [{
   }
 ];
 
-const activeBudgetsSchema = actions => [
-    {
-      name: 'id',
-      title: 'id',
-      hidden: true
-    },
-    {
-      name: 'name',
-      title: 'Name',
-      hidden: true,
-    },
-    {
-      name: 'activatedOn', 
-      title: 'Activated', 
-      type: 'datetime',
-      hidden: true,
-    },
-    {
-      name: 'goal',
-      title: 'Goal',
-      type: 'element',
-      style: {
-        height: 100
-      }
-    },
-    {
-      name: 'savings',
-      title: 'Savings',
-      type: 'element',
-      style: {
-        height: 100
-      }
-    },
-    {
-      name: 'affected',
-      title: 'Affected',
-      type: 'element',
-      style: {
-        height: 100
-      }
-    }
-];
-
 const exploreBudgetSchema = actions => [
   {
     name: 'id',
@@ -161,7 +118,6 @@ const exploreBudgetSchema = actions => [
 
 module.exports = {
   budgetSchema,
-  activeBudgetsSchema,
   exploreBudgetSchema
 };
 

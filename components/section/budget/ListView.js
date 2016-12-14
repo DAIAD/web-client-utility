@@ -5,7 +5,7 @@ var { budgetSchema } = require('../../../schemas/budget');
 
 function BudgetsList (props) {
   const { groups, clusters, segments, areas, budgets, actions, budgetToRemove, searchFilter, intl } = props;
-  const { removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView } = actions;
+  const { removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView, goToActiveView } = actions;
   const budgetFields = budgetSchema(actions);
   const budgetSorter = {
     defaultSort: 'completedOn',
@@ -28,6 +28,13 @@ function BudgetsList (props) {
           />
        </bs.Col>
         <bs.Col sm={8} md={7} style={{textAlign: 'right'}}>
+         <bs.Button 
+           bsStyle='primary' 
+           style={{ marginRight: 20 }}
+           onClick={() => { goToActiveView(); }}
+           ><i className='fa fa-eye'></i> Monitor active
+         </bs.Button>
+
          <bs.Button 
            bsStyle='success' 
            onClick={() => { goToAddView(); }}
