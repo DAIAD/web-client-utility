@@ -85,7 +85,7 @@ var SavingsPotentialExplore = React.createClass({
         id: 3,
         display: 'stat',
         title: 'Savings Potential',
-        highlight: <h1>{potential}</h1>,
+        highlight: potential,
         info: [],
         footer: null,
       });

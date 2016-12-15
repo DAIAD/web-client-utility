@@ -26,7 +26,9 @@ function Widget (props) {
                        {title ? <span>{title}</span> : <div /> }
                        <bs.Button style={{ float: 'right' }} bsStyle='default' onClick={maximize}><i className='fa fa-search-plus'/></bs.Button>
                      </h4>
-                     )  : <div />
+                     )  
+                     : 
+                       ( title ? <h4>{title}</h4> : <div /> )
              }
            </div>
         }
