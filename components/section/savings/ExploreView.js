@@ -63,6 +63,7 @@ var SavingsPotentialExplore = React.createClass({
       id: 2,
       display: 'stat',
       title: 'Parameters',
+      dialogClassName: 'maximized-modal-half',
       highlight: null,
       maximizable: true,
       info: paramsShort,
@@ -70,7 +71,7 @@ var SavingsPotentialExplore = React.createClass({
         info: parameters
       },
       maximizedStyle: {
-        width: '80%',
+        padding: 10,
         height: '10vh',
         fontSize: '1.5em'
       },

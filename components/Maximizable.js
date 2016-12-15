@@ -11,7 +11,8 @@ var maximizable = Component => {
     getDefaultProps: function() {
       return {
         maximizedStyle: {},
-        maximizedProps: {}
+        maximizedProps: {},
+        dialogClassName: 'maximized-modal',
       }
     },
     minimize: function() {
@@ -22,7 +23,7 @@ var maximizable = Component => {
     },
     render: function() {
       const { maximized } = this.state;
-      const { maximizedProps, maximizedStyle } = this.props;
+      const { maximizedProps, maximizedStyle, dialogClassName } = this.props;
       return (
         <div>
           <Component 
@@ -31,7 +32,7 @@ var maximizable = Component => {
           />
           <bs.Modal
             animation={false} 
-            dialogClassName='maximized-modal'
+            dialogClassName={dialogClassName}
             show={maximized}
             onHide={this.minimize}
             >

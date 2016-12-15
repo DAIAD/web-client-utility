@@ -573,6 +573,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         display: 'stat',
         title: 'Parameters',
         maximizable: true,
+        dialogClassName: 'maximized-modal-half',
         highlight: null,
         style: {
           width: 250,
