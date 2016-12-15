@@ -1,8 +1,8 @@
 var React = require('react');
 var bs = require('react-bootstrap');
 var Modal = require('../../Modal');
-var Wizard = require('../../common/Wizard');
-var { SetNameItem, WhoItem, WhereItem, WhenItem } = require('../../common/WizardReusableItems');
+var Wizard = require('../../wizard/Wizard');
+var { SetName, SelectWho, SelectWhere, SelectWhen } = require('../../wizard/items/');
 var util = require('../../../helpers/wizard');
 var { nameToId } = require('../../../helpers/common');
 
@@ -106,7 +106,7 @@ var SavingsPotentialAdd = React.createClass({
           validateLive
           childrenProps={{ intl }}
           > 
-          <WhoItem
+          <SelectWho
             id='who'
             title='Who'
             description='Select all population or narrow savings potential calculation to selected groupsn'
@@ -114,7 +114,7 @@ var SavingsPotentialAdd = React.createClass({
             initialValue={{}}
             validate={validateWho}
           />
-          <WhereItem
+          <SelectWhere
             id='where'
             title='Where'
             description='Select all areas or narrow savings potential calculation to selected areas'
@@ -130,14 +130,14 @@ var SavingsPotentialAdd = React.createClass({
             initialValue={{}}
             validate={validateWhere}
           />
-          <WhenItem
+          <SelectWhen
             id='when'
             title='Data'
             description='Data to be used for savings potential calculation, last year or custom'
             initialValue={{}}
             validate={validateWhen}
           />
-          <SetNameItem
+          <SetName
             title='Name'
             description='Select a descriptive name for your scenario'
             id='name'
