@@ -17,7 +17,7 @@ const initialState = {
        id: 'scenario-2',
        name: 'Scenario 2',
        user: 'foofootos',
-       parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'Nowhere'}, when: {value: 'last', label:'Last year'}},
+       parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, when: {value: 'last', label:'Last year'}},
        createdOn: new Date('1990-01-01'),
        completedOn: new Date('1999-01-01'),
        potential: '25 Mlt'
