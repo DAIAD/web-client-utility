@@ -6,7 +6,7 @@ var { Link } = require('react-router');
 var Table = require('../../Table');
 var { FormattedDate } = require('react-intl');
 
-var Widget = require('../../WidgetComponent');
+var Widget = require('../../Widget');
 
 var ActiveBudgets = React.createClass({ 
   render: function() {

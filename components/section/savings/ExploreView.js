@@ -3,7 +3,6 @@ var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
 var { FormattedTime } = require('react-intl');
 
-//var Widget = require('../../WidgetComponent');
 var WidgetRow = require('../../WidgetRow');
 var theme = require('../../chart/themes/blue');
 
