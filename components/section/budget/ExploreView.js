@@ -11,6 +11,7 @@ var WidgetRow = require('../../WidgetRow');
 var Modal = require('../../Modal');
 var theme = require('../../chart/themes/blue');
 var { exploreBudgetSchema } = require('../../../schemas/budget');
+var maximizable = require('../../Maximizable'); 
 
 
 function BudgetDetails (props) {
@@ -304,7 +305,6 @@ var BudgetExplore = React.createClass({
           <div>
             <bs.Panel header={<h3>{_t('Budgets.Explore.stats')}</h3>}>
               <WidgetRow
-                maximizable
                 itemsPerRow={2}
                 widgets={stats}
               />
@@ -409,7 +409,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   const details = [], stats = [];
   
   if (budget) {
-    const { activatedOn, createdOn, completedOn, parameters, params, user, updatedOn, expectation, actual, overlap, consumers } = budget;
+    const { activatedOn, createdOn, completedOn, params, paramsShort, user, updatedOn, expectation, actual, overlap, consumers } = budget;
     const completed = completedOn != null;
     const active = activatedOn != null;
     
@@ -501,6 +501,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
           id: i,
           title: cluster.name,
           display: 'chart',
+          maximizable: true,
           style: {
             height: 200
           },
@@ -523,9 +524,11 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
 
         stats.push({
           id: 100,
+          title: 'Map',
           display: 'map',
+          maximizable: true,
           style: {
-            height: 238,
+            height: 200,
           },
           map: {},
           data: metersLocations && metersLocations.features ? 
@@ -569,11 +572,20 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         id: 3,
         display: 'stat',
         title: 'Parameters',
+        maximizable: true,
         highlight: null,
         style: {
           width: 250,
         },
-        info: params,
+        info: paramsShort,
+        maximizedProps: {
+          info: params
+        },
+        maximizedStyle: {
+          width: '80%',
+          height: '10vh',
+          fontSize: '1.5em'
+        },
         footer: <span>&nbsp;</span>,
         limit: 5,
         show: 3

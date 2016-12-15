@@ -4,18 +4,31 @@ var echarts = require('react-echarts');
 var theme = require('./chart/themes/blue');
 var { Map, TileLayer, HeatLayer, LayersControl, InfoControl } = require('react-leaflet-wrapper');
 var DisplayParams = require('./DisplayParams');
+var maximizable = require('./Maximizable');
 
 function Widget (props) {
-  const { error, display, title, footer, style } = props;
+  const { error, display, title, footer, style, maximizable=false, maximizedProps, maximized, maximize, minimize } = props;
+  //const innerProps = maximized ? { ...props, ...maximizedProps } : props;
   return (
     <div className='infobox'>
         {
-          title ? 
            <div className='infobox-header'>
-             <h4>{title}</h4>
+             {
+               maximizable ? 
+                 (
+                   maximized ? 
+                     <h1 style={{ marginLeft: 20 }}>
+                       {title ? <span>{title}</span> : <div /> }
+                        <bs.Button style={{ float: 'right' }} bsStyle='default' onClick={minimize}><i className='fa fa-search-minus'/></bs.Button>
+                    </h1>
+                   :
+                     <h4>
+                       {title ? <span>{title}</span> : <div /> }
+                       <bs.Button style={{ float: 'right' }} bsStyle='default' onClick={maximize}><i className='fa fa-search-plus'/></bs.Button>
+                     </h4>
+                     )  : <div />
+             }
            </div>
-           :
-            <div />
         }
       <div className='infobox-body'>
          {
@@ -47,7 +60,7 @@ function Widget (props) {
        <div className='infobox-footer'>
         {footer}
        </div>
-    </div>
+     </div>
   );
 }
 
@@ -73,8 +86,8 @@ function BarChart(props) {
   const { xAxis, yAxis, series, grid, style={} } = props;
   return (
     <echarts.LineChart
-      width={style.width ? style.width : '100%'}
-      height={style.height ? style.height : '100%'}
+      width={style.width}
+      height={style.height}
       theme={theme}
       xAxis={{
         boundaryGap: true,
@@ -124,4 +137,4 @@ function Stat (props) {
 }
 
 
-module.exports = Widget;
+module.exports = maximizable(Widget);

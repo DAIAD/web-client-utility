@@ -39,7 +39,7 @@ var SavingsPotentialExplore = React.createClass({
       );
     } 
   
-    const { id:scenarioId, name, createdOn, completedOn, user, params:parameters, potential } = scenario; 
+    const { id:scenarioId, name, createdOn, completedOn, user, params:parameters, paramsShort, potential } = scenario; 
     const completed = completedOn != null;
     const details = [{
       id: 1,
@@ -64,7 +64,16 @@ var SavingsPotentialExplore = React.createClass({
       display: 'stat',
       title: 'Parameters',
       highlight: null,
-      info: parameters,
+      maximizable: true,
+      info: paramsShort,
+      maximizedProps: {
+        info: parameters
+      },
+      maximizedStyle: {
+        width: '80%',
+        height: '10vh',
+        fontSize: '1.5em'
+      },
       limit: 5
 
     }];
@@ -86,6 +95,7 @@ var SavingsPotentialExplore = React.createClass({
           id: i + 4,
           title: cluster.name,
           display: 'chart',
+          maximizable: true,
           style: {
             height: 200
           },
@@ -110,6 +120,8 @@ var SavingsPotentialExplore = React.createClass({
       stats.push({
         id: 25,
         display: 'map',
+        title: 'Map',
+        maximizable: true,
         style: {
           height: 238,
         },
