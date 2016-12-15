@@ -11,7 +11,8 @@ function BudgetsList (props) {
     defaultSort: 'completedOn',
     defaultOrder: 'desc'
   };
-  const budgetData  = searchFilter ? budgets.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : ( Array.isArray(budgets) ? budgets : []);
+  const budgetData  = searchFilter ? budgets.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : ( Array.isArray(budgets) ? budgets : [])
+  .map(budget => ({ ...budget, paramsShort: budget.paramsShort.map(x => <span>{x.key} (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>)}));
 
   const _t = x => intl.formatMessage({ id: x });
 

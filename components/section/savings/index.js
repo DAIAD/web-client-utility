@@ -83,8 +83,7 @@ function mapStateToProps(state, ownProps) {
      }],
      scenarios: state.savings.scenarios.map(scenario => ({
        ...scenario, 
-       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short')
-       .map(x => <span><span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>),
+       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
        params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
      })),
      scenarioToRemove: state.savings.scenarios.find(s => s.id === state.savings.scenarioToRemove),

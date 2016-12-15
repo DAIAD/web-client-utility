@@ -87,9 +87,8 @@ function mapStateToProps(state, ownProps) {
      budgets: state.budget.scenarios.map(scenario => ({
        ...scenario, 
        active: scenario.activatedOn != null,
-       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short')
-       .map(x => <span>{x.key} (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>),
-       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
+       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long'),
+       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
      })),
      budgetToRemoveIdx: state.budget.budgetToRemove,
      //list

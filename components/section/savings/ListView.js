@@ -12,7 +12,8 @@ function SavingsPotentialList (props) {
 
   const _t = x => intl.formatMessage({ id: x });
 
-  const savingsScenarios = searchFilter ? scenarios.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : (Array.isArray(scenarios) ? scenarios : [])
+  const savingsScenarios = (searchFilter ? scenarios.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : (Array.isArray(scenarios) ? scenarios : []))
+  .map(scenario => ({ ...scenario, paramsShort: scenario.paramsShort.map(x => <span><span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>) }));
 
   const tableSorter = {
     defaultSort: 'completedOn',
