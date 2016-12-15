@@ -1,6 +1,6 @@
 var React = require('react');
 var bs = require('react-bootstrap');
-var Widget = require('./WidgetComponent');
+var Widget = require('./Widget');
 
 function toNlets(array, n) {
   return array.reduce((p, c, i, arr) => i % n === 0 ? [...p, arr.slice(i, i+n)] : p, []);

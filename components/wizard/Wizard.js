@@ -7,7 +7,7 @@ var createWizard = require('react-wiz');
 var util = require('../../helpers/wizard');
 var DisplayParams = require('../DisplayParams');
 
-function WizardItem (props) {
+function WizardTemplate (props) {
   const { id, title, description, children, hasPrevious, hasNext, isLast, onNextClicked, onPreviousClicked, reset, errors, completed, value, values, step, onComplete, next, intl } = props;
   const params = util.getFriendlyParams(values, intl);
   return (
@@ -90,4 +90,4 @@ function WizardItem (props) {
 }
 
 
-module.exports = createWizard(WizardItem);
+module.exports = createWizard(WizardTemplate);

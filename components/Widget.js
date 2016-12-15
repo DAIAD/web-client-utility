@@ -7,7 +7,6 @@ var DisplayParams = require('./DisplayParams');
 
 function Widget (props) {
   const { error, display, title, footer, style } = props;
-  //const _t = intl.formatMessage;
   return (
     <div className='infobox'>
         {
@@ -99,31 +98,29 @@ function BarChart(props) {
 }
 
 
-var Stat = React.createClass({
-  render: function() {
-    const { highlight, info, limit, show, style={} } = this.props;
-    return (
-      <div style={{ height: 120, ...style}}>
-        <div style={{float: 'left', width: highlight ? (Array.isArray(info) && info.length > 0 ? '33%' : '100%') : '0%'}}>
-          <h1 style={{ marginTop: 0, fontSize: '2.5em' }}>{highlight}</h1>
-        </div>
-        <div style={{float: 'left', width: Array.isArray(info) && info.length > 0 ? (highlight  ? '63%' : '100%') : '0%'}}>
-          { 
-            Array.isArray(info) ?
-            <DisplayParams 
-              params={info} 
-              limit={limit}
-              show={show}
-              style={{ lineHeight: '1.7em' }}
-            /> 
-              : 
-                <div />
-          }
-        </div>
+function Stat (props) {
+  const { highlight, info, limit, show, style={} } = props;
+  return (
+    <div style={{ height: 120, ...style}}>
+      <div style={{float: 'left', width: highlight ? (Array.isArray(info) && info.length > 0 ? '33%' : '100%') : '0%'}}>
+        <h1 style={{ marginTop: 0, fontSize: '2.5em' }}>{highlight}</h1>
       </div>
-    );
-  }
-});
+      <div style={{float: 'left', width: Array.isArray(info) && info.length > 0 ? (highlight  ? '63%' : '100%') : '0%'}}>
+        { 
+          Array.isArray(info) ?
+          <DisplayParams 
+            params={info} 
+            limit={limit}
+            show={show}
+            style={{ lineHeight: '1.7em' }}
+          /> 
+            : 
+              <div />
+        }
+      </div>
+    </div>
+  );
+}
 
 
 module.exports = Widget;

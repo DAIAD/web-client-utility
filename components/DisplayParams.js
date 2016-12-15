@@ -44,8 +44,6 @@ var DisplayParamLine = React.createClass({
     const { show } = this.props;
     const { key, value } = this.props.param;
     const { hasMore, showMore } = this.state;
-    //const showFront = Math.ceil(this.props.show / 2);
-    //const showBack = this.props.show - showFront;
     return (
       <div>
         {
@@ -69,9 +67,6 @@ var DisplayParamLine = React.createClass({
                    value.map((v, i, arr) => {
                      if (i < show) return <span>{v}, </span>;
                      else if (i === show) return <span>... , </span>;
-                    //else if (i == showFront) return <span>... , </span>;
-                    //else if (i >= arr.length - showBack && i < arr.length -1) return <span>{v}, </span>;
-                    //else if (i == arr.length -1) return <span>{v} </span>;
                   })
                    }
                    <a href='#' style={{ whiteSpace: 'nowrap' }} onClick={e => { e.preventDefault(); this.setState({ showMore: true })}}>Show more</a>
