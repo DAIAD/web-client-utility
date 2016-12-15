@@ -48,7 +48,7 @@ var DisplayParamLine = React.createClass({
       <div>
         {
           key ? 
-          <span style={{ fontSize: 16, fontWeight: 500, color: '#666' }}>{key}: </span>
+          <span style={{ fontSize: '1.1em', fontWeight: 500, color: '#666' }}>{key}: </span>
             :
             <span />
             }

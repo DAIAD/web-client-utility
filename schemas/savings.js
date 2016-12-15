@@ -24,14 +24,14 @@ const savingsSchema = actions => [{
       fontSize: '1.1em',
       textAlign: 'center'
     }
-  }, 
-  {
-    name: 'user',
-    title: 'Savings.List.user',
-  }, 
+  },  
   {
     name: 'paramsShort',
     title: 'Savings.List.paramsShort',
+  },
+  {
+    name: 'user',
+    title: 'Savings.List.user',
   },
   {
     name: 'createdOn',
