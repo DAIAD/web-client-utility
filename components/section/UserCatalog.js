@@ -346,7 +346,8 @@ var UserCatalog = React.createClass({
     //  case 'map':
     var map = (
               <Map
-                style={{ width: '100%', height: 600}}
+                width='100%'
+                height={600}
                 center={[38.35, -0.48]}
                 zoom={13}
                 >

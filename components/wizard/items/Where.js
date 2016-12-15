@@ -89,7 +89,8 @@ var WhereItem = React.createClass({
             <bs.Row>
               <bs.Col md={8}>
               <Map
-                style={{ width: '100%', height: 450 }}
+                width='100%'
+                height='70vh'
                 center={[38.35, -0.48]} 
                 zoom={12.55}
                 >
@@ -136,7 +137,7 @@ var WhereItem = React.createClass({
                   params={selectedParams}
                   limit={50}
                   show={50}
-                  style={{ maxHeight: 380, overflow: 'auto' }}
+                  style={{ maxHeight: '60vh', overflow: 'auto' }}
                 />
               </div>
             </bs.Col>

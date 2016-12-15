@@ -213,7 +213,8 @@ var Dashboard = React.createClass({
           <Map
             center={[38.36, -0.479]}
             zoom={13}
-            style={{ width: '100%', height: 600 }}
+            width='100%'
+            height={600}
             info='topright'
             >
             <TileLayer />

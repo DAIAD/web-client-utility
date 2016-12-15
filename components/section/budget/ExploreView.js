@@ -13,7 +13,6 @@ var theme = require('../../chart/themes/blue');
 var { exploreBudgetSchema } = require('../../../schemas/budget');
 
 
-
 function BudgetDetails (props) {
   const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
   const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry, resetQuery } = actions;
@@ -129,7 +128,8 @@ function BudgetDetails (props) {
      
     <br />
     <Map
-      style={{ width: '100%', height: 300}}
+      width='100%'
+      height={300}
       center={[38.35, -0.48]}
       zoom={13}
       >
@@ -304,6 +304,7 @@ var BudgetExplore = React.createClass({
           <div>
             <bs.Panel header={<h3>{_t('Budgets.Explore.stats')}</h3>}>
               <WidgetRow
+                maximizable
                 itemsPerRow={2}
                 widgets={stats}
               />

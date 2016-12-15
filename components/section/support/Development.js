@@ -171,7 +171,8 @@ var Development = React.createClass({
     var map = (
       <Bootstrap.ListGroupItem>
          <Map
-          style={{ width: '100%', height: 400}}
+          height={400}
+          width='100%' 
           center={[38.35, -0.48]}
           zoom={13}
           >
