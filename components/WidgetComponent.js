@@ -63,7 +63,8 @@ function Heatmap(props) {
     <Map
       center={[38.36, -0.479]}
       zoom={12}
-      style={{ width: style.width || '100%', height: style.height || 600 }}
+      width={style.width}
+      height={style.height}
       >
       <TileLayer />
       <HeatLayer
