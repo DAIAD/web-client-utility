@@ -100,7 +100,7 @@ var WhereItem = React.createClass({
                   <GeoJSON
                     data={{ type: 'FeatureCollection', features: selectedCluster.groups.map(g => g.feature)}}
                     infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
-                    onClick={(map, layer, feature) => { 
+                    onClick={feature => { 
                       if (this.state.selectedGroups.map(g => g.key).includes(feature.properties.label)) {
                         this.setState({ selectedGroups: this.state.selectedGroups.filter(group => group.key !== feature.properties.label) });
                       }
