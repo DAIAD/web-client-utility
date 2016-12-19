@@ -184,7 +184,7 @@ const requestExploreData = function() {
       }, null));
     },
     error => {
-      console.log('error:', error);
+      console.error('error:', error);
       dispatch(setData(null, error));
 
     });
