@@ -136,6 +136,7 @@ function BudgetDetails (props) {
       >
       <TileLayer />
         <DrawControl
+          controlled
           data={selectedGeometry}
           onFeatureChange={features => { 
             setQueryGeometry(features && features.features && Array.isArray(features.features) && features.features.length > 0 ? features.features[0].geometry : null);
