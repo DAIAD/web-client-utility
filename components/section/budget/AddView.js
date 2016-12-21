@@ -7,26 +7,26 @@ var Wizard = require('../../wizard/Wizard');
 var { SetName, SelectWho, SelectWhere, SelectWhen, SelectBudgetType, SelectSavingsScenario, SetSavingsPercentage, SetGoal, SelectDistribution  } = require('../../wizard/items/');
 var { nameToId } = require('../../../helpers/common');
 
-const validateBudgetType = ({value}) => {
+const validateBudgetType = ({type:value}) => {
   if (!value) {
     throw 'noBudget';
   }
 }
 
 const validateWho = (value) => {
-  if ((!Array.isArray(value) && value.value !== 'all') || 
+  if ((!Array.isArray(value) && value.selected !== 'all') || 
      (Array.isArray(value) && value.length == 0)) {
     throw 'noWho';
   }
 };
 
 const validateWhere = (value) => {
-  if ((!Array.isArray(value) && value.value !== 'all') ||
+  if ((!Array.isArray(value) && value.selected !== 'all') ||
      (Array.isArray(value) && value.length == 0)) {
        throw 'noWhere';
   }
 };
-const validateSavingsPercentage = ({value}) => {
+const validateSavingsPercentage = ({savings:value}) => {
   if (isNaN(value)) {
     throw 'notANumber';
   }
@@ -35,12 +35,12 @@ const validateSavingsPercentage = ({value}) => {
   }
 };
 
-const validateDistribution = ({value}) => {
+const validateDistribution = ({type:value}) => {
   if (!value) {
     throw 'noDistribution';
   }
 };
-const validateGoal = ({value}) => {
+const validateGoal = ({goal:value}) => {
   if (isNaN(value)) {
     throw 'notANumber';
   }
@@ -48,13 +48,13 @@ const validateGoal = ({value}) => {
     throw 'notPercentage';
   }
 };
-const validateSavingsPotentialSelect = ({value}) => {
+const validateSavingsScenario = ({id:value}) => {
   if (!value) {
       throw 'noSavingsScenario';
   }
 };
 
-const validateName = function ({value}) { 
+const validateName = function ({name:value}) { 
   const existing = this.props.budgets.map(budget => nameToId(budget.name));
 
   if (!value) {
@@ -103,7 +103,7 @@ var BudgetsAdd = React.createClass ({
   },
 
   render: function() {
-    const { groups, clusters, segments, areas, actions, wizardType, validationError, savings, intl } = this.props;
+    const { utility, groups, clusters, segments, areas, actions, wizardType, validationError, savings, intl } = this.props;
     const { setValidationError, setAddBudgetWizardType, goToListView, addBudgetScenario } = actions;
     const geojson = this.getGeoJSON(areas);
 
@@ -133,24 +133,24 @@ var BudgetsAdd = React.createClass ({
           <SelectBudgetType
             id='budgetType'
             initialValue={{}}
-            next={value => value.value === 'estimate' ? 'goal' : 'scenario'} 
+            next={value => value.selected === 'estimate' ? 'goal' : 'scenario'} 
             validate={validateBudgetType}
           />
           <SelectSavingsScenario
             id='scenario'
             items={savingsItems}
             initialValue={{}}
-            validate={validateSavingsPotentialSelect}
+            validate={validateSavingsScenario}
           />
           <SetSavingsPercentage
             id='savings'
-            initialValue={{value: 0, label: 0}}
+            initialValue={{savings: 0}}
             validate={validateSavingsPercentage}
             next={value => 'name'} 
           />
           <SetGoal
             id='goal'
-            initialValue={{value: 0, label: 0}}
+            initialValue={{goal: 0}}
             validate={validateGoal}
           />
           <SelectDistribution
@@ -160,6 +160,7 @@ var BudgetsAdd = React.createClass ({
           />
           <SelectWho
             id='who'
+            utility={utility}
             groups={groups}
             clusters={clusters}
             initialValue={{}}
@@ -167,6 +168,7 @@ var BudgetsAdd = React.createClass ({
           />
           <SelectWhere
            id='where'
+           utility={utility}
            clusters={segments.map(segment => ({ 
              ...segment, 
              groups: geojson.features ? geojson.features.map(f => ({ 
@@ -218,6 +220,7 @@ var BudgetsAdd = React.createClass ({
 
 function mapStateToProps(state) {
   return {
+    utility: state.config.utility.key,
     savings: state.savings.scenarios,
     areas: state.map.map.areas,
     profile: state.session.profile,

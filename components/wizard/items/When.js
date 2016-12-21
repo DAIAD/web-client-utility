@@ -12,9 +12,14 @@ var WhenItem = React.createClass({
       timespan: this.props.initialValue.timespan ? this.props.initialValue.timespan : this.getLastYear(),
     };
   },
-
   getLastYear: function() {
     return [moment().subtract(1, 'year').startOf('year').valueOf(), moment().subtract(1, 'year').endOf('year').valueOf()];
+  },
+  getValue: function(selected, timespan, label) {
+    if (!Array.isArray(timespan) || timespan.length < 2 || timespan.length > 3) {
+      throw 'timespan must be array of two timestamps';
+    }
+    return { selected, type: 'ABSOLUTE', startDate: timespan[0], endDate: timespan[1], label };
   },
   render: function() {
     const { value, setValue, intl } = this.props;
@@ -30,14 +35,14 @@ var WhenItem = React.createClass({
       <div>
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
-              <bs.Button bsSize='large' bsStyle={value.value === 'lastYear' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({timespan: this.getLastYear(), value:'lastYear', label: lastLabel} )}>{lastLabel}</bs.Button>
-            <bs.Button bsSize='large' bsStyle={value.value === 'custom' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{chooseLabel}</bs.Button>
+              <bs.Button bsSize='large' bsStyle={value.selected === 'lastYear' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue( this.getValue('lastYear', this.getLastYear(), lastLabel) )}>{lastLabel}</bs.Button>
+            <bs.Button bsSize='large' bsStyle={value.selected === 'custom' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{chooseLabel}</bs.Button>
           </bs.ButtonGroup>
         </bs.Col>
         
         <bs.Col md={7} style={{ textAlign: 'left' }}>
           {
-            value.value === 'custom' ?
+            value.selected === 'custom' ?
               <div>
               <span style={{ fontSize: 16, fontWeight: 500, color: '#666' }}>{_t('Wizard.items.when.modal')}: </span>
               <b>
@@ -99,7 +104,7 @@ var WhenItem = React.createClass({
             }
           </bs.Modal.Body>
           <bs.Modal.Footer>
-            <bs.Button onClick={() => { setValue({timespan: this.state.timespan, value: 'custom', label: `${moment(this.state.timespan[0]).format('DD/MM/YYYY')}-${moment(this.state.timespan[1]).format('DD/MM/YYYY')}` });   this.setState({showModal: false})} }>OK</bs.Button>
+            <bs.Button onClick={() => { setValue( this.getValue('custom', this.state.timespan,`${moment(this.state.timespan[0]).format('DD/MM/YYYY')}-${moment(this.state.timespan[1]).format('DD/MM/YYYY')}`) );   this.setState({showModal: false})} }>OK</bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>{_t('Buttons.Cancel')}</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal> 

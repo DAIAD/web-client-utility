@@ -9,46 +9,43 @@ var { nameToId } = require('../../../helpers/common');
 const initialEmpty = {};
 
 const validateWho = (value) => {
-  if ((!Array.isArray(value) && value.value !== 'all') || 
+  if ((!Array.isArray(value) && value.selected !== 'all') || 
       (Array.isArray(value) && value.length === 0)) {
     throw 'noWho';
   }
 };
 
 const validateWhere = value => {
-  if ((!Array.isArray(value) && value.value !== 'all') || 
+  if ((!Array.isArray(value) && value.selected !== 'all') || 
      (Array.isArray(value) && value.length == 0)) {
     throw 'noWhere';
   }
 };
 
-const validateWhen = ({timespan:value}) => {
-  if (!value) {
+const validateWhen = (value) => {
+  if (!value || !value.startDate || !value.endDate) {
     throw 'noWhen';
   }
-  else if (value.length < 2 || value.length > 2) {
-    throw 'noWhen';
-  }
-  else if (isNaN(Date.parse(new Date(value[0])))) {
+  else if (isNaN(Date.parse(new Date(value.startDate)))) {
     throw 'fromInvalid';
   }
-  else if (isNaN(Date.parse(new Date(value[1])))) {
+  else if (isNaN(Date.parse(new Date(value.endDate)))) {
     throw 'toInvalid';
   }
-  else if (value[0] > value[1]) {
+  else if (value.startDate > value.endDate)  {
     throw 'fromAfterTo';
   }
-  else if (value[1] > new Date().valueOf()) {
+  else if (value.endDate > new Date().valueOf()) {
     throw 'noFuture';
   }
 };
 
 const validateName = function (value) { 
   const existing = this.props.scenarios.map(scenario => nameToId(scenario.name));
-  if (!value.value) {
+  if (!value.name) {
     throw 'noName';
   }
-  else if (existing.includes(nameToId(value.value))) {
+  else if (existing.includes(nameToId(value.name))) {
     throw 'nameExists';
   }
 };
@@ -89,7 +86,7 @@ var SavingsPotentialAdd = React.createClass({
     };
   },
   render: function() {
-    const { groups, clusters, segments, areas, actions, validationError, intl } = this.props;
+    const { utility, groups, clusters, segments, areas, actions, validationError, intl } = this.props;
     const { setValidationError, addSavingsScenario, goToListView } = actions;
     const _t = x => intl.formatMessage({ id: x });
     const geojson = this.getGeoJSON(areas);
@@ -110,6 +107,7 @@ var SavingsPotentialAdd = React.createClass({
             id='who'
             title='Who'
             description='Select all population or narrow savings potential calculation to selected groupsn'
+            utility={utility}
             clusters={clusters}
             initialValue={{}}
             validate={validateWho}
@@ -118,6 +116,7 @@ var SavingsPotentialAdd = React.createClass({
             id='where'
             title='Where'
             description='Select all areas or narrow savings potential calculation to selected areas'
+            utility={utility}
             clusters={segments.map(segment => ({ 
               ...segment, 
               groups: geojson.features ? geojson.features.map(f => ({ 

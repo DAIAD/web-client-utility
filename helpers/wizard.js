@@ -22,7 +22,7 @@ function getFriendlyParams (dict, intl, details='long') {
             dict[key].map(x => x.label)
       )
       :
-        dict[key].label || '-'
+        typeof dict[key] === 'object' ? (dict[key].label || '-') : (dict[key] || '-')
   }));
 }
 

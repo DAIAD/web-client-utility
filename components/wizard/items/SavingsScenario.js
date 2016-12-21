@@ -12,8 +12,8 @@ function SelectSavingsScenario (props) {
         name='scenario-select'
         multi={false}
         options={items}
-        value={value}
-        onChange={(val) => val != null ? setValue(val) : setValue({}) }
+        value={{ label: value.label, value: value.id }}
+        onChange={(val) => { return val != null ? setValue({id: val.value, label: val.label }) : setValue({}) }}
       />
     </bs.Col>
   );

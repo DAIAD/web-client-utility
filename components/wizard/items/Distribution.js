@@ -5,8 +5,8 @@ var { FormattedMessage } = require('react-intl');
 function DistributionItem (props) {
   const { value, setValue, intl } = props;
   const distributionItems = [
-    {value: 'equally', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.equally.value' })},
-    {value: 'fairly', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.fairly.value' })}
+    {selected: 'equally', type: 'EQUALLY', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.equally.value' })},
+    {selected: 'fairly', type: 'FAIRLY', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.fairly.value' })}
   ];
   return (
     <bs.Col md={5}>
@@ -14,13 +14,13 @@ function DistributionItem (props) {
       {
         distributionItems.map(item => 
           <bs.Button 
-            key={item.value}
+            key={item.selected}
             bsSize='large'
-            bsStyle={item.value === value.value ? 'primary' : 'default'} 
+            bsStyle={item.selected === value.selected ? 'primary' : 'default'} 
             style={{marginBottom: 10}} 
             onClick={() => setValue(item)}
             >
-            <FormattedMessage id={`Wizard.items.distribution.options.${item.value}.label`} />
+            <FormattedMessage id={`Wizard.items.distribution.options.${item.selected}.label`} />
         </bs.Button>
         )
       }

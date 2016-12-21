@@ -5,12 +5,11 @@ var { extractFeatures, nameToId } = require('../helpers/common');
 
 const addBudgetScenario = function (values) {
   return function(dispatch, getState) {
-    const profile = getState().session.profile;
     const scenarios = getState().budget.scenarios;
 
-    const name = values.name.label;
+    const name = values.name.name;
 
-    if (!values.name || !values.name.label) {
+    if (!values.name || !values.name.name) {
       throw 'Oops, no name provided to add savings scenario';
     }
 
@@ -20,19 +19,16 @@ const addBudgetScenario = function (values) {
       throw `Oops, scenario with id ${id} already exists`;
     }
 
-    const user = profile.username;
     const createdOn = new Date().valueOf();
     const completedOn = null;
-    const parameters = values;
-    const potential = completedOn ?  Math.round(Math.random()*50) : null;
+    const potential = null;
 
     const newScenario = {
       type: types.BUDGET_ADD_SCENARIO,
       options: {
         name,
         id,
-        user,
-        parameters,
+        parameters:values,
         createdOn,
         completedOn,
         potential

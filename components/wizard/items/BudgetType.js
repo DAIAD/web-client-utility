@@ -5,22 +5,22 @@ var { FormattedMessage } = require('react-intl');
 function SelectBudgetType (props) {
   const { value, setValue, intl } = props;
   const budgetTypes = [
-    {value: 'scenario', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.scenario.value' })}, 
-    {value: 'estimate', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.estimate.value' })}
+    {selected: 'scenario', type: 'SCENARIO', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.scenario.value' }) }, 
+    {selected: 'estimate', type: 'GLOBAL', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.estimate.value' }) }
   ];
   return (
     <bs.Col md={4}>
       {
         budgetTypes.map(budget =>  
           <bs.Button 
-            key={budget.value}
-            bsStyle={budget.value === value.value ? 'primary' : 'default'} 
+            key={budget.selected}
+            bsStyle={budget.selected === value.selected ? 'primary' : 'default'} 
             bsSize='large' 
             style={{marginBottom: 10}} 
             onClick={() => setValue(budget)} 
             block
             >
-            <FormattedMessage id={`Wizard.items.budgetType.options.${budget.value}.label`} />
+            <FormattedMessage id={`Wizard.items.budgetType.options.${budget.selected}.label`} />
           </bs.Button>
           )
       }

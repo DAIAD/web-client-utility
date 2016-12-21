@@ -76,6 +76,7 @@ function mapStateToProps(state, ownProps) {
   return {
     routing: state.routing,
     user: state.session.profile ? {value: state.session.profile.username, label: state.session.profile.firstname + ' ' + state.session.profile.lastname} : null,
+    utility: state.config.utility.key,
     clusters: state.config.utility.clusters,
     segments: [{
        key: 'area',

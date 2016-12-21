@@ -8,16 +8,35 @@ var WhereItem = React.createClass({
     return {
       showModal: false,
       selectedCluster: Array.isArray(this.props.clusters) && this.props.clusters[0] ? this.props.clusters[0] : null,
-      selectedGroups: Array.isArray(this.props.value) ? this.props.value : []
+      selectedGroups: this.valueToGroups(this.props.value) 
     };
   },
   componentWillReceiveProps: function(nextProps) {
     if (Array.isArray(nextProps.clusters) && nextProps.clusters[0]) {
       this.setState({ selectedCluster: nextProps.clusters[0] });
     }
-    if (nextProps.value) {
-      this.setState({ selectedGroups: Array.isArray(nextProps.value) ? nextProps.value : [] });
+    //reset selected on wizard reset
+    if (nextProps.value && !Array.isArray(nextProps.value) && !nextProps.value.type) {
+      this.setState({ selectedGroups: [] });
     }
+  },
+  getValue: function(selected, label) {
+    if (selected === 'all') { 
+      return { selected: 'all', type: 'UTILITY', utility: this.props.utility, label };
+    }
+    return { type: 'AREA', area: selected, label };
+  },
+  getAllGroups: function() {
+    return this.props.clusters
+    .map(cluster => cluster.groups
+         .map(group => ({ ...group, value: this.getValue(group.key, `${group.name}`) })))
+    .reduce((p, c) => [...p, ...c], []);
+  },
+  valueToGroups: function(value) {
+    return Array.isArray(value) ? 
+      this.getAllGroups().filter(group => value.find(g => g.area === group.key) ? true : false)
+        :
+          [];
   },
   render: function() {
     const { setValue, clusters, value, noAll, intl, geojson, id } = this.props;
@@ -29,7 +48,10 @@ var WhereItem = React.createClass({
     const { selectedCluster, selectedGroups } = this.state;
 
     if (!clusters) return null;
-    const allGroups = clusters.map(cluster => cluster.groups).reduce((p, c) => [...p, ...c], []);
+
+    const allGroups = this.getAllGroups();
+      
+
     const selectedParams = clusters.map(cluster => {
       const selectedClusterGroups = selectedGroups.filter(group => group.clusterKey === cluster.key);
       return {
@@ -38,20 +60,12 @@ var WhereItem = React.createClass({
       };
     });
 
-    const displayGroups = selectedGroups.map(group => ({ 
-      ...group, 
-      value: group.key, 
-      //label: clusters.find(cluster => cluster.key === group.clusterKey).name + ': ' + group.name
-      label: group.name
-    }));
-   
     return (
       <div>
-
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
             { !noAll ? 
-              <bs.Button bsSize='large' bsStyle={value.value === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue({value:'all', label: allLabel})}>{allLabel}</bs.Button>
+              <bs.Button bsSize='large' bsStyle={value.selected === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => setValue(this.getValue('all', allLabel))}>{allLabel}</bs.Button>
               :
                 <div />
             }
@@ -60,10 +74,14 @@ var WhereItem = React.createClass({
           </bs.ButtonGroup>
         </bs.Col>
         <bs.Col md={7}>
+          { value.selected !== 'all' ? 
           <DisplayParams
             params={selectedParams}
             limit={4}
           />
+          :
+            <div />
+          }
         </bs.Col>
         
         <bs.Modal
@@ -128,7 +146,7 @@ var WhereItem = React.createClass({
             </bs.Col>
             <bs.Col md={4}>
               <div style={{ margin: 15, textAlign: 'right' }}>
-                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.clusterKey !== selectedCluster.key), ...selectedCluster.groups] }); }}>{allLabel}</bs.Button>
+                <bs.Button bsStyle='primary' style={{ marginRight: 5 }} onClick={() => { this.setState({ selectedGroups: [...selectedGroups.filter(group => group.clusterKey !== selectedCluster.key), ...allGroups.filter(group => group.clusterKey === selectedCluster.key)] }); }}>{allLabel}</bs.Button>
                 <bs.Button bsStyle='default' onClick={() => { this.setState({ selectedGroups: selectedGroups.filter(group => group.clusterKey !== selectedCluster.key) }); }}>{noneLabel}</bs.Button>
               </div>
 
@@ -145,7 +163,7 @@ var WhereItem = React.createClass({
           </bs.Modal.Body>
           
           <bs.Modal.Footer>
-            <bs.Button onClick={() => { setValue(displayGroups);  this.setState({showModal: false})} }>OK</bs.Button>
+            <bs.Button onClick={() => { setValue(selectedGroups.map(group => group.value));  this.setState({showModal: false})} }>OK</bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>Cancel</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal> 

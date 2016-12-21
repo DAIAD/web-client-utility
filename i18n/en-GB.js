@@ -302,11 +302,11 @@
         }
       },
       "scenario": {
-        "title": "Savings scenario",
+        "title": "Scenario",
         "description": "Select a precomputed savings scenario"
       },
       "savings": {
-        "title": "Savings percentage",
+        "title": "Goal",
         "description": "Set global savings percentage",
         "help": "0-100 of max"
       },
