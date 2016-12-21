@@ -58,15 +58,15 @@ var DisplayParamLine = React.createClass({
               (
                 showMore ?
                   <span>
-                    { value.map((v, i, arr) => i == arr.length -1 ? <span key={i}>{v} </span> : <span>{v}, </span>) }
+                    { value.map((v, i, arr) => i == arr.length -1 ? <span key={i}>{v} </span> : <span key={i}>{v}, </span>) }
                     <a href='#' style={{ whiteSpace: 'nowrap' }} onClick={e => { e.preventDefault(); this.setState({ showMore: false })}}>Show less</a>
                   </span>
                   :
                  <span>
                    {
                    value.map((v, i, arr) => {
-                     if (i < show) return <span>{v}, </span>;
-                     else if (i === show) return <span>... , </span>;
+                     if (i < show) return <span key={i}>{v}, </span>;
+                     else if (i === show) return <span key={i}>... , </span>;
                   })
                    }
                    <a href='#' style={{ whiteSpace: 'nowrap' }} onClick={e => { e.preventDefault(); this.setState({ showMore: true })}}>Show more</a>
@@ -75,9 +75,9 @@ var DisplayParamLine = React.createClass({
             :
             value.map((v, i, arr) => (
               i == arr.length - 1 ? 
-                <span>{v}</span>
+                <span key={i}>{v}</span>
                 :
-                <span>{v}, </span>
+                <span key={i}>{v}, </span>
               ))
           }
         </span>
