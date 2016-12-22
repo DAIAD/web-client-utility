@@ -9,7 +9,7 @@ var Table = require('../../Table');
 var { Map, TileLayer, GeoJSON, DrawControl } = require('react-leaflet-wrapper');
 var WidgetRow = require('../../WidgetRow');
 var Modal = require('../../Modal');
-var theme = require('../../chart/themes/blue');
+var theme = require('../../chart/themes/blue-palette');
 var { exploreBudgetSchema } = require('../../../schemas/budget');
 var maximizable = require('../../Maximizable'); 
 
@@ -385,6 +385,7 @@ var BudgetExplore = React.createClass({
 function mapStateToProps(state) {
   return {
     viewportWidth: state.viewport.width,
+    viewportHeight: state.viewport.height,
     budgetToSet: state.budget.budgetToSet,
     budgetToReset: state.budget.budgetToReset,
     metersLocations: state.map.metersLocations,
@@ -405,7 +406,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     mode: Table.PAGING_SERVER_SIDE
   };
 
-  const { metersLocations } = stateProps;
+  const { metersLocations, viewportWidth, viewportHeight } = stateProps;
   const { budgets, clusters=[] } = ownProps;
   const budget = budgets.find(budget => budget.id === ownProps.params.id);
   const details = [], stats = [];
@@ -504,19 +505,28 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
           title: cluster.name,
           display: 'chart',
           maximizable: true,
+          viewportWidth,
+          viewportHeight,
           style: {
             height: 200
           },
+          theme,
           yAxis: {
             formatter: y => y.toString() + '%',
           },
           xAxis: {
             data: cluster.groups.map(x => x.name)
           },
+          grid: {
+            x: Math.max(Math.max(...cluster.groups.map(group => group.name.length))*6.5, 45) + 'px',
+          },
           series: [
             {
-              name: '',
-              type: 'bar',
+              name: cluster.name,
+              color: (name, data, dataIndex) => theme.color.find((x, i, arr) => i  === dataIndex % arr.length),
+              label: {
+                formatter: y => y.toString() + '%',
+              },
               fill: 0.8,
               data: cluster.groups.map(x => Math.round(Math.random()*10))
             }

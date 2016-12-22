@@ -4,9 +4,8 @@ var echarts = require('react-echarts');
 var { FormattedTime } = require('react-intl');
 
 var WidgetRow = require('../../WidgetRow');
-var theme = require('../../chart/themes/blue');
-
-
+var theme = require('../../chart/themes/blue-palette');
+console.log('theme:', theme);
 var SavingsPotentialExplore = React.createClass({ 
   componentWillMount: function() {
 
@@ -16,7 +15,7 @@ var SavingsPotentialExplore = React.createClass({
 
   },
   render: function() {
-    const { scenarios, clusters, actions, metersLocations, params, intl } = this.props;
+    const { scenarios, clusters, actions, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
     const { goToListView, confirmRemoveScenario } = actions;
     const _t = x => intl.formatMessage({ id: x });
     
@@ -92,24 +91,34 @@ var SavingsPotentialExplore = React.createClass({
       });
       
       clusters.forEach((cluster, i) => {
+
         stats.push({
           id: i + 4,
           title: cluster.name,
           display: 'chart',
           maximizable: true,
+          viewportWidth,
+          viewportHeight,
           style: {
-            height: 200
+            height: 200,
           },
+          theme,
           yAxis: {
             formatter: y => y.toString() + '%',
           },
           xAxis: {
             data: cluster.groups.map(x => x.name)
           },
+          grid: {
+            x: Math.max(Math.max(...cluster.groups.map(group => group.name.length))*6.5, 45) + 'px',
+          },
           series: [
             {
-              name: '',
-              type: 'bar',
+              name: cluster.name,
+              color: (name, data, dataIndex) => theme.color.find((x, i, arr) => i  === dataIndex % arr.length),
+              label: {
+                formatter: y => y.toString() + '%',
+              },
               fill: 0.8,
               data: cluster.groups.map(x => Math.round(Math.random()*50))
             }

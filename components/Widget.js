@@ -1,7 +1,7 @@
 var React = require('react');
+var { findDOMNode } = require('react-dom');
 var bs = require('react-bootstrap');
-var echarts = require('react-echarts');
-var theme = require('./chart/themes/blue');
+var { BarChart } = require('react-echarts');
 var { Map, TileLayer, HeatLayer, LayersControl, InfoControl } = require('react-leaflet-wrapper');
 var DisplayParams = require('./DisplayParams');
 var maximizable = require('./Maximizable');
@@ -41,17 +41,17 @@ function Widget (props) {
              else {
                if (display==='stat') {
                  return (
-                    <Stat {...props} />
+                    <StatWidget {...props} />
                  );
                }
                else if (display==='chart') {
                  return (
-                   <BarChart {...props} /> 
+                   <BarChartWidget {...props} /> 
                    );
                }
                else if (display === 'map') {
                  return (
-                   <Heatmap {...props} />
+                   <HeatmapWidget {...props} />
                    );
                }
                else return null;
@@ -66,7 +66,7 @@ function Widget (props) {
   );
 }
 
-function Heatmap(props) {
+function HeatmapWidget(props) {
   const { style={}, data, map } = props;
   return (
     <Map
@@ -84,37 +84,44 @@ function Heatmap(props) {
   );
 }
 
-function BarChart(props) {
-  const { xAxis, yAxis, series, grid, style={} } = props;
-  return (
-    <echarts.LineChart
-      width={style.width}
-      height={style.height}
-      theme={theme}
-      xAxis={{
-        boundaryGap: true,
-        ...xAxis
-      }}
-      yAxis={{
-        formatter: y => (y.toString() + '%'),
-        numTicks: 3,
-        min: 0,
-        ...yAxis
-      }}
-      grid={{
-        x: '12%',
-        y: '-20%',
-        x2: '7%',
-        y2: '15%',
-        ...grid
-      }}
-      series={series}
-    />
-  );
-}
+var BarChartWidget = React.createClass({
+  componentDidMount: function() {
+    this.node = findDOMNode(this);
+  },
+  render: function() {
+    const { xAxis, yAxis, series, grid, viewportWidth, viewportHeight, style={}, theme } = this.props;
+    return (
+      <div style={{ height: style.height }}>
+        <BarChart
+          width={this.node ? this.node.clientWidth : null}
+          height={this.node ? this.node.clientHeight : style.height}
+          horizontal
+          legend={false}
+          theme={theme}
+          xAxis={{
+            boundaryGap: true,
+            ...xAxis
+          }}
+          yAxis={{
+            formatter: y => (y.toString() + '%'),
+            numTicks: 3,
+            min: 0,
+            ...yAxis
+          }}
+          grid={{
+            x: '15%',
+            y: '-2%',
+            ...grid
+          }}
+          series={series}
+        />
+      </div>
+    );
+  }
+});
 
 
-function Stat (props) {
+function StatWidget (props) {
   const { highlight, info, limit, show, style={} } = props;
   return (
     <div style={{ height: 120, ...style}}>

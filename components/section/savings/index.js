@@ -81,6 +81,7 @@ function mapStateToProps(state, ownProps) {
   return {
     routing: state.routing,
     viewportWidth: state.viewport.width,
+    viewportHeight: state.viewport.height,
     profile: state.session.profile,
     utility: state.config.utility.key,
     clusters: state.config.utility.clusters,
