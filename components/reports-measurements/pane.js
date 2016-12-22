@@ -578,7 +578,7 @@ var ReportPanel = React.createClass({
     );
 
     for (var i = 1; i < this.props.multipleQueries.length; i++) {
-      var parameterFragment = this._renderParameterFragment(this.props.multipleQueries[i]);
+      parameterFragment = this._renderParameterFragment(this.props.multipleQueries[i]);
       var multipleSerieTitle = (        
         <span>
           <span>
@@ -659,16 +659,16 @@ var ReportPanel = React.createClass({
         moment(query.timespan[0]).format('DD/MMM/YYYY') + ' - ' + moment(query.timespan[1]).format('DD/MMM/YYYY');
     
     var {config} = this.context;
-    var label;
+    var label, cluster;
     if (target instanceof population.Utility) {
       // Use utility's friendly name
       label = 'Utility';
     } else if (target instanceof population.ClusterGroup) {
       // Use group's friendly name
-      var cluster = config.utility.clusters.find(c => (c.key == target.clusterKey));
+      cluster = config.utility.clusters.find(c => (c.key == target.clusterKey));
       label = cluster.name + ': ' + cluster.groups.find(g => (g.key == target.key)).name;  
     } else if (target instanceof population.Cluster) {
-      var cluster = config.utility.clusters.find(k => (k.key == target.key));
+      cluster = config.utility.clusters.find(k => (k.key == target.key));
       label = cluster.name;
     }
     return label + ': ' + timeLabel; //todo - consider shorter time label if possible. Problem in case of many series
@@ -680,13 +680,10 @@ var ReportPanel = React.createClass({
     switch (groupKey) {
       case 'shared-parameters':
         return this._switchToFormFragment(key);
-        break;
       case 'query-parameters':
-        return this._switchToParameterFragment(key);
-        break;        
+        return this._switchToParameterFragment(key);  
       case 'actions':
         return this._performAction(key);
-        break;
     }
   },
   
@@ -726,7 +723,7 @@ var ReportPanel = React.createClass({
         // Todo
         break;
       case 'add':
-        var {field, level, reportName, multipleQueries, source, population, timespan} = this.props;
+        var {multipleQueries, source, population} = this.props;
 
         var cls = this.constructor;
         var {timespan} = cls.configForReport(this.props, this.context);  
@@ -857,7 +854,7 @@ var ReportPanel = React.createClass({
         }
       }      
     } else {
-      q = getDefaultQuery(this);
+      var q = getDefaultQuery(this);
       q.query.timespan = queryTimespan;
       mq = [q];    
     }
@@ -906,7 +903,7 @@ var ReportPanel = React.createClass({
         }
       }      
     } else {
-      q = getDefaultQuery(this);
+      var q = getDefaultQuery(this);
       q.query.timespan = queryTimespan;
       mq = [q];    
     }    
@@ -1038,13 +1035,13 @@ var ReportPanel = React.createClass({
           fragment1 = (
             <div>
               <div className='col-md-3'>
-                <input  id='label' name='favourite' type='favourite' ref='favourite' autofocus
+                <input  id='label' name='favourite' type='favourite' ref='favourite' autoFocus
                   defaultValue ={this.props.favouriteChart ? this.props.favouriteChart.title : null}
                   placeholder='Label ...' className='form-control' style={{ marginBottom : 15 }}/>
                 <span className='help-block'>Insert a label for this favourite</span>
               </div>
             <div className='col-md-6'>
-              <input  id='name' name='name' type='name' ref='name' autofocus disabled
+              <input  id='name' name='name' type='name' ref='name' autoFocus disabled
                 placeholder={tags} className='form-control' style={{ marginBottom : 15 }}/>
               <span className='help-block'>Auto-generated Identifier</span>
             </div>
@@ -1200,7 +1197,6 @@ var ReportPanel = React.createClass({
     var {config} = this.context;
     var {fields, sources, levels} = config.reports.byType.measurements;
     var {level} = this.props;
-    var clusterKey;
     var fragment1; // single element or array of keyed elements
     switch (this.state.parameterFragment) {
       case 'timespan':
@@ -1444,7 +1440,7 @@ var ReportPanel = React.createClass({
         if(queries[m].series[k].ranking){
 
           var target = queries[m].series[k].population;
-          var [clusterKey2, groupKey2] = population.extractGroupParams(target);
+          [clusterKey2, groupKey2] = population.extractGroupParams(target);
           if (target instanceof population.Utility || target == null) {
             popu.label = ('UTILITY:'+queries[m].series[k].population.key.toString() + '/' + new population.Ranking(queries[m].series[k].ranking).toString());
             popu.utility = queries[m].series[k].population.key;
@@ -1539,13 +1535,14 @@ var ReportPanel = React.createClass({
 
     // Find a friendly name for population target
     var populationName = target? target.name : 'Utility';
+    var cluster;
     if (target instanceof population.Utility || target == null) {
       populationName = 'Utility'; //config.utility.name;
     } else if (target instanceof population.Cluster) {
-      var cluster = config.utility.clusters.find(c => c.key == target.key);
+      cluster = config.utility.clusters.find(c => c.key == target.key);
       populationName = 'Cluster by: ' + cluster.name;
     } else if (target instanceof population.ClusterGroup) {
-      var cluster = config.utility.clusters.find(c => c.key == target.clusterKey);
+      cluster = config.utility.clusters.find(c => c.key == target.clusterKey);
       var group = cluster.groups.find(g => g.key == target.key);
       populationName = cluster.name + ': ' + group.name;
     }
@@ -2117,7 +2114,8 @@ module.exports = {
   Panel: ReportPanel,
   Form: ReportForm,
   Info: ReportInfo,
+  // eslint-disable-next-line react/display-name
   Chart: (props) => (
-    <ChartContainer {...props} reportKey={REPORT_KEY} />
+    <ChartContainer {...props} displayName={'Chart'} reportKey={REPORT_KEY} />
   ),
 };

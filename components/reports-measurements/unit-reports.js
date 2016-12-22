@@ -423,7 +423,7 @@ class _Report extends React.Component {
     
     // Fixme: This computation for N is not always correct
     var N = moment.duration(1, unit).as(level); 
-    
+    var padArray;
     return (
       <div className={viewProps.className} key={"forecasting-chart"}>
         <echarts.LineChart
@@ -612,7 +612,7 @@ class ReportByDay extends _Report {
       },
     });
   }
-};
+}
 
 ReportByDay.defaultProps = _.extend({}, _Report.defaultProps, {
   formatDate: (m, brief=false) => (
@@ -648,7 +648,7 @@ class ReportByWeek extends _Report {
       },
     });
   }
-};
+}
 
 ReportByWeek.defaultProps = _.extend({}, _Report.defaultProps, {
   formatDate: (m, brief=false) => {
@@ -690,7 +690,7 @@ class ReportByMonth extends _Report {
       },
     });
   }
-};
+}
 
 ReportByMonth.defaultProps = _.extend({}, _Report.defaultProps, {
   formatDate: (m, brief=false) => (
@@ -726,7 +726,7 @@ class ReportByYear extends _Report {
       },
     });
   }
-};
+}
 
 ReportByYear.defaultProps = _.extend({}, _Report.defaultProps, {
   formatDate: (m, brief=false) => (

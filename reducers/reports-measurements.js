@@ -57,7 +57,6 @@ var reduce = function (state={}, action={}) {
         errors: null,      
         multipleQueries: action.multipleQueries
       });
-      break;
     case 'REQUEST_DATA':
       assertInitialized(state, key);
       // Keep current series data, until fresh arrive
@@ -73,7 +72,6 @@ var reduce = function (state={}, action={}) {
         requested: action.timestamp,
         requests: state.requests + 1
       });       
-      break;      
     case 'SET_DATA':
       assertInitialized(state, key);
       r = _.extend({}, state[key], {
@@ -95,7 +93,6 @@ var reduce = function (state={}, action={}) {
         multipleQueries : multipleQueriesWithSeries,
         errors: action.errors? action.errors : null
       });
-      break;
 //    case 'CHANGE_MULTIPLE_QUERY':   //todo
 //      if (state.source != action.source) {
 //        return Object.assign({}, state, {
@@ -143,7 +140,6 @@ var reduce = function (state={}, action={}) {
         overlap: action.overlap,
         invalid: true
       });
-      break;
     case 'ADD_FAVOURITE_REQUEST':
       break;
     case 'ADD_FAVOURITE_RESPONSE':

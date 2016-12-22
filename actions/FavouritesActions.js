@@ -262,6 +262,7 @@ var FavouritesActions = {
               //Recalculate xAxis timespan based on returned data. 
               var timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
               for(let j=0; j<favourite.queries.length; j++){ //loop to get 
+                var res2;
                 if (rr) {
                   var points = rs.points.map(p => ({
                     timestamp: p.timestamp,
@@ -269,7 +270,7 @@ var FavouritesActions = {
                   }));
               
                   // Shape a result with ranking on users
-                  var res2 =  _.times(rr.limit, (i) => ({
+                  res2 =  _.times(rr.limit, (i) => ({
                     source,
                     timespan: [favourite.queries[j].time.start,favourite.queries[j].time.end],
                     granularity: favourite.queries[j].time.granularity,
@@ -281,7 +282,7 @@ var FavouritesActions = {
                 } else {
                   // Shape a normal timeseries result for requested metrics
                   // Todo support other metrics (as client-side "average")
-                  var res2 = favourite.queries[j].metrics.map(metric => ({
+                  res2 = favourite.queries[j].metrics.map(metric => ({
                     source,
                     timespan: timespan1,
                     granularity: favourite.queries[j].time.granularity,

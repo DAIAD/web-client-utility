@@ -340,7 +340,7 @@ var actions = {
         dispatch(actions.setMultipleData(field, level, reportName, key, data))
       ),
       (reason) => (
-        console.error(sprintf('Cannot refresh data for %s: %s', k, reason)),
+        console.error(sprintf('Cannot refresh data for %s: %s', key, reason)),
         dispatch(actions.setMultipleDataError(field, level, reportName, key, [reason]))
       )
     );

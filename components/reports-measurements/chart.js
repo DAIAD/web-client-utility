@@ -78,12 +78,8 @@ var Chart = React.createClass({
     var {defaults} = this.constructor;
     var {field, level, reportName} = this.props;
     var {config} = this.context;
-
-    if(typeof config === "undefined"){
-      var {title, unit, name: fieldName} = this.props.context.reports.byType.measurements.fields[field];
-    } else {
-      var {title, unit, name: fieldName} = config.reports.byType.measurements.fields[field];  
-    }
+    var {title, unit, name: fieldName} = typeof config === "undefined" ? 
+      this.props.context.reports.byType.measurements.fields[field] : config.reports.byType.measurements.fields[field];
     
     //var {title, unit, name: fieldName} = config.reports.byType.measurements.fields[field];
     
@@ -153,23 +149,19 @@ var Chart = React.createClass({
     var {field, level, reportName, series, scaleTimeAxis} = this.props;
 
     var {config} = this.context;
-    //var _config = config.reports.byType.measurements;
+    var _config;
     if(typeof config === "undefined"){
-      var _config = this.props.context.reports.byType.measurements;
+      _config = this.props.context.reports.byType.measurements;
     } else {
-      var _config = config.reports.byType.measurements;  
+      _config = config.reports.byType.measurements;  
     }    
 
     if (!series || !series.length || series.every(s => !s.data.length))
       return result; // no data available
 
     var report = _config.levels[level].reports[reportName];
-    
-    if(typeof config === "undefined"){
-      var {bucket, duration} = this.props.context.reports.levels[level];
-    } else {
-      var {bucket, duration} = config.reports.levels[level];
-    }       
+    var {bucket, duration} = typeof config === "undefined"? 
+        this.props.context.reports.levels[level] : config.reports.levels[level];     
 
     var [d, durationUnit] = duration;
     d = moment.duration(d, durationUnit);
@@ -258,13 +250,12 @@ var Chart = React.createClass({
     }
     
     var {config} = this.context;
-
+    var _config;
+    var {bucket, duration} = typeof config === "undefined" ? this.props.context.reports.levels[level] : config.reports.levels[level];
     if(typeof config === "undefined"){
-      var _config = this.props.context.reports.byType.measurements;
-      var {bucket, duration} = this.props.context.reports.levels[level];
+      _config = this.props.context.reports.byType.measurements;
     } else {
-      var _config = config.reports.byType.measurements;
-      var {bucket, duration} = config.reports.levels[level];
+      _config = config.reports.byType.measurements;
     }
 
     var report = _config.levels[level].reports[reportName];
@@ -345,11 +336,12 @@ var Chart = React.createClass({
       // Use utility's friendly name
       label = 'Utility' + timeLabel; //config.utility.name;
     } else if (target instanceof population.ClusterGroup) {
+      var cluster
       // Use group's friendly name
       if(typeof config === "undefined"){
-        var cluster = this.props.context.utility.clusters.find(c => (c.key == target.clusterKey));        
+        cluster = this.props.context.utility.clusters.find(c => (c.key == target.clusterKey));        
       } else {
-        var cluster = config.utility.clusters.find(c => (c.key == target.clusterKey));
+        cluster = config.utility.clusters.find(c => (c.key == target.clusterKey));
       }
       label = cluster.name + ': ' +
           cluster.groups.find(g => (g.key == target.key)).name + timeLabel;
