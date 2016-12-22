@@ -258,7 +258,10 @@ var types = mirrorToPath({
   DEBUG_SET_ERRORS: null,
   DEBUG_AMPHIRO_DATA_GENERATE_REQUEST: null,
   DEBUG_AMPHIRO_DATA_GENERATED: null,
-  DEBUG_GET_FEATURES: null
+  DEBUG_GET_FEATURES: null,
+
+  //Viewport
+  VIEWPORT_SET_SIZE: null,
 });
 
 module.exports = types;
