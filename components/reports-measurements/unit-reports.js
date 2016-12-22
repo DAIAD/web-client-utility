@@ -442,7 +442,7 @@ class _Report extends React.Component {
             },
             // Forecast (2nd half)
             {
-              data: data? padArray(data.get(k1r).points.map(v => v[1]), 2 * N) : null,
+              data: data? padArrayLeft(data.get(k1r).points.map(v => v[1]), 2 * N) : null,
               name: 'Forecast'
             },
           ]}

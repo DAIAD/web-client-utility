@@ -168,6 +168,7 @@
       "currentMode": "Current Mode",
       "viewInfoOnAmphiro": "b1",
       "viewInfoOnMobile": "Mobile",
+      "viewInfoOnWeb": "Web",
       "allowSocial": "Social",
       "deactivateUser": "Deactivate User",
       "searchUsers": "Search users..."

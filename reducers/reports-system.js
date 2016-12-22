@@ -32,7 +32,7 @@ var reduce = function (state={}, action={}) {
       // See more on the meaning of each field at store.js.
       if (r == null) {
         r = { // new entry
-          timespan: action.timespan || 'week',  // as default
+          timespan: action.timespan || 'week',
           points: null,     // data points, aka series
           invalid: true,    // data that needs to be refreshed?
           requested: null,  // time of last successfull attempt to fetch series

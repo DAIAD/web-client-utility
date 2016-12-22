@@ -53,15 +53,19 @@ var ModeManagementTableSchema = {
     }, {
       name: 'amphiro',
       title: 'Table.User.viewInfoOnAmphiro',
-      type:'property'
+      type: 'property'
     }, {
       name: 'mobile',
       title: 'Table.User.viewInfoOnMobile',
-      type:'property'
+      type: 'property'
+    }, {
+      name: 'web',
+      title: 'Table.User.viewInfoOnWeb',
+      type: 'property'
     }, {
       name: 'social',
       title: 'Table.User.allowSocial',
-      type:'property'
+      type: 'property'
     }, {
       name: 'deactivate',
       title: 'Table.User.deactivateUser',
