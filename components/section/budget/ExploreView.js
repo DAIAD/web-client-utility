@@ -384,6 +384,7 @@ var BudgetExplore = React.createClass({
 
 function mapStateToProps(state) {
   return {
+    viewportWidth: state.viewport.width,
     budgetToSet: state.budget.budgetToSet,
     budgetToReset: state.budget.budgetToReset,
     metersLocations: state.map.metersLocations,

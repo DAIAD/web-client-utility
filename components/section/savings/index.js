@@ -13,6 +13,10 @@ var util = require('../../../helpers/wizard');
 
 var Breadcrumb = require('../../../components/Breadcrumb');
 
+const SPATIAL_CLUSTERS = [{
+  key: 'area',
+  name: 'Areas'
+}];
 
 function SavingsPotential (props) {
   const { routes, children, actions, scenarioToRemove } = props;
@@ -72,14 +76,11 @@ function RemoveConfirmation (props) {
     />
   );
 }
-const SPATIAL_CLUSTERS = [{
-       key: 'area',
-       name: 'Areas'
-     }];
 
 function mapStateToProps(state, ownProps) {
   return {
     routing: state.routing,
+    viewportWidth: state.viewport.width,
     profile: state.session.profile,
     utility: state.config.utility.key,
     clusters: state.config.utility.clusters,
