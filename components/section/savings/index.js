@@ -72,26 +72,23 @@ function RemoveConfirmation (props) {
     />
   );
 }
+const SPATIAL_CLUSTERS = [{
+       key: 'area',
+       name: 'Areas'
+     }];
+
 function mapStateToProps(state, ownProps) {
   return {
     routing: state.routing,
-    user: state.session.profile ? {value: state.session.profile.username, label: state.session.profile.firstname + ' ' + state.session.profile.lastname} : null,
+    profile: state.session.profile,
     utility: state.config.utility.key,
     clusters: state.config.utility.clusters,
-    segments: [{
-       key: 'area',
-       name: 'Areas'
-     }],
-     scenarios: state.savings.scenarios.map(scenario => ({
-       ...scenario, 
-       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
-       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
-     })),
-     scenarioToRemove: state.savings.scenarios.find(s => s.id === state.savings.scenarioToRemove),
-     searchFilter: state.savings.searchFilter,
-     areas: state.map.map.areas,
-     profile: state.session.profile,
-     metersLocations: state.map.metersLocations,
+    segments: SPATIAL_CLUSTERS,
+    scenarios: state.savings.scenarios,
+    scenarioToRemove: state.savings.scenarios.find(s => s.id === state.savings.scenarioToRemove),
+    searchFilter: state.savings.searchFilter,
+    areas: state.map.map.areas,
+    metersLocations: state.map.metersLocations,
   };
 }
 
@@ -106,9 +103,23 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
+function mergeProps(stateProps, dispatchProps, ownProps) {
+  return {
+    ...stateProps,
+    ...dispatchProps,
+    ...ownProps,
+    user: stateProps.profile ? {value: stateProps.profile.username, label: stateProps.profile.firstname + ' ' + stateProps.profile.lastname} : null,
+    scenarios: stateProps.scenarios.map(scenario => ({
+      ...scenario, 
+      paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
+      params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
+    })),
+  };
+}
 
 
-const SavingsPotentialContainer = injectIntl(connect(mapStateToProps, mapDispatchToProps)(SavingsPotential));
+
+const SavingsPotentialContainer = injectIntl(connect(mapStateToProps, mapDispatchToProps, mergeProps)(SavingsPotential));
 
 SavingsPotentialContainer.icon = 'percent';
 SavingsPotentialContainer.title = 'Section.Savings';

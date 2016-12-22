@@ -14,6 +14,11 @@ var { getTimeline, getMetersLocations } = require('../../../actions/MapActions')
 
 var Breadcrumb = require('../../../components/Breadcrumb');
 
+const SPATIAL_CLUSTERS = [{
+  key: 'area',
+  name: 'Areas'
+}];
+
 var Budgets = React.createClass({ 
   render: function() {
     const { routes, children, budgetToRemove, actions, clusters, groups, segments, budgets, intl } = this.props;
@@ -80,19 +85,11 @@ function mapStateToProps(state, ownProps) {
     //common
     routing: state.routing,
     clusters: state.config.utility.clusters,
-    segments: [{
-       key: 'area',
-       name: 'Areas'
-     }],
-     budgets: state.budget.scenarios.map(scenario => ({
-       ...scenario, 
-       active: scenario.activatedOn != null,
-       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long'),
-       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
-     })),
-     budgetToRemoveIdx: state.budget.budgetToRemove,
-     //list
-     searchFilter: state.budget.searchFilter,
+    segments: SPATIAL_CLUSTERS,
+    budgets: state.budget.scenarios, 
+    budgetToRemoveIdx: state.budget.budgetToRemove,
+    //list
+    searchFilter: state.budget.searchFilter,
   };
 }
 
@@ -113,6 +110,12 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     ...ownProps,
     ...dispatchProps,
     ...stateProps,
+    budgets: stateProps.budgets.map(scenario => ({
+      ...scenario, 
+      active: scenario.activatedOn != null,
+      params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long'),
+      paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
+     })),
     budgetToRemove: stateProps.budgets.find(scenario => scenario.id === stateProps.budgetToRemoveIdx),
 
   };
