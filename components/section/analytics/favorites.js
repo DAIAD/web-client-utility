@@ -202,6 +202,8 @@ var Favourites = React.createClass({
              );
            break;
        case 'CHART':
+         //todo - add overlaping pros to chart
+
          title = 'Chart: ' + this.props.selectedFavourite.title;
              dataContent = (
              <Bootstrap.ListGroup fill>
@@ -291,14 +293,15 @@ var Favourites = React.createClass({
            type:'action',
            icon: 'eye',
            handler: function() {
-         self.clickedOpenFavourite(this.props.row);
+             self.clickedOpenFavourite(this.props.row);
            }
         }, {
            name: 'edit',
            type:'action',
            icon: 'pencil',
+           hidden: false,
            handler: function() {
-         self.editFavourite(this.props.row);
+             self.editFavourite(this.props.row);
            }
         }, {
            name: 'copy',

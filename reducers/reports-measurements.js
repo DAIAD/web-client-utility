@@ -15,13 +15,14 @@ var reduce = function (state={}, action={}) {
     return state; // not interested
 
   var {field, level, reportName, key} = action;
-  if (field == null || level == null || reportName == null || key == null || action.query)
-    return state; // malformed action; dont touch state
+  if (field == null || level == null || reportName == null || key == null || action.query){
+    //return state; // malformed action; dont touch state
+  }  
   key = reports.measurements.computeKey(field, level, reportName, key);
 
   var r = null; // updated entry for key
   switch (type) {
-    case 'INITIALIZE':
+    case 'INITIALIZE':  
       // Initialize parameters for report (field, level, reportName)
       // See more on the meaning of each field at store.js.
       if (!(key in state)) {
@@ -45,6 +46,18 @@ var reduce = function (state={}, action={}) {
         };
       }
       break;
+    case 'INIT_MULTIPLE': 
+      return Object.assign({}, state, {
+        source: action.source || 'meter',
+        series: null,
+        invalid: true,
+        requested: null,
+        requests: 0,
+        finished: null,
+        errors: null,      
+        multipleQueries: action.multipleQueries
+      });
+      break;
     case 'REQUEST_DATA':
       assertInitialized(state, key);
       // Keep current series data, until fresh arrive
@@ -54,6 +67,13 @@ var reduce = function (state={}, action={}) {
       });
       r.requests = r.requests + 1;
       break;
+    case 'REQUEST_MULTIPLE_DATA':
+      return Object.assign({}, state, {
+        finished: false,
+        requested: action.timestamp,
+        requests: state.requests + 1
+      });       
+      break;      
     case 'SET_DATA':
       assertInitialized(state, key);
       r = _.extend({}, state[key], {
@@ -63,6 +83,26 @@ var reduce = function (state={}, action={}) {
         errors: action.errors? action.errors : null,
       });
       break;
+    case 'SET_MULTIPLE_DATA':
+      var multipleQueriesWithSeries = state.multipleQueries;
+      for (var i = 0; i<state.multipleQueries.length; i++) {
+        multipleQueriesWithSeries[i].series = action.data[i];
+      }
+      
+      return Object.assign({}, state, {
+        finished: action.timestamp,
+        invalid: false,
+        multipleQueries : multipleQueriesWithSeries,
+        errors: action.errors? action.errors : null
+      });
+      break;
+//    case 'CHANGE_MULTIPLE_QUERY':   //todo
+//      if (state.source != action.source) {
+//        return Object.assign({}, state, {
+//          multipleQueries: action.multipleQueries
+//        });
+//      }
+//      break;       
     case 'SET_SOURCE':
       assertInitialized(state, key);
       if (state[key].source != action.source) {
@@ -72,6 +112,14 @@ var reduce = function (state={}, action={}) {
         });
       }
       break;
+    case 'SET_QUERY_SOURCE':
+      if (state.source != action.source) {
+        return Object.assign({}, state, {
+          source: action.source,
+          invalid: true
+        });
+      }
+      break;      
     case 'SET_TIMESPAN':
       assertInitialized(state, key);
       if (state[key].timespan != action.timespan) {
@@ -80,7 +128,7 @@ var reduce = function (state={}, action={}) {
           invalid: true
         });
       }
-      break;
+      break;  
     case 'SET_POPULATION':
       assertInitialized(state, key);
       if (state[key].population != action.population) {
@@ -90,20 +138,35 @@ var reduce = function (state={}, action={}) {
         });
       }
       break;
+    case 'SET_OVERLAP':
+      return Object.assign({}, state, {
+        overlap: action.overlap,
+        invalid: true
+      });
+      break;
     case 'ADD_FAVOURITE_REQUEST':
-
       break;
     case 'ADD_FAVOURITE_RESPONSE':
-      assertInitialized(state, key);
-      r = _.extend({}, state[key], {
+      //assertInitialized(state, key);
+      r = _.extend({}, state, {
         invalid : false
       });
       break;
+    case 'ADD_SERIES':
+      return Object.assign({}, state, {
+        invalid: true,
+        multipleQueries: action.multipleQueries
+      });  
+    case 'REMOVE_SERIES':
+      return Object.assign({}, state, {
+        invalid: true,
+        multipleQueries: action.multipleQueries
+      });      
     default:
       // Unknown action; dont touch state
       break;
   }
-
+  
   // Compute new state, if entry r is touched
   return r? _.extend({}, state, {[key]: r}) : state;
 };

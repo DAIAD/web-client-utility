@@ -218,7 +218,7 @@ var favourites = function (state, action) {
     case types.FAVOURITES_CHART_REQUEST:
       return Object.assign({}, state, {
         data: null,
-        draw: false,
+        draw: true,
         finished: false
       }); 
     case types.FAVOURITES_CHART_RESPONSE:

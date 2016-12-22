@@ -9,7 +9,40 @@ var initialState = {
     'quarter': {bucket: 'quarter', duration: [1, 'Q']},
     'year': {bucket: 'year', duration: [1, 'Y']},
   },
-
+  
+  //Timespan overlay for multiple series
+  overlap: {
+    levels: {
+      'day': {bucket: 'day', duration: [1, 'd']},
+      'week': {bucket: 'isoweek', duration: [1, 'w']},
+      'month': {bucket: 'month', duration: [1, 'M']},
+      'quarter': {bucket: 'quarter', duration: [1, 'Q']},
+      'year': {bucket: 'year', duration: [1, 'Y']},
+    },
+    values: {
+      'day': {
+        name: 'day',
+        title: 'Day',
+        description: 'Overlap over day', 
+      },
+      'week': {
+        name: 'week',
+        title: 'Week',
+        description: 'Overlap over week', // time unit of 1 week
+      },
+      'month': {
+        name: 'month',
+        title: 'Month',
+        description: 'Report over month', // time unit of 1 month
+      },
+      'year': {
+        name: 'year',
+        title: 'Year',
+        description: 'Report over year', // time unit of 1 year
+      }      
+    }    
+  },
+  
   // Describe types of reports
   byType: {
 

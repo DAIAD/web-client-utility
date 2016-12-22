@@ -130,7 +130,8 @@ var AnalyticsMap = React.createClass({
             (this.props.population ? ' - ' + this.props.population.label : '') +
               (this.props.geometry ? ' - Custom' : '');
 
-    var namedQuery = this.props.map.query;
+    var namedQuery = {};
+    namedQuery.queries = [this.props.map.query.query]; //set as array to align with chart multiple queries
     namedQuery.type = 'Map';
     namedQuery.tags = tags;
     namedQuery.title = this.refs.favouriteLabel.value;

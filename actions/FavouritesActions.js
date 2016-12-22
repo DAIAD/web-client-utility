@@ -193,16 +193,16 @@ var FavouritesActions = {
       var population, source, geometry, interval, timezone;
 
         population = {
-          utility: favourite.query.population[0].utility,
-          label: favourite.query.population[0].label,
-          type: favourite.query.population[0].type
+          utility: favourite.queries[0].population[0].utility,
+          label: favourite.queries[0].population[0].label,
+          type: favourite.queries[0].population[0].type
         };
-        interval = [moment(favourite.query.time.start),
-                    moment(favourite.query.time.end)];
-        source = favourite.query.source;
+        interval = [moment(favourite.queries[0].time.start),
+                    moment(favourite.queries[0].time.end)];
+        source = favourite.queries[0].source;
 
-        if(favourite.query.spatial && favourite.query.spatial.length > 1){
-          geometry = favourite.query.spatial[1].geometry;
+        if(favourite.queries[0].spatial && favourite.queries[0].spatial.length > 1){
+          geometry = favourite.queries[0].spatial[1].geometry;
         } else {
           geometry = null;
         }
@@ -237,56 +237,71 @@ var FavouritesActions = {
     };
   },
   getFavouriteChart : function(favourite) {
-  /* jshint ignore:start */
-  return function(dispatch, getState) {
-    dispatch(_chartRequest());
-    return queryAPI.queryMeasurements({query: favourite.query}).then(
-      res => {
-        if (res.errors.length)
-          throw 'The request is rejected: ' + res.errors[0].description;
+    return function(dispatch, getState) {
+    
+      dispatch(_chartRequest());
+      
+      var promiseArray =[];
+      for(let i=0; i<favourite.queries.length; i++){
+        promiseArray.push(queryAPI.queryMeasurements({query: favourite.queries[i]}));  
+      }
 
-        var source = favourite.query.source;
+      Promise.all(promiseArray).then(
+        res => {       
+          var source = favourite.queries[0].source; //source is same for all queries
+          var resAll = [];
+          for(let m=0; m< res.length; m++){
+            if (res[m].errors.length) {
+              throw 'The request is rejected: ' + res[m].errors[0].description; 
+            }
+            var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
 
-        var resultSets = (favourite.query.source == 'AMPHIRO') ? res.devices : res.meters;
-
-        var res1 = (resultSets || []).map(rs => {
-          var [g, rr] = population.fromString(rs.label);
-
-          if (rr) {
-            var points = rs.points.map(p => ({
-              timestamp: p.timestamp,
-              values: p.users.map(u => u[rr.field][rr.metric]).sort(rr.comparator),
-            }));
-            // Shape a result with ranking on users  //TODO - fix dot notation jshint errors in this block
-
-            return _.times(rr.limit, (i) => ({
-              source,
-              timespan: [favourite.query.time.start,favourite.query.time.end],
-              granularity: favourite.query.time.granularity,
-              metric: favourite.query.metric,
-              population: g,
-              ranking: {...rr.toJSON(), index: i},
-              data: points.map(p => ([p.timestamp, p.values[i] || null]))
-            }));
-          } else {
-            // Shape a normal timeseries result for requested metrics
-            // Todo support other metrics (as client-side "average")
-            return favourite.query.metrics.map(metric => ({
-              source,
-              timespan: [favourite.query.time.start,favourite.query.time.end],
-              granularity: favourite.query.time.granularity,
-              metric,
-              population: g,
-              data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
-            }));
+            var res1 = (resultSets || []).map(rs => {
+              var [g, rr] = population.fromString(rs.label);
+              
+              //Recalculate xAxis timespan based on returned data. 
+              var timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              for(let j=0; j<favourite.queries.length; j++){ //loop to get 
+                if (rr) {
+                  var points = rs.points.map(p => ({
+                    timestamp: p.timestamp,
+                    values: p.users.map(u => u[rr.field][rr.metric]).sort(rr.comparator),
+                  }));
+              
+                  // Shape a result with ranking on users
+                  var res2 =  _.times(rr.limit, (i) => ({
+                    source,
+                    timespan: [favourite.queries[j].time.start,favourite.queries[j].time.end],
+                    granularity: favourite.queries[j].time.granularity,
+                    metric: favourite.queries[j].metric,
+                    population: g,
+                    ranking: {...rr.toJSON(), index: i},
+                    data: points.map(p => ([p.timestamp, p.values[i] || null]))
+                  }));
+                } else {
+                  // Shape a normal timeseries result for requested metrics
+                  // Todo support other metrics (as client-side "average")
+                  var res2 = favourite.queries[j].metrics.map(metric => ({
+                    source,
+                    timespan: timespan1,
+                    granularity: favourite.queries[j].time.granularity,
+                    metric,
+                    population: g,
+                    data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+                  }));
+                }
+                return _.flatten(res2);
+              }
+            });
+            resAll.push(_.flatten(res1)); 
           }
-        });
-          dispatch(_chartResponse(res.success, res.errors, _.flatten(res1)));
-          return _.flatten(res1);
-      });
+          
+          dispatch(_chartResponse(res.success, res.errors, _.flatten(resAll)));
 
+          return _.flatten(resAll);
+        }
+      );
     };
-  /* jshint ignore:end */
   },
   getFeatures : function(index, timestamp, label) {
     return _getFeatures(index, timestamp, label);

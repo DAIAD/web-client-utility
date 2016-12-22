@@ -5,7 +5,10 @@ var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
 var Breadcrumb = require('../Breadcrumb');
 var Counter = require('../Counter');
-var Chart = require('../Chart');
+//var Chart = require('../Chart');
+var Chart = require('../reports-measurements/chart');
+var {configPropType} = require('../../prop-types');
+var moment = require('moment');
 var LeafletMap = require('../LeafletMap');
 var FilterTag = require('../chart/dimension/FilterTag');
 var Timeline = require('../Timeline');
@@ -14,7 +17,7 @@ var {FormattedTime} = require('react-intl');
 var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 
-var { getTimeline, getFeatures, getCounters, getChart } = require('../../actions/DashboardActions');
+var { getTimeline, getFeatures, getCounters, getChart, getDefaultChart } = require('../../actions/DashboardActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
@@ -50,54 +53,49 @@ var Dashboard = React.createClass({
   },
 
   contextTypes: {
-      intl: React.PropTypes.object
+    intl: React.PropTypes.object,
+    config: configPropType,     
   },
-
+  componentWillMount : function() {
+    //TODO. Define the default query.
+    var favourite = {
+      title:"for dashboard",
+      tags:"Chart - METER - 01/07/2016 to 01/10/2016 - Level: week - Everyone",
+      reportName:"avg-daily-avg",
+      level:"week",
+      field:"volume",
+      query:{
+        time:{
+          type:"ABSOLUTE",
+          granularity:"WEEK",
+          start:moment().subtract(150, 'day').valueOf(),
+          end:moment().valueOf(),
+          duration:null,
+          durationTimeUnit:"HOUR"},
+        population:[{
+          type:"UTILITY",
+          label:"UTILITY:941be15c-a8ea-40c9-8502-9b790d2a99f3",
+          ranking:null,
+          utility:"941be15c-a8ea-40c9-8502-9b790d2a99f3"}],
+        source:"METER",
+        metrics:["AVERAGE"]}
+      };
+    this.props.actions.getDefaultChart(favourite);
+  },
+  
   componentDidMount : function() {
     var utility = this.props.profile.utility;
 
     if(!this.props.map.timeline) {
       this.props.actions.getTimeline(utility.key, utility.name, utility.timezone);
     }
-    if(!this.props.chart.series) {
-      this.props.actions.getChart(utility.key, utility.name, utility.timezone);
-    }
+//    if(!this.props.chart.series) {
+//      this.props.actions.getChart(utility.key, utility.name, utility.timezone);
+//    }
     this.props.actions.getCounters();
   },
 
   render: function() {
-    var chartData = {
-      series: []
-    };
-
-    if(this.props.chart.series) {
-      if(this.props.chart.series.meters) {
-        chartData.series.push({
-          legend: 'Meter',
-          xAxis: 'date',
-          yAxis: 'volume',
-          data: this.props.chart.series.meters.data
-        });
-      }
-
-      if(this.props.chart.series.devices) {
-        chartData.series.push({
-          legend: 'Amphiro B1',
-          xAxis: 'date',
-          yAxis: 'volume',
-          data: this.props.chart.series.devices.data
-        });
-      }
-    }
-
-    var chartOptions = {
-      tooltip: {
-        show: true
-      },
-      dataZoom : {
-        format: 'day'
-      }
-    };
 
     var chartTitle = (
       <span>
@@ -169,21 +167,32 @@ var Dashboard = React.createClass({
       <FilterTag key='time' text={intervalLabel} icon='calendar' />
     );
     chartFilterTags.push(
-      <FilterTag key='source' text='Meter, Amphiro B1' icon='database' />
+      <FilterTag key='source' text='Meter' icon='database' />
     );
 
-    if(chartData.series.length > 0) {
-      chart = (
-        <Bootstrap.ListGroupItem>
-          <Chart style={{ width: '100%', height: 400 }}
-                 elementClassName='mixin'
-                 prefix='chart'
-                 options={chartOptions}
-                 data={chartData}/>
-        </Bootstrap.ListGroupItem>
-      );
-    }
+    var defaults= {
+      chartProps: {
+        width: '100%',
+        height: 300,
+      }
+    };
 
+    chart = (
+      <Bootstrap.ListGroupItem className="report-chart-wrapper">
+        <Chart 
+          {...defaults.chartProps}
+          draw={this.props.chart.draw} 
+          field={'volume'}
+          level={'week'}
+          reportName={'avg-daily-avg'}
+          finished={this.props.chart.finished}
+          series={this.props.chart.data ? this.props.chart.data : []}
+          context={this.props.config}
+          scaleTimeAxis={false}
+        />
+      </Bootstrap.ListGroupItem>              
+    ); 
+    
     mapFilterTags.push(
       <FilterTag key='time' text={intervalLabel} icon='calendar' />
     );
@@ -193,7 +202,7 @@ var Dashboard = React.createClass({
     mapFilterTags.push(
       <FilterTag key='source' text='Meter' icon='database' />
     );
-
+   
     map = (
       <Bootstrap.ListGroup fill>
         <Bootstrap.ListGroupItem>
@@ -231,7 +240,7 @@ var Dashboard = React.createClass({
           </div>
           <span style={{ paddingLeft : 7}}> </span>
           <Link className='pull-right' to='/analytics' style={{ paddingLeft : 7, paddingTop: 12 }}>View analytics</Link>
-        </Bootstrap.ListGroupItem>
+        </Bootstrap.ListGroupItem>   
       </Bootstrap.ListGroup>
     );
 
@@ -264,7 +273,7 @@ var Dashboard = React.createClass({
     );
 
     var chartPanel = ( <div /> );
-    if(this.props.chart.series) {
+    //if(this.props.chart.data) {
       chartPanel = (
         <div key='0' className='draggable'>
           <Bootstrap.Panel header={chartTitle}>
@@ -281,7 +290,7 @@ var Dashboard = React.createClass({
           </Bootstrap.Panel>
         </div>
       );
-    }
+    //}
 
     var mapPanel = (
       <Bootstrap.Panel header={mapTitle}>
@@ -345,18 +354,21 @@ Dashboard.title = 'Section.Dashboard';
 
 function mapStateToProps(state) {
   return {
-      interval: state.dashboard.interval,
-      map: state.dashboard.map,
-      chart: state.dashboard.chart,
-      counters: state.dashboard.statistics.counters,
-      profile: state.session.profile,
-      routing: state.routing
+    interval: state.dashboard.interval,
+    map: state.dashboard.map,
+    chart: state.dashboard.chart,
+    counters: state.dashboard.statistics.counters,
+    profile: state.session.profile,
+    routing: state.routing,
+    config: state.config,
+    defaultChart : state.dashboard.defaultChart
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters, getChart }) , dispatch)
+    actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters,
+                                                     getChart, getDefaultChart }) , dispatch)
   };
 }
 
