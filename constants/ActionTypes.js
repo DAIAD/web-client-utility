@@ -134,11 +134,19 @@ var types = mirrorToPath({
     
     measurements: {
       INITIALIZE: null,
+      INIT_MULTIPLE: null,
+      CHANGE_MULTIPLE_QUERY: null,
       SET_SOURCE: null,
+      SET_QUERY_SOURCE: null,
       SET_TIMESPAN: null,
       SET_POPULATION: null,
+      SET_OVERLAP: null,
       REQUEST_DATA: null,
+      REQUEST_MULTIPLE_DATA: null,
       SET_DATA: null,
+      SET_MULTIPLE_DATA: null,      
+      ADD_SERIES: null,
+      REMOVE_SERIES: null,
       ADD_FAVOURITE_REQUEST: null,
       ADD_FAVOURITE_RESPONSE: null
     },

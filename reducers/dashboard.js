@@ -220,13 +220,6 @@ var _extractSeries = function(interval, data, label) {
   };
 };
 
-var _extractChartSeries = function(interval, data) {
-  return {
-    meters : _extractSeries(interval, data.meters, 'Meter'),
-    devices : _extractSeries(interval, data.devices, 'Amphiro B1')
-  };
-};
-
 var statisticsReducer = function(state, action) {
   switch (action.type) {
     case types.COUNTER_REQUEST:
@@ -299,21 +292,24 @@ var chartReducer = function(state, action) {
   switch (action.type) {
     case types.CHART_REQUEST:
       return Object.assign({}, state, {
-        query : action.query,
-        series : null
+        draw: true,
+        finished: false,
+        data: null
       });
-
     case types.CHART_RESPONSE:
       if (action.success) {
         return Object.assign({}, state, {
-          series : _extractChartSeries(state.interval, action.data)
+          draw: true,
+          finished: action.timestamp,
+          data: action.data
+        });
+      } else {
+        return Object.assign({}, state, {
+          draw: false,
+          finished: false,
+          data : null
         });
       }
-
-      return Object.assign({}, state, {
-        series : null
-      });
-
     default:
       return state || _createChartInitialState();
   }
@@ -322,7 +318,6 @@ var chartReducer = function(state, action) {
 var dashboard = function(state, action) {
   switch (action.type) {
     case types.TIMELINE_REQUEST:
-    case types.CHART_REQUEST:
     case types.COUNTER_REQUEST:
       return Object.assign({}, state, {
         isLoading : true,
@@ -332,7 +327,6 @@ var dashboard = function(state, action) {
       });
 
     case types.TIMELINE_RESPONSE:
-    case types.CHART_RESPONSE:
     case types.COUNTER_RESPONSE:
       return Object.assign({}, state, {
         isLoading : false,
@@ -340,7 +334,16 @@ var dashboard = function(state, action) {
         map : mapReducer(state.map, action),
         chart : chartReducer(state.chart, action)
       });
-
+    case types.CHART_REQUEST:
+      return Object.assign({}, state, {
+        isLoading : true,
+        chart : chartReducer(state.chart, action)
+      });      
+    case types.CHART_RESPONSE:
+      return Object.assign({}, state, {
+        isLoading : false,
+        chart : chartReducer(state.chart, action)
+      });
     case types.GET_FEATURES:
       return Object.assign({}, state, {
         isLoading : false,

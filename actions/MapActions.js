@@ -206,21 +206,20 @@ var MapActions = {
 
       }
       else if(getState().favourites.selectedFavourite){
+        var selectedFav = getState().favourites.selectedFavourite.queries[0];
         population = {
-          utility: getState().favourites.selectedFavourite.query.population[0].utility,
-          label: getState().favourites.selectedFavourite.query.population[0].label,
-          type: getState().favourites.selectedFavourite.query.population[0].type
+          utility: selectedFav.population[0].utility,
+          label: selectedFav.population[0].label,
+          type: selectedFav.population[0].type
         };
-        interval = [moment(getState().favourites.selectedFavourite.query.time.start),
-                    moment(getState().favourites.selectedFavourite.query.time.end)];
-        source = getState().favourites.selectedFavourite.query.source;
+        interval = [moment(selectedFav.time.start), moment(selectedFav.time.end)];
+        
+        source = selectedFav.source;
 
-        //if( (!getState().map.features) || (getState().map.features.length === 0) ){
-        if(getState().favourites.selectedFavourite.query.spatial
-            && getState().favourites.selectedFavourite.query.spatial > 1){
-          geometry = getState().favourites.selectedFavourite.query.spatial[1].geometry;
+        if(selectedFav.spatial && selectedFav.spatial > 1){
+          geometry = selectedFav.spatial[1].geometry;
         } else {
-          //geometry = getState().map.features[0].geometry;
+
           geometry = null;
         }
         dispatch(_setEditorValue('population', population));

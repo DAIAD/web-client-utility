@@ -1,19 +1,12 @@
 var _ = require('lodash');
 var moment = require('moment');
 var numeral = require('numeral');
-var sprintf = require('sprintf');
-
 var React = require('react');
 var echarts = require('react-echarts');
-
-var Granularity = require('../../model/granularity');
-var TimeSpan = require('../../model/timespan');
 var population = require('../../model/population');
 var {consolidateFuncs} = require('../../reports').measurements;
-var {timespanPropType, populationPropType, seriesPropType, configPropType} = require('../../prop-types');
-
+var {seriesPropType, configPropType} = require('../../prop-types');
 var PropTypes = React.PropTypes;
-
 var theme = require('../chart/themes/blue');
 
 var Chart = React.createClass({
@@ -62,6 +55,8 @@ var Chart = React.createClass({
       series: [],
       finished: true,
       scaleTimeAxis: false,
+      overlap: null,
+      overlapping: false
     };
   },
   
@@ -76,16 +71,12 @@ var Chart = React.createClass({
     var {defaults} = this.constructor;
     var {field, level, reportName} = this.props;
     var {config} = this.context;
-
-    if(typeof config === "undefined"){
-      var {title, unit, name: fieldName} = this.props.context.reports.byType.measurements.fields[field];
-    } else {
-      var {title, unit, name: fieldName} = config.reports.byType.measurements.fields[field];  
-    }
+    var {unit, name: fieldName} = typeof config === "undefined" ? 
+      this.props.context.reports.byType.measurements.fields[field] : config.reports.byType.measurements.fields[field];
     
     //var {title, unit, name: fieldName} = config.reports.byType.measurements.fields[field];
-
-    var {xaxisData, series} = this._consolidateData();
+    
+    var {xaxisData, series} = this.props.overlapping ? this._overlapData() : this._consolidateData();
     xaxisData || (xaxisData = []);
     
     series = (series || []).map(s => ({
@@ -96,7 +87,36 @@ var Chart = React.createClass({
     }));
 
     var xf = defaults.xAxis.dateformat[level];
+    var xAxis;
+    if(this.props.overlapping){
 
+      var overlapFormat;
+      
+      if(this.props.overlap.value == 'month'){
+        overlapFormat = 'DD';
+      } else if(this.props.overlap.value == 'year') {
+        overlapFormat = 'MMM';
+      } else if (this.props.overlap.value == 'day') {
+        overlapFormat = 'LT';
+      } else {
+        overlapFormat = xf;
+      }
+      //xAxis data are based on the level aggregation. e.g for week level and year overlapping we get 52 week dates.
+      //The viewing of these dates is formatted based on the previous level of the overlap value.
+      
+      xAxis = {
+        data: xaxisData,
+        boundaryGap: false,
+        formatter: (t) => (moment(t).utc().format(overlapFormat)),
+      };     
+    } else {
+      xAxis = {
+        data: xaxisData,
+        boundaryGap: false, 
+        formatter: (t) => (moment(t).utc().format(xf)),
+      };    
+    }
+    
     return (
       <div className="report-chart" id={['chart', field, level, reportName].join('--')}>
         <echarts.LineChart
@@ -105,11 +125,7 @@ var Chart = React.createClass({
           loading={this.props.finished? null : {text: 'Loading data...'}}
           tooltip={defaults.tooltip}
           theme={theme}
-          xAxis={{
-            data: xaxisData,
-            boundaryGap: false, 
-            formatter: (t) => (moment(t).utc().format(xf)),
-          }}
+          xAxis={xAxis}
           yAxis={{
             name: fieldName + (unit? (' (' + unit + ')') : ''),
             numTicks: 4,
@@ -125,32 +141,28 @@ var Chart = React.createClass({
 
   _consolidateData: function () {
     var result = {xaxisData: null, series: null};
-    var {field, level, reportName, series, scaleTimeAxis} = this.props;
-    
+    var {level, reportName, series, scaleTimeAxis} = this.props;
+
     var {config} = this.context;
-    //var _config = config.reports.byType.measurements;
+    var _config;
     if(typeof config === "undefined"){
-      var _config = this.props.context.reports.byType.measurements;
+      _config = this.props.context.reports.byType.measurements;
     } else {
-      var _config = config.reports.byType.measurements;  
+      _config = config.reports.byType.measurements;  
     }    
 
     if (!series || !series.length || series.every(s => !s.data.length))
       return result; // no data available
-      
+
     var report = _config.levels[level].reports[reportName];
-    
-    if(typeof config === "undefined"){
-      var {bucket, duration} = this.props.context.reports.levels[level];
-    } else {
-      var {bucket, duration} = config.reports.levels[level];
-    }       
+    var {bucket, duration} = typeof config === "undefined"? 
+        this.props.context.reports.levels[level] : config.reports.levels[level];     
 
     var [d, durationUnit] = duration;
     d = moment.duration(d, durationUnit);
 
     // Use a sorted (by timestamp t) copy of series data [t,y]
-    
+
     series = series.map(s => (_.extend({}, s, {
       data: s.data.slice(0).sort((p1, p2) => (p1[0] - p2[0])),
     })));
@@ -165,16 +177,16 @@ var Chart = React.createClass({
       start = _.min(series.map(s => s.timespan[0]));
       end = _.max(series.map(s => s.timespan[1]));
     }
-    
+
     var startx = moment(start).utc().startOf(bucket);
     var endx = moment(end).utc().endOf(bucket);
-    
+
     // Generate x-axis data,
     result.xaxisData = [];
     for (let m = startx; m < endx; m.add(d)) {
       result.xaxisData.push(m.valueOf());
     }
-
+    
     // Collect points in level-wide buckets
     var groupInBuckets = (data, boundaries) => {
       // Group y values into buckets defined yb x-axis boundaries:
@@ -199,35 +211,140 @@ var Chart = React.createClass({
         data: groupInBuckets(s.data, result.xaxisData).map(cf)
       })
     ));
-    
+
     // The number of Y buckets is always N - 1, where N is the number of X points!
     result.xaxisData.pop(); 
 
     return result;
   },
 
-  _getNameForSeries: function ({ranking, population: target, metric}) {
+  _overlapData: function () {
+    var result = {xaxisData: null, series: null};
+    var {level, reportName, series} = this.props;
+    
+    if (!series || !series.length || series.every(s => !s.data.length)){
+      return result; // no data available    
+    }
+    
+    var maxDuration = 0;
+    var minStart = moment();
+
+    for(let k=0; k< series.length; k++) {
+      var start1 = moment(series[k].timespan[0]);
+      var end1 = moment(series[k].timespan[1]);
+      var diff = moment(end1,"DD/MM/YYYY HH:mm:ss").diff(start1,"DD/MM/YYYY HH:mm:ss");
+      if(diff<0) {
+        console.error('Invalid timespan');
+      }
+      if(diff > maxDuration){
+        maxDuration = diff;
+      }
+      if(start1.isBefore(minStart)){
+        minStart = start1;
+      }
+    }
+    
+    var {config} = this.context;
+    var _config;
+    var {bucket, duration} = typeof config === "undefined" ? this.props.context.reports.levels[level] : config.reports.levels[level];
+    if(typeof config === "undefined"){
+      _config = this.props.context.reports.byType.measurements;
+    } else {
+      _config = config.reports.byType.measurements;
+    }
+
+    var report = _config.levels[level].reports[reportName];
+
+    var [d, durationUnit] = duration;
+    d = moment.duration(d, durationUnit);
+
+    // Use a sorted (by timestamp t) copy of series data [t,y]
+    
+    series = series.map(s => (_.extend({}, s, {
+      data: s.data.slice(0).sort((p1, p2) => (p1[0] - p2[0])),
+    })));
+    
+    //shift series to reference same time period
+    for(let n=0; n<series.length; n++){
+      if(series[n].data.length === 0 ){
+        continue;
+      }
+      if(series[n].data[0][0] == minStart.valueOf()){
+        continue; //this serie defines the starting alignment and won 't be shifted.
+      } else {
+        //find shift value:
+        var subtract = series[n].data[0][0]- minStart.valueOf();      
+        for(let m=0; m<series[n].data.length; m++){
+          series[n].data[m][0] = series[n].data[m][0]-subtract;
+        }
+      }
+    }
+    
+    //find time range from min start and max duration in order to overlap    
+    var startx = moment(minStart).utc().startOf(bucket);
+    var endx = moment(moment(minStart).add(maxDuration).valueOf()).utc().endOf(bucket);
+    
+    // Generate x-axis data
+    result.xaxisData = [];
+    for (let m = startx; m < endx; m.add(d)) {
+      result.xaxisData.push(m.valueOf());
+    }
+    
+    // Collect points in level-wide buckets
+    var groupInBuckets = (data, boundaries) => {
+      // Group y values into buckets defined yb x-axis boundaries:
+      var N = boundaries.length;
+      // For i=0..N-2 all y with (b[i] <= y < b[i+1]) fall into bucket #i ((i+1)-th)
+      var yb = []; // hold buckets of y values
+      for (var i = 1, j = 0; i < N; i++) {
+        yb.push([]);
+        while (j < data.length && data[j][0] < boundaries[i]) {
+          var y = data[j][1];
+          (y != null) && yb[i - 1].push(y);
+          j++;
+        }
+      }
+      return yb;
+    };
+
+    // Consolidate
+    var cf = consolidateFuncs[report.consolidate]; 
+    result.series = series.map(s => (
+      _.extend({}, s, {
+        data: groupInBuckets(s.data, result.xaxisData).map(cf)
+      })
+    ));
+
+    // The number of Y buckets is always N - 1, where N is the number of X points!
+    result.xaxisData.pop(); 
+    return result;
+  },
+
+  _getNameForSeries: function ({ranking, population: target, metric, timespan}) {
+    //todo - refine label with shorter timelabel?
+    var timeLabel = ' ' + moment(timespan[0]).format('DD/MM/YYYY') + '-' +  moment(timespan[1]).format('DD/MM/YYYY');
     var {nameTemplates} = this.constructor;
     var {config} = this.context;
 
     var label;
     if (target instanceof population.Utility) {
       // Use utility's friendly name
-      label = 'Utility'; //config.utility.name;
+      label = 'Utility' + timeLabel; //config.utility.name;
     } else if (target instanceof population.ClusterGroup) {
+      var cluster
       // Use group's friendly name
       if(typeof config === "undefined"){
-        var cluster = this.props.context.utility.clusters.find(c => (c.key == target.clusterKey));        
+        cluster = this.props.context.utility.clusters.find(c => (c.key == target.clusterKey));        
       } else {
-        var cluster = config.utility.clusters.find(c => (c.key == target.clusterKey));
+        cluster = config.utility.clusters.find(c => (c.key == target.clusterKey));
       }
       label = cluster.name + ': ' +
-          cluster.groups.find(g => (g.key == target.key)).name;
+          cluster.groups.find(g => (g.key == target.key)).name + timeLabel;
     }
 
     var tpl = (ranking)? nameTemplates.ranking : nameTemplates.basic;
     return tpl({metric, label, ranking});
-  },
+  }
 });
 
 module.exports = Chart;

@@ -423,7 +423,7 @@ class _Report extends React.Component {
     
     // Fixme: This computation for N is not always correct
     var N = moment.duration(1, unit).as(level); 
-    
+    var padArray;
     return (
       <div className={viewProps.className} key={"forecasting-chart"}>
         <echarts.LineChart

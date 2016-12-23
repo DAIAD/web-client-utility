@@ -86,7 +86,7 @@ var AnalyticsMap = React.createClass({
 
   componentWillMount : function() {
     var isDefault;
-    if(this.props.favourite){
+    if(this.props.favourite && this.props.favourite.type == 'MAP'){
       isDefault = false;
       this.props.defaultFavouriteValues.interval = true;
       this.props.defaultFavouriteValues.source = true;
@@ -124,13 +124,14 @@ var AnalyticsMap = React.createClass({
   clickedAddFavourite : function() {
 
     var tags = 'Map - ' +
-      (this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source) +
+      (this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source) +
         ' - '+ this.props.interval[0].format("DD/MM/YYYY") +
           ' to ' + this.props.interval[1].format("DD/MM/YYYY") +
             (this.props.population ? ' - ' + this.props.population.label : '') +
               (this.props.geometry ? ' - Custom' : '');
 
-    var namedQuery = this.props.map.query;
+    var namedQuery = {};
+    namedQuery.queries = [this.props.map.query.query]; //set as array to align with chart multiple queries
     namedQuery.type = 'Map';
     namedQuery.tags = tags;
     namedQuery.title = this.refs.favouriteLabel.value;
@@ -160,7 +161,7 @@ var AnalyticsMap = React.createClass({
     }
 
     var tags = 'Map - ' +
-      (this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source) +
+      (this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source) +
         ' - '+ this.props.interval[0].format("DD/MM/YYYY") +
           ' to ' + this.props.interval[1].format("DD/MM/YYYY") +
             (this.props.population ? ' - ' + this.props.population.label : '') +
@@ -172,9 +173,9 @@ var AnalyticsMap = React.createClass({
     var intervalLabel ='';
     if(this.props.interval) {
       var start = this.props.defaultFavouriteValues.interval ?
-        moment(this.props.favourite.query.time.start).format('DD/MM/YYYY') : this.props.interval[0].format('DD/MM/YYYY');
+        moment(this.props.favourite.queries[0].time.start).format('DD/MM/YYYY') : this.props.interval[0].format('DD/MM/YYYY');
       var end = this.props.defaultFavouriteValues.interval ?
-        moment(this.props.favourite.query.time.end).format('DD/MM/YYYY') : this.props.interval[1].format('DD/MM/YYYY');
+        moment(this.props.favourite.queries[0].time.end).format('DD/MM/YYYY') : this.props.interval[1].format('DD/MM/YYYY');
 
       intervalLabel = start + ' - ' + end;
       if (start === end) {
@@ -186,9 +187,9 @@ var AnalyticsMap = React.createClass({
       <div className='col-md-3'>
         <DateRangePicker
           startDate={this.props.defaultFavouriteValues.interval ?
-                      moment(this.props.favourite.query.time.start) : this.props.interval[0]}
+                      moment(this.props.favourite.queries[0].time.start) : this.props.interval[0]}
           endDate={this.props.defaultFavouriteValues.interval ?
-                      moment(this.props.favourite.query.time.end) : this.props.interval[1]}
+                      moment(this.props.favourite.queries[0].time.end) : this.props.interval[1]}
           ranges={this.props.ranges}
           onEvent={_onIntervalEditorChange.bind(this)}
         >
@@ -203,7 +204,7 @@ var AnalyticsMap = React.createClass({
     var populationEditor = (
       <div className='col-md-3'>
         <GroupSearchTextBox
-          value={this.props.defaultFavouriteValues.population ? this.props.favourite.query.population : this.props.population}
+          value={this.props.defaultFavouriteValues.population ? this.props.favourite.queries[0].population : this.props.population}
           name='groupname'
           onChange={onPopulationEditorChange.bind(this)}/>
         <span className='help-block'>Select a consumer group</span>
@@ -243,7 +244,7 @@ var AnalyticsMap = React.createClass({
     var sourceEditor = (
       <div className='col-md-3'>
         <Select name='source'
-          value={this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source}
+          value={this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source}
           options={[
             { value: 'METER', label: 'Meter' },
             { value: 'AMPHIRO', label: 'Amphiro B1' }
@@ -379,7 +380,7 @@ var AnalyticsMap = React.createClass({
       <FilterTag key='spatial' text={ this.props.geometry ? 'Custom' : 'Alicante' } icon='map' />
     );
     mapFilterTags.push(
-      <FilterTag key='source' text={ this.props.defaultFavouriteValues.source ? this.props.favourite.query.source : this.props.source} icon='database' />
+      <FilterTag key='source' text={ this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source} icon='database' />
     );
 
     map = (
