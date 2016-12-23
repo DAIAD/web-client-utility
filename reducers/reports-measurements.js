@@ -15,9 +15,7 @@ var reduce = function (state={}, action={}) {
     return state; // not interested
 
   var {field, level, reportName, key} = action;
-  if (field == null || level == null || reportName == null || key == null || action.query){
-    //return state; // malformed action; dont touch state
-  }  
+
   key = reports.measurements.computeKey(field, level, reportName, key);
 
   var r = null; // updated entry for key
@@ -93,13 +91,11 @@ var reduce = function (state={}, action={}) {
         multipleQueries : multipleQueriesWithSeries,
         errors: action.errors? action.errors : null
       });
-//    case 'CHANGE_MULTIPLE_QUERY':   //todo
-//      if (state.source != action.source) {
-//        return Object.assign({}, state, {
-//          multipleQueries: action.multipleQueries
-//        });
-//      }
-//      break;       
+    case 'CHANGE_MULTIPLE_QUERY':
+      return Object.assign({}, state, {
+        invalid: true,
+        multipleQueries: action.multipleQueries
+      });               
     case 'SET_SOURCE':
       assertInitialized(state, key);
       if (state[key].source != action.source) {
@@ -143,11 +139,9 @@ var reduce = function (state={}, action={}) {
     case 'ADD_FAVOURITE_REQUEST':
       break;
     case 'ADD_FAVOURITE_RESPONSE':
-      //assertInitialized(state, key);
-      r = _.extend({}, state, {
-        invalid : false
+      return Object.assign({}, state, {
+        invalid: false
       });
-      break;
     case 'ADD_SERIES':
       return Object.assign({}, state, {
         invalid: true,

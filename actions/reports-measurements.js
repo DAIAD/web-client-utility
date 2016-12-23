@@ -275,7 +275,7 @@ var actions = {
     }
 
     dispatch(actions.requestMultipleData(field, level, reportName, key, now)); 
-    var pqArray=[];
+
     var queries = _state.multipleQueries;
     if(!queries){
       return;
@@ -303,7 +303,7 @@ var actions = {
       }
 
       // Prepare literal time range, re-order if needed
-      var t0, t1, timezone = 'Etc/GMT';
+      var t0, t1;
       if (_.isString(ts)) {
         // Interpret this named range, as if you were at UTC+0
         [t0, t1] = TimeSpan.fromName(ts, 0).toRange();

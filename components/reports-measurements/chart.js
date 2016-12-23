@@ -1,19 +1,12 @@
 var _ = require('lodash');
 var moment = require('moment');
 var numeral = require('numeral');
-var sprintf = require('sprintf');
-
 var React = require('react');
 var echarts = require('react-echarts');
-
-var Granularity = require('../../model/granularity');
-var TimeSpan = require('../../model/timespan');
 var population = require('../../model/population');
 var {consolidateFuncs} = require('../../reports').measurements;
-var {timespanPropType, populationPropType, seriesPropType, configPropType} = require('../../prop-types');
-
+var {seriesPropType, configPropType} = require('../../prop-types');
 var PropTypes = React.PropTypes;
-
 var theme = require('../chart/themes/blue');
 
 var Chart = React.createClass({
@@ -78,7 +71,7 @@ var Chart = React.createClass({
     var {defaults} = this.constructor;
     var {field, level, reportName} = this.props;
     var {config} = this.context;
-    var {title, unit, name: fieldName} = typeof config === "undefined" ? 
+    var {unit, name: fieldName} = typeof config === "undefined" ? 
       this.props.context.reports.byType.measurements.fields[field] : config.reports.byType.measurements.fields[field];
     
     //var {title, unit, name: fieldName} = config.reports.byType.measurements.fields[field];
@@ -96,7 +89,7 @@ var Chart = React.createClass({
     var xf = defaults.xAxis.dateformat[level];
     var xAxis;
     if(this.props.overlapping){
-    
+
       var overlapFormat;
       
       if(this.props.overlap.value == 'month'){
@@ -108,7 +101,9 @@ var Chart = React.createClass({
       } else {
         overlapFormat = xf;
       }
-
+      //xAxis data are based on the level aggregation. e.g for week level and year overlapping we get 52 week dates.
+      //The viewing of these dates is formatted based on the previous level of the overlap value.
+      
       xAxis = {
         data: xaxisData,
         boundaryGap: false,
@@ -121,7 +116,7 @@ var Chart = React.createClass({
         formatter: (t) => (moment(t).utc().format(xf)),
       };    
     }
-
+    
     return (
       <div className="report-chart" id={['chart', field, level, reportName].join('--')}>
         <echarts.LineChart
@@ -146,7 +141,7 @@ var Chart = React.createClass({
 
   _consolidateData: function () {
     var result = {xaxisData: null, series: null};
-    var {field, level, reportName, series, scaleTimeAxis} = this.props;
+    var {level, reportName, series, scaleTimeAxis} = this.props;
 
     var {config} = this.context;
     var _config;
@@ -225,7 +220,7 @@ var Chart = React.createClass({
 
   _overlapData: function () {
     var result = {xaxisData: null, series: null};
-    var {field, level, reportName, series, scaleTimeAxis} = this.props;
+    var {level, reportName, series} = this.props;
     
     if (!series || !series.length || series.every(s => !s.data.length)){
       return result; // no data available    
@@ -326,7 +321,7 @@ var Chart = React.createClass({
   },
 
   _getNameForSeries: function ({ranking, population: target, metric, timespan}) {
-    //todo - refine label
+    //todo - refine label with shorter timelabel?
     var timeLabel = ' ' + moment(timespan[0]).format('DD/MM/YYYY') + '-' +  moment(timespan[1]).format('DD/MM/YYYY');
     var {nameTemplates} = this.constructor;
     var {config} = this.context;

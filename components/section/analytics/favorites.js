@@ -21,8 +21,6 @@ var { setTimezone, fetchFavouriteQueries, openFavourite,
       closeWarning, resetMapState, getFavouriteMap,
       getFavouriteChart, getFeatures} = require('../../../actions/FavouritesActions');
 
-//var ViewChart = require('../../../report-measurements/pane');
-
 var _getTimelineValues = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps();
@@ -130,7 +128,10 @@ var Favourites = React.createClass({
     };
     this.props.actions.openWarning(request);
   },
-
+  onLinkClick () {
+    //todo - consider keeping or discarding favourite
+  },
+  
   render: function() {
       var icon = 'list';
     var self = this;
@@ -195,14 +196,25 @@ var Favourites = React.createClass({
              footerContent = (
                 <Bootstrap.ListGroupItem>
                    <span style={{ paddingLeft : 7}}> </span>
-                   <Link to='/analytics/map' style={{ paddingLeft : 7, float: 'right'}}>View Maps</Link>
+                   <Link 
+                     to='/analytics/map' 
+                     style={{ paddingLeft : 7, float: 'right'}}
+                     onClick={this.onLinkClick}
+                     >View Maps</Link>
                   <span style={{ paddingLeft : 7}}> </span>
                    <Link to='/' style={{ paddingLeft : 7, float: 'right'}}>View Dashboard</Link>
                 </Bootstrap.ListGroupItem>
              );
            break;
        case 'CHART':
-         //todo - add overlaping pros to chart
+         var overlap, overlapping;
+         if(this.props.selectedFavourite.overlap){
+           overlap = {value:this.props.selectedFavourite.overlap, label: this.props.selectedFavourite.overlap};
+           overlapping = true;
+         } else {
+           overlap = null;
+           overlapping = false;
+         }
 
          title = 'Chart: ' + this.props.selectedFavourite.title;
              dataContent = (
@@ -217,6 +229,8 @@ var Favourites = React.createClass({
                    finished={this.props.finished}
                    series={this.props.data}
                    context={this.props.config}
+                   overlap={overlap}
+                   overlapping={overlapping}
                  />
               </Bootstrap.ListGroupItem>
             </Bootstrap.ListGroup>
@@ -225,7 +239,11 @@ var Favourites = React.createClass({
                footerContent = (
                   <Bootstrap.ListGroupItem>
                      <span style={{ paddingLeft : 7}}> </span>
-                     <Link to='/analytics/panel' style={{ paddingLeft : 7, float: 'right'}}>View Charts</Link>
+                     <Link 
+                       to='/analytics/panel' 
+                       style={{ paddingLeft : 7, float: 'right'}} 
+                       onClick={this.onLinkClick} 
+                        >View Charts</Link>
                     <span style={{ paddingLeft : 7}}> </span>
                      <Link to='/' style={{ paddingLeft : 7, float: 'right'}}>View Dashboard</Link>
                   </Bootstrap.ListGroupItem>

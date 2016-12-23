@@ -21,7 +21,6 @@ var {timespanPropType, populationPropType, seriesPropType, configPropType} = req
 var {equalsPair} = require('../../helpers/comparators');
 
 var Chart = require('./chart');
-var Checkbox = require('../Checkbox');
 
 var {Button, Collapse, Panel, ListGroup, ListGroupItem, Accordion} = Bootstrap;
 
@@ -29,9 +28,7 @@ var {PropTypes} = React;
 
 const REPORT_KEY = 'pane';
 const REPORT_MULTIPLE_KEY = 'pane/multiple';
-
 const MAX_QUERIES = 3;
-const YEARS = 5; //available past years in dropdown 
 const LEVEL_OPTIONS = 
   [
     { value: 'hour', label: 'hour' },
@@ -125,7 +122,12 @@ var shapeFavouriteQueries = function (favouriteQueries, config) {
 
     //set id
     query.id = i;
-
+    
+    //set overlapping
+    query.overlap = {};
+    query.overlap.value = favouriteQueries[i].overlap ? favouriteQueries[i].overlap : null;
+    query.overlap.label = favouriteQueries[i].overlap ? favouriteQueries[i].overlap : null;
+    
     query.query = {};
     
     //construct population 
@@ -158,6 +160,50 @@ var shapeFavouriteQueries = function (favouriteQueries, config) {
   }
 
   return multipleQueries;
+}
+
+var getTags = function (obj) {
+  var source = obj.props.source;
+  var level = obj.props.level;
+  var queries = obj.props.multipleQueries;
+  var time = '';
+  var populationTag = '';
+
+  for(let n=0; n<queries.length; n++){
+    if(queries[n].query.population.name){
+      populationTag += '/' +queries[n].query.population.name;
+    } else if(queries[n].query.population.type) {
+      populationTag += '/' +queries[n].query.population.type;
+    } else {
+      populationTag += '/Cluster';
+    }  
+  }
+
+  if(obj.state.overlapping){
+    var maxDuration = 0;
+
+    for(let k=0; k< queries.length; k++) {
+      var start1 = moment(queries[k].query.timespan[0]);
+      var end1 = moment(queries[k].query.timespan[1]);
+      var diff = moment(end1,"DD/MM/YYYY HH:mm:ss").diff(start1,"DD/MM/YYYY HH:mm:ss");
+      if(diff<0) {
+        console.error('Invalid timespan');
+      }
+      if(diff > maxDuration){
+        maxDuration = diff;
+      }
+    }
+    time = 'Overlap ' + moment.duration(maxDuration).humanize();
+    
+  } else {
+  
+    var q1t = computeTimespan(obj.props.multipleQueries[0].query.timespan);
+    var q2t = computeTimespan(obj.props.multipleQueries[obj.props.multipleQueries.length-1].query.timespan);
+    var start = q1t[0].format("DD/MM/YYYY");
+    var end = q2t[1].format("DD/MM/YYYY");
+    time = start + ' to ' + end;
+  }
+  return 'Chart - ' + source + ' - ' + time + ' - ' + 'Level: ' + level + ' - '+  populationTag;
 }
 //
 // Presentational components
@@ -366,33 +412,36 @@ var ReportPanel = React.createClass({
   },
 
   componentWillMount: function() {
-
+    //initializing favourite view (if editing favourite)
     if(this.props.favouriteChart&& this.props.favouriteChart.type == 'CHART'){
+      if(this.props.favouriteChart.overlap){
+        var overlap = {value:this.props.favouriteChart.overlap, label:this.props.favouriteChart.overlap};
+        this.setState({overlapping:true}); 
+        this._setOverlap(overlap);
+      }
       this.props.initMultipleQueries(
            this.props.favouriteChart.field, this.props.favouriteChart.level, 
              this.props.favouriteChart.reportName, 
                  shapeFavouriteQueries(this.props.favouriteChart.queries, this.context.config));
-    } 
+    }
   },
   componentDidMount: function () {
-    var cls = this.constructor;
+
     var {field, level, reportName} = this.props;
 
     if (_.isEmpty(field) || _.isEmpty(level) || _.isEmpty(reportName)) {
       return; // cannot yet initialize the target report
     }
 
-    var {timespan} = cls.configForReport(this.props, this.context);
-
-    if(!this.props.favouriteChart){
+    if(!(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART')) {
       var defaultQuery = getDefaultQuery(this);
       this.props.initMultipleQueries(field, level, reportName, [defaultQuery]);
-    }        
-    this.props.refreshMultipleData(field, level, reportName).then(() => (this.setState({draw: true})));
+      
+    } 
+      this.props.refreshMultipleData(field, level, reportName).then(() => (this.setState({draw: true})));
   },
 
   componentWillReceiveProps: function (nextProps, nextContext) {
-    var cls = this.constructor;
     
     // In any case, reset temporary copy of timespan, clear error/dirty flags
     this.setState({
@@ -412,8 +461,6 @@ var ReportPanel = React.createClass({
       ));
       console.assert(nextContext.config == this.context.config,
         'Unexpected change for configuration in context!');
-        
-      var {timespan} = cls.configForReport(nextProps, nextContext);
 
       if(this.props.multipleQueries.length > 0 ){
         nextProps.initMultipleQueries(
@@ -438,13 +485,7 @@ var ReportPanel = React.createClass({
           nextProps.field, nextProps.level, nextProps.reportName)
         ),
         100
-      );     
-//      setTimeout(
-//        () => (nextProps.refreshData(
-//          nextProps.field, nextProps.level, nextProps.reportName)
-//        ),
-//        100
-//      );
+      );
     }
   },
 
@@ -671,7 +712,7 @@ var ReportPanel = React.createClass({
       cluster = config.utility.clusters.find(k => (k.key == target.key));
       label = cluster.name;
     }
-    return label + ': ' + timeLabel; //todo - consider shorter time label if possible. Problem in case of many series
+    return label + ': ' + timeLabel; //todo - consider shorter time label
   }, 
   
   // Event handlers
@@ -723,7 +764,7 @@ var ReportPanel = React.createClass({
         // Todo
         break;
       case 'add':
-        var {multipleQueries, source, population} = this.props;
+        var {multipleQueries} = this.props;
 
         var cls = this.constructor;
         var {timespan} = cls.configForReport(this.props, this.context);  
@@ -731,6 +772,7 @@ var ReportPanel = React.createClass({
         var lastId = multipleQueries[multipleQueries.length-1].id;
         var queryTemp = {};
         queryTemp.id = lastId+1;
+        
         queryTemp.query = {
           timespan: timespan,
           population: popul          
@@ -763,11 +805,8 @@ var ReportPanel = React.createClass({
   },
   
   _setSource: function (source) {
-    var {field, level, reportName} = this.props;
-
-    //this.props.defaultFavouriteValues.source = false;
     this.props.setQuerySource(source.value);
-    //this.props.setSource(field, level, reportName, source);
+
     this.setState({dirty: true});
     return false;
   },
@@ -824,8 +863,7 @@ var ReportPanel = React.createClass({
   
   //set overlapping timespan for current query
   _setQueryOverlappingTimespan: function (value, query) { 
-    //this.props.defaultFavouriteValues.timespan = false;
-    
+
     var queryTimespan, overlapTimespan;
     if(this.state.overlapping){
       switch (this.state.viewMode) {
@@ -859,7 +897,6 @@ var ReportPanel = React.createClass({
       mq = [q];    
     }
     
-    //Todo - validate timespan when Custom values is implemented for overlapping.
     this.props.changeMultipleQueries(mq);
     
     var error = null;
@@ -869,10 +906,8 @@ var ReportPanel = React.createClass({
     return false;
   },  
   //set timespan for current query
-  _setQueryTimespan: function (value, query) { //todo - set interval not single datime value
+  _setQueryTimespan: function (value, query) { 
 
-    //this.props.defaultFavouriteValues.timespan = false;
-    
     var error = null, queryTimespan = null;
 
     // Validate
@@ -908,11 +943,9 @@ var ReportPanel = React.createClass({
       mq = [q];    
     }    
 
-    // If valid, invoke setTimespan()
+    // If valid, change timespan of selected query
     if (!error) {
-      var {field, level, reportName} = this.props;
       this.props.changeMultipleQueries(mq);
-      //this.props.setTimespan(field, level, reportName, timespan);
     }
 
     // Update state with (probably invalid) timespan (to keep track of user input)
@@ -945,7 +978,6 @@ var ReportPanel = React.createClass({
   
   _setQueryPopulation: function (clusterKey, groupKey, query) {
 
-    var {field, level, reportName} = this.props;
     var {config} = this.context;
 
     var target;
@@ -977,60 +1009,19 @@ var ReportPanel = React.createClass({
     var {defaults} = this.constructor;
     var {helpMessages} = defaults;
     var {config} = this.context;
-    var {fields, sources, levels} = config.reports.byType.measurements;
+    var {levels} = config.reports.byType.measurements;
     var overlap = config.reports.overlap.values;
     delete overlap.week; //excluding week from overlap options
 
     var {level} = this.props;
-    var clusterKey;
     var fragment1; // single element or array of keyed elements
     switch (this.state.formFragment) {
       case 'favourite':
         var favouriteButtonText = this.props.favouriteChart ? 'Update Favourite' : 'Add Favourite';
         {
           //Calculate tags
-
-          //var [t1, t2] = computeTimespan(this.props.timespan);
-          var [t1, t2] = computeTimespan(this.props.multipleQueries[0].query.timespan);
+          var tags = getTags(this);
           
-          var start = this.props.defaultFavouriteValues.timespan ?
-            moment(this.props.favouriteChart.query.time.start).format("DD/MM/YYYY") : t1.format("DD/MM/YYYY");
-
-          var end = this.props.defaultFavouriteValues.timespan ?
-            moment(this.props.favouriteChart.query.time.start).format("DD/MM/YYYY") : t2.format("DD/MM/YYYY");
-
-//          if(this.props.defaultFavouriteValues.population){
-//            clusterKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).clusterKey;
-//
-//            if(this.props.favouriteChart.query.population.length > 1){ //ClusterGroup with all groups
-//              groupKey = null;
-//            } else if(this.props.favouriteChart.query.population[0].type == 'UTILITY') { //Utility all
-//              clusterKey = groupKey = null;
-//            } else if(this.props.favouriteChart.query.population.length == 1){ //ClusterGroup with subgroup
-//              groupKey = population.Group.fromString(this.props.favouriteChart.query.population[0].label).key;
-//            } else{
-//              console.error('Could not resolve options for favourite population!');
-//            }
-//          }
-
-          var {clusters} = config.utility;
-          var selectedCluster = !clusterKey? null : clusters.find(c => (c.key == clusterKey));
-          var favouritePopulationTag = selectedCluster ? selectedCluster.name : 'Everyone';
-
-          var [clusterKey2, groupKey2] = population.extractGroupParams(this.props.population);
-
-          var selectedCluster2 = !clusterKey2? null : clusters.find(c => (c.key == clusterKey2));
-          var selectedPopulationTag = selectedCluster2 ? selectedCluster2.name : 'Everyone';
-
-          var defaultSource = this.props.source == 'device' ? 'AMPHIRO' : 'METER';
-
-          var tags = 'Chart - ' + (this.props.defaultFavouriteValues.source ? this.props.favouriteChart.query.source : defaultSource) + ' - ' +
-              (start + ' to ' + end) + ' - ' +
-                  (this.props.defaultFavouriteValues.levelMetric ? 'Level: ' +
-                      this.props.favouriteChart.level : 'Level: ' + this.props.level) + ' - ' +
-                          (this.props.defaultFavouriteValues.population ? favouritePopulationTag : selectedPopulationTag);
-          // \Calculate tags
-
           var enableHelpText = this.state.dirty ? 'Refresh to enable saving.' : '';
           fragment1 = (
             <div>
@@ -1060,19 +1051,6 @@ var ReportPanel = React.createClass({
       case 'source':
         {
           var {source} = this.props;
-          var sourceOptions = new Map(
-            _.intersection(_.keys(sources), fields[this.props.field].sources)
-              .map(k => ([k, sources[k].title]))
-          );
-          
-//          if(this.props.defaultFavouriteValues.source){
-//            if(this.props.favouriteChart.query.source == 'AMPHIRO'){
-//              source = 'device';
-//            }
-//            else{
-//              source = 'meter';
-//            }
-//          }
 
           fragment1 = (
             <div className="form-group">
@@ -1100,16 +1078,13 @@ var ReportPanel = React.createClass({
           var overlapOptions = Object.keys(overlap).map(function(key) {
             return {value: key, label: overlap[key].name};
           });
- 
-          var reportOptions = new Map(
-            _.values(
-              _.mapValues(levels[level].reports, (r, k) => ([k, r.title]))
-            )
-          );
+
           var reportOptions2 = Object.keys(levels[level].reports).map(function(key) {
             return {value: key, label: levels[level].reports[key].title};
           });
+          
           level = this.props.defaultFavouriteValues.metricLevel ? this.props.favouriteChart.level : level;
+          
           fragment1 = [
             (
               <div key="level" className="form-group" >
@@ -1179,15 +1154,63 @@ var ReportPanel = React.createClass({
   },
   
   _handleOverlapSwitchChange: function () {
-    //this.props.setQueryTimespan
+    var mq = this.props.multipleQueries;
+
+    for(let j=0; j<mq.length; j++){
+      var queryTimespan;
+      var query = mq[j].query;
+
+      var qTime = _.isString(query.timespan) ? computeTimespan(query.timespan)[0] : moment(query.timespan[0]);
+
+      switch (this.props.overlap.value) {
+        case 'year':
+          queryTimespan = [qTime.valueOf(), moment(qTime).add(1, 'year').valueOf()];
+        break;
+        case 'month':
+          queryTimespan = [qTime.valueOf(), moment(qTime).add(1, 'month').valueOf()];
+        break;
+        case 'day':
+          queryTimespan = [qTime.valueOf(), moment(qTime).add(1, 'day').valueOf()];
+        break;
+      }
+
+      mq[j].query.timespan = queryTimespan;
+    }
+
+    this.props.changeMultipleQueries(mq);
     this.setState({dirty: true, overlapping:!this.state.overlapping})
   },
   
   _setOverlap: function (value) {
     this.props.setOverlap(value);
+    var mq = this.props.multipleQueries;
+
+    for(let j=0; j<mq.length; j++){
+      var queryTimespan;
+      var query = mq[j].query;
+
+      var qTime = _.isString(query.timespan) ? computeTimespan(query.timespan)[0] : moment(query.timespan[0]);
+
+      switch (value.value) {
+        case 'year':
+          queryTimespan = [qTime.valueOf(), moment(qTime).add(1, 'year').valueOf()];
+        break;
+        case 'month':
+          queryTimespan = [qTime.valueOf(), moment(qTime).add(1, 'month').valueOf()];
+        break;
+        case 'day':
+          queryTimespan = [qTime.valueOf(), moment(qTime).add(1, 'day').valueOf()];
+        break;
+      }
+
+      mq[j].query.timespan = queryTimespan;
+    }
+
+    this.props.changeMultipleQueries(mq);    
     
-    var ov = value.value + 's'; //adding 's' to feed datePicker options
-    this.setState({dirty:true, panelChanged:true, viewMode:ov});
+    var vm = value.value + 's'; //adding 's' to feed datePicker options
+    
+    this.setState({dirty:true, panelChanged:true, viewMode:vm});
   },
 
   _renderParameterFragment: function (query) {
@@ -1195,21 +1218,18 @@ var ReportPanel = React.createClass({
     var {defaults} = this.constructor;
     var {helpMessages} = defaults;
     var {config} = this.context;
-    var {fields, sources, levels} = config.reports.byType.measurements;
     var {level} = this.props;
     var fragment1; // single element or array of keyed elements
     switch (this.state.parameterFragment) {
       case 'timespan':
         {
           var {timespan} = query.query;
-
+          var [t0, t1] = computeTimespan(timespan);
+          
           if(timespan == null){
             break;
           }
-          
-          var [t0, t1] = this.props.defaultFavouriteValues.timespan ? computeTimespan(
-              [this.props.favouriteChart.query.time.start,this.props.favouriteChart.query.time.end]) : computeTimespan(timespan);
-          
+
           var datetimeProps = _.merge({}, defaults.datetimeInputProps, {
             inputProps: {
               disabled: _.isString(timespan)? 'disabled' : null
@@ -1225,25 +1245,22 @@ var ReportPanel = React.createClass({
 
           timespanOptions.set('', 'Custom...');
 
-          if(!_.isString(query.query.timespan)){
-            var overlapTimespan;
-            switch (this.state.viewMode) {
-              case 'years':
-                overlapTimespan = moment(query.query.timespan[0]).format('YYYY');
-              break;
-              case 'months':
-                overlapTimespan = moment(query.query.timespan[0]).format('MMM YYYY');
-              break;
-              case 'days':
-                overlapTimespan = moment(query.query.timespan[0]).format('DD MMM YYYY');
-              break;
-            }
+          var viewTimespan = _.isString(timespan) ? t0 : timespan[0];
+
+          var overlapTimespan;
+          switch (this.state.viewMode) {
+            case 'years':
+              overlapTimespan = moment(viewTimespan).format('YYYY');
+            break;
+            case 'months':
+              overlapTimespan = moment(viewTimespan).format('MMM YYYY');
+            break;
+            case 'days':
+              overlapTimespan = moment(viewTimespan).format('DD MMM YYYY');
+            break;
           }
-          
+
           if(this.state.overlapping){
-            var refTimespan = computeTimespan(query.query.timespan);
-            var refTimeFromString = refTimespan[0].format('DD MMM YYYY');
-            var timeValue = _.isString(query.query.timespan)? query.query.timespan : overlapTimespan;
             fragment1 = (
               <div className="form-group">
                 <label className="col-sm-2 control-label">Overlap Time:</label>
@@ -1255,7 +1272,7 @@ var ReportPanel = React.createClass({
                     dateFormat={'MMM[,] YYYY'}
                     timeFormat= {false}
                     viewMode={this.state.viewMode}
-                    value={timeValue}
+                    value={overlapTimespan}
                     onChange={(val) => (this._setQueryOverlappingTimespan([val, t1], query))}
                    />
                   <p className="help text-muted">{helpMessages['timespan']}</p>
@@ -1372,40 +1389,11 @@ var ReportPanel = React.createClass({
   _clickedAddFavourite: function() {
   
     var {config} = this.context;
-    var multipleFavouriteRequest = [];
+    var {levels} = config.reports.byType.measurements;
+    var report = levels[this.props.level].reports[this.props.reportName];
+    
     var queries = this.props.multipleQueries;
-    
-    for(let i=0; i<queries.length;i++){
-      var [t1, t2] = computeTimespan(queries[i].query.timespan);
-
-      var start = this.props.defaultFavouriteValues.timespan ?
-        moment(this.props.favouriteChart.query.time.start).format("DD/MM/YYYY") : t1.format("DD/MM/YYYY");
-
-      var end = this.props.defaultFavouriteValues.timespan ?
-        moment(this.props.favouriteChart.query.time.end).format("DD/MM/YYYY") : t2.format("DD/MM/YYYY");
-
-      var clusterKey, groupKey;
-
-      var {clusters} = config.utility;
-      var selectedCluster = !clusterKey? null : clusters.find(c => (c.key == clusterKey));
-      var favouritePopulationTag = selectedCluster ? selectedCluster.name : 'Everyone';
-
-      var [clusterKey2, groupKey2] = population.extractGroupParams(queries[i].query.population);
-
-      var selectedCluster2 = !clusterKey2? null : clusters.find(c => (c.key == clusterKey2));
-      var selectedPopulationTag = selectedCluster2 ? selectedCluster2.name : 'Everyone';
-
-      var defaultSource = this.props.source == 'device' ? 'AMPHIRO' : 'METER';
-      var tags = 'Chart - ' + (this.props.defaultFavouriteValues.source ?
-          this.props.favouriteChart.query.source : defaultSource) + ' - ' +
-              (start + ' to ' + end) + ' - ' +
-                  (this.props.defaultFavouriteValues.levelMetric ? 'Level: ' +
-                      this.props.favouriteChart.level : 'Level: ' + this.props.level) + ' - ' +
-                          (this.props.defaultFavouriteValues.population ?
-                              favouritePopulationTag : selectedPopulationTag);
-      break; //todo- change above loop and redefine tags for multiple queries.                          
-    }
-    
+    var tags = getTags(this);
                      
     var namedQuery = {};
     namedQuery.type = 'Chart';
@@ -1414,17 +1402,18 @@ var ReportPanel = React.createClass({
     namedQuery.reportName = this.props.reportName;
     namedQuery.level = this.props.level;
     namedQuery.field = this.props.field;
+    namedQuery.overlap = this.state.overlapping ? this.props.overlap.value : null;
 
     namedQuery.queries = [];
 
-    for(let m=0; m<queries.length;m++){ 
+    for(let m=0; m<queries.length;m++){
       namedQuery.queries[m] = {};
       var [tt1, tt2] = computeTimespan(queries[m].query.timespan);
       namedQuery.queries[m].source = this.props.source;
       namedQuery.queries[m].time = {};
       namedQuery.queries[m].time.start = tt1.valueOf();
       namedQuery.queries[m].time.end = tt2.valueOf();
-      namedQuery.queries[m].time.granularity = this.props.level.toUpperCase();
+      namedQuery.queries[m].time.granularity = report.granularity;
 
       //the metric should be same for all series, except on peaks that MIN and MAX are both required
       var tempMetrics = [];
@@ -1440,7 +1429,7 @@ var ReportPanel = React.createClass({
         if(queries[m].series[k].ranking){
 
           var target = queries[m].series[k].population;
-          [clusterKey2, groupKey2] = population.extractGroupParams(target);
+          var [clusterKey2, groupKey2] = population.extractGroupParams(target);
           if (target instanceof population.Utility || target == null) {
             popu.label = ('UTILITY:'+queries[m].series[k].population.key.toString() + '/' + new population.Ranking(queries[m].series[k].ranking).toString());
             popu.utility = queries[m].series[k].population.key;
@@ -1476,7 +1465,6 @@ var ReportPanel = React.createClass({
         namedQuery.id = this.props.favouriteChart.id;
         this.props.updateFavourite(request);
       } else{
-
         this.props.addFavourite(request);
       }
     this.setState({dirty: true});
@@ -1602,11 +1590,6 @@ var ReportForm = React.createClass({
   },
 
   componentDidMount: function () {
-    var {level, reportName} = this.props;
-
-    var _config = this.context.config.reports.byType.measurements;
-    var report = _config.levels[level].reports[reportName];
-
     this.props.initMultipleQueries();
     this.props.refreshMultipleData();
   },
@@ -1620,8 +1603,6 @@ var ReportForm = React.createClass({
     ) {
       console.assert(nextContext.config == this.context.config,
         'Unexpected change for configuration in context!');
-      var _config = nextContext.config.reports.byType.measurements;
-      var report = _config.levels[nextProps.level].reports[nextProps.reportName];
 
       this.setState({dirty: false, error: null});
 
@@ -1939,7 +1920,7 @@ var ReportInfo = React.createClass({
 
   render: function () {
     var {field, level, reportName} = this.props;
-    var {errors, requests, requested, finished, series} = this.props;
+    var {errors, finished, series} = this.props;
     var paragraph, message;
 
     var n = !series? 0 : series.filter(s => (s.data.length > 0)).length;
@@ -1981,17 +1962,12 @@ ReportPanel = ReactRedux.connect(
     stateProps = {field, level, reportName};
 
     if (!ownProps.title){
-      //stateProps.title = 'Shared Settings';
       stateProps.title = fields[field].title;
     }  
-    var key = computeKey(field, level, reportName, REPORT_KEY);
-    
-    var key2 = computeKey(field, level, reportName, REPORT_MULTIPLE_KEY);
+
     var r2 = state.reports.measurements;
     if (r2) {
 
-      // Found an initialized intance of the report for (field, level, reportName)
-      var {multipleQueries} = r2;
       stateProps.multipleQueries = r2.multipleQueries;
       stateProps.source = r2.source;
       stateProps.finished = r2.finished;
@@ -2008,7 +1984,7 @@ ReportPanel = ReactRedux.connect(
     return stateProps;
   },
   (dispatch, ownProps) => {
-    var {setField, setLevel, setReport} = chartingActions;
+    var {setField, setReport} = chartingActions;
     var {initialize, setSource, setQuerySource, setTimespan, setPopulation,
          refreshData, refreshMultipleData, addFavourite, updateFavourite, addQuery, 
          removeSeries, initMultipleQueries, changeMultipleQueries, setOverlap} = reportingActions;
@@ -2094,9 +2070,7 @@ ReportForm = ReactRedux.connect(
 
 ReportInfo = ReactRedux.connect(
   (state, ownProps) => {
-    var {field, level, reportName} = ownProps;
     var _state = state.reports.measurements;
-    var key = computeKey(field, level, reportName, REPORT_KEY);
     var infoState = _.pick(_state, ['requested', 'finished', 'requests', 'errors']);
     infoState.series = mergeMultipleSeries(_state.multipleQueries);
     return infoState ? {} : infoState;

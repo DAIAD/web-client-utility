@@ -247,7 +247,7 @@ var FavouritesActions = {
       }
 
       Promise.all(promiseArray).then(
-        res => {       
+        res => {
           var source = favourite.queries[0].source; //source is same for all queries
           var resAll = [];
           for(let m=0; m< res.length; m++){
@@ -255,26 +255,25 @@ var FavouritesActions = {
               throw 'The request is rejected: ' + res[m].errors[0].description; 
             }
             var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
-
             var res1 = (resultSets || []).map(rs => {
               var [g, rr] = population.fromString(rs.label);
               
-              //Recalculate xAxis timespan based on returned data. 
+              //Recalculate xAxis timespan based on returned data. (scale)
               var timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
-              for(let j=0; j<favourite.queries.length; j++){ //loop to get 
+              for(let j=0; j<favourite.queries.length; j++){
                 var res2;
                 if (rr) {
                   var points = rs.points.map(p => ({
                     timestamp: p.timestamp,
                     values: p.users.map(u => u[rr.field][rr.metric]).sort(rr.comparator),
                   }));
-              
+
                   // Shape a result with ranking on users
                   res2 =  _.times(rr.limit, (i) => ({
                     source,
-                    timespan: [favourite.queries[j].time.start,favourite.queries[j].time.end],
-                    granularity: favourite.queries[j].time.granularity,
-                    metric: favourite.queries[j].metric,
+                    timespan: timespan1,
+                    granularity: favourite.queries[0].time.granularity,
+                    metric: favourite.queries[0].metric,
                     population: g,
                     ranking: {...rr.toJSON(), index: i},
                     data: points.map(p => ([p.timestamp, p.values[i] || null]))
