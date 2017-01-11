@@ -131,6 +131,20 @@ var _getCountersComplete = function(success, errors, counters) {
   };
 };
 
+var _saveLayoutRequest = function() {
+  return {
+    type : types.SAVE_LAYOUT_REQUEST
+  };
+};
+
+var _saveLayoutResponse = function(success, errors) {
+  return {
+    type : types.SAVE_LAYOUT_RESPONSE,
+    success : success,
+    errors : errors
+  };
+};
+
 var DashboardActions = {
   getChart : function(key, name, timezone) {
     return function(dispatch, getState) {
@@ -253,7 +267,24 @@ var DashboardActions = {
 
   getFeatures : function(index, timestamp, label) {
     return _getFeatures(index, timestamp, label);
-  }
+  }, 
+
+  saveLayout : function(layout) {
+    return function(dispatch, getState) {
+    
+      dispatch(_saveLayoutRequest());
+      
+      return adminAPI.saveLayout(layout).then(function(response) {
+      
+        dispatch(_saveLayoutResponse(response.success, response.errors));
+        
+      }, function(error) {
+      
+        dispatch(_saveLayoutResponse(false, error));
+        
+      });
+    };
+  }  
 };
 
 module.exports = DashboardActions;

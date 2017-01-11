@@ -13,7 +13,10 @@ var types = mirrorToPath({
   COUNTER_REQUEST : null,
   COUNTER_RESPONSE : null,
 
-  USER_RECEIVED_LOGOUT : null
+  USER_RECEIVED_LOGOUT : null,
+  
+  SAVE_LAYOUT_REQUEST : null,
+  SAVE_LAYOUT_RESPONSE :null
 
 });
 

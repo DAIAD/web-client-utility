@@ -17,7 +17,10 @@ var {FormattedTime} = require('react-intl');
 var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 
-var { getTimeline, getFeatures, getCounters, getChart, getDefaultChart } = require('../../actions/DashboardActions');
+var Maximizable = require('../Maximizable');
+
+var { getTimeline, getFeatures, getCounters, 
+      getChart, getDefaultChart, saveLayout } = require('../../actions/DashboardActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
@@ -57,6 +60,7 @@ var Dashboard = React.createClass({
     config: configPropType,     
   },
   componentWillMount : function() {
+    console.log(this);
     //TODO. Define the default query.
     var favourite = {
       title:"for dashboard",
@@ -94,7 +98,10 @@ var Dashboard = React.createClass({
 //    }
     this.props.actions.getCounters();
   },
-
+  toggleSize() {
+    console.log(this);
+  },
+  
   render: function() {
 
     var chartTitle = (
@@ -102,23 +109,12 @@ var Dashboard = React.createClass({
         <i className='fa fa-bar-chart fa-fw'></i>
         <span style={{ paddingLeft: 4 }}>Last 2 Week Consumption</span>
         <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button  bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-database fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button  bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-map fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button  bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-group fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3 }}>
-          <Bootstrap.Button  bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-calendar fa-fw'></i>
+          <Bootstrap.Button  
+            bsStyle='default' 
+            className='btn-circle'
+            onClick={this.toggleSize}
+            >
+            <i className='fa fa-arrows-alt fa-fw'></i>
           </Bootstrap.Button>
         </span>
       </span>
@@ -129,23 +125,12 @@ var Dashboard = React.createClass({
         <i className='fa fa-map fa-fw'></i>
         <span style={{ paddingLeft: 4 }}>Last 2 Week Consumption</span>
         <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button  bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-database fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-map fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          <Bootstrap.Button  bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-group fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3 }}>
-          <Bootstrap.Button  bsStyle='default' className='btn-circle' disabled >
-            <i className='fa fa-calendar fa-fw'></i>
+          <Bootstrap.Button  
+            bsStyle='default' 
+            className='btn-circle'
+            onClick={this.toggleSize}
+            >
+            <i className='fa fa-arrows-alt fa-fw'></i>
           </Bootstrap.Button>
         </span>
       </span>
@@ -177,9 +162,8 @@ var Dashboard = React.createClass({
       }
     };
 
-    chart = (
-      <Bootstrap.ListGroupItem className="report-chart-wrapper">
-        <Chart 
+    var maximizableChart = 
+        (<Chart 
           {...defaults.chartProps}
           draw={this.props.chart.draw} 
           field={'volume'}
@@ -190,9 +174,13 @@ var Dashboard = React.createClass({
           context={this.props.config}
           scaleTimeAxis={false}
         />
+    );
+    chart = (
+      <Bootstrap.ListGroupItem className="report-chart-wrapper">
+        {maximizableChart}
       </Bootstrap.ListGroupItem>              
     ); 
-    
+
     mapFilterTags.push(
       <FilterTag key='time' text={intervalLabel} icon='calendar' />
     );
@@ -306,15 +294,23 @@ var Dashboard = React.createClass({
     };
 
     var onLayoutChange = function(e) {
-
+      //if toggle size action, do nothing
+      
+      //if layout didn t change, do nothing
+      console.log('onLayoutChange');
+      console.log(this);
+      console.log(e);
+      this.props.actions.saveLayout(e);
     };
 
     var onBreakpointChange = function(e) {
-
+      console.log('onBreakpointChange');
+      console.log(e);
     };
 
     var onResizeStop = function(e) {
-
+      console.log('onResizeStop');
+      console.log(e);
     };
 
     return (
@@ -368,7 +364,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters,
-                                                     getChart, getDefaultChart }) , dispatch)
+                                                     getChart, getDefaultChart, saveLayout }) , dispatch)
   };
 }
 

@@ -161,65 +161,6 @@ var _extractTimeline = function(meters, areas) {
   return timeline;
 };
 
-var _extractSeries = function(interval, data, label) {
-  var d;
-  var series = [];
-
-  var ref = interval[1].clone();
-  var days = interval[1].diff(interval[0], 'days') + 1;
-
-  if ((data.length === 0) || (!data[0].points) || (data[0].points.length === 0)) {
-    for (d = days; d > 0; d--) {
-      series.push({
-        volume : 0,
-        date : ref.clone().toDate()
-      });
-
-      ref.subtract(1, 'days');
-    }
-  } else {
-    var index = 0;
-    var points = data[0].points;
-
-    points.sort(function(p1, p2) {
-      return (p2.timestamp - p1.timestamp);
-    });
-
-    for (d = days; d > 0; d--) {
-      if (index === points.length) {
-        series.push({
-          volume : 0,
-          date : ref.clone().toDate()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isBefore(points[index].timestamp, 'day')) {
-        index++;
-      } else if (ref.isAfter(points[index].timestamp, 'day')) {
-        series.push({
-          volume : 0,
-          date : ref.clone().toDate()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isSame(points[index].timestamp, 'day')) {
-        series.push({
-          volume : points[index].volume.SUM,
-          date : ref.clone().toDate()
-        });
-
-        index++;
-        ref.subtract(1, 'days');
-      }
-    }
-  }
-
-  return {
-    label : label,
-    data : series.reverse()
-  };
-};
-
 var statisticsReducer = function(state, action) {
   switch (action.type) {
     case types.COUNTER_REQUEST:
