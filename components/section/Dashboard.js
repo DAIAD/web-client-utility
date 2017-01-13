@@ -20,9 +20,11 @@ var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 var Maximizable = require('../Maximizable');
 
 var { getTimeline, getFeatures, getCounters, 
-      getChart, getDefaultChart, saveLayout } = require('../../actions/DashboardActions');
+      getChart, getDefaultChart, getProfileLayout, saveLayout} = require('../../actions/DashboardActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
+
+var _isMounted = false;
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -50,6 +52,14 @@ var _onChangeTimeline = function(value, label, index) {
 };
 
 var Dashboard = React.createClass({
+
+  getInitialState: function () {
+    return {
+      savedLayout: null,
+      layouts: null,
+    };
+  },
+
   _disabledActionHandler: function(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -59,7 +69,9 @@ var Dashboard = React.createClass({
     intl: React.PropTypes.object,
     config: configPropType,     
   },
+
   componentWillMount : function() {
+
     console.log(this);
     //TODO. Define the default query.
     var favourite = {
@@ -84,10 +96,12 @@ var Dashboard = React.createClass({
         source:"METER",
         metrics:["AVERAGE"]}
       };
+    this.props.actions.getProfileLayout();
     this.props.actions.getDefaultChart(favourite);
   },
-  
+
   componentDidMount : function() {
+    _isMounted = true;
     var utility = this.props.profile.utility;
 
     if(!this.props.map.timeline) {
@@ -98,10 +112,15 @@ var Dashboard = React.createClass({
 //    }
     this.props.actions.getCounters();
   },
+
+  componentWillUnmount : function() {
+    _isMounted = false;
+  },
+
   toggleSize() {
     console.log(this);
   },
-  
+
   render: function() {
 
     var chartTitle = (
@@ -294,6 +313,9 @@ var Dashboard = React.createClass({
     };
 
     var onLayoutChange = function(e) {
+      if(!_isMounted){
+        return;
+      }
       //if toggle size action, do nothing
       
       //if layout didn t change, do nothing
@@ -357,14 +379,16 @@ function mapStateToProps(state) {
     profile: state.session.profile,
     routing: state.routing,
     config: state.config,
-    defaultChart : state.dashboard.defaultChart
+    defaultChart : state.dashboard.defaultChart,
+    layouts: state.dashboard.layouts
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters,
-                                                     getChart, getDefaultChart, saveLayout }) , dispatch)
+                                                     getChart, getDefaultChart, 
+                                                     getProfileLayout, saveLayout }) , dispatch)
   };
 }
 

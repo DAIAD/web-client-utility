@@ -59,7 +59,11 @@ var AdminAPI = {
   saveLayout : function(layout) {
     var request = {layouts: layout};
     return api.json('/action/layout/save', request);
-  }  
+  },
+  
+  getLayout : function() {
+    return api.json('/action/layout/load');
+  }    
 };
 
 module.exports = AdminAPI;

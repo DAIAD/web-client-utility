@@ -145,6 +145,21 @@ var _saveLayoutResponse = function(success, errors) {
   };
 };
 
+var _getLayoutRequest = function() {
+  return {
+    type : types.GET_LAYOUT_REQUEST
+  };
+};
+
+var _getLayoutResponse = function(success, errors, layouts) {
+  return {
+    type : types.GET_LAYOUT_RESPONSE,
+    success : success,
+    errors : errors,
+    layouts : layouts
+  };
+};
+
 var DashboardActions = {
   getChart : function(key, name, timezone) {
     return function(dispatch, getState) {
@@ -284,7 +299,24 @@ var DashboardActions = {
         
       });
     };
-  }  
+  },
+  
+  getProfileLayout : function() {
+    return function(dispatch, getState) {
+    
+      dispatch(_getLayoutRequest());
+      
+      return adminAPI.getLayout().then(function(response) {
+      
+        dispatch(_getLayoutResponse(response.success, response.errors, response.layouts));
+        
+      }, function(error) {
+      
+        dispatch(_getLayoutResponse(false, error));
+        
+      });
+    };
+  }
 };
 
 module.exports = DashboardActions;

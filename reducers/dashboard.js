@@ -292,7 +292,15 @@ var dashboard = function(state, action) {
         map : mapReducer(state.map, action),
         chart : chartReducer(state.chart, action)
       });
-
+    case types.GET_LAYOUT_REQUEST:
+      return Object.assign({}, state, {
+        isLoading : true
+      });
+    case types.GET_LAYOUT_RESPONSE:
+      return Object.assign({}, state, {
+        isLoading : false,
+        layouts : action.layouts
+      });      
     case types.USER_RECEIVED_LOGOUT:
       return _createInitialState();
 
