@@ -299,7 +299,7 @@ var dashboard = function(state, action) {
     case types.GET_LAYOUT_RESPONSE:
       return Object.assign({}, state, {
         isLoading : false,
-        layouts : action.layouts
+        savedLayout : action.savedLayout
       });      
     case types.USER_RECEIVED_LOGOUT:
       return _createInitialState();

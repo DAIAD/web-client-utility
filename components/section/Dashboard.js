@@ -18,14 +18,22 @@ var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 
 var Maximizable = require('../Maximizable');
+var _ = require('lodash');
 
 var { getTimeline, getFeatures, getCounters, 
       getChart, getDefaultChart, getProfileLayout, saveLayout} = require('../../actions/DashboardActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
+Chart = Maximizable(Chart);
 
-var _isMounted = false;
-
+//var defaultLayout = [
+//  { i: 'chart', x: 0, y: 0, w: 12, h: 14, minH: 14, maxH: 14},
+//  { i: 'map', x: 0, y: 12, w: 12, h: 20, minH: 20, maxH: 20}
+//];
+var defaultLayout = [
+  { i: 'chart', x: 0, y: 0, w: 12, h: 14},
+  { i: 'map', x: 0, y: 12, w: 12, h: 20}
+];
 var _getTimelineValues = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps();
@@ -97,11 +105,14 @@ var Dashboard = React.createClass({
         metrics:["AVERAGE"]}
       };
     this.props.actions.getProfileLayout();
+    console.log('will mount, geting profilelayout:');
+    console.log(this.props.layouts);
     this.props.actions.getDefaultChart(favourite);
+    //todo - get favourite chart/map instead of default?
   },
 
   componentDidMount : function() {
-    _isMounted = true;
+
     var utility = this.props.profile.utility;
 
     if(!this.props.map.timeline) {
@@ -114,15 +125,16 @@ var Dashboard = React.createClass({
   },
 
   componentWillUnmount : function() {
-    _isMounted = false;
+
   },
 
   toggleSize() {
     console.log(this);
+    
   },
 
   render: function() {
-
+    console.log(this.props.counters);
     var chartTitle = (
       <span>
         <i className='fa fa-bar-chart fa-fw'></i>
@@ -181,8 +193,9 @@ var Dashboard = React.createClass({
       }
     };
 
-    var maximizableChart = 
-        (<Chart 
+    chart = (
+      <Bootstrap.ListGroupItem className="report-chart-wrapper">
+        <Chart 
           {...defaults.chartProps}
           draw={this.props.chart.draw} 
           field={'volume'}
@@ -193,10 +206,6 @@ var Dashboard = React.createClass({
           context={this.props.config}
           scaleTimeAxis={false}
         />
-    );
-    chart = (
-      <Bootstrap.ListGroupItem className="report-chart-wrapper">
-        {maximizableChart}
       </Bootstrap.ListGroupItem>              
     ); 
 
@@ -209,36 +218,34 @@ var Dashboard = React.createClass({
     mapFilterTags.push(
       <FilterTag key='source' text='Meter' icon='database' />
     );
-   
+
     map = (
       <Bootstrap.ListGroup fill>
         <Bootstrap.ListGroupItem>
-          <LeafletMap style={{ width: '100%', height: 600}}
-                      elementClassName='mixin'
-                      prefix='map'
-                      center={[38.36, -0.479]}
-                      zoom={13}
-                      mode={LeafletMap.MODE_CHOROPLETH}
-                      choropleth= {{
-                        colors : ['#2166ac', '#67a9cf', '#d1e5f0', '#fddbc7', '#ef8a62', '#b2182b'],
-                        min : this.props.map.timeline ? this.props.map.timeline.min : 0,
-                        max : this.props.map.timeline ? this.props.map.timeline.max : 0,
-                        data : this.props.map.features
-                      }}
-                      overlays={[
-                        { url : '/assets/data/meters.geojson',
-                          popupContent : 'serial'
-                        }
-                      ]}
+          <LeafletMap 
+            style={{ width: '100%', height: 600}}
+            elementClassName='mixin'
+            prefix='map'
+            center={[38.36, -0.479]}
+            zoom={13}
+            mode={LeafletMap.MODE_CHOROPLETH}
+            choropleth= {{
+              colors : ['#2166ac', '#67a9cf', '#d1e5f0', '#fddbc7', '#ef8a62', '#b2182b'],
+                min : this.props.map.timeline ? this.props.map.timeline.min : 0,
+                max : this.props.map.timeline ? this.props.map.timeline.max : 0,
+                data : this.props.map.features
+            }}
+            overlays={[{ url : '/assets/data/meters.geojson', popupContent : 'serial'}]}
           />
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem>
-          <Timeline   onChange={_onChangeTimeline.bind(this)}
-                      labels={ _getTimelineLabels(this.props.map.timeline) }
-                      values={ _getTimelineValues(this.props.map.timeline) }
-                      defaultIndex={this.props.map.index}
-                      speed={1000}
-                      animate={false}>
+          <Timeline   
+            onChange={_onChangeTimeline.bind(this)}
+            labels={ _getTimelineLabels(this.props.map.timeline) }
+            values={ _getTimelineValues(this.props.map.timeline) }
+            defaultIndex={this.props.map.index}
+            speed={1000}
+            animate={false}>
           </Timeline>
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem className='clearfix'>
@@ -282,7 +289,6 @@ var Dashboard = React.createClass({
     var chartPanel = ( <div /> );
     //if(this.props.chart.data) {
       chartPanel = (
-        <div key='0' className='draggable'>
           <Bootstrap.Panel header={chartTitle}>
             <Bootstrap.ListGroup fill>
               {chart}
@@ -295,7 +301,6 @@ var Dashboard = React.createClass({
               </Bootstrap.ListGroupItem>
             </Bootstrap.ListGroup>
           </Bootstrap.Panel>
-        </div>
       );
     //}
 
@@ -306,23 +311,12 @@ var Dashboard = React.createClass({
     );
 
     var layouts = {
-      lg : [
-            { i: '0', x: 0, y: 0, w: 12, h: 14, minH: 14, maxH: 14},
-            { i: '1', x: 0, y: 12, w: 12, h: 20, minH: 20, maxH: 20}
-          ]
+      lg : this.props.savedLayout ? this.props.savedLayout : defaultLayout
     };
 
+    console.log({lg:defaultLayout}, {lg : this.props.savedLayout});
     var onLayoutChange = function(e) {
-      if(!_isMounted){
-        return;
-      }
-      //if toggle size action, do nothing
-      
-      //if layout didn t change, do nothing
-      console.log('onLayoutChange');
-      console.log(this);
-      console.log(e);
-      this.props.actions.saveLayout(e);
+
     };
 
     var onBreakpointChange = function(e) {
@@ -331,10 +325,32 @@ var Dashboard = React.createClass({
     };
 
     var onResizeStop = function(e) {
-      console.log('onResizeStop');
-      console.log(e);
     };
-
+    
+    var onDragStop = function(e) {
+      //todo - if maximize/minimize action, do nothing
+      console.log('comparing e,saved : ');
+      console.log(e, this.props.savedLayout);      
+      if(!_.isEqual(e, this.props.savedLayout)){
+      
+//        var layoutString = JSON.stringify({"layout": e});
+//        
+//        var profileData = {"configuration" : layoutString};
+//
+//        this.props.actions.saveLayout(profileData);
+//        
+        //todo - support multiple components in swap
+        if(e[0].i !== e[1].i){
+          let temp = e[0];
+          defaultLayout[0] = e[1];
+          defaultLayout[1] = temp;
+        }
+        var defaultLayoutString = JSON.stringify({"layout": defaultLayout});
+        var defaultProfileData = {"configuration" : defaultLayoutString};
+        
+        this.props.actions.saveLayout(defaultProfileData);
+      }
+    };
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>
@@ -344,20 +360,26 @@ var Dashboard = React.createClass({
         </div>
         {counterComponents}
         <div className='row' style={{ overflow : 'hidden' }}>
-          <ResponsiveReactGridLayout  className='clearfix'
-                          layouts={layouts}
-                          rowHeight={30}
-                          onLayoutChange={onLayoutChange.bind(this)}
-                          onBreakpointChange={onBreakpointChange.bind(this)}
-                          onResizeStop={onResizeStop.bind(this)}
-                          breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}
-                          cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}}
-                          autoSize={true}
-                          verticalCompact={true}
-                          isResizable={false}
-                          draggableHandle='.panel-heading'>
-            {chartPanel}
-            <div key='1' className='draggable'>
+          <ResponsiveReactGridLayout  
+            className='clearfix'
+            layouts={layouts}
+            rowHeight={30}
+            onLayoutChange={onLayoutChange.bind(this)}
+            onBreakpointChange={onBreakpointChange.bind(this)}
+            onResizeStop={onResizeStop.bind(this)}
+            onDragStop={onDragStop.bind(this)}
+            breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}}
+            cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}}
+            autoSize={true}
+            verticalCompact={true}
+            isResizable={true}
+            measureBeforeMount
+            draggableHandle='.panel-heading'>
+             
+            <div key='chart' className='draggable'>
+              {chartPanel}
+            </div>        
+            <div key='map' className='draggable'>
               {mapPanel}
             </div>
           </ResponsiveReactGridLayout>
@@ -371,6 +393,7 @@ Dashboard.icon = 'dashboard';
 Dashboard.title = 'Section.Dashboard';
 
 function mapStateToProps(state) {
+  
   return {
     interval: state.dashboard.interval,
     map: state.dashboard.map,
@@ -380,7 +403,7 @@ function mapStateToProps(state) {
     routing: state.routing,
     config: state.config,
     defaultChart : state.dashboard.defaultChart,
-    layouts: state.dashboard.layouts
+    savedLayout: state.dashboard.savedLayout
   };
 }
 

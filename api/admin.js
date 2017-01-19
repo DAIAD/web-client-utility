@@ -57,12 +57,11 @@ var AdminAPI = {
   },
   
   saveLayout : function(layout) {
-    var request = {layouts: layout};
-    return api.json('/action/layout/save', request);
+    return api.json('/action/profile/save', layout);
   },
   
   getLayout : function() {
-    return api.json('/action/layout/load');
+    return api.json('/action/profile/load');
   }    
 };
 

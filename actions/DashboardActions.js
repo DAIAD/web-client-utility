@@ -151,12 +151,14 @@ var _getLayoutRequest = function() {
   };
 };
 
-var _getLayoutResponse = function(success, errors, layouts) {
+var _getLayoutResponse = function(success, errors, layout) {
+  var configuration = JSON.parse(layout);
+
   return {
     type : types.GET_LAYOUT_RESPONSE,
     success : success,
     errors : errors,
-    layouts : layouts
+    savedLayout : configuration.layout
   };
 };
 
@@ -268,7 +270,7 @@ var DashboardActions = {
 
       return adminAPI.getCounters().then(function(response) {
         var counters = null;
-
+        
         if (response.success) {
           counters = response.counters;
         }
@@ -307,8 +309,8 @@ var DashboardActions = {
       dispatch(_getLayoutRequest());
       
       return adminAPI.getLayout().then(function(response) {
-      
-        dispatch(_getLayoutResponse(response.success, response.errors, response.layouts));
+
+        dispatch(_getLayoutResponse(response.success, response.errors, response.profile.configuration));
         
       }, function(error) {
       
