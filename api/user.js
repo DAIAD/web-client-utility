@@ -2,10 +2,6 @@ var api = require('./base');
 
 var UserAPI = {
 
-  filterUserByPrefix : function(prefix) {
-    return api.json('/action/user/' + prefix);
-  },
-
   getAccounts : function(query) {
     return api.json('/action/user/search', {
       query : query
@@ -14,10 +10,6 @@ var UserAPI = {
 
   fetchUser : function(user_id) {
     return api.json('/action/user/' + user_id);
-  },
-
-  fetchUserGroupMembershipInfo : function(user_id) {
-    return api.json('/action/group/list/member/' + user_id);
   },
 
   addFavorite : function(userKey) {

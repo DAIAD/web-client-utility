@@ -328,7 +328,7 @@ var GroupCatalog  = React.createClass({
 });
 
 GroupCatalog.icon = 'group';
-GroupCatalog.title = 'Section.Demographics';
+GroupCatalog.title = 'Section.Groups';
 
 function mapStateToProps(state) {
   return {

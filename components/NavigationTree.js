@@ -147,7 +147,7 @@ var NavigationTree = React.createClass({
                   <li>
                     <Link to='/groups'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-group fa-fw'></i>{' ' + _t({ id: 'Section.Demographics'})}
+                        <i className='fa fa-group fa-fw'></i>{' ' + _t({ id: 'Section.Groups'})}
                       </span>
                     </Link>
                   </li>

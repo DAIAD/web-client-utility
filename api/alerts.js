@@ -17,7 +17,7 @@ var ManageAlertsAPI = {
       return api.json('/action/recommendation/static/delete', tip);
     },
     getAllUtilityUsers: function() {
-      return api.json('/action/admin/trial/activity');
+      return api.json('/action/utility/user/all');
     },
     getAnnouncements: function(){
       return api.json('/action/announcement/history');
@@ -30,10 +30,10 @@ var ManageAlertsAPI = {
       return api.json('/action/announcement/broadcast', {announcement : announcement, receiverAccountList : receiverAccountList});
     },
     getAllGroups: function(){
-      return api.json('/action/group/list');
+      return api.json('/action/groups');
     },
     getUsersOfGroup: function(groupUUID){
-      return api.json(`/action/group/accounts/current/${groupUUID}`, groupUUID, 'GET');
+      return api.json(`/action/group/members/${groupUUID}`, groupUUID, 'GET');
     },
     deleteAnnouncement: function(announcement){
       return api.json('/action/announcement/delete', announcement);

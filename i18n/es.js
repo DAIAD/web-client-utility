@@ -44,9 +44,9 @@
         "ReportPanel": "Charts"
       },
       "Forecasting": "Forecasting",
-      "Demographics": "Groups",
       "ModeManagement": "Mode Management",
       "Users": "Users",
+      "Groups": "Groups",
       "Messages": "Messages",
       "Settings": "Settings",
       "Reports": {
@@ -71,62 +71,6 @@
   },
   "Page": {
     "PasswordReset":"Reset Password"
-  },
-  "Demographics" : {
-    "Group" : "Groups",
-    "Favourites" : {
-      "Type" : "Type",
-      "Name" : "Name",
-      "AddedOn" : "Added On"
-    },
-    "GroupMembers" : {
-      "Name" : "Name",
-      "Email" : "E-mail",
-      "RegisteredOn" : "Registered On"
-    },
-    "NewGroup" : {
-      "NewGroup" : "New group",
-      "Name" : "Group Name",
-      "NamePlaceholder" : "Please enter the group name.",
-      "CurrentMembers" : "Current Members",
-      "PossibleMembers" : "Possible Members"
-    },
-    "NewFavourite" : {
-      "Label" : "Label",
-      "LabelPlaceholder" : "Please type the item's label.",
-      "Account" : {
-        "FavouriteAccountInfo" : "Favourite Account Info",
-        "Name" : "Name",
-        "Email" : "E-mail",
-        "Gender" : {
-          "label" : "Gender",
-          "values" : {
-            "Male" : "Male",
-            "Female" : "Female"
-          }
-        },
-        "CreatedOn" : "Created On",
-        "City" : "City",
-        "Country" : "Country",
-        "NumDevices" : "Number of Devices"
-      },
-      "Group" : {
-        "FavouriteGroupInfo" : "Favourite Group Info"
-      },
-      "Status" : {
-        "Label" : "Status",
-        "Included" : "Included",
-        "NotIncluded" : "Not Included"
-      }
-    },
-    "JobManagement" : {
-      "Description" : "Description",
-      "Owner" : "Owner",
-      "CreatedOn" : "Created On",
-      "NextExecution" : "Next Execution",
-      "Status" : "Status",
-      "Progress" : "Progress"
-    }
   },
   "Settings" : {
     "User" : "User Preferences",
