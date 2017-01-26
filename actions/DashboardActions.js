@@ -1,9 +1,10 @@
 var adminAPI = require('../api/admin');
 var queryAPI = require('../api/query');
+var favouritesAPI = require('../api/favourites');
 var population = require('../model/population');
 var types = require('../constants/DashboardActionTypes');
 
-var _buildTimelineQuery = function(key, name, timezone, interval) {
+var _buildTimelineQuery = function(key, name, timezone, interval) {//todo - replace with favourite if exists
   return {
     'query' : {
       'timezone' : timezone,
@@ -102,7 +103,7 @@ var _chartResponse = function(success, errors, data, t=null) {
     type : types.CHART_RESPONSE,
     success : success,
     errors : errors,
-    data : data,
+    data : success ? data : [],
     timestamp: (t || new Date()).getTime()
   };
 };
@@ -151,17 +152,110 @@ var _getLayoutRequest = function() {
   };
 };
 
-var _getLayoutResponse = function(success, errors, layout) {
-  var configuration = JSON.parse(layout);
-
+var requestedFavouriteQueries = function () {
   return {
-    type : types.GET_LAYOUT_RESPONSE,
-    success : success,
-    errors : errors,
-    savedLayout : configuration.layout
+    type: types.FAVOURITES_REQUEST
   };
 };
 
+var receivedFavouriteQueries = function (success, errors, favourites) {
+  return {
+    type: types.FAVOURITES_RESPONSE,
+    success: success,
+    errors: errors,
+    favourites: favourites
+  };
+};
+
+var _getLayoutResponse = function(success, errors, layout) {
+  if(layout){  
+    var configuration = JSON.parse(layout);
+    return {
+      type : types.GET_LAYOUT_RESPONSE,
+      success : success,
+      errors : errors,
+      savedLayout : configuration.layout
+    };
+  } else { //initialize layout when running first time
+    var initLayout = [{"i":"chart","x":1,"y":20,"w":12,"h":14},{"i":"map","x":0,"y":0,"w":12,"h":20}];
+    return {
+      type : types.GET_LAYOUT_RESPONSE,
+      success : success,
+      errors : errors,
+      savedLayout : initLayout
+    };    
+  }
+  
+};
+var getDefaultChart = function(favourite) {
+    return function(dispatch, getState) {
+    
+      dispatch(_chartRequest());
+      
+      var promiseArray =[];
+      for(let i=0; i<favourite.queries.length; i++){
+        promiseArray.push(queryAPI.queryMeasurements({query: favourite.queries[i]}));  
+      }
+
+      Promise.all(promiseArray).then(
+        res => {
+          var source = favourite.queries[0].source; //source is same for all queries
+          var resAll = [];
+          for(let m=0; m< res.length; m++){
+            if (res[m].errors.length) {
+              throw 'The request is rejected: ' + res[m].errors[0].description; 
+            }
+            var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
+            var res1 = (resultSets || []).map(rs => {
+              var [g, rr] = population.fromString(rs.label);
+              
+              //Recalculate xAxis timespan based on returned data. (scale)
+              var timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              for(let j=0; j<favourite.queries.length; j++){
+                var res2;
+                if (rr) {
+                  var points = rs.points.map(p => ({
+                    timestamp: p.timestamp,
+                    values: p.users.map(u => u[rr.field][rr.metric]).sort(rr.comparator),
+                  }));
+
+                  // Shape a result with ranking on users
+                  res2 =  _.times(rr.limit, (i) => ({
+                    source,
+                    timespan: timespan1,
+                    granularity: favourite.queries[0].time.granularity,
+                    metric: favourite.queries[0].metric,
+                    population: g,
+                    ranking: {...rr.toJSON(), index: i},
+                    data: points.map(p => ([p.timestamp, p.values[i] || null]))
+                  }));
+                } else {
+                  // Shape a normal timeseries result for requested metrics
+                  // Todo support other metrics (as client-side "average")
+                  res2 = favourite.queries[j].metrics.map(metric => ({
+                    source,
+                    timespan: timespan1,
+                    granularity: favourite.queries[j].time.granularity,
+                    metric,
+                    population: g,
+                    data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+                  }));
+                }
+                return _.flatten(res2);
+              }
+            });
+            resAll.push(_.flatten(res1)); 
+          }
+          var success = res.every(x => x.success === true); 
+          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors
+          dispatch(_chartResponse(success, errors, _.flatten(resAll)));          
+
+          return _.flatten(resAll);
+        }
+      );
+    };
+  };
+  
 var DashboardActions = {
   getChart : function(key, name, timezone) {
     return function(dispatch, getState) {
@@ -185,7 +279,7 @@ var DashboardActions = {
       });
     };
   },
-  getDefaultChart : function(favourite) {
+  getDefaultChart : function(favourite) {//todo - to be removed
     return function(dispatch, getState) {
       dispatch(_chartRequest());
       return queryAPI.queryMeasurements({query: favourite.query}).then(
@@ -285,7 +379,24 @@ var DashboardActions = {
   getFeatures : function(index, timestamp, label) {
     return _getFeatures(index, timestamp, label);
   }, 
+  
+  fetchFavouriteQueries : function() {
+    return function(dispatch, getState) {
+      dispatch(requestedFavouriteQueries());
+      return favouritesAPI.fetchFavouriteQueries().then(function (response) {
 
+        dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
+
+        var charts = response.queries.filter(function(fav){return fav.type === 'CHART';});
+
+        dispatch(getDefaultChart(charts[0]));
+        
+      }, function (error) {
+        dispatch(receivedFavouriteQueries(false, error, null));
+      });
+    };
+  },
+  
   saveLayout : function(layout) {
     return function(dispatch, getState) {
     

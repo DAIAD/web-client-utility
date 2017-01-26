@@ -238,6 +238,7 @@ var chartReducer = function(state, action) {
         data: null
       });
     case types.CHART_RESPONSE:
+
       if (action.success) {
         return Object.assign({}, state, {
           draw: true,
@@ -251,6 +252,7 @@ var chartReducer = function(state, action) {
           data : null
         });
       }
+      
     default:
       return state || _createChartInitialState();
   }
@@ -300,7 +302,16 @@ var dashboard = function(state, action) {
       return Object.assign({}, state, {
         isLoading : false,
         savedLayout : action.savedLayout
-      });      
+      });   
+    case types.FAVOURITES_REQUEST:
+      return Object.assign({}, state, {
+        isLoading: true
+      });
+    case types.FAVOURITES_RESPONSE:
+      return Object.assign({}, state, {
+        isLoading: false,
+        favourites: action.favourites
+      });          
     case types.USER_RECEIVED_LOGOUT:
       return _createInitialState();
 

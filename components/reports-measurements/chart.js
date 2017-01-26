@@ -8,7 +8,6 @@ var {consolidateFuncs} = require('../../reports').measurements;
 var {seriesPropType, configPropType} = require('../../prop-types');
 var PropTypes = React.PropTypes;
 var theme = require('../chart/themes/blue');
-var maximizable = require('../Maximizable');
 
 var Chart = React.createClass({
   statics: {
@@ -348,4 +347,4 @@ var Chart = React.createClass({
   }
 });
 
-module.exports = maximizable(Chart);
+module.exports = Chart;

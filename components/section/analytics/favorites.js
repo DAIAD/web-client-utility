@@ -68,7 +68,7 @@ var Favourites = React.createClass({
   componentWillMount : function() {
     this.props.actions.resetMapState();
     this.props.actions.fetchFavouriteQueries();
-      this.setState({points : createPoints()});
+    this.setState({points : createPoints()});
    },
 
   componentDidMount : function() {
@@ -83,6 +83,7 @@ var Favourites = React.createClass({
   },
 
   clickedOpenFavourite(favourite) {
+
     favourite.timezone = this.props.profile.utility.timezone;
     this.props.actions.closeFavourite();
     if(favourite.type == 'MAP'){
@@ -128,6 +129,15 @@ var Favourites = React.createClass({
     };
     this.props.actions.openWarning(request);
   },
+  
+  pinToDashboard(namedQuery) {
+    console.log(this);
+//    var request =  {
+//      'namedQuery' : namedQuery
+//    };
+    //this.props.actions.openWarning(request);
+  },
+  
   onLinkClick () {
     //todo - consider keeping or discarding favourite
   },
@@ -326,12 +336,18 @@ var Favourites = React.createClass({
            type:'action',
            icon: 'copy',
            handler: function() {
-         self.duplicateFavourite(this.props.row);
+             self.duplicateFavourite(this.props.row);
            }
         }, {
            name: 'link',
            type:'action',
            icon: 'link',
+           handler: function() {
+           }
+        }, {
+           name: 'pin',
+           type:'action',
+           icon: 'hand-o-up',
            handler: function() {
            }
         }, {

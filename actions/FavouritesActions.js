@@ -296,8 +296,10 @@ var FavouritesActions = {
             resAll.push(_.flatten(res1)); 
           }
           
-          dispatch(_chartResponse(res.success, res.errors, _.flatten(resAll)));
-
+          var success = res.every(x => x.success === true); 
+          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors
+          dispatch(_chartResponse(success, errors, _.flatten(resAll)));
+          
           return _.flatten(resAll);
         }
       );

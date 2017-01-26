@@ -18,10 +18,12 @@ var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 
 var Maximizable = require('../Maximizable');
+
 var _ = require('lodash');
 
 var { getTimeline, getFeatures, getCounters, 
-      getChart, getDefaultChart, getProfileLayout, saveLayout} = require('../../actions/DashboardActions');
+      getChart, getDefaultChart, getProfileLayout, 
+      fetchFavouriteQueries, saveLayout} = require('../../actions/DashboardActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 Chart = Maximizable(Chart);
@@ -31,9 +33,37 @@ Chart = Maximizable(Chart);
 //  { i: 'map', x: 0, y: 12, w: 12, h: 20, minH: 20, maxH: 20}
 //];
 var defaultLayout = [
-  { i: 'chart', x: 0, y: 0, w: 12, h: 14},
-  { i: 'map', x: 0, y: 12, w: 12, h: 20}
+  { i: 'chart', x: 1, y: 12, w: 12, h: 14},
+  { i: 'map', x: 0, y: 0, w: 12, h: 20}
 ];
+
+//var dashboardWrapper = function (props) {
+//    var defaults= {
+//      chartProps: {
+//        width: '100%',
+//        height: 300,
+//      }
+//    };
+//  return class DashboardChannel extends React.Component {
+//    render() {
+//      return Maximizable(
+//          <Chart 
+//            {...defaults.chartProps}
+//            draw={props.chart.draw} 
+//            field={'volume'}
+//            level={'week'}
+//            reportName={'avg-daily-avg'}
+//            finished={props.chart.finished}
+//            series={props.chart.data ? props.chart.data : []}
+//            context={props.config}
+//            scaleTimeAxis={false}
+//            maximized={true}
+//          />
+//      )
+//    }
+//  }
+//}
+
 var _getTimelineValues = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps();
@@ -61,13 +91,6 @@ var _onChangeTimeline = function(value, label, index) {
 
 var Dashboard = React.createClass({
 
-  getInitialState: function () {
-    return {
-      savedLayout: null,
-      layouts: null,
-    };
-  },
-
   _disabledActionHandler: function(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -80,35 +103,9 @@ var Dashboard = React.createClass({
 
   componentWillMount : function() {
 
-    console.log(this);
-    //TODO. Define the default query.
-    var favourite = {
-      title:"for dashboard",
-      tags:"Chart - METER - 01/07/2016 to 01/10/2016 - Level: week - Everyone",
-      reportName:"avg-daily-avg",
-      level:"week",
-      field:"volume",
-      query:{
-        time:{
-          type:"ABSOLUTE",
-          granularity:"WEEK",
-          start:moment().subtract(150, 'day').valueOf(),
-          end:moment().valueOf(),
-          duration:null,
-          durationTimeUnit:"HOUR"},
-        population:[{
-          type:"UTILITY",
-          label:"UTILITY:941be15c-a8ea-40c9-8502-9b790d2a99f3",
-          ranking:null,
-          utility:"941be15c-a8ea-40c9-8502-9b790d2a99f3"}],
-        source:"METER",
-        metrics:["AVERAGE"]}
-      };
     this.props.actions.getProfileLayout();
-    console.log('will mount, geting profilelayout:');
-    console.log(this.props.layouts);
-    this.props.actions.getDefaultChart(favourite);
-    //todo - get favourite chart/map instead of default?
+    this.props.actions.fetchFavouriteQueries();
+
   },
 
   componentDidMount : function() {
@@ -118,23 +115,21 @@ var Dashboard = React.createClass({
     if(!this.props.map.timeline) {
       this.props.actions.getTimeline(utility.key, utility.name, utility.timezone);
     }
-//    if(!this.props.chart.series) {
-//      this.props.actions.getChart(utility.key, utility.name, utility.timezone);
-//    }
+
     this.props.actions.getCounters();
+    //this.props.actions.getDefaultChart(favourite);
   },
-
+  
   componentWillUnmount : function() {
-
+    //
   },
 
   toggleSize() {
     console.log(this);
-    
   },
 
   render: function() {
-    console.log(this.props.counters);
+    
     var chartTitle = (
       <span>
         <i className='fa fa-bar-chart fa-fw'></i>
@@ -193,6 +188,12 @@ var Dashboard = React.createClass({
       }
     };
 
+//    var chartMx = dashboardWrapper(this.props);
+//    chart = (
+//      <Bootstrap.ListGroupItem className="report-chart-wrapper">
+//      {chartMx}
+//      </Bootstrap.ListGroupItem>       
+//    );
     chart = (
       <Bootstrap.ListGroupItem className="report-chart-wrapper">
         <Chart 
@@ -212,9 +213,11 @@ var Dashboard = React.createClass({
     mapFilterTags.push(
       <FilterTag key='time' text={intervalLabel} icon='calendar' />
     );
+   
     mapFilterTags.push(
       <FilterTag key='spatial' text='Alicante' icon='map' />
     );
+   
     mapFilterTags.push(
       <FilterTag key='source' text='Meter' icon='database' />
     );
@@ -286,6 +289,15 @@ var Dashboard = React.createClass({
       </div>
     );
 
+//    var counter2 = (
+//      <ChartBox 
+//        {...infobox} 
+//         width={this.state.el ? this.state.el.clientWidth : '100%'}
+//         height={this.state.el ? this.state.el.clientHeight - 90 : null}
+//      /> 
+//    );
+
+
     var chartPanel = ( <div /> );
     //if(this.props.chart.data) {
       chartPanel = (
@@ -311,12 +323,10 @@ var Dashboard = React.createClass({
     );
 
     var layouts = {
-      lg : this.props.savedLayout ? this.props.savedLayout : defaultLayout
+      lg : this.props.savedLayout
     };
 
-    console.log({lg:defaultLayout}, {lg : this.props.savedLayout});
     var onLayoutChange = function(e) {
-
     };
 
     var onBreakpointChange = function(e) {
@@ -326,31 +336,35 @@ var Dashboard = React.createClass({
 
     var onResizeStop = function(e) {
     };
-    
+
     var onDragStop = function(e) {
       //todo - if maximize/minimize action, do nothing
-      console.log('comparing e,saved : ');
-      console.log(e, this.props.savedLayout);      
-      if(!_.isEqual(e, this.props.savedLayout)){
-      
-//        var layoutString = JSON.stringify({"layout": e});
-//        
-//        var profileData = {"configuration" : layoutString};
-//
-//        this.props.actions.saveLayout(profileData);
-//        
-        //todo - support multiple components in swap
-        if(e[0].i !== e[1].i){
-          let temp = e[0];
-          defaultLayout[0] = e[1];
-          defaultLayout[1] = temp;
+      var changed = [];
+      for(let k=0; k<defaultLayout.length; k++){
+        var lay = defaultLayout[k];
+        for(let l=0; l<e.length; l++){
+          if(e[l].i == defaultLayout[k].i){
+            //we don t allow side by side components in layout because of resizing discrepancies
+            //lay.x = e[l].x;  
+            lay.y = e[l].y;
+          }
         }
-        var defaultLayoutString = JSON.stringify({"layout": defaultLayout});
-        var defaultProfileData = {"configuration" : defaultLayoutString};
-        
-        this.props.actions.saveLayout(defaultProfileData);
+        changed.push(lay);
       }
+      
+      var layoutString = JSON.stringify({"layout": changed});
+      var defaultProfileData = {"configuration" : layoutString};
+      
+      this.props.actions.saveLayout(defaultProfileData);
     };
+
+    //layout not loaded yet
+    if(!this.props.savedLayout){
+      return(<div> </div>);
+    } else if(this.props.savedLayout.lg){
+      return(<div> </div>);
+    }
+
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>
@@ -372,7 +386,7 @@ var Dashboard = React.createClass({
             cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}}
             autoSize={true}
             verticalCompact={true}
-            isResizable={true}
+            isResizable={false}
             measureBeforeMount
             draggableHandle='.panel-heading'>
              
@@ -393,7 +407,7 @@ Dashboard.icon = 'dashboard';
 Dashboard.title = 'Section.Dashboard';
 
 function mapStateToProps(state) {
-  
+
   return {
     interval: state.dashboard.interval,
     map: state.dashboard.map,
@@ -403,14 +417,15 @@ function mapStateToProps(state) {
     routing: state.routing,
     config: state.config,
     defaultChart : state.dashboard.defaultChart,
-    savedLayout: state.dashboard.savedLayout
+    savedLayout: state.dashboard.savedLayout,
+    favourites: state.dashboard.favourites
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters,
-                                                     getChart, getDefaultChart, 
+                                                     getChart, getDefaultChart, fetchFavouriteQueries,  
                                                      getProfileLayout, saveLayout }) , dispatch)
   };
 }
