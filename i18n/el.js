@@ -39,9 +39,9 @@
       "Dashboard": "Περίληψη",
 	    "Analytics":"Ανάλυση",
 	    "Forecasting": "Πρόβλεψη",
-	    "Demographics": "Ομάδες",
 	    "ModeManagement": "Διαχείριση Κατάστασης",
 	    "Users": "Χρήστες",
+      "Groups": "Ομάδες",
 	    "Messages": "Μηνύματα",
 	    "Settings": "Ρυθμίσεις",
       "Reports": {
@@ -68,62 +68,6 @@
 	},
 	"Page": {
 	  "PasswordReset":"Reset Password"
-	},
-	"Demographics" : {
-		"Group" : "Ομάδες Καταναλωτών",
-		"Favourites" : {
-	    "Type" : "Τύπος",
-	    "Name" : "Όνομα",
-	    "AddedOn" : "Προστέθηκε"
-	  },
-    "GroupMembers" : {
-      "Name" : "Όνομα",
-      "Email" : "E-mail",
-      "RegisteredOn" : "Εγγράφηκε"
-    },
-    "NewGroup" : {
-      "NewGroup" : "Νέα ομάδα",
-      "Name" : "Όνομα Ομάδας",
-      "NamePlaceholder" : "Παρακαλώ εισάγετε το όνομα της ομάδας.",
-      "CurrentMembers" : "Τρέχοντα Μέλη",
-      "PossibleMembers" : "Πιθανά Μέλη"
-    },
-    "NewFavourite" : {
-      "Label" : "Ετικέτα",
-      "LabelPlaceholder" : "Παρακαλώ πληκτρολογήστε την ετικέτα του στοιχείου.",
-      "Account" : {
-        "FavouriteAccountInfo" : "Πληροφορίες Αγαπημένου Λογαριασμού",
-        "Name" : "Όνομα",
-        "Email" : "E-mail",
-        "Gender" : {
-          "label" : "Φύλο",
-          "values" : {
-            "Male" : "Άνδρας",
-            "Female" : "Γυναίκα"
-          }
-        },
-        "CreatedOn" : "Δημιουργήθηκε",
-        "City" : "Πόλη",
-        "Country" : "Χώρα",
-        "NumDevices" : "Αριθμός Συσκευών"
-      },
-      "Group" : {
-        "FavouriteGroupInfo" : "Πληροφορίες Αγαπημένης Ομάδας"
-      },
-      "Status" : {
-        "Label" : "Κατάσταση",
-        "Included" : "Περιλαμβάνεται",
-        "NotIncluded" : "Δεν περιλαμβάνεται"
-      }
-    },
-    "JobManagement" : {
-      "Description" : "Περιγραφή",
-      "Owner" : "Κάτοχος",
-      "CreatedOn" : "Δημιουργήθηκε",
-      "NextExecution" : "Επόμενη Εκτέλεση",
-      "Status" : "Κατάσταση",
-      "Progress" : "Πρόοδος"
-    }
 	},
 	"Settings" : {
 		"User" : "Επιλογές Χρήστη",

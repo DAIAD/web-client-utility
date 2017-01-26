@@ -13,7 +13,7 @@ var createMembersRows = function(membersInfo){
     var member = {
         id: m.id,
         user: m.name,
-        registeredOn: new Date (m.registrationDateMils),
+        registeredOn: new Date (m.createdOn),
         email: m.email
     };
     members[m.id] = member;

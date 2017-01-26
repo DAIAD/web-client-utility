@@ -4,8 +4,6 @@ var {FormattedDate} = require('react-intl');
 var { Link } = require('react-router');
 var Table = require('./Table');
 
-var UpsertFavouriteForm = require('./section/demographics/UpsertFavouriteForm');
-
 var { connect } = require('react-redux');
 var { bindActionCreators } = require('redux');
 
@@ -93,30 +91,7 @@ var Group = React.createClass({
           </span>
         );
 
-      if (this.props.application === 'favouriteGroupForm'){
-        return (
-            <UpsertFavouriteForm
-            type = 'GROUP'
-            itemId = {this.props.params.id}
-            actions = {{
-              cancelAction : this.props.hideFavouriteGroupForm,
-              refreshParentForm : function (){}
-            }}
-          />
-        );
-      } else if (this.props.application === 'favouriteAccountForm'){
-        return (
-            <UpsertFavouriteForm
-            type = 'ACCOUNT'
-            itemId = {this.props.accountId}
-            actions = {{
-              cancelAction : this.props.hideFavouriteAccountForm,
-              refreshParentForm : function (){}
-            }}
-          />
-        );
-      } else  if (this.props.groupInfo && this.props.currentMembers){
-
+      if (this.props.groupInfo && this.props.currentMembers){
         return (
 
           <div className='container-fluid' style={{ paddingTop: 10 }}>

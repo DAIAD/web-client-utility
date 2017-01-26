@@ -14,7 +14,6 @@ var User = require('../components/User');
 var UserCatalog = require('../components/section/UserCatalog');
 var Group = require('../components/Group');
 var GroupCatalog = require('../components/section/GroupCatalog');
-var CreateGroupForm = require('../components/section/demographics/CreateGroupForm');
 var Device = require('../components/Device');
 var Forecasting = require('../components/section/Forecasting');
 var Scheduler = require('../components/section/Scheduler');
@@ -52,7 +51,6 @@ module.exports = (
     <Route path="/user/:id" component={User} />
     <Route path="/groups" component={GroupCatalog} />
     <Route path="/group/:id" component={Group} />
-		<Route path="/group/create" component={CreateGroupForm} />
     <Route path="/device/:id" component={Device} />
     <Route path="/scheduler" component={Scheduler} />
     <Route path="/announcements" component={Announcements} />

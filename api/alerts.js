@@ -5,50 +5,50 @@ var ManageAlertsAPI = {
       return api.json('/action/utility/current');
     },
     getTips: function(locale){
-      return api.json('/action/recommendation/static/' + locale);
+      return api.json('/action/tip/localized/' + locale);
     },
     saveActiveTips: function(changedRows){
-      return api.json('/action/recommendation/static/status/save/', changedRows);
+      return api.json('/action/tip/status/save/', changedRows);
     },
     insertTip: function(tip){
-      return api.json('/action/recommendation/static/insert', tip);
+      return api.json('/action/tip/save', tip);
     },
     deleteTip: function(tip){
-      return api.json('/action/recommendation/static/delete', tip);
+      return api.json('/action/tip/delete', tip);
     },
     getAllUtilityUsers: function() {
-      return api.json('/action/admin/trial/activity');
+      return api.json('/action/utility/user/all');
     },
     getAnnouncements: function(){
       return api.json('/action/announcement/history');
     },
     broadcastAnnouncement: function(users, announcement) {
-      var receiverAccountList = [];
+      var receivers = [];
       for(var obj in users){
-        receiverAccountList.push({accountId : users[obj].id, username : users[obj].username, lastName : users[obj].lastName});
+        receivers.push({accountId: users[obj].id, username: users[obj].username});
       }
-      return api.json('/action/announcement/broadcast', {announcement : announcement, receiverAccountList : receiverAccountList});
+      return api.json('/action/announcement/broadcast', {announcement: announcement, receivers: receivers});
     },
     getAllGroups: function(){
-      return api.json('/action/group/list');
+      return api.json('/action/groups');
     },
     getUsersOfGroup: function(groupUUID){
-      return api.json(`/action/group/accounts/current/${groupUUID}`, groupUUID, 'GET');
+      return api.json(`/action/group/members/${groupUUID}`, groupUUID, 'GET');
     },
     deleteAnnouncement: function(announcement){
-      return api.json('/action/announcement/delete', announcement);
+      return api.json('/action/announcement/delete/' + announcement.id, {});
     },
     fetchAnnouncement: function(announcement){
       return api.json('/action/announcement/details/' + announcement.id);
     },
     getMessageStatistics: function(query){
-      return api.json('/action/recommendation/dynamic/statistics', query);
+      return api.json('/action/recommendation/statistics', query);
     },
     getAlertReceivers: function(id, query){
-      return api.json('/action/recommendation/dynamic/alert/receivers/' + id, query);
+      return api.json('/action/alert/receivers/' + id, query);
     },
     getRecommendationReceivers: function(id, query){
-      return api.json('/action/recommendation/dynamic/recommendation/receivers/' + id, query);
+      return api.json('/action/recommendation/receivers/' + id, query);
     }
 };
 

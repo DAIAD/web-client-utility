@@ -16,12 +16,12 @@ var receivedGroupInfo = function (success, errors, groupInfo){
   };
 };
 
-var receivedGroupMembers = function (success, errors, groupMembersInfo){
+var receivedGroupMembers = function (success, errors, members){
   return {
     type : types.GROUP_RECEIVE_GROUP_MEMBERS,
     success : success,
     errors : errors,
-    members : groupMembersInfo
+    members : members
   };
 };
 
@@ -36,7 +36,7 @@ var GroupActions = {
         dispatch(receivedGroupInfo(response.success, response.errors, response.groupInfo));
 
         return GroupAPI.fetchGroupMembers(groupId).then( function (response) {
-          dispatch(receivedGroupMembers(response.success, response.errors, response.groupMembersInfo));
+          dispatch(receivedGroupMembers(response.success, response.errors, response.members));
         }, function (error) {
           dispatch(receivedGroupMembers(false, error, null));
         });
