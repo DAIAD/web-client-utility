@@ -23,24 +23,20 @@ var requestedUsers = function() {
   };
 };
 
-var receivedCurrentUtilityUsers = function(success, errors, accounts) {
+var receivedCurrentUtilityUsers = function(success, errors, members) {
   var initialUsers = [];
-  for(var obj in accounts){
-    var currentId, currentUsername, currentLastName, elementTemp;
-    for(var prop in accounts[obj]){
-      if(prop == "accountId"){
-        currentId = accounts[obj][prop];
-      }
-      else if(prop == "lastName"){
-        currentLastName = accounts[obj][prop];
-      }
-      else if(prop == "username"){
-        currentUsername = accounts[obj][prop];
-      }
-    }
-    elementTemp = {id: currentId, lastName: currentLastName, username : currentUsername, selected: false};
-    initialUsers.push(elementTemp);
+
+  if(members) {
+    initialUsers = members.map( m => {
+      return {
+        id: m.id,
+        lastName: m.name,
+        username: m.email,
+        selected: false
+      };
+    });
   }
+
   return {
     type : types.ANNC_RECEIVED_USERS,
     isLoading: false,
@@ -144,7 +140,7 @@ var AnnouncementsActions = {
       dispatch(requestedUsers());
 
       return alertsAPI.getAllUtilityUsers().then(function(response) {
-        dispatch(receivedCurrentUtilityUsers(response.success, response.errors, response.accounts));
+        dispatch(receivedCurrentUtilityUsers(response.success, response.errors, response.members));
       }, function(error) {
         dispatch(receivedCurrentUtilityUsers(false, error, null));
       });
@@ -154,7 +150,7 @@ var AnnouncementsActions = {
     return function(dispatch, getState) {
       dispatch(requestedUsers());
       return alertsAPI.getUsersOfGroup(groupUUID).then(function(response) {
-        dispatch(receivedCurrentUtilityUsers(response.success, response.errors, response.accounts));
+        dispatch(receivedCurrentUtilityUsers(response.success, response.errors, response.members));
       }, function(error) {
         dispatch(receivedCurrentUtilityUsers(false, error, null));
       });

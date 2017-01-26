@@ -5,14 +5,12 @@ var i18n = require('./i18n');
 var session = require('./session');
 var dashboard = require('./dashboard');
 var map = require('./map');
-var demographics = require('./demographics');
 var forecasting = require('./forecasting');
 var group = require('./group');
 var groupCatalog=  require('./group-catalog');
 var user = require('./user');
 var password = require('./password');
 var userCatalog=  require('./user-catalog');
-var upsertFavouriteForm = require('./upsertFavouriteForm');
 var favourites = require('./favourites');
 var mode_management = require('./mode_management');
 var admin = require('./admin');
@@ -38,14 +36,12 @@ var rootReducer = combineReducers({
   dashboard,
   forecasting,
   map,
-  demographics,
   group,
   groupCatalog,
   user,
   password,
   userCatalog,
   favourites,
-  upsertFavouriteForm,
   mode_management,
   admin,
   alerts,

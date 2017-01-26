@@ -1,12 +1,12 @@
 var api = require('./base');
 
 var GroupAPI = {
-    fetchGroupInfo: function(group_id) {
-      return api.json('/action/group/' + group_id);
+    fetchGroupInfo: function(key) {
+      return api.json(`/action/group/${key}`);
     },
 
-    fetchGroupMembers: function(group_id) {
-      return api.json('/action/group/members/current/' + group_id);
+    fetchGroupMembers: function(key) {
+      return api.json(`/action/group/members/${key}`);
     },
 
     create: function(title, members) {

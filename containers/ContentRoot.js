@@ -84,13 +84,13 @@ var ContentRoot = React.createClass({
 
   componentDidUpdate: function (prevProps, prevState) {
 
-    // Detect a successfull login, and try to configure the client side.
+    // Detect a successful login, and try to configure the client side.
     // This usually includes requesting configuration parts from the server side.
     if (!prevProps.isAuthenticated && this.props.isAuthenticated) {
       this.props.actions.configure();
     }
 
-    // Todo On a successfull logout, we should probably deconfigure the client
+    // Todo On a successful logout, we should probably deconfigure the client
     // (if the configuration holds any security-sensitive parts).
   },
 
