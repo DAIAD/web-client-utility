@@ -27,7 +27,7 @@ var _getTimelineValues = function(timeline) {
   }
   return [];
 };
-
+var tempActive = true;
 var _getTimelineLabels = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps().map(function(timestamp) {
@@ -130,12 +130,10 @@ var Favourites = React.createClass({
     this.props.actions.openWarning(request);
   },
   
-  pinToDashboard(namedQuery) {
+  pinToDashboard(row) {
+    console.log(row);
     console.log(this);
-//    var request =  {
-//      'namedQuery' : namedQuery
-//    };
-    //this.props.actions.openWarning(request);
+
   },
   
   onLinkClick () {
@@ -338,17 +336,23 @@ var Favourites = React.createClass({
            handler: function() {
              self.duplicateFavourite(this.props.row);
            }
-        }, {
-           name: 'link',
-           type:'action',
-           icon: 'link',
-           handler: function() {
-           }
-        }, {
+        }, 
+//          {
+//           name: 'link',
+//           type:'action',
+//           icon: 'link',
+//           handler: function() {
+//           }
+//        }, 
+        {
            name: 'pin',
            type:'action',
-           icon: 'hand-o-up',
+           icon: function(field, row) {
+             return (row.pinned === false ? 'map-pin' : null);
+           },
+           hidden: false,
            handler: function() {
+             self.pinToDashboard(this.props.row);
            }
         }, {
            name: 'remove',
