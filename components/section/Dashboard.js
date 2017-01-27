@@ -63,6 +63,43 @@ var defaultLayout = [
 //    }
 //  }
 //}
+var getPinnedCharts = function(ob) {
+  //if no pinned charts, return default chart
+  var charts = [];
+  
+  //if(!ob){
+    var favourite = {
+      title:"for dashboard",
+      tags:"Chart - Meter",
+      reportName:"avg-daily-avg",
+      level:"week",
+      field:"volume",
+      query:{
+        time:{
+          type:"ABSOLUTE",
+          granularity:"WEEK",
+          start:moment().subtract(150, 'day').valueOf(),
+          end:moment().valueOf(),
+          duration:null,
+          durationTimeUnit:"HOUR"},
+        population:[{
+          type:"UTILITY",
+          label:"UTILITY:941be15c-a8ea-40c9-8502-9b790d2a99f3",
+          ranking:null,
+          utility:"941be15c-a8ea-40c9-8502-9b790d2a99f3"}],
+        source:"METER",
+        metrics:["AVERAGE"]}
+    };  
+    return [favourite];
+  //}
+  //return charts;
+};
+
+var getPinnedMaps = function(favourites) {
+  //if no pinned charts, return default chart
+  var maps = [];
+  return maps;
+}
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -75,10 +112,11 @@ var _getTimelineLabels = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps().map(function(timestamp) {
       return (
-        <FormattedTime  value={new Date(timestamp)}
-                        day='numeric'
-                        month='numeric'
-                        year='numeric'/>
+        <FormattedTime  
+          value={new Date(timestamp)}
+          day='numeric'
+          month='numeric'
+          year='numeric'/>
       );
     });
   }
@@ -117,7 +155,7 @@ var Dashboard = React.createClass({
     }
 
     this.props.actions.getCounters();
-    //this.props.actions.getDefaultChart(favourite);
+
   },
   
   componentWillUnmount : function() {
@@ -127,13 +165,35 @@ var Dashboard = React.createClass({
   toggleSize() {
     console.log(this);
   },
-
+  
+  unpin() {
+    console.log(this);
+  },
+  
   render: function() {
+
+    var pinnedCharts;
+    if(this.props.favourites){
+      pinnedCharts = getPinnedCharts(this);
+    }
     
+//    var ctitles,
+//    for(var k=0; k<pinnedCharts.length; k++){
+//      
+//    }
     var chartTitle = (
       <span>
-        <i className='fa fa-bar-chart fa-fw'></i>
+        <i key='chart1' className='fa fa-bar-chart fa-fw'></i>
         <span style={{ paddingLeft: 4 }}>Last 2 Week Consumption</span>
+        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
+          <Bootstrap.Button  
+            bsStyle='default' 
+            className='btn-circle'
+            onClick={this.unpin}
+            >
+            <i className='fa fa-remove fa-fw'></i>
+          </Bootstrap.Button>
+        </span>
         <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
           <Bootstrap.Button  
             bsStyle='default' 

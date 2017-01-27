@@ -34,6 +34,20 @@ var addFavouriteResponse = function (success, errors) {
   };
 };
 
+var pinRequest = function () {
+  return {
+    type: types.FAVOURITES_PIN_REQUEST
+  };
+};
+
+var pinResponse = function (success, errors) {
+  return {
+    type: types.FAVOURITES_PIN_RESPONSE,
+    success: success,
+    errors: errors
+  };
+};
+
 var deleteFavouriteResponse = function (success, errors) {
   return {
     type: types.FAVOURITES_DELETE_QUERY_RESPONSE,
@@ -137,6 +151,7 @@ var FavouritesActions = {
       timezone : timezone
     };
   },
+  
   fetchFavouriteQueries : function() {
     return function(dispatch, getState) {
       dispatch(requestedFavouriteQueries());
@@ -164,6 +179,7 @@ var FavouritesActions = {
         });
     };
   },
+  
   deleteFavourite : function(event) {
     return function(dispatch, getState) {
       dispatch(addFavouriteRequest());
@@ -181,6 +197,7 @@ var FavouritesActions = {
         });
     };
   },
+  
   openFavourite : function(favourite) {
     return{
       type : types.FAVOURITES_OPEN_SELECTED,
@@ -188,6 +205,7 @@ var FavouritesActions = {
       selectedFavourite: favourite
     };
   },
+  
   getFavouriteMap : function(favourite) {
     return function(dispatch, getState) {
       var population, source, geometry, interval, timezone;
@@ -236,6 +254,7 @@ var FavouritesActions = {
       });
     };
   },
+  
   getFavouriteChart : function(favourite) {
     return function(dispatch, getState) {
     
@@ -305,9 +324,11 @@ var FavouritesActions = {
       );
     };
   },
+  
   getFeatures : function(index, timestamp, label) {
     return _getFeatures(index, timestamp, label);
   },
+  
   closeFavourite : function() {
     return{
       type : types.FAVOURITES_CLOSE_SELECTED,
@@ -324,23 +345,43 @@ var FavouritesActions = {
       selectedFavourite: favourite
     };
   },
+  
   openWarning : function(favourite) {
     return {
       type : types.FAVOURITES_DELETE_QUERY_REQUEST,
       favouriteToBeDeleted: favourite
     };
   },
+  
   closeWarning : function() {
     return {
       type : types.FAVOURITES_CANCEL_DELETE_QUERY,
       favouriteToBeDeleted: null
     };
   },
+  
   resetMapState : function() {
     return {
       type : types.FAVOURITES_RESET_MAP_STATE
     };
-  }
+  },
+  
+  pinToDashboard : function(query) {
+    return function(dispatch, getState) {
+      dispatch(pinRequest());
+      return favouritesAPI.pinFavourite(query).then(function (response) {
+        dispatch(pinResponse(response.success, response.errors));
+        dispatch(requestedFavouriteQueries());
+        return favouritesAPI.fetchFavouriteQueries().then(function (response) {
+          dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
+        }, function (error) {
+          dispatch(receivedFavouriteQueries(false, error, null));
+        });
+          }, function (error) {
+            dispatch(pinResponse(false, error));
+        });
+    };
+  }  
 };
 
 

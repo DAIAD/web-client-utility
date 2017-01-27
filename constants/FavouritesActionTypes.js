@@ -24,7 +24,9 @@ var types = mirrorToPath({
   FAVOURITES_RESET_MAP_STATE : null,
   FAVOURITES_GET_FEATURES : null,
   FAVOURITES_CHART_REQUEST: null,
-  FAVOURITES_CHART_RESPONSE: null
+  FAVOURITES_CHART_RESPONSE: null,
+  FAVOURITES_PIN_REQUEST: null,
+  FAVOURITES_PIN_RESPONSE: null
 });
 
 module.exports = types;

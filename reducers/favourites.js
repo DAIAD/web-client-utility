@@ -262,15 +262,7 @@ var favourites = function (state, action) {
       return Object.assign({}, state, {
         showDeleteMessage : true,
         favouriteToBeDeleted: action.favouriteToBeDeleted
-      });    
-    case types.FAVOURITES_CONFIRM_DELETE_QUERY:
-      return Object.assign({}, state, {
-        isLoading : true
-      });  
-    case types.FAVOURITES_CANCEL_DELETE_QUERY:
-      return Object.assign({}, state, {
-        showDeleteMessage : false
-      });       
+      }); 
     case types.FAVOURITES_DELETE_QUERY_RESPONSE:
       return Object.assign({}, state, {
         isLoading : false,
@@ -278,8 +270,23 @@ var favourites = function (state, action) {
         isActiveFavourite: false,
         showSelected: false,        
         selectedFavourite: null
+      });
+    case types.FAVOURITES_PIN_REQUEST:
+      return Object.assign({}, state, {
+        isLoading : true
       }); 
-    
+    case types.FAVOURITES_PIN_RESPONSE:
+      return Object.assign({}, state, {
+        isLoading : false
+      });          
+    case types.FAVOURITES_CONFIRM_DELETE_QUERY:
+      return Object.assign({}, state, {
+        isLoading : true
+      });  
+    case types.FAVOURITES_CANCEL_DELETE_QUERY:
+      return Object.assign({}, state, {
+        showDeleteMessage : false
+      });
     default:
       return state || initialState;
   }

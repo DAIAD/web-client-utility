@@ -19,7 +19,7 @@ var { setTimezone, fetchFavouriteQueries, openFavourite,
       closeFavourite, setActiveFavourite,
       addCopy, deleteFavourite, openWarning,
       closeWarning, resetMapState, getFavouriteMap,
-      getFavouriteChart, getFeatures} = require('../../../actions/FavouritesActions');
+      getFavouriteChart, getFeatures, pinToDashboard } = require('../../../actions/FavouritesActions');
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -130,10 +130,11 @@ var Favourites = React.createClass({
     this.props.actions.openWarning(request);
   },
   
-  pinToDashboard(row) {
-    console.log(row);
-    console.log(this);
-
+  pinToDashboard(namedQuery) {
+    var request =  {
+      'namedQuery' : namedQuery
+    };    
+    this.props.actions.pinToDashboard(request);
   },
   
   onLinkClick () {
@@ -474,7 +475,7 @@ function mapDispatchToProps(dispatch) {
                                                      openFavourite, closeFavourite, setActiveFavourite,
                                                      addCopy, deleteFavourite, openWarning, closeWarning,
                                                      resetMapState, getFavouriteMap, getFavouriteChart,
-                                                     getFeatures}) , dispatch)
+                                                     getFeatures, pinToDashboard }) , dispatch)
   };
 }
 

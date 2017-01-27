@@ -13,7 +13,10 @@ var FavouritesAPI = {
     },
     deleteFavourite: function(request) {
       return api.json('/action/data/query/delete', request);
-    }
+    },
+    pinFavourite: function(request) {
+      return api.json('/action/data/query/pin', request);
+    }    
   };
 
 module.exports = FavouritesAPI;
