@@ -385,19 +385,19 @@ function mapDispatchToProps(dispatch) {
     hideModal : bindActionCreators(ManageAlertsActions.hideModal, dispatch),
     confirmDeleteTip : bindActionCreators(ManageAlertsActions.deleteTip, dispatch),
     setUtility: function (event, utility){
-      dispatch(ManageAlertsActions.setUtility(event, utility));
-      dispatch(ManageAlertsActions.getStaticTips(event, utility, self.props.activePage));
+      dispatch(ManageAlertsActions.setUtility(utility));
+      dispatch(ManageAlertsActions.getStaticTips(utility, self.props.activePage));
     },
-    saveCurrentTip : function (){
+    saveCurrentTip : function () {
     var newTip;
       if(self.props.currentTip == null){
         newTip = {title : self.refs.title.value, description : self.refs.description.value};
-        dispatch(ManageAlertsActions.addTip(event, newTip, self.props.utility));
+        dispatch(ManageAlertsActions.addTip(newTip, self.props.utility));
       }
       else{
         self.props.currentTip.title = self.refs.title.value;
         self.props.currentTip.description = self.refs.description.value;
-        dispatch(ManageAlertsActions.addTip(event, self.props.currentTip));
+        dispatch(ManageAlertsActions.addTip(self.props.currentTip));
       }
     },
     fetchUtilities : bindActionCreators(ManageAlertsActions.fetchUtilities, dispatch),
@@ -408,7 +408,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(ManageAlertsActions.setActivationChanged(newData));
     },
     saveActiveStatusAction: function (changedRows){
-      dispatch(ManageAlertsActions.saveActiveStatusChanges(event,changedRows,self.props.utility, self.props.activePage));
+      dispatch(ManageAlertsActions.saveActiveStatusChanges(changedRows,self.props.utility, self.props.activePage));
     }
   };
 }
