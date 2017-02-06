@@ -12,7 +12,7 @@ var AdminAPI = {
       userKey : userKey,
       deviceKey : null,
       type : 'SLIDING',
-      length : 100
+      length : 20
     });
   },
 
