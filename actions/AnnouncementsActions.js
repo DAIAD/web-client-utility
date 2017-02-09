@@ -29,9 +29,11 @@ var receivedCurrentUtilityUsers = function(success, errors, members) {
   if(members) {
     initialUsers = members.map( m => {
       return {
-        id: m.id,
-        lastName: m.name,
-        username: m.email,
+        id: m.key,
+        lastName: m.fullName || m.username,
+        username: m.username,
+        location: m.location,
+        createdOn: m.createdOn,
         selected: false
       };
     });

@@ -32,8 +32,8 @@ var ManageAlertsAPI = {
     getAllGroups: function(){
       return api.json('/action/groups');
     },
-    getUsersOfGroup: function(groupUUID){
-      return api.json(`/action/group/members/${groupUUID}`, groupUUID, 'GET');
+    getUsersOfGroup: function(key){
+      return api.json(`/action/group/members/${key}`);
     },
     deleteAnnouncement: function(announcement){
       return api.json('/action/announcement/delete/' + announcement.id, {});
