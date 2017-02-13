@@ -9,8 +9,8 @@ var defaultChartTitle = "Last 12 Months Average Consumption";
 var defaultMapTitle = "Last 12 Months Consumption";
 
 var defaultLayout = [
-      {"i":defaultChartTitle,"x":0,"y":1,"w":12,"h":14},
-      {"i":defaultMapTitle,"x":0,"y":0,"w":12,"h":20}
+      {"i":defaultChartTitle,"x":0,"y":1,"w":1,"h":1},
+      {"i":defaultMapTitle,"x":0,"y":0,"w":1,"h":2}
 ];
 
 var getDefaultChart = function(props) {
