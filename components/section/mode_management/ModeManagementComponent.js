@@ -37,7 +37,7 @@ var ModeManagementComponent = React.createClass({
 
   decativateUser(){
     this.closeModal();
-    this.props.deactivateUser({userDeactId: this.props.userToDecativate.id});
+    this.props.deactivateUser({userkey: this.props.userToDecativate.id});
   },
 
   showModalSaveChanges: function(changedModes){

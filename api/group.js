@@ -1,12 +1,12 @@
 var api = require('./base');
 
 var GroupAPI = {
-    fetchGroupInfo: function(key) {
-      return api.json(`/action/group/${key}`);
+    getGroup: function(groupKey) {
+      return api.json(`/action/group/${groupKey}`);
     },
 
-    fetchGroupMembers: function(key) {
-      return api.json(`/action/group/members/${key}`);
+    getGroupMembers: function(groupKey) {
+      return api.json(`/action/group/members/${groupKey}`);
     },
 
     create: function(title, members) {
@@ -15,27 +15,23 @@ var GroupAPI = {
           members:members
       };
 
-      return api.json('/action/group' , data, 'PUT');
+      return api.json('/action/group', data, 'PUT');
     },
 
-    remove: function(groupKey){
+    remove: function(groupKey) {
       return api.json(`/action/group/${groupKey}`, null, 'DELETE');
     },
 
     getGroups: function(query) {
-      return api.json('/action/group' , query);
+      return api.json('/action/group', query);
     },
 
     addFavorite: function(groupKey) {
-      return api.json(`/action/group/favorite/${groupKey}` , null, 'PUT');
+      return api.json(`/action/group/favorite/${groupKey}`, null, 'PUT');
     },
 
     removeFavorite: function(groupKey) {
-      return api.json(`/action/group/favorite/${groupKey}` , null, 'DELETE');
-    },
-
-    deleteGroup: function(groupKey) {
-      return api.json(`/action/group/${groupKey}` , null, 'DELETE');
+      return api.json(`/action/group/favorite/${groupKey}`, null, 'DELETE');
     }
   };
 

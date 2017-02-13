@@ -8,13 +8,13 @@ var ManageAlertsAPI = {
       return api.json('/action/tip/localized/' + locale);
     },
     saveActiveTips: function(changedRows){
-      return api.json('/action/tip/status/save/', changedRows);
+      return api.json('/action/tip/status/save', changedRows.map((r) => ({id: r.id, active: r.active})));
     },
     insertTip: function(tip){
       return api.json('/action/tip/save', tip);
     },
     deleteTip: function(tip){
-      return api.json('/action/tip/delete', tip);
+      return api.json('/action/tip/delete/' + tip.id, {});
     },
     getAllUtilityUsers: function() {
       return api.json('/action/utility/user/all');
@@ -32,8 +32,8 @@ var ManageAlertsAPI = {
     getAllGroups: function(){
       return api.json('/action/groups');
     },
-    getUsersOfGroup: function(groupUUID){
-      return api.json(`/action/group/members/${groupUUID}`, groupUUID, 'GET');
+    getUsersOfGroup: function(key){
+      return api.json(`/action/group/members/${key}`);
     },
     deleteAnnouncement: function(announcement){
       return api.json('/action/announcement/delete/' + announcement.id, {});

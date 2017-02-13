@@ -32,10 +32,10 @@ var GroupActions = {
     return function (dispatch, getState) {
       dispatch(requestedGroup());
 
-      return GroupAPI.fetchGroupInfo(groupId).then(function(response) {
+      return GroupAPI.getGroup(groupId).then(function(response) {
         dispatch(receivedGroupInfo(response.success, response.errors, response.groupInfo));
 
-        return GroupAPI.fetchGroupMembers(groupId).then( function (response) {
+        return GroupAPI.getGroupMembers(groupId).then( function (response) {
           dispatch(receivedGroupMembers(response.success, response.errors, response.members));
         }, function (error) {
           dispatch(receivedGroupMembers(false, error, null));

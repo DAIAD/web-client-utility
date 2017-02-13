@@ -87,13 +87,13 @@ var deleteTipResponse = function (success, errors) {
 };
 
 var ManageAlertsActions = {
-  setUtility: function (event, utility) {
+  setUtility: function (utility) {
     return{
       type: types.ADMIN_SELECTED_UTILITY_FILTER,
       utility: utility
     };
   },
-  fetchUtilities: function (event) {
+  fetchUtilities: function () {
     return function (dispatch, getState) {
       dispatch(requestedUtilities());
       return alertsAPI.getAllUtilities().then(function (response) {
@@ -103,7 +103,7 @@ var ManageAlertsActions = {
       });
     };
   },
-  getStaticTips: function (event, utility, activePage) {
+  getStaticTips: function (utility, activePage) {
     var locale;
     if (utility.label == "DAIAD") {
       locale = "en";
@@ -121,7 +121,7 @@ var ManageAlertsActions = {
       });
     };
   },
-  addTip: function (event, tip, utility) {
+  addTip: function (tip, utility) {
     return function (dispatch, getState) {
       dispatch(requestAddTip);
       return alertsAPI.insertTip(tip).then(function (response) {
@@ -145,12 +145,12 @@ var ManageAlertsActions = {
       });
     };
   },
-  deleteTip: function (event) {
+  deleteTip: function () {
     return function (dispatch, getState) {
       dispatch(requestDeleteTip);
-      return alertsAPI.deleteTip(getState(event).alerts.currentTip).then(function (response) {
+      return alertsAPI.deleteTip(getState().alerts.currentTip).then(function (response) {
         dispatch(deleteTipResponse(response.success, response.errors));
-        var utility = getState(event).alerts.utility;
+        var utility = getState().alerts.utility;
         var locale;
         if (utility.label == "DAIAD") {
           locale = "en";
@@ -216,7 +216,7 @@ var ManageAlertsActions = {
       data: data
     };
   },
-  saveActiveStatusChanges: function (dispatch, changedRows, utility, activePage) {
+  saveActiveStatusChanges: function (changedRows, utility, activePage) {
     return function (dispatch, getState) {
       dispatch(clickedActiveStatusSaveButton());
       return alertsAPI.saveActiveTips(changedRows).then(function (response) {

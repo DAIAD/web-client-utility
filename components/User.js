@@ -546,15 +546,20 @@ var User = React.createClass({
         <span>
           <span>
             <i className='fa fa-bar-chart fa-fw'></i>
-            <span style={{ paddingLeft: 4 }}>{device.name} - Last 100 sessions</span>
+            <span style={{ paddingLeft: 4 }}>{device.name} - Last 20 sessions (most recent first) </span>
           </span>
         </span>
       );
 
-      for(var s=0; s < size; s++) {
+      for(var s=size-1; s >=0; s--) {
         data.push({
           volume: device.sessions[s].volume,
-          id:  index
+          duration: device.sessions[s].duration,
+          energy: device.sessions[s].energy.toFixed(0),
+          flow: device.sessions[s].flow.toFixed(2),
+          history: device.sessions[s].history,
+          temperature: device.sessions[s].temperature,
+          id:  device.sessions[s].id
         });
         index++;
       }
@@ -564,7 +569,25 @@ var User = React.createClass({
         xAxis: 'id',
         yAxis: 'volume',
         data: data,
-        yAxisName: 'Volume (lt)'
+        yAxisName: 'Volume (lt)',
+        formatter: function(params) {
+          var item = data[params.dataIndex];
+          var text = [];
+          text.push("Id : " + item.id);
+          text.push('<br/>');
+          text.push("Volume : " + item.volume + ' lt');
+          text.push('<br/>');
+          text.push("Duration : " + item.duration + ' seconds');
+          text.push('<br/>');
+          text.push("Energy : " + item.energy + ' W');
+          text.push('<br/>');
+          text.push("Flow : " + item.flow + ' lt/minute');
+          text.push('<br/>');
+          text.push("Temperature : " + item.temperature + ' °C');
+          text.push('<br/>');
+
+          return text.join('');
+        }
       });
 
       chart = (

@@ -137,11 +137,20 @@ var Chart = React.createClass({
         };
       }
 
+      // Point formatter configuration
+      var tooltip = {
+          show: true
+      }
+      if(series.formatter) {
+        tooltip.formatter = series.formatter;
+      }
+
       chartOptions.series.push({
         name: series.legend,
         type: (type === 'area' ? 'line' : type),
         itemStyle: itemStyle,
-        data: getValues(series, 0)
+        data: getValues(series, 0),
+        tooltip: tooltip
       });
     }
 
