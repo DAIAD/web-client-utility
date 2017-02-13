@@ -134,6 +134,7 @@ var Dashboard = React.createClass({
     var request =  {
       'namedQuery' : fav
     };
+    
     this.props.actions.unpin(request, this.props);
   },
   
@@ -434,13 +435,13 @@ var Dashboard = React.createClass({
     };
 
     var onDragStop = function(e) {
-      console.log('onDragStop, saving:');
-      console.log(e);
+      //compare previous with current layouts and prevent from saving
+      if(JSON.stringify(e) !== JSON.stringify(this.props.savedLayout)){
 
-      var layoutString = JSON.stringify({"layout": e});
-      var layoutRequest = {"configuration" : layoutString};
-
-      this.props.actions.saveLayout(layoutRequest);
+        var layoutString = JSON.stringify({"layout": e});
+        var layoutRequest = {"configuration" : layoutString};
+        this.props.actions.saveLayout(layoutRequest);
+      }
     };
 
     var chartComponents = divCharts ? divCharts : [];
@@ -467,7 +468,6 @@ var Dashboard = React.createClass({
             : null;            
  
     var components = lCharts.concat(lMaps);
-
     if(components.length !== this.props.savedLayout.length) {
       return (<div>Loading...</div>);
     }

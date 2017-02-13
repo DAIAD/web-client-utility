@@ -239,9 +239,22 @@ var _getLayoutResponse = function(success, errors, layout) {
       savedLayout : defaultLayout
     };    
   }
-  
 };
-  
+
+var alignLayout = function(layout) {
+  if(layout){
+    return {
+      type : types.GET_LAYOUT_RESPONSE,
+      savedLayout : layout
+    };
+  } else { //return default layout in first login
+    return {
+      type : types.GET_LAYOUT_RESPONSE,
+      savedLayout : defaultLayout
+    };    
+  }
+};
+
 var getChart = function(favourite) {
     return function(dispatch, getState) {
     
@@ -439,43 +452,64 @@ var DashboardActions = {
   },
   
   unpin : function(query, props) {
-
+    //todo - stop unpinned component if it is on timeline play
+    
     return function(dispatch, getState) {
 
       dispatch(unpinRequest());
       //todo - figure out a way not to refetch favourites, 
       //but to remove from local layout and sync layout with components
-      return favouritesAPI.unpinFavourite(query).then(function (response) {
 
-        dispatch(unpinResponse(response.success, response.errors));
-
-        dispatch(requestedFavouriteQueries());
-        return favouritesAPI.fetchFavouriteQueries().then(function (response) {
-
-          dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
-
-          var pinnedCharts = response.queries.filter(fav => fav.type === "CHART" && fav.pinned === true);
-
-          pinnedCharts.push(getDefaultChart(props)); //adding default chart
-
-          for(var m=0;m<pinnedCharts.length;m++){ 
-            dispatch(getChart(pinnedCharts[m]));
-          }
-
-          var pinnedMaps = response.queries.filter(fav => fav.type === "MAP" && fav.pinned === true);
-          pinnedMaps.push(getDefaultMap(props)); //adding default map
-        
-          for(var n=0;n<pinnedMaps.length;n++){
-            dispatch(getTimeline(pinnedMaps[n]));
-          }     
-        
-        }, function (error) {
-          dispatch(receivedFavouriteQueries(false, error, null));
-        });
-        
-        }, function (error) {
-          dispatch(unpinResponse(false, error));
+      var lay = getState().dashboard.savedLayout.filter(function( component ) {
+        return component.i !== query.namedQuery.title;
       });
+
+      var layoutRequest = {"configuration" : JSON.stringify({"layout": lay})};
+      
+      dispatch(_saveLayoutRequest());
+      
+      return adminAPI.saveLayout(layoutRequest).then(function(response) {
+        dispatch(_saveLayoutResponse(response.success, response.errors));
+
+        if(response.success){
+
+          dispatch(alignLayout(lay)); //aligning new savedLayout        
+        
+          return favouritesAPI.unpinFavourite(query).then(function (response) {
+
+            dispatch(unpinResponse(response.success, response.errors));
+
+            dispatch(requestedFavouriteQueries());
+            return favouritesAPI.fetchFavouriteQueries().then(function (response) {
+
+              dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
+
+              var pinnedCharts = response.queries.filter(fav => fav.type === "CHART" && fav.pinned === true);
+
+              pinnedCharts.push(getDefaultChart(props)); //adding default chart
+
+              for(var m=0;m<pinnedCharts.length;m++){ 
+                dispatch(getChart(pinnedCharts[m]));
+              }
+
+              var pinnedMaps = response.queries.filter(fav => fav.type === "MAP" && fav.pinned === true);
+              pinnedMaps.push(getDefaultMap(props)); //adding default map
+        
+              for(var n=0;n<pinnedMaps.length;n++){
+                dispatch(getTimeline(pinnedMaps[n]));
+              }     
+        
+            }, function (error) {
+              dispatch(receivedFavouriteQueries(false, error, null));
+            });
+        
+          }, function (error) {
+            dispatch(unpinResponse(false, error));
+          });
+        }//if success
+      }, function(error) {
+        dispatch(_saveLayoutResponse(false, error));
+      });         
     };
   },
   

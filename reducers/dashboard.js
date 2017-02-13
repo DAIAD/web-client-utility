@@ -1,7 +1,5 @@
 var moment = require('moment');
-
 var types = require('../constants/DashboardActionTypes');
-
 var _ = require('lodash');
 
 var _createStatisticsInitialState = function() {
@@ -9,20 +7,6 @@ var _createStatisticsInitialState = function() {
     counters : null
   };
 };
-
-//var _createMapInitialState = function() {
-//  return [{
-//    interval : [
-//        moment().subtract(14, 'day'), moment()
-//    ],
-//    query : null,
-//    areas : null,
-//    meters : null,
-//    devices : null,
-//    timeline : null,
-//    features : null
-//  }];
-//};
 
 var _createChartInitialState = function() {
   return {
