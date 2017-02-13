@@ -73,7 +73,6 @@ var Forecasting = React.createClass({
         data: this.props.forecasting.data.utility.data
       });
     }
-    
     if(this.props.forecasting.forecast.utility) {
       utilityChart.series.push({
         legend: 'Forecast',
