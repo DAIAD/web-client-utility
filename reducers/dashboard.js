@@ -2,25 +2,27 @@ var moment = require('moment');
 
 var types = require('../constants/DashboardActionTypes');
 
+var _ = require('lodash');
+
 var _createStatisticsInitialState = function() {
   return {
     counters : null
   };
 };
 
-var _createMapInitialState = function() {
-  return {
-    interval : [
-        moment().subtract(14, 'day'), moment()
-    ],
-    query : null,
-    areas : null,
-    meters : null,
-    devices : null,
-    timeline : null,
-    features : null
-  };
-};
+//var _createMapInitialState = function() {
+//  return [{
+//    interval : [
+//        moment().subtract(14, 'day'), moment()
+//    ],
+//    query : null,
+//    areas : null,
+//    meters : null,
+//    devices : null,
+//    timeline : null,
+//    features : null
+//  }];
+//};
 
 var _createChartInitialState = function() {
   return {
@@ -39,12 +41,13 @@ var _createInitialState = function() {
         moment().subtract(14, 'day'), moment()
     ],
     statistics : _createStatisticsInitialState(),
-    map : _createMapInitialState(),
-    chart : _createChartInitialState(),
+    map : [],
+    chart : []
   };
 };
 
 var _extractTimeline = function(meters, areas) {
+
   var timeline = {}, timestamp, label, area, min = NaN, max = NaN;
 
   for (var m = 0; m < meters.length; m++) {
@@ -106,6 +109,7 @@ var _extractTimeline = function(meters, areas) {
   };
 
   timeline.getFeatures = function(timestamp, label) {
+
     var geojson = {
       type : 'FeatureCollection',
       features : [],
@@ -145,6 +149,7 @@ var _extractTimeline = function(meters, areas) {
     var areas = this.getAreas();
 
     for ( var index in instance) {
+
       geojson.features.push({
         'type' : 'Feature',
         'geometry' : areas[index].geometry,
@@ -154,7 +159,7 @@ var _extractTimeline = function(meters, areas) {
         }
       });
     }
-
+    
     return geojson;
   };
 
@@ -187,7 +192,9 @@ var statisticsReducer = function(state, action) {
 var mapReducer = function(state, action) {
   switch (action.type) {
     case types.TIMELINE_REQUEST:
-      return Object.assign({}, state, {
+      return [{
+        id : action.id,
+        title : action.title,
         query : action.query,
         areas : null,
         meters : null,
@@ -195,62 +202,83 @@ var mapReducer = function(state, action) {
         timeline : null,
         features : null,
         index : 0
-      });
+      }];
 
     case types.TIMELINE_RESPONSE:
       if (action.success) {
-        return Object.assign({}, state, {
+        return [{
+          id : action.id,
+          title : action.title,
           areas : action.data.areas,
           meters : action.data.meters,
           devices : action.data.devices,
           timeline : _extractTimeline(action.data.meters, action.data.areas),
           features : null
-        });
+        }];
       }
 
-      return Object.assign({}, state, {
+      return [{
+        id : null,
+        title : null,
         areas : null,
         meters : null,
         devices : null,
         regions : null,
         features : null
-      });
+      }];
 
     case types.GET_FEATURES:
-      var features = (state.timeline ? state.timeline.getFeatures(action.timestamp, action.label) : null);
 
-      return Object.assign({}, state, {
-        features : features,
-        index : action.index
-      });
+      var pMap = state.length > 0? state.filter(function(map) { return map.id === action.id; }) : null;
+
+      var pMap0 = pMap[0];
+      var features = (pMap0.timeline ? pMap0.timeline.getFeatures(action.timestamp, action.label) : null);
+
+      pMap0.features = features;
+      pMap0.index = action.index;
+      pMap0.id = action.id;
+      
+     var stateFeatures = state.filter(function( obj ) {
+       return obj.id !== action.id;
+     });   
+     stateFeatures.push(pMap0);
+     return stateFeatures;
 
     default:
-      return state || _createMapInitialState();
+      return state || [];
   }
 };
 
 var chartReducer = function(state, action) {
   switch (action.type) {
     case types.CHART_REQUEST:
-      return Object.assign({}, state, {
-        draw: true,
-        finished: false,
-        data: null
-      });
+//      return Object.assign({}, state, {
+//        draw: true,
+//        finished: false,
+//        data: null
+//      });
+      return [{
+        id : action.id,
+        title : action.title,
+        draw : true,
+        finished : false,
+        data : null
+      }];
     case types.CHART_RESPONSE:
-
       if (action.success) {
-        return Object.assign({}, state, {
+        return [{          
           draw: true,
           finished: action.timestamp,
-          data: action.data
-        });
+          data: action.data,
+          title: action.title,
+          id: action.id}];
       } else {
-        return Object.assign({}, state, {
+        return [{          
           draw: false,
           finished: false,
-          data : null
-        });
+          data: null,
+          title: action.title,
+          id: action.id}];
       }
       
     default:
@@ -260,39 +288,63 @@ var chartReducer = function(state, action) {
 
 var dashboard = function(state, action) {
   switch (action.type) {
-    case types.TIMELINE_REQUEST:
     case types.COUNTER_REQUEST:
       return Object.assign({}, state, {
         isLoading : true,
-        statistics : statisticsReducer(state.statistics, action),
-        map : mapReducer(state.map, action),
-        chart : chartReducer(state.chart, action)
+        statistics : statisticsReducer(state.statistics, action)
+        //map : mapReducer(state.map, action)
+        //chart : chartReducer(state.chart, action)
       });
-
-    case types.TIMELINE_RESPONSE:
     case types.COUNTER_RESPONSE:
       return Object.assign({}, state, {
         isLoading : false,
-        statistics : statisticsReducer(state.statistics, action),
-        map : mapReducer(state.map, action),
-        chart : chartReducer(state.chart, action)
+        statistics : statisticsReducer(state.statistics, action)
+        //map : mapReducer(state.map, action)
+        //chart : chartReducer(state.chart, action)
       });
-    case types.CHART_REQUEST:
+    case types.TIMELINE_REQUEST:
+      var _previousMaps = state.map;
+      var tempMaps = mapReducer(state.map, action);
+      var mapsRequests = tempMaps.concat(_previousMaps);      
+    
       return Object.assign({}, state, {
         isLoading : true,
-        chart : chartReducer(state.chart, action)
-      });      
-    case types.CHART_RESPONSE:
+        map : mapsRequests
+      });        
+    case types.TIMELINE_RESPONSE:
+    
+      var _stateMap = state.map;
+      var temp = mapReducer(state.map, action);
+      var mapComplete = _.unionBy(temp, _stateMap, "id");
+      
       return Object.assign({}, state, {
         isLoading : false,
-        chart : chartReducer(state.chart, action)
-      });
+        //statistics : statisticsReducer(state.statistics, action),
+        map : mapComplete
+        //chart : chartReducer(state.chart, action)
+      });  
     case types.GET_FEATURES:
       return Object.assign({}, state, {
         isLoading : false,
-        statistics : statisticsReducer(state.statistics, action),
-        map : mapReducer(state.map, action),
-        chart : chartReducer(state.chart, action)
+        //statistics : statisticsReducer(state.statistics, action),
+        map : mapReducer(state.map, action)
+      });      
+    case types.CHART_REQUEST:
+      var _previousCharts = state.chart;
+      var tempCharts = chartReducer(state.map, action);
+      var chartsRequests = tempCharts.concat(_previousCharts);      
+      return Object.assign({}, state, {
+        isLoading : true,
+        chart : chartsRequests
+      });       
+    case types.CHART_RESPONSE:
+      var _stateChart = state.chart;
+      var tempChart = chartReducer(state.chart, action);
+      var chartComplete = _.unionBy(tempChart, _stateChart, "id");
+
+      return Object.assign({}, state, {
+        isLoading : false,
+        chart : chartComplete
       });
     case types.GET_LAYOUT_REQUEST:
       return Object.assign({}, state, {
@@ -311,7 +363,15 @@ var dashboard = function(state, action) {
       return Object.assign({}, state, {
         isLoading: false,
         favourites: action.favourites
-      });          
+      });    
+    case types.UNPIN_REQUEST:
+      return Object.assign({}, state, {
+        isLoading: true
+      });
+    case types.UNPIN_RESPONSE:
+      return Object.assign({}, state, {
+        isLoading: false
+      });        
     case types.USER_RECEIVED_LOGOUT:
       return _createInitialState();
 

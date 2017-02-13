@@ -27,7 +27,7 @@ var _getTimelineValues = function(timeline) {
   }
   return [];
 };
-var tempActive = true;
+
 var _getTimelineLabels = function(timeline) {
   if(timeline) {
     return timeline.getTimestamps().map(function(timestamp) {

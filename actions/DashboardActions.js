@@ -3,11 +3,90 @@ var queryAPI = require('../api/query');
 var favouritesAPI = require('../api/favourites');
 var population = require('../model/population');
 var types = require('../constants/DashboardActionTypes');
+var moment = require('moment');
 
-var _buildTimelineQuery = function(key, name, timezone, interval) {//todo - replace with favourite if exists
+var defaultChartTitle = "Last 12 Months Average Consumption";
+var defaultMapTitle = "Last 12 Months Consumption";
+
+var defaultLayout = [
+      {"i":defaultChartTitle,"x":0,"y":1,"w":12,"h":14},
+      {"i":defaultMapTitle,"x":0,"y":0,"w":12,"h":20}
+];
+
+var getDefaultChart = function(props) {
+  var defaultChart = {
+    id: 100000,
+    pinned : false,
+    title:defaultChartTitle,
+    type:"CHART",
+    tags:"Chart - Meter",
+    reportName:"avg-daily-avg",
+    level:"week",
+    field:"volume",
+    queries:[{
+      time:{
+        type:"ABSOLUTE",
+        granularity:"WEEK",
+        start:moment().subtract(350, 'day').valueOf(),
+        end:moment().valueOf(),
+        durationTimeUnit:"HOUR"},
+      population:[{
+        type:"UTILITY",
+        label:"UTILITY:" + props.profile.utility.key,
+        ranking:null,
+        utility:props.profile.utility.key}],
+      source:"METER",
+      metrics:["AVERAGE"]
+    }]
+  };
+  return defaultChart;
+}
+
+var getDefaultMap = function(props) {
+  var defaultMap = {
+    id: 100001,
+    pinned : false,
+    title:defaultMapTitle,
+    type:"MAP",
+    tags:"Map - Meter",
+    queries:[{
+      time:{
+        type:"ABSOLUTE",
+        granularity:"DAY",
+        start:moment().subtract(350, 'day').valueOf(),
+        end:moment().valueOf(),
+        durationTimeUnit:"HOUR"},
+      population:[{
+        type:"UTILITY",
+        label:"Utility",
+        ranking:null,
+        utility:props.profile.utility.key}],
+      source:"METER",
+      metrics:["SUM"]
+    }]
+  };
+  return defaultMap;
+}
+
+var _buildTimelineQuery = function(population, source, geometry, timezone, interval) {
+  var spatial = [
+    {
+      type : 'GROUP',
+      group : 'd29f8cb8-7df6-4d57-8c99-0a155cc394c5'
+    }
+  ];
+
+  if (geometry) {
+    spatial.push({
+      type : 'CONSTRAINT',
+      geometry : geometry,
+      operation : 'INTERSECT'
+    });
+  }
+
   return {
     'query' : {
-      'timezone' : timezone,
+      'timezone' : "Europe/Athens",
       'time' : {
         'type' : 'ABSOLUTE',
         'start' : interval[0].toDate().getTime(),
@@ -15,19 +94,10 @@ var _buildTimelineQuery = function(key, name, timezone, interval) {//todo - repl
         'granularity' : 'DAY'
       },
       'population' : [
-        {
-          'type' : 'UTILITY',
-          'label' : name,
-          'utility' : key
-        }
+        population
       ],
-      spatial : [
-        {
-          type : 'GROUP',
-          group : 'd29f8cb8-7df6-4d57-8c99-0a155cc394c5'
-        }
-      ],
-      'source' : 'METER',
+      spatial : spatial,
+      'source' : source,
       'metrics' : [
         'SUM'
       ]
@@ -35,85 +105,56 @@ var _buildTimelineQuery = function(key, name, timezone, interval) {//todo - repl
   };
 };
 
-var _buildChartQuery = function(key, name, timezone, interval) {
-  return {
-    'query' : {
-      'timezone' : timezone,
-      'time' : {
-        'type' : 'ABSOLUTE',
-        'start' : interval[0].toDate().getTime(),
-        'end' : interval[1].toDate().getTime(),
-        'granularity' : 'DAY'
-      },
-      'population' : [
-        {
-          'type' : 'UTILITY',
-          'label' : name,
-          'utility' : key
-        }
-      ],
-      'source' : 'BOTH',
-      'metrics' : [
-        'SUM'
-      ]
-    }
-  };
-};
-
-var _getTimelineInit = function(query) {
+var _getTimelineInit = function(query, id, title) {
   return {
     type : types.TIMELINE_REQUEST,
+    id : id,
+    title : title,
     query : query
   };
 };
 
-var _getTimelineComplete = function(success, errors, data) {
+var _getTimelineComplete = function(success, errors, data, id, title) {
+
   return {
     type : types.TIMELINE_RESPONSE,
+    id: id,
+    title: title,
     success : success,
     errors : errors,
     data : data
   };
 };
 
-var _getFeatures = function(index, timestamp, label) {
+var _getFeatures = function(index, timestamp, label, id) {
+
   return {
     type : types.GET_FEATURES,
+    id: id,
     timestamp : timestamp,
     label : label,
     index: index
+    
   };
 };
 
-var _getChartInit = function(query) {
+var _chartRequest = function(id, title) {
   return {
     type : types.CHART_REQUEST,
-    query : query
+    id : id,
+    title : title
   };
 };
 
-var _chartRequest = function() {
-  return {
-    type : types.CHART_REQUEST
-  };
-};
-
-var _chartResponse = function(success, errors, data, t=null) {
+var _chartResponse = function(success, errors, data, title, id, t=null) {
   return {
     type : types.CHART_RESPONSE,
+    id : id,
     success : success,
     errors : errors,
     data : success ? data : [],
-    timestamp: (t || new Date()).getTime()
-  };
-};
-
-var _getChartComplete = function(success, errors, data) {
-  return {
-    type : types.CHART_RESPONSE,
-    success : success,
-    errors : errors,
-    data : data
+    timestamp: (t || new Date()).getTime(),
+    title: title
   };
 };
 
@@ -167,8 +208,22 @@ var receivedFavouriteQueries = function (success, errors, favourites) {
   };
 };
 
+var unpinRequest = function () {
+  return {
+    type: types.UNPIN_REQUEST
+  };
+};
+
+var unpinResponse = function (success, errors) {
+  return {
+    type: types.UNPIN_RESPONSE,
+    success: success,
+    errors: errors
+  };
+};
+
 var _getLayoutResponse = function(success, errors, layout) {
-  if(layout){  
+  if(layout){
     var configuration = JSON.parse(layout);
     return {
       type : types.GET_LAYOUT_RESPONSE,
@@ -176,21 +231,21 @@ var _getLayoutResponse = function(success, errors, layout) {
       errors : errors,
       savedLayout : configuration.layout
     };
-  } else { //initialize layout when running first time
-    var initLayout = [{"i":"chart","x":1,"y":20,"w":12,"h":14},{"i":"map","x":0,"y":0,"w":12,"h":20}];
+  } else { //return default layout in first login
     return {
       type : types.GET_LAYOUT_RESPONSE,
       success : success,
       errors : errors,
-      savedLayout : initLayout
+      savedLayout : defaultLayout
     };    
   }
   
 };
-var getDefaultChart = function(favourite) {
+  
+var getChart = function(favourite) {
     return function(dispatch, getState) {
     
-      dispatch(_chartRequest());
+      dispatch(_chartRequest(favourite.id, favourite.title));
       
       var promiseArray =[];
       for(let i=0; i<favourite.queries.length; i++){
@@ -241,99 +296,52 @@ var getDefaultChart = function(favourite) {
                     data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
                   }));
                 }
-                return _.flatten(res2);
+                var flatRes2 = _.flatten(res2);
+                return flatRes2;
               }
             });
-            resAll.push(_.flatten(res1)); 
+            var flatRes1 = _.flatten(res1);
+            resAll.push(flatRes1); 
           }
           var success = res.every(x => x.success === true); 
           var errors = success ? [] : res[0].errors; //todo - return flattend array of errors
-          dispatch(_chartResponse(success, errors, _.flatten(resAll)));          
 
+          var flatResAll = _.flatten(resAll);
+          var title = favourite.title;
+          var id = favourite.id;
+          dispatch(_chartResponse(success, errors, flatResAll, title, id));          
           return _.flatten(resAll);
         }
       );
     };
-  };
+  }; 
   
-var DashboardActions = {
-  getChart : function(key, name, timezone) {
+var getTimeline = function(favourite) {
+
+  var id = favourite.id;
+  var title = favourite.title;
     return function(dispatch, getState) {
-      var query = _buildChartQuery(key, name, timezone, getState().dashboard.interval);
 
-      dispatch(_getChartInit(query));
+      var population, source, geometry, interval, timezone;
 
-      return queryAPI.queryMeasurements(query).then(function(response) {
-        var data = {
-          meters : null,
-          devices : null
-        };
+      population = {
+          utility: favourite.queries[0].population[0].utility,
+          label: favourite.queries[0].population[0].label,
+          type: favourite.queries[0].population[0].type
+      };
+      interval = [moment(favourite.queries[0].time.start),
+                    moment(favourite.queries[0].time.end)];
+      source = favourite.queries[0].source;
 
-        if (response.success) {
-          data.meters = response.meters;
-          data.devices = response.devices;
-        }
-        dispatch(_getChartComplete(response.success, response.errors, data));
-      }, function(error) {
-        dispatch(_getChartComplete(false, error, null));
-      });
-    };
-  },
-  getDefaultChart : function(favourite) {//todo - to be removed
-    return function(dispatch, getState) {
-      dispatch(_chartRequest());
-      return queryAPI.queryMeasurements({query: favourite.query}).then(
-        res => {
-          if (res.errors.length)
-            throw 'The request is rejected: ' + res.errors[0].description;
-
-          var source = favourite.query.source;
-
-          var resultSets = (favourite.query.source == 'AMPHIRO') ? res.devices : res.meters;
-
-          var res1 = (resultSets || []).map(rs => {
-            var [g, rr] = population.fromString(rs.label);
-
-            if (rr) {
-              var points = rs.points.map(p => ({
-                timestamp: p.timestamp,
-                values: p.users.map(u => u[rr.field][rr.metric]).sort(rr.comparator),
-              }));
-              // Shape a result with ranking on users
-
-              return _.times(rr.limit, (i) => ({
-                source,
-                timespan: [favourite.query.time.start,favourite.query.time.end],
-                granularity: favourite.query.time.granularity,
-                metric: favourite.query.metric,
-                population: g,
-                ranking: {...rr.toJSON(), index: i},
-                data: points.map(p => ([p.timestamp, p.values[i] || null]))
-              }));
-            } else {
-              // Shape a normal timeseries result for requested metrics
-              // Todo support other metrics (as client-side "average")
-              return favourite.query.metrics.map(metric => ({
-                source,
-                timespan: [favourite.query.time.start,favourite.query.time.end],
-                granularity: favourite.query.time.granularity,
-                metric,
-                population: g,
-                data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
-              }));
-            }
-          });
-        dispatch(_chartResponse(res.success, res.errors, _.flatten(res1)));
-        return _.flatten(res1);
-      });
-    };
-  },
-  
-  getTimeline : function(key, name, timezone) {
-    return function(dispatch, getState) {
-      var query = _buildTimelineQuery(key, name, timezone, getState().dashboard.interval);
-
-      dispatch(_getTimelineInit(query));
+      if(favourite.queries[0].spatial && favourite.queries[0].spatial.length > 1){
+        geometry = favourite.queries[0].spatial[1].geometry;
+      } else {
+        geometry = null;
+      }      
+      
+      var query = _buildTimelineQuery(population, source, geometry, timezone, interval);
+      
+      dispatch(_getTimelineInit(query, id, title));
 
       return queryAPI.queryMeasurements(query).then(function(response) {
         var data = {
@@ -346,17 +354,20 @@ var DashboardActions = {
           data.meters = response.meters;
           data.devices = response.devices;
         }
-        dispatch(_getTimelineComplete(response.success, response.errors, data));
 
-        dispatch(_getFeatures(0, null, null));
+        dispatch(_getTimelineComplete(response.success, response.errors, data, id, title));
+
+        dispatch(_getFeatures(0, null, null, id));
 
       }, function(error) {
-        dispatch(_getTimelineComplete(false, error, null));
+        dispatch(_getTimelineComplete(false, error, null, null, null));
 
-        dispatch(_getFeatures(0, null, null));
+        dispatch(_getFeatures(0, null, null, id));
       });
     };
-  },
+};
+  
+var DashboardActions = {
 
   getCounters : function(key, name, timezone) {
     return function(dispatch, getState) {
@@ -376,20 +387,32 @@ var DashboardActions = {
     };
   },
 
-  getFeatures : function(index, timestamp, label) {
-    return _getFeatures(index, timestamp, label);
+  getFeatures : function(index, timestamp, label, id) {
+    return _getFeatures(index, timestamp, label, id);
   }, 
   
-  fetchFavouriteQueries : function() {
+  fetchFavouriteQueries : function(props) {
+
     return function(dispatch, getState) {
       dispatch(requestedFavouriteQueries());
       return favouritesAPI.fetchFavouriteQueries().then(function (response) {
 
         dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
 
-        var charts = response.queries.filter(function(fav){return fav.type === 'CHART';});
+        var pinnedCharts = response.queries.filter(fav => fav.type === "CHART" && fav.pinned === true);
 
-        dispatch(getDefaultChart(charts[0]));
+        pinnedCharts.push(getDefaultChart(props)); //adding default chart
+
+        for(var m=0;m<pinnedCharts.length;m++){ 
+          dispatch(getChart(pinnedCharts[m]));
+        }
+
+        var pinnedMaps = response.queries.filter(fav => fav.type === "MAP" && fav.pinned === true);
+        pinnedMaps.push(getDefaultMap(props)); //adding default map
+        
+        for(var n=0;n<pinnedMaps.length;n++){
+          dispatch(getTimeline(pinnedMaps[n]));
+        }     
         
       }, function (error) {
         dispatch(receivedFavouriteQueries(false, error, null));
@@ -398,18 +421,60 @@ var DashboardActions = {
   },
   
   saveLayout : function(layout) {
+
     return function(dispatch, getState) {
     
       dispatch(_saveLayoutRequest());
-      
+
       return adminAPI.saveLayout(layout).then(function(response) {
-      
+         
         dispatch(_saveLayoutResponse(response.success, response.errors));
-        
+
       }, function(error) {
       
         dispatch(_saveLayoutResponse(false, error));
         
+      });
+    };
+  },
+  
+  unpin : function(query, props) {
+
+    return function(dispatch, getState) {
+
+      dispatch(unpinRequest());
+      //todo - figure out a way not to refetch favourites, 
+      //but to remove from local layout and sync layout with components
+      return favouritesAPI.unpinFavourite(query).then(function (response) {
+
+        dispatch(unpinResponse(response.success, response.errors));
+
+        dispatch(requestedFavouriteQueries());
+        return favouritesAPI.fetchFavouriteQueries().then(function (response) {
+
+          dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
+
+          var pinnedCharts = response.queries.filter(fav => fav.type === "CHART" && fav.pinned === true);
+
+          pinnedCharts.push(getDefaultChart(props)); //adding default chart
+
+          for(var m=0;m<pinnedCharts.length;m++){ 
+            dispatch(getChart(pinnedCharts[m]));
+          }
+
+          var pinnedMaps = response.queries.filter(fav => fav.type === "MAP" && fav.pinned === true);
+          pinnedMaps.push(getDefaultMap(props)); //adding default map
+        
+          for(var n=0;n<pinnedMaps.length;n++){
+            dispatch(getTimeline(pinnedMaps[n]));
+          }     
+        
+        }, function (error) {
+          dispatch(receivedFavouriteQueries(false, error, null));
+        });
+        
+        }, function (error) {
+          dispatch(unpinResponse(false, error));
       });
     };
   },
@@ -422,6 +487,19 @@ var DashboardActions = {
       return adminAPI.getLayout().then(function(response) {
 
         dispatch(_getLayoutResponse(response.success, response.errors, response.profile.configuration));
+        
+        if(!response.profile.configuration){ //save default layout at first login
+
+          var layoutRequest = {"configuration" : JSON.stringify({"layout": defaultLayout})};
+
+          return adminAPI.saveLayout(layoutRequest).then(function(response) {
+          
+            dispatch(_saveLayoutResponse(response.success, response.errors));
+            
+          }, function(error) {
+            dispatch(_saveLayoutResponse(false, error));
+          });        
+        }
         
       }, function(error) {
       

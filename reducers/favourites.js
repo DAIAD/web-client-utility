@@ -90,6 +90,7 @@ var _extractTimeline = function(meters, areas) {
   };
 
   timeline.getFeatures = function(timestamp, label) {
+
     var geojson = {
       type : 'FeatureCollection',
       features : [],

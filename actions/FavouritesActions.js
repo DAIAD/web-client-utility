@@ -1,6 +1,7 @@
 var types = require('../constants/FavouritesActionTypes');
 var favouritesAPI = require('../api/favourites');
 var queryAPI = require('../api/query');
+var adminAPI = require('../api/admin');
 var moment = require('moment');
 var population = require('../model/population');
 var _ = require('lodash');
@@ -141,6 +142,38 @@ var _chartResponse = function(success, errors, data, t=null) {
     data : data,
     timestamp: (t || new Date()).getTime()
   };
+};
+
+var _saveLayoutRequest = function() {
+  return {
+    type : types.FAVOURITES_SAVE_LAYOUT_REQUEST
+  };
+};
+
+var _saveLayoutResponse = function(success, errors) {
+  return {
+    type : types.FAVOURITES_SAVE_LAYOUT_RESPONSE,
+    success : success,
+    errors : errors
+  };
+};
+
+var getLayoutRequest = function() {
+  return {
+    type : types.FAVOURITES_GET_LAYOUT_REQUEST
+  };
+};
+
+var getLayoutResponse = function(success, errors, layout) {
+  if(layout){
+    var configuration = JSON.parse(layout);
+    return {
+      type : types.FAVOURITES_GET_LAYOUT_RESPONSE,
+      success : success,
+      errors : errors,
+      savedLayout : configuration.layout
+    };
+  }
 };
 
 var FavouritesActions = {
@@ -316,7 +349,7 @@ var FavouritesActions = {
           }
           
           var success = res.every(x => x.success === true); 
-          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors
+          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
           dispatch(_chartResponse(success, errors, _.flatten(resAll)));
           
           return _.flatten(resAll);
@@ -374,6 +407,36 @@ var FavouritesActions = {
         dispatch(requestedFavouriteQueries());
         return favouritesAPI.fetchFavouriteQueries().then(function (response) {
           dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
+          dispatch(getLayoutRequest());
+          return adminAPI.getLayout().then(function(response) {
+            
+            var configuration = JSON.parse(response.profile.configuration);
+            var lay = configuration.layout;
+            var maxY = Math.max.apply(Math, lay.map(function(o){return o.y;}));
+
+            var layoutComponent;
+            if(query.namedQuery.type === 'CHART'){
+              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 1, h: 1};
+            } else if(query.namedQuery.type === 'MAP') {
+              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 1, h: 1};
+            }
+            lay.push(layoutComponent);
+            dispatch(_saveLayoutRequest());
+            var layoutRequest = {"configuration" : JSON.stringify({"layout": lay})};
+
+            return adminAPI.saveLayout(layoutRequest).then(function(response) {
+              dispatch(_saveLayoutResponse(response.success, response.errors));
+            }, function(error) {
+              dispatch(_saveLayoutResponse(false, error));
+            });  
+
+          }, function(error) {
+      
+            dispatch(getLayoutResponse(false, error));
+        
+          }); 
+          
+
         }, function (error) {
           dispatch(receivedFavouriteQueries(false, error, null));
         });

@@ -20,7 +20,9 @@ var types = mirrorToPath({
   GET_LAYOUT_REQUEST : null,
   GET_LAYOUT_RESPONSE : null,
   FAVOURITES_REQUEST : null,
-  FAVOURITES_RESPONSE : null
+  FAVOURITES_RESPONSE : null,
+  UNPIN_REQUEST : null,
+  UNPIN_RESPONSE : null
 
 });
 

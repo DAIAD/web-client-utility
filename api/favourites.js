@@ -16,7 +16,10 @@ var FavouritesAPI = {
     },
     pinFavourite: function(request) {
       return api.json('/action/data/query/pin', request);
-    }    
+    },
+    unpinFavourite: function(request) {
+      return api.json('/action/data/query/unpin', request);
+    }
   };
 
 module.exports = FavouritesAPI;
