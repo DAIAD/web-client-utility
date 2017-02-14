@@ -1,6 +1,7 @@
 var types = require('../constants/FavouritesActionTypes');
 var favouritesAPI = require('../api/favourites');
 var queryAPI = require('../api/query');
+var adminAPI = require('../api/admin');
 var moment = require('moment');
 var population = require('../model/population');
 var _ = require('lodash');
@@ -29,6 +30,20 @@ var addFavouriteRequest = function () {
 var addFavouriteResponse = function (success, errors) {
   return {
     type: types.FAVOURITES_ADD_FAVOURITE_RESPONSE,
+    success: success,
+    errors: errors
+  };
+};
+
+var pinRequest = function () {
+  return {
+    type: types.FAVOURITES_PIN_REQUEST
+  };
+};
+
+var pinResponse = function (success, errors) {
+  return {
+    type: types.FAVOURITES_PIN_RESPONSE,
     success: success,
     errors: errors
   };
@@ -129,6 +144,38 @@ var _chartResponse = function(success, errors, data, t=null) {
   };
 };
 
+var _saveLayoutRequest = function() {
+  return {
+    type : types.FAVOURITES_SAVE_LAYOUT_REQUEST
+  };
+};
+
+var _saveLayoutResponse = function(success, errors) {
+  return {
+    type : types.FAVOURITES_SAVE_LAYOUT_RESPONSE,
+    success : success,
+    errors : errors
+  };
+};
+
+var getLayoutRequest = function() {
+  return {
+    type : types.FAVOURITES_GET_LAYOUT_REQUEST
+  };
+};
+
+var getLayoutResponse = function(success, errors, layout) {
+  if(layout){
+    var configuration = JSON.parse(layout);
+    return {
+      type : types.FAVOURITES_GET_LAYOUT_RESPONSE,
+      success : success,
+      errors : errors,
+      savedLayout : configuration.layout
+    };
+  }
+};
+
 var FavouritesActions = {
 
   setTimezone : function(timezone) {
@@ -137,6 +184,7 @@ var FavouritesActions = {
       timezone : timezone
     };
   },
+  
   fetchFavouriteQueries : function() {
     return function(dispatch, getState) {
       dispatch(requestedFavouriteQueries());
@@ -164,6 +212,7 @@ var FavouritesActions = {
         });
     };
   },
+  
   deleteFavourite : function(event) {
     return function(dispatch, getState) {
       dispatch(addFavouriteRequest());
@@ -181,6 +230,7 @@ var FavouritesActions = {
         });
     };
   },
+  
   openFavourite : function(favourite) {
     return{
       type : types.FAVOURITES_OPEN_SELECTED,
@@ -188,6 +238,7 @@ var FavouritesActions = {
       selectedFavourite: favourite
     };
   },
+  
   getFavouriteMap : function(favourite) {
     return function(dispatch, getState) {
       var population, source, geometry, interval, timezone;
@@ -236,6 +287,7 @@ var FavouritesActions = {
       });
     };
   },
+  
   getFavouriteChart : function(favourite) {
     return function(dispatch, getState) {
     
@@ -296,16 +348,20 @@ var FavouritesActions = {
             resAll.push(_.flatten(res1)); 
           }
           
-          dispatch(_chartResponse(res.success, res.errors, _.flatten(resAll)));
-
+          var success = res.every(x => x.success === true); 
+          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
+          dispatch(_chartResponse(success, errors, _.flatten(resAll)));
+          
           return _.flatten(resAll);
         }
       );
     };
   },
+  
   getFeatures : function(index, timestamp, label) {
     return _getFeatures(index, timestamp, label);
   },
+  
   closeFavourite : function() {
     return{
       type : types.FAVOURITES_CLOSE_SELECTED,
@@ -322,23 +378,73 @@ var FavouritesActions = {
       selectedFavourite: favourite
     };
   },
+  
   openWarning : function(favourite) {
     return {
       type : types.FAVOURITES_DELETE_QUERY_REQUEST,
       favouriteToBeDeleted: favourite
     };
   },
+  
   closeWarning : function() {
     return {
       type : types.FAVOURITES_CANCEL_DELETE_QUERY,
       favouriteToBeDeleted: null
     };
   },
+  
   resetMapState : function() {
     return {
       type : types.FAVOURITES_RESET_MAP_STATE
     };
-  }
+  },
+  
+  pinToDashboard : function(query) {
+    return function(dispatch, getState) {
+      dispatch(pinRequest());
+      return favouritesAPI.pinFavourite(query).then(function (response) {
+        dispatch(pinResponse(response.success, response.errors));
+        dispatch(requestedFavouriteQueries());
+        return favouritesAPI.fetchFavouriteQueries().then(function (response) {
+          dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
+          dispatch(getLayoutRequest());
+          return adminAPI.getLayout().then(function(response) {
+            
+            var configuration = JSON.parse(response.profile.configuration);
+            var lay = configuration.layout;
+            var maxY = Math.max.apply(Math, lay.map(function(o){return o.y;}));
+
+            var layoutComponent;
+            if(query.namedQuery.type === 'CHART'){
+              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 1, h: 1};
+            } else if(query.namedQuery.type === 'MAP') {
+              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 1, h: 1};
+            }
+            lay.push(layoutComponent);
+            dispatch(_saveLayoutRequest());
+            var layoutRequest = {"configuration" : JSON.stringify({"layout": lay})};
+
+            return adminAPI.saveLayout(layoutRequest).then(function(response) {
+              dispatch(_saveLayoutResponse(response.success, response.errors));
+            }, function(error) {
+              dispatch(_saveLayoutResponse(false, error));
+            });  
+
+          }, function(error) {
+      
+            dispatch(getLayoutResponse(false, error));
+        
+          }); 
+          
+
+        }, function (error) {
+          dispatch(receivedFavouriteQueries(false, error, null));
+        });
+          }, function (error) {
+            dispatch(pinResponse(false, error));
+        });
+    };
+  }  
 };
 
 

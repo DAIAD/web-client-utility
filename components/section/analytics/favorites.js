@@ -19,7 +19,7 @@ var { setTimezone, fetchFavouriteQueries, openFavourite,
       closeFavourite, setActiveFavourite,
       addCopy, deleteFavourite, openWarning,
       closeWarning, resetMapState, getFavouriteMap,
-      getFavouriteChart, getFeatures} = require('../../../actions/FavouritesActions');
+      getFavouriteChart, getFeatures, pinToDashboard } = require('../../../actions/FavouritesActions');
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -68,7 +68,7 @@ var Favourites = React.createClass({
   componentWillMount : function() {
     this.props.actions.resetMapState();
     this.props.actions.fetchFavouriteQueries();
-      this.setState({points : createPoints()});
+    this.setState({points : createPoints()});
    },
 
   componentDidMount : function() {
@@ -83,6 +83,7 @@ var Favourites = React.createClass({
   },
 
   clickedOpenFavourite(favourite) {
+
     favourite.timezone = this.props.profile.utility.timezone;
     this.props.actions.closeFavourite();
     if(favourite.type == 'MAP'){
@@ -128,6 +129,14 @@ var Favourites = React.createClass({
     };
     this.props.actions.openWarning(request);
   },
+  
+  pinToDashboard(namedQuery) {
+    var request =  {
+      'namedQuery' : namedQuery
+    };    
+    this.props.actions.pinToDashboard(request);
+  },
+  
   onLinkClick () {
     //todo - consider keeping or discarding favourite
   },
@@ -326,13 +335,25 @@ var Favourites = React.createClass({
            type:'action',
            icon: 'copy',
            handler: function() {
-         self.duplicateFavourite(this.props.row);
+             self.duplicateFavourite(this.props.row);
            }
-        }, {
-           name: 'link',
+        }, 
+//          {
+//           name: 'link',
+//           type:'action',
+//           icon: 'link',
+//           handler: function() {
+//           }
+//        }, 
+        {
+           name: 'pin',
            type:'action',
-           icon: 'link',
+           icon: function(field, row) {
+             return (row.pinned === false ? 'map-pin' : null);
+           },
+           hidden: false,
            handler: function() {
+             self.pinToDashboard(this.props.row);
            }
         }, {
            name: 'remove',
@@ -454,7 +475,7 @@ function mapDispatchToProps(dispatch) {
                                                      openFavourite, closeFavourite, setActiveFavourite,
                                                      addCopy, deleteFavourite, openWarning, closeWarning,
                                                      resetMapState, getFavouriteMap, getFavouriteChart,
-                                                     getFeatures}) , dispatch)
+                                                     getFeatures, pinToDashboard }) , dispatch)
   };
 }
 

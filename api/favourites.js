@@ -13,6 +13,12 @@ var FavouritesAPI = {
     },
     deleteFavourite: function(request) {
       return api.json('/action/data/query/delete', request);
+    },
+    pinFavourite: function(request) {
+      return api.json('/action/data/query/pin', request);
+    },
+    unpinFavourite: function(request) {
+      return api.json('/action/data/query/unpin', request);
     }
   };
 

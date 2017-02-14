@@ -54,7 +54,15 @@ var AdminAPI = {
 
   getCounters : function() {
     return api.json('/action/admin/counter');
-  }
+  },
+  
+  saveLayout : function(layout) {
+    return api.json('/action/profile/save', layout);
+  },
+  
+  getLayout : function() {
+    return api.json('/action/profile/load');
+  }    
 };
 
 module.exports = AdminAPI;

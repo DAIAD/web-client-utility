@@ -44,6 +44,8 @@ var Announcements = React.createClass({
       for(var prop in this.props.accounts[obj]){
         if(prop == "selected"){
           if(this.props.accounts[obj][prop] === true){
+            //id is the accountKey. If null the account is resolved from the username
+            this.props.accounts[obj].id = null; 
             addedAccounts.push(this.props.accounts[obj]);
           }
         }
