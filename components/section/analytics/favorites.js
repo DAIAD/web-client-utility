@@ -42,16 +42,6 @@ var _getTimelineLabels = function(timeline) {
   return [];
 };
 
-var createPoints = function() {
-  var points = [];
-
-  for(var i=0; i<50; i++) {
-    points.push([38.35 + 0.02 * Math.random(), -0.521 + 0.05 * Math.random(), Math.random()]);
-  }
-
-  return points;
-};
-
 var _onChangeTimeline = function(value, label, index) {
   this.props.actions.getFeatures(index, value);
 };
@@ -64,11 +54,16 @@ var Favourites = React.createClass({
     //using this instead of  router: React.PropTypes.func due to warning
     //https://github.com/react-bootstrap/react-router-bootstrap/issues/91
    },
-
+   
+   getInitialState() {
+     return {
+       expanded: null,
+     };
+  },
+  
   componentWillMount : function() {
     this.props.actions.resetMapState();
     this.props.actions.fetchFavouriteQueries();
-    this.setState({points : createPoints()});
    },
 
   componentDidMount : function() {
