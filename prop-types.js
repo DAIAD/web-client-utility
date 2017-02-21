@@ -11,6 +11,7 @@ var PropTypes = React.PropTypes;
 var populationPropType = PropTypes.oneOfType([
   PropTypes.instanceOf(population.Group),
   PropTypes.instanceOf(population.Cluster),
+  PropTypes.instanceOf(population.User)
 ]);
 
 var seriesPropType = PropTypes.shape({

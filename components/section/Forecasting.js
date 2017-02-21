@@ -4,30 +4,50 @@ var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
 var Breadcrumb = require('../Breadcrumb');
-var Chart = require('../Chart');
 var Select = require('react-select');
 var UserSearchTextBox = require('../UserSearchTextBox');
-var { getUtilityData, getUtilityForecast, getUserData, getUserForecast, setUser } = require('../../actions/ForecastingActions');
-var theme = require('../chart/themes/forecast');
+var Chart = require('../reports-measurements/chart');
+
+var { getUtilityData, getUtilityForecast, getUserData, 
+      getUserForecast, setUser, setGroup, getUtilityChart, getUserChart, 
+      filterByType, getGroups} = require('../../actions/ForecastingActions');
+      
+      
+var _filterByType = function(e) {
+
+  var profile = this.props.profile;
+  this.props.actions.filterByType(e.value === 'UNDEFINED' ? null : e.value);
+  if(e.value === 'UNDEFINED'){
+    this.props.actions.getUtilityChart(null, profile.utility.key, profile.utility.name, profile.timezone);
+  }
+};
+
+var _groupSelect = function(e) {
+
+  var profile = this.props.profile;
+  this.props.actions.setGroup(e);
+  var population;
+  if(e.group.type === 'SEGMENT'){
+  
+    var clusterKey = this.props.config.utility.clusters.filter((cluster) => cluster.name == e.group.cluster);
+    population = [{group: e.group.key, label:"CLUSTER:" + clusterKey[0].key + ":" + e.group.key, type:"GROUP"}];
+    this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
+    
+  } else if (e.group.type === 'SET') {
+  
+    population = [{group: e.group.key, label:"GROUP:" + e.group.key + '/' + e.name, type:"GROUP"}];
+    this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
+  }
+};
 
 var _onUserSelect= function(e) {
   var profile = this.props.profile;
-
   if(e) {
     if(e.value) {
-      this.props.actions.getUserData(e.value, e.label, profile.timezone);
-      this.props.actions.getUserForecast(e.value, e.label, profile.timezone);
+      this.props.actions.getUserChart(e.value, e.label, profile.timezone);
     }
   }
   this.props.actions.setUser(e);
-};
-
-var _onChangeChartType = function(e) {
-  this.setState({
-    chart: {
-      type: e.value
-    }
-  });
 };
 
 var Forecasting = React.createClass({
@@ -35,118 +55,89 @@ var Forecasting = React.createClass({
       intl: React.PropTypes.object
   },
 
-  getInitialState() {
-    return {
-      chart: {
-        type: 'line'
-      }
-    };
-  },
-
   toggleView(view) {
     this.setState({map : !this.state.map});
   },
 
   componentWillMount : function() {
+  
     var profile = this.props.profile;
-
-
     this.props.actions.setUser(null);
 
-    this.props.actions.getUtilityData(profile.utility.key, profile.utility.name, profile.timezone);
-    this.props.actions.getUtilityForecast(profile.utility.key, profile.utility.name, profile.timezone);
+    this.props.actions.getUtilityChart(null, profile.utility.key, profile.utility.name, profile.timezone);
+    
+    if(this.props.forecasting.groups == null) {
+      this.props.actions.getGroups();
+    }    
   },
 
   render: function() {
-    var utilityChart = {
-      series: []
-    };
-    var userChart = {
-      series: []
-    };
 
-    if(this.props.forecasting.data.utility) {
-      utilityChart.series.push({
-        legend: 'Actual',
-        xAxis: 'date',
-        yAxis: 'volume',
-        data: this.props.forecasting.data.utility.data
-      });
-    }
-    if(this.props.forecasting.forecast.utility) {
-      utilityChart.series.push({
-        legend: 'Forecast',
-        xAxis: 'date',
-        yAxis: 'volume',
-        data: this.props.forecasting.forecast.utility.data
-      });
-    }
-
-    if(this.props.forecasting.user) {
-      if(this.props.forecasting.data.user) {
-        userChart.series.push({
-          legend: this.props.forecasting.data.user.label + ' - Actual',
-          xAxis: 'date',
-          yAxis: 'volume',
-          data: this.props.forecasting.data.user.data
-        });
-      }
-      if(this.props.forecasting.forecast.user) {
-        userChart.series.push({
-          legend: this.props.forecasting.forecast.user.label + ' - Forecast',
-          xAxis: 'date',
-          yAxis: 'volume',
-          data: this.props.forecasting.forecast.user.data
-        });
-      }
-    }
-
-    var chartOptions = {
-      tooltip: {
-        show: true
-      },
-      dataZoom : {
-        format: 'day'
+    var defaults= {
+      chartProps: {
+        width: 780,
+        height: 300,
       }
     };
 
     const title = (
       <span>
         <i className={'fa fa-bar-chart fa-fw'}></i>
-        <span style={{ paddingLeft: 4 }}>Utility and User Water Consumption Forecasting</span>
+        <span style={{ paddingLeft: 4 }}>Water Consumption Forecasting</span>
       </span>
     );
 
-    var chart1 = (<span>Loading ... </span>), chart2 = null;
-
-    if(utilityChart.series.length > 0) {
-      chart1 = (
-        <Chart style={{ width: '100%', height: 450 }}
-               elementClassName='mixin'
-               type={this.state.chart.type}
-               prefix='chart'
-               options={chartOptions}
-               data={utilityChart}
-               theme={theme}
-        />
+    var chart1 = (
+        <Bootstrap.ListGroup fill>
+          <Bootstrap.ListGroupItem className="report-chart-wrapper">       
+            <Chart
+              {...defaults.chartProps}
+              draw={this.props.forecasting.groupDraw}
+              field={"volume"}
+              level={"week"}
+              reportName={"avg-daily-avg"}
+              finished={this.props.forecasting.groupFinished}
+              series={this.props.forecasting.groupSeries}
+              context={this.props.config}
+              overlap={null}
+              overlapping={false}
+              forecast={this.props.forecasting.group ? this.props.forecasting.group : null}
+            />
+          </Bootstrap.ListGroupItem>
+        </Bootstrap.ListGroup>
       );
-    }
-
-    if(userChart.series.length > 0) {
-      chart2 = (
-        <Bootstrap.ListGroupItem>
-          <Chart  style={{ width: '100%', height: 450 }}
-                  elementClassName='mixin'
-                  type={this.state.chart.type}
-                  prefix='chart'
-                  options={chartOptions}
-                  data={userChart}
-                  theme={theme}
-          />
-        </Bootstrap.ListGroupItem>
+     
+      var chart2 = (
+        <Bootstrap.ListGroup fill>
+          <Bootstrap.ListGroupItem className="report-chart-wrapper">       
+            <Chart
+              {...defaults.chartProps}
+              draw={this.props.forecasting.userDraw}
+              field={"volume"}
+              level={"week"}
+              reportName={"avg-daily-avg"}
+              finished={this.props.forecasting.userFinished}
+              series={this.props.forecasting.userSeries}
+              context={this.props.config}
+              overlap={null}
+              overlapping={false}   
+              forecast={this.props.forecasting.user ? this.props.forecasting.user : null}
+            />
+          </Bootstrap.ListGroupItem>
+        </Bootstrap.ListGroup>         
       );
-    }
 
+    var typeOptions = [];
+    if(this.props.forecasting.groups && this.props.forecasting.query.type){
+      typeOptions = this.props.forecasting.groups.filtered.map((group) => {
+        return {
+          name: group.name,
+          label: group.type == 'SEGMENT' ? group.cluster + ' ' + group.name : group.name,
+          group: group
+        };
+      });
+    }
+    
     var content = (
       <div className='row'>
         <div className='col-lg-12'>
@@ -155,27 +146,43 @@ var Forecasting = React.createClass({
               <Bootstrap.ListGroupItem>
                 <div className='row'>
                   <div className='col-md-3'>
-                    <UserSearchTextBox name='username' onChange={_onUserSelect.bind(this)}/>
-                    <span className='help-block'>Select a single user</span>
-                  </div>
-                  <div className='col-md-2'>
-                    <Select name='chart-type'
-                      value={ 'line' }
+                    <Select name='groupType'
+                      value={this.props.forecasting.query.type ? this.props.forecasting.query.type : 'UNDEFINED'}
                       options={[
-                          { value: 'bar', label: 'Bar' },
-                          { value: 'line', label: 'Line' },
-                          { value: 'area', label: 'Area' }
+                        { value: 'UNDEFINED', label: this.props.profile.utility.name },
+                        { value: 'SEGMENT', label: 'Segment' },
+                        { value: 'SET', label: 'Set' }
                       ]}
-                      onChange={_onChangeChartType.bind(this)}
+                      onChange={_filterByType.bind(this)}
                       clearable={false}
-                    />
-                    <span className='help-block'>Select chart type</span>
+                      searchable={false} className='form-group'/>
+                    <span className='help-block'>Filter group type</span>
+                  </div>
+                  <div className='col-md-3'>
+                    <Select name='group'
+                      value={this.props.forecasting.group ? 
+                          {name:this.props.forecasting.group.name,label:this.props.forecasting.group.label} : 'UNDEFINED'}
+                      options={typeOptions}
+                      onChange={_groupSelect.bind(this)}
+                      clearable={false}
+                      searchable={false} className='form-group'/>
+                    <span className='help-block'>Select group</span>
                   </div>
                 </div>
               </Bootstrap.ListGroupItem>
               <Bootstrap.ListGroupItem>
                 {chart1}
               </Bootstrap.ListGroupItem>
+             <Bootstrap.ListGroupItem>
+             <div className='row'>
+                  <div className='col-md-3'>
+                    <UserSearchTextBox name='username' 
+                      noResults={'Type a username...'}
+                      onChange={_onUserSelect.bind(this)}/>
+                    <span className='help-block'>Select a single user</span>
+                  </div>
+                 </div>
+                </Bootstrap.ListGroupItem>
               {chart2}
               <Bootstrap.ListGroupItem className='clearfix'>
                 <Link className='pull-right' to='/scheduler' style={{ paddingLeft : 7, paddingTop: 12 }}>Job Scheduler</Link>
@@ -206,15 +213,17 @@ function mapStateToProps(state) {
   return {
       forecasting: state.forecasting,
       profile: state.session.profile,
-      routing: state.routing
+      routing: state.routing,
+      config: state.config
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { getUtilityData, getUtilityForecast,
-                                                     getUserData, getUserForecast,
-                                                     setUser }) , dispatch)
+                                                     getUserData, getUserForecast, setUser, 
+                                                     setGroup, getUtilityChart, getUserChart, 
+                                                     filterByType, getGroups }) , dispatch)
   };
 }
 

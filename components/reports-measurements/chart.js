@@ -14,6 +14,7 @@ var Chart = React.createClass({
     nameTemplates: {
       basic: _.template('<%= metric %> of <%= label %>'),
       ranking: _.template('<%= ranking.type %>-<%= ranking.index + 1 %> of <%= label %>'),
+      forecast: _.template('Forecast - <%= metric %> of <%= label %>'),
     },
    
     defaults: {
@@ -56,7 +57,8 @@ var Chart = React.createClass({
       finished: true,
       scaleTimeAxis: false,
       overlap: null,
-      overlapping: false
+      overlapping: false,
+      forecast: null
     };
   },
   
@@ -320,7 +322,7 @@ var Chart = React.createClass({
     return result;
   },
 
-  _getNameForSeries: function ({ranking, population: target, metric, timespan}) {
+  _getNameForSeries: function ({ranking, population: target, metric, timespan, forecast}) {
     //todo - refine label with shorter timelabel?
     var timeLabel = ' ' + moment(timespan[0]).format('DD/MM/YYYY') + '-' +  moment(timespan[1]).format('DD/MM/YYYY');
     var {nameTemplates} = this.constructor;
@@ -340,9 +342,16 @@ var Chart = React.createClass({
       }
       label = cluster.name + ': ' +
           cluster.groups.find(g => (g.key == target.key)).name + timeLabel;
+    } else {
+      label = this.props.forecast? this.props.forecast.label : 'Custom Group';
+    }
+    var tpl;
+    if(forecast){ //label per serie if multiple
+      tpl = nameTemplates.forecast;
+    } else {
+      tpl = (ranking)? nameTemplates.ranking : nameTemplates.basic;   
     }
 
-    var tpl = (ranking)? nameTemplates.ranking : nameTemplates.basic;
     return tpl({metric, label, ranking});
   }
 });
