@@ -22,8 +22,8 @@ var { getTimeline, getFeatures, getCounters, getProfileLayout,
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 //Chart = Maximizable(Chart);
 
-var defaultChartTitle = "Last 12 Months Average Consumption";
-var defaultMapTitle = "Last 12 Months Consumption";
+var defaultChartTitle = "Last 30 Days Average Consumption";
+var defaultMapTitle = "Last 30 Days Consumption";
 
 var getDefaultChart = function(props) {
   var defaultChart = {

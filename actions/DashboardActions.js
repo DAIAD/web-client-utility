@@ -5,8 +5,8 @@ var population = require('../model/population');
 var types = require('../constants/DashboardActionTypes');
 var moment = require('moment');
 
-var defaultChartTitle = "Last 12 Months Average Consumption";
-var defaultMapTitle = "Last 12 Months Consumption";
+var defaultChartTitle = "Last 30 Days Average Consumption";
+var defaultMapTitle = "Last 30 Days Consumption";
 
 var defaultLayout = [
       {"i":defaultChartTitle,"x":0,"y":1,"w":1,"h":1},
@@ -27,7 +27,7 @@ var getDefaultChart = function(props) {
       time:{
         type:"ABSOLUTE",
         granularity:"WEEK",
-        start:moment().subtract(350, 'day').valueOf(),
+        start:moment().subtract(30, 'day').valueOf(),
         end:moment().valueOf(),
         durationTimeUnit:"HOUR"},
       population:[{
@@ -53,7 +53,7 @@ var getDefaultMap = function(props) {
       time:{
         type:"ABSOLUTE",
         granularity:"DAY",
-        start:moment().subtract(350, 'day').valueOf(),
+        start:moment().subtract(30, 'day').valueOf(),
         end:moment().valueOf(),
         durationTimeUnit:"HOUR"},
       population:[{
@@ -114,12 +114,13 @@ var _getTimelineInit = function(query, id, title) {
   };
 };
 
-var _getTimelineComplete = function(success, errors, data, id, title) {
+var _getTimelineComplete = function(success, errors, data, id, title, source) {
 
   return {
     type : types.TIMELINE_RESPONSE,
     id: id,
     title: title,
+    source: source,
     success : success,
     errors : errors,
     data : data
@@ -368,12 +369,12 @@ var getTimeline = function(favourite) {
           data.devices = response.devices;
         }
 
-        dispatch(_getTimelineComplete(response.success, response.errors, data, id, title));
+        dispatch(_getTimelineComplete(response.success, response.errors, data, id, title, source));
 
         dispatch(_getFeatures(0, null, null, id));
 
       }, function(error) {
-        dispatch(_getTimelineComplete(false, error, null, null, null));
+        dispatch(_getTimelineComplete(false, error, null, null, null, null));
 
         dispatch(_getFeatures(0, null, null, id));
       });
