@@ -190,13 +190,15 @@ var mapReducer = function(state, action) {
 
     case types.TIMELINE_RESPONSE:
       if (action.success) {
+        var sourceData = (action.source == "METER") ? action.data.meters : action.data.devices;
+        
         return [{
           id : action.id,
           title : action.title,
           areas : action.data.areas,
           meters : action.data.meters,
           devices : action.data.devices,
-          timeline : _extractTimeline(action.data.meters, action.data.areas),
+          timeline : _extractTimeline(sourceData, action.data.areas),
           features : null
         }];
       }

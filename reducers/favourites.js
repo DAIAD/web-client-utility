@@ -160,13 +160,13 @@ var mapReducer = function(state, action) {
       });
     case types.FAVOURITES_TIMELINE_RESPONSE:
       if (action.success) {
-        var source = (state.query.query.source == 'METER') ? action.data.meters : action.data.devices;
+        var sourceData = (state.query.query.source == 'METER') ? action.data.meters : action.data.devices;
 
         return Object.assign({}, state, {
           areas : action.data.areas,
           meters : action.data.meters,
           devices : action.data.devices,
-          timeline : _extractTimeline(source, action.data.areas),
+          timeline : _extractTimeline(sourceData, action.data.areas),
           features : null
         });
       }

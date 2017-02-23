@@ -49,7 +49,8 @@ var UserSearchTextBox = React.createClass({
     return {
       name: 'username',
       onChange: null,
-      multi: false
+      multi: false,
+      noResults: 'No users found'
     };
   },
 
@@ -67,7 +68,7 @@ var UserSearchTextBox = React.createClass({
         loadOptions={_getOptions.bind(this)}
         clearable={true}
         multi={this.props.multi}
-        noResultsText={'No users found'}
+        noResultsText={this.props.noResults}
       />
     );
   }

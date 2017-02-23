@@ -128,6 +128,29 @@ class ClusterGroup extends Group {
   }
 }
 
+// Represents a user
+
+class User extends Group {
+  
+  constructor (key, name) {
+    super(key, name);
+    this.key = key;
+    this.name = name;
+  }
+  
+  toString () {
+    return 'USER' + ':' + this.key + ':' + this.name;
+  }
+  
+  toJSON () {
+    return {
+      type: 'USER',
+      label: this.name,
+      key: this.key,
+    };  
+  }  
+}
+
 // A factory for Group instances
 
 Group.fromString = function (label) {
@@ -199,6 +222,7 @@ var extractGroupParams = function (target) {
 module.exports = {
   Group, 
   Cluster,
+  User,
   Utility,
   ClusterGroup, 
   Ranking, 

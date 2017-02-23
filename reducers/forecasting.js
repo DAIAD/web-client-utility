@@ -1,235 +1,222 @@
 var moment = require('moment');
-
 var types = require('../constants/ForecastingActionTypes');
 
 var _createInitialState = function() {
   return {
     isLoading : false,
     interval : [
-        moment().startOf('month'), moment().endOf('month')
-    ],
+      moment().subtract(60, 'day'), moment()
+    ],    
     query : {
-      utility : null,
+      group : null,
       user : null
     },
-    data : {
-      utility : null,
-      user : null
-    },
-    forecast : {
-      utility : null,
-      user : null
-    },
+    groupSeries : null,
+    userSeries : null,
+    group : null,
     user : null
   };
 };
 
-var _extractChartSeries = function(interval, data, label) {
-  var d;
-  var series = [];
-
-  var ref = interval[1].clone();
-  var days = interval[1].diff(interval[0], 'days') + 1;
-
-  if ((data.length === 0) || (!data[0].points) || (data[0].points.length === 0)) {
-    for (d = days; d > 0; d--) {
-      series.push({
-        volume : 0,
-        date : ref.clone().toDate()
-      });
-
-      ref.subtract(1, 'days');
-    }
-  } else {
-    var index = 0;
-    var points = data[0].points;
-
-    points.sort(function(p1, p2) {
-      return (p2.timestamp - p1.timestamp);
-    });
-
-    for (d = days; d > 0; d--) {
-      if (index === points.length) {
-        series.push({
-          volume : 0,
-          date : ref.clone().toDate()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isBefore(points[index].timestamp, 'day')) {
-        index++;
-      } else if (ref.isAfter(points[index].timestamp, 'day')) {
-        series.push({
-          volume : 0,
-          date : ref.clone().toDate()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isSame(points[index].timestamp, 'day')) {
-        series.push({
-          volume : points[index].volume.SUM,
-          date : ref.clone().toDate()
-        });
-
-        index++;
-        ref.subtract(1, 'days');
+var _extractFeatures = function(groups) {
+  var geojson = {
+    type : 'FeatureCollection',
+    features : [],
+    crs : {
+      type : 'name',
+      properties : {
+        name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
       }
+    }
+  };
+
+  groups = groups || [];
+
+  for ( var index in groups) {
+    if (groups[index].location) {
+      var meter = groups[index].hasOwnProperty('meter') ? groups[index].meter : null;
+
+      geojson.features.push({
+        'type' : 'Feature',
+        'geometry' : groups[index].location,
+        'properties' : {
+          'groupKey' : groups[index].id,
+          'deviceKey' : meter.key,
+          'name' : groups[index].fullname,
+          'address' : groups[index].address,
+          'meter' : {
+            'key' : meter.key,
+            'serial' : meter.serial
+          }
+        }
+      });
     }
   }
 
+  return geojson;
+};
+
+var _createInitialGroupState = function() {
   return {
-    label : label,
-    data : series.reverse()
+    groups : [],
+    filtered: [],
+    features : null
   };
+};
+
+var _filterRows = function(rows, type, name) {
+  var filteredRows = rows.filter( r => {
+    if(name) {
+      if(r.text.indexOf(name) === -1) {
+        return false;
+      }
+    }
+    if(type) {
+      return (r.type == type);
+    }
+    return true;
+  });
+  return filteredRows;
+};
+
+var dataReducer = function(state, action) {
+  
+  switch (action.type) {
+    case types.GROUP_CATALOG_FILTER_TYPE :
+      var filterd = _filterRows(state || [], action.groupType, action.name);
+
+      return {
+        groups : state || [],
+        filtered : filterd,
+        features : _extractFeatures(state || [])
+      };
+    
+    case types.GROUP_CATALOG_RESPONSE:
+
+      if (action.success === true) {
+        action.groups.forEach( g => {
+          if(g.type == 'SEGMENT') {
+            g.text = g.cluster + ': ' + g.name;
+          } else {
+            g.text = g.name;
+          }
+        });
+        action.groups.sort( (a, b) => {
+          if (a.text < b.text) {
+            return -1;
+          }
+          if (a.text > b.text) {
+            return 1;
+          }
+          return 0;
+        });
+        return {
+          total : action.total || 0,
+          index : action.index || 0,
+          size : action.size || 10,
+          groups : action.groups || [],
+          filtered : _filterRows(action.groups || [], action.groupType, action.name),
+          features : _extractFeatures(action.groups || [])
+        };
+      } else {
+
+        return {
+          total : 0,
+          index : 0,
+          size : 10,
+          groups : [],
+          filtered: [],
+          features : _extractFeatures([])
+        };
+      }
+
+    default:
+      return state || _createInitialGroupState();
+  }
 };
 
 var admin = function(state, action) {
   switch (action.type) {
-    case types.UTILITY_DATA_REQUEST:
-
+    case types.GROUP_CHART_DATA_REQUEST:
       return Object.assign({}, state, {
         isLoading : true,
-        query : {
-          utility : action.query,
-          user : state.query.user
-        },
-        data : {
-          utility : null,
-          user : state.data.user
-        }
+        groupSeries: null,
+        groupDraw: true,
+        groupFinished: false
       });
 
-    case types.UTILITY_DATA_RESPONSE:
+    case types.GROUP_CHART_DATA_RESPONSE:
       if (action.success) {
         return Object.assign({}, state, {
           isLoading : false,
-          data : {
-            utility : _extractChartSeries(state.interval, action.data, state.query.utility.query.population[0].label),
-            user : state.data.user
-          }
+          groupDraw: true,
+          groupFinished: action.timestamp,
+          groupSeries: action.data
         });
       }
 
       return Object.assign({}, state, {
         isLoading : false,
-        data : {
-          utility : null,
-          user : state.data.user
-        }
+        groupDraw: true,
+        groupFinished: action.timestamp,
+        groupSeries: null
       });
-
-    case types.UTILITY_FORECAST_REQUEST:
-
-      return Object.assign({}, state, {
-        isLoading : true,
-        query : {
-          utility : action.query,
-          user : state.query.user
-        },
-        forecast : {
-          utility : null,
-          user : state.data.user
-        }
-      });
-
-    case types.UTILITY_FORECAST_RESPONSE:
-      if (action.success) {
-        return Object.assign({}, state, {
-          isLoading : false,
-          forecast : {
-            utility : _extractChartSeries(state.interval, action.data, state.query.utility.query.population[0].label),
-            user : state.data.user
-          }
-        });
-      }
-
-      return Object.assign({}, state, {
-        isLoading : false,
-        data : {
-          utility : null,
-          user : state.data.user
-        }
-      });
-
     case types.USER_DATA_REQUEST:
+
       return Object.assign({}, state, {
         isLoading : true,
-        query : {
-          utility : state.query.utility,
-          user : action.query,
-        },
-        data : {
-          utility : state.data.utility,
-          user : null
-        }
+        userSeries: null,
+        userDraw: true,
+        userFinished: false
       });
 
     case types.USER_DATA_RESPONSE:
       if (action.success) {
         return Object.assign({}, state, {
           isLoading : false,
-          data : {
-            utility : state.data.utility,
-            user : _extractChartSeries(state.interval, action.data, state.query.user.query.population[0].label)
-          }
+          userDraw: true,
+          userFinished: action.timestamp,
+          userSeries: action.data
         });
       }
-
       return Object.assign({}, state, {
         isLoading : false,
-        data : {
-          utility : state.data.utility,
-          user : null
-        }
+        userDraw: true,
+        userFinished: action.timestamp,
+        userSeries: null
       });
-
-    case types.USER_FORECAST_REQUEST:
-
+    case types.GROUP_CATALOG_REQUEST: 
       return Object.assign({}, state, {
-        isLoading : true,
-        query : {
-          utility : state.query.utility,
-          user : action.query
-        },
-        forecast : {
-          utility : state.forecast.utility,
-          user : null
-        }
+        isLoading : false
       });
-
-    case types.USER_FORECAST_RESPONSE:
-      if (action.success) {
-        return Object.assign({}, state, {
-          isLoading : false,
-          forecast : {
-            utility : state.forecast.utility,
-            user : _extractChartSeries(state.interval, action.data, state.query.user.query.population[0].label)
-          }
-        });
-      }
-
+    case types.GROUP_CATALOG_RESPONSE:
+      action.groupType = state.query.type;
+      action.name = state.query.name;
       return Object.assign({}, state, {
         isLoading : false,
-        data : {
-          utility : state.data.utility,
-          user : null
-        }
-      });
+        groups : dataReducer(state.data, action)
+      });  
+    case types.GROUP_CATALOG_FILTER_TYPE:
+      action.name = state.query.name;
 
+      var groups = dataReducer(state.groups.groups, action);
+      return Object.assign({}, state, {
+        query : Object.assign({}, state.query, {
+          type: (action.groupType === 'UNDEFINED' ? null : action.groupType),
+          population : groups
+        }),
+        groups : groups,
+        group : null
+      }); 
     case types.SET_USER:
-      var clearData = ((action.user == null) || (state.user == null));
       return Object.assign({}, state, {
-        user : action.user,
-        data : {
-          utility : state.data.utility,
-          user : (clearData ? null : state.data.user)
-        },
-        forecast : {
-          utility : state.forecast.utility,
-          user : (clearData ? null : state.forecast.user)
-        }
-      });
-
+        user : action.user ? action.user : null,
+        userSeries: action.user ? state.userSeries : null
+      });      
+    case types.SET_GROUP:
+      return Object.assign({}, state, {
+        group : action.group,
+      });  
     case types.USER_RECEIVED_LOGOUT:
       return _createInitialState();
 
