@@ -12,6 +12,7 @@ var Timeline = require('../Timeline');
 var GroupSearchTextBox = require('../GroupSearchTextBox');
 var {FormattedTime} = require('react-intl');
 var moment = require('moment');
+var toolbars = require('../toolbars');
 
 var { getTimeline, getFeatures, getChart,
       setEditor, setEditorValue,
@@ -298,42 +299,49 @@ var AnalyticsMap = React.createClass({
           );
         break;
     }
-
+    
+//    var mapTitle = (
+//      <div className="header-wrapper">
+//        <h3>{title}</h3>
+//        <toolbars.ButtonToolbar className="header-toolbar"
+//          groups={toolbarSpec}
+//          onSelect={this._handleToolbarEvent}
+//         />
+//      </div>
+//    );
+   
     // Map configuration
     var mapTitle = (
       <span>
+      <div className="header-wrapper">
         <i className='fa fa-map fa-fw'></i>
         <span style={{ paddingLeft: 4 }}>Map</span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5, display : (this.props.editor ? 'block' : 'none' ) }}>
-          <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={_setEditor.bind(this, null)}>
+        <span style={{float: 'right',  marginTop: -3, marginLeft: 0, display : (this.props.editor ? 'block' : 'none' ) }}>
+          <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, null)}>
             <i className='fa fa-rotate-left fa-fw'></i>
           </Bootstrap.Button>
         </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5}}>
-          <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={_setEditor.bind(this, 'source')}>
+        <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
+          <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'source')}>
             <i className='fa fa-database fa-fw'></i>
           </Bootstrap.Button>
         </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5}}>
-        <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={_setEditor.bind(this, 'spatial')} disabled>
-            <i className='fa fa-map fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5}}>
-        <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={_setEditor.bind(this, 'population')}>
+        <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
+        <Bootstrap.Button bsStyle='default'  onClick={_setEditor.bind(this, 'population')}>
             <i className='fa fa-group fa-fw'></i>
           </Bootstrap.Button>
         </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5}}>
-        <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={_setEditor.bind(this, 'interval')}>
+        <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
+        <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'interval')}>
             <i className='fa fa-calendar fa-fw'></i>
           </Bootstrap.Button>
         </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5}}>
-        <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={_setEditor.bind(this, 'favourite')}>
+        <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
+        <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'favourite')}>
             <i className={'fa fa-' + favouriteIcon + ' fa-fw'}></i>
           </Bootstrap.Button>
         </span>
+      </div>
       </span>
     );
 

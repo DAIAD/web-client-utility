@@ -16,7 +16,7 @@ var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 //var Maximizable = require('../Maximizable');
 
-var { getTimeline, getFeatures, getCounters, getProfileLayout, 
+var { getFeatures, getCounters, getProfileLayout, 
       fetchFavouriteQueries, saveLayout, unpin } = require('../../actions/DashboardActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
@@ -110,18 +110,18 @@ var Dashboard = React.createClass({
     e.stopPropagation();
     e.preventDefault();
   },
-  
+
   contextTypes: {
     intl: React.PropTypes.object,
     config: configPropType,     
   },
-  
+
   componentWillMount : function() {
     this.props.actions.getProfileLayout();  
   },
-  
+
   componentDidMount : function() {
-    
+
     this.props.actions.fetchFavouriteQueries(this.props);
     this.props.actions.getCounters();
   },
@@ -129,15 +129,15 @@ var Dashboard = React.createClass({
   toggleSize : function() {
     console.log(this);
   },
-  
+
   _unpin : function(fav, e) {
     var request =  {
       'namedQuery' : fav
     };
-    
+
     this.props.actions.unpin(request, this.props);
   },
-  
+
   createChartComponents : function (pinnedCharts) {
 
     var props = this.props;
@@ -212,6 +212,14 @@ var Dashboard = React.createClass({
         <FilterTag key='source' text={pChart.data ? pChart.data[0].source : ' ... '} icon='database' />
       );
 
+      var overlap, overlapping;
+      if(pinnedCharts[i].overlap){
+         overlap = {value:pinnedCharts[i].overlap, label: pinnedCharts[i].overlap};
+         overlapping = true;
+      } else {
+         overlap = null;
+         overlapping = false;
+      }      
       var chart = (
         <Chart 
           {...defaults.chartProps}
@@ -223,6 +231,8 @@ var Dashboard = React.createClass({
           series={pChart.data}
           context={props.config}
           scaleTimeAxis={false}
+          overlapping={overlapping}
+          overlap={overlap}
         />
       ); 
 
@@ -255,12 +265,12 @@ var Dashboard = React.createClass({
     var mPanels = [];
     pinnedMaps.push(getDefaultMap(this.props));
     for(var i=0; i<pinnedMaps.length; i++){
-      
+
       //todo - merge returned pMap with its corresponding pinned object 
       //to keep info about timespan and source for the tags
       var pMaps = props.map.length > 0 ? 
           props.map.filter(function(propMap) { return propMap.id === pinnedMaps[i].id; }) : [];
-          
+
       var pMap = pMaps[0];
 
       if(!pMap){
@@ -297,9 +307,9 @@ var Dashboard = React.createClass({
 
       </span>
       );
-     
+
       //todo - put fav interval
-      
+
       var intervalLabel ='';
       if(props.interval) {
         var start = moment(pinnedMaps[i].queries[0].time.start).format('DD/MM/YYYY');
@@ -308,21 +318,21 @@ var Dashboard = React.createClass({
         if (start === end) {
           intervalLabel = start;
         }
-      }      
+      }
 
       var mapFilterTags = [];
       mapFilterTags.push(
         <FilterTag key='time' text={intervalLabel} icon='calendar' />
       );
-   
+
       mapFilterTags.push(
         <FilterTag key='spatial' text='Alicante' icon='map' />
       );
-   
+
       mapFilterTags.push(
         <FilterTag key='source' text='Meter' icon='database' />
       );
-      
+
       var map = (
       <Bootstrap.ListGroup fill>
         <Bootstrap.ListGroupItem>
@@ -367,12 +377,109 @@ var Dashboard = React.createClass({
           {map}
         </Bootstrap.Panel>
       );
-     
+
       var mPanelWithKey = {panel:mapPanel, key:pinnedMaps[i].title};
       mPanels.push(mPanelWithKey);
     }
 
     return mPanels;
+  },
+  
+  createForecastComponents : function (pinnedForecasts) {
+
+    var props = this.props;
+    var defaults= {
+      chartProps: {
+        width: '100%',
+        height: 300,
+      }
+    };
+
+    var forPanels = [];
+
+    for(var i=0; i<pinnedForecasts.length; i++){
+      var pCharts = props.chart.length > 0 ? 
+          props.chart.filter(function(propChart) { return propChart.id === pinnedForecasts[i].id; }) : [];
+          
+      var pChart = pCharts[0];
+
+      if(!pChart){
+        return [];
+      }  
+
+      var unpinButton = pChart.id === 100000 ? null : (
+        <Bootstrap.Button 
+            bsStyle='default'
+            className='btn-circle'
+            onClick={this._unpin.bind(this, pChart)}
+            type='button'
+            >
+            <i className='fa fa-remove fa-fw'></i>
+          </Bootstrap.Button>
+      );
+      var chartTitle = (
+      <span>
+        <i key={pChart.title} className='fa fa-bar-chart fa-fw'></i>
+        <span style={{ paddingLeft: 4 }}>{pChart.title}</span>
+        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
+          {unpinButton}
+        </span>
+      </span>
+      );
+
+      var intervalLabel =' ... ';
+      if(pChart.data) {
+        var start = moment(pChart.data[0].timespan[0]).format('DD/MM/YYYY');
+        var end = moment(pChart.data[0].timespan[1]).format('DD/MM/YYYY');
+        intervalLabel = start + ' - ' + end;
+        if (start === end) {
+          intervalLabel = start;
+        }
+      }
+
+      var chartFilterTags =[];
+      chartFilterTags.push(
+        <FilterTag key='time' text={intervalLabel} icon='calendar' />
+      );
+      chartFilterTags.push(
+        <FilterTag key='source' text={pChart.data ? pChart.data[0].source : ' ... '} icon='database' />
+      );
+
+      var chart = (
+        <Chart 
+          {...defaults.chartProps}
+          draw={pChart.draw} 
+          field={'volume'}
+          level={'week'}
+          reportName={'avg-daily-avg'}
+          finished={pChart.finished}
+          series={pChart.data}
+          context={props.config}
+          scaleTimeAxis={false}
+        />
+      ); 
+
+      var chartPanel = (
+      <Bootstrap.Panel header={chartTitle} style={{width: 600}}>
+        <Bootstrap.ListGroup fill>
+          <Bootstrap.ListGroupItem className="report-chart-wrapper">
+          {chart}
+          </Bootstrap.ListGroupItem>
+          <Bootstrap.ListGroupItem className='clearfix'>
+            <div className='pull-left'>
+              {chartFilterTags}
+            </div>
+            <span style={{ paddingLeft : 7}}> </span>
+            <Link className='pull-right' to='/analytics' style={{ paddingLeft : 7, paddingTop: 12 }}>View analytics</Link>
+          </Bootstrap.ListGroupItem>
+        </Bootstrap.ListGroup>
+      </Bootstrap.Panel>
+      );
+      var cPanelWithKey = {panel:chartPanel, key:pChart.title};
+      forPanels.push(cPanelWithKey);
+    }
+
+    return forPanels;
   },
 
   render: function() {
@@ -381,14 +488,18 @@ var Dashboard = React.createClass({
       return (<div> Loading... </div>)
     }
 
-    var pinnedComponents, pinnedCharts, pinnedMaps, divCharts, divMaps;
+    var pinnedComponents, pinnedCharts, pinnedMaps, pinnedForecasts, divCharts, divMaps, divForecasts;
 
     if(this.props.favourites){
       pinnedComponents = this.props.favourites.filter(fav => fav.pinned === true);
+
       pinnedCharts = pinnedComponents.filter(fav => fav.type === "CHART");
       pinnedMaps = pinnedComponents.filter(fav => fav.type === "MAP");
+      pinnedForecasts = pinnedComponents.filter(fav => fav.type === "FORECAST");
+
       divCharts = this.createChartComponents(pinnedCharts);
       divMaps = this.createMapComponents(pinnedMaps);
+      divForecasts = this.createForecastComponents(pinnedForecasts);
     }
 
     var counters = this.props.counters;
@@ -446,28 +557,36 @@ var Dashboard = React.createClass({
 
     var chartComponents = divCharts ? divCharts : [];
     var mapComponents = divMaps ? divMaps : [];
+    var forecastComponents = divForecasts ? divForecasts : [];
 
-     var lCharts = chartComponents ?
-              chartComponents.map( 
-                chart => (
-                  <div key={chart.key} className='draggable'>
-                  {chart.panel}
-                  </div>
-                )
-              )
-            : null;
+    var lCharts = chartComponents ?
+      chartComponents.map( 
+        chart => (
+          <div key={chart.key} className='draggable'>
+            {chart.panel}
+          </div>
+        )
+      ) : null;
             
-     var lMaps = mapComponents ?
-              mapComponents.map( 
-                map => (
-                  <div key={map.key} className='draggable'>
-                  {map.panel}
-                  </div>
-                )
-              )
-            : null;            
- 
-    var components = lCharts.concat(lMaps);
+    var lMaps = mapComponents ?
+      mapComponents.map( 
+        map => (
+          <div key={map.key} className='draggable'>
+            {map.panel}
+          </div>
+        )
+      ) : null;
+            
+    var lForecasts = forecastComponents ?
+      forecastComponents.map( 
+        forecast => (
+          <div key={forecast.key} className='draggable'>
+            {forecast.panel}
+          </div>
+        )
+      ) : null;
+
+    var components = lCharts.concat(lMaps, lForecasts);
     if(components.length !== this.props.savedLayout.length) {
       return (<div>Loading...</div>);
     }
@@ -527,7 +646,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters, fetchFavouriteQueries,  
+    actions : bindActionCreators(Object.assign({}, { getFeatures, getCounters, fetchFavouriteQueries,  
                                                      getProfileLayout, saveLayout, unpin }) , dispatch)
   };
 }

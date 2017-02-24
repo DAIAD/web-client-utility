@@ -105,6 +105,49 @@ var _buildTimelineQuery = function(population, source, geometry, timezone, inter
   };
 };
 
+var _buildGroupQuery = function(population, timezone, from, to) {
+  return {
+    "level":"week",
+    "field":"volume",
+    "overlap":null,
+    "queries":[{
+      "time": {
+        "type":"ABSOLUTE",
+        "granularity":"DAY",
+        "start":from,
+        "end":to
+      },
+      "population":population,
+      "source":"METER",
+      "metrics":["SUM"]}
+    ]
+  };
+};
+
+var _buildUtilityQuery = function(key, timezone, from, to) {
+  return {
+    "level":"week",
+    "field":"volume",
+    "overlap":null,
+    "queries":[{
+      "time": {
+        "type":"ABSOLUTE",
+        "granularity":"DAY",
+        "start":from,
+        "end":to
+      },
+      "population":[{
+        "type":"UTILITY",
+        "label":"UTILITY:" + key,
+        "ranking":null,
+        "utility":key
+      }],
+      "source":"METER",
+      "metrics":["SUM"]}
+    ]
+  };
+};
+
 var _getTimelineInit = function(query, id, title) {
   return {
     type : types.TIMELINE_REQUEST,
@@ -325,10 +368,103 @@ var getChart = function(favourite) {
           var id = favourite.id;
           dispatch(_chartResponse(success, errors, flatResAll, title, id));          
           return _.flatten(resAll);
+      }
+    );
+  };
+};
+
+var getForecast = function(favourite) {
+    //Build two queries, one for real data and one for forecast data.
+
+    return function(dispatch, getState) {
+      var profile = getState().session.profile;
+      var key = profile.utility.key;
+      var timezone =   profile.timezone;
+
+      var group = null;
+      var groupType = favourite.queries[0].population[0].type;
+      if(groupType === 'UTILITY'){
+        group = null;
+      } else if(groupType === 'GROUP'){
+        var [g, r] =  population.fromString(favourite.queries[0].population[0].label);
+        if(!g.clusterKey){
+          group = [{group: g.key, label:"GROUP:" + g.key + '/' + favourite.title, type:"GROUP"}];
+        } else {
+          group = [{group: g.key, label:"CLUSTER:" + g.clusterKey + ":" + g.key, type:"GROUP"}];
+        }
+      } else if (groupType === 'USER'){
+        console.error('Single user forecast favourite not supported. ', favourite.queries[0].population[0]);
+      }
+
+      dispatch(_chartRequest(favourite.id, favourite.title));
+      var promises =[];
+
+      var interval = [moment(favourite.queries[0].time.start), moment(favourite.queries[0].time.end)];
+      var actualData, forecast;
+
+      if(group) {
+        actualData = _buildGroupQuery(group, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
+        forecast = _buildGroupQuery(group, timezone, interval[0].toDate().getTime(), moment().endOf('month').toDate().getTime());
+      } else {
+        actualData = _buildUtilityQuery(key, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());
+        forecast = _buildUtilityQuery(key, timezone, interval[0].toDate().getTime(), moment().endOf('month').toDate().getTime());
+      }
+
+      //don' t change push order. It is used below for forecast labels in each serie
+      promises.push(queryAPI.queryMeasurements({query: actualData.queries[0]}));
+      promises.push(queryAPI.queryForecast({query: forecast.queries[0]}));
+
+      Promise.all(promises).then(
+        res => {
+
+          var source = actualData.queries[0].source; //source is same for all queries
+          var resAll = [];
+          for(let m=0; m< res.length; m++){
+            if (res[m].errors.length) {
+              throw 'The request is rejected: ' + res[m].errors[0].description; 
+            }
+            var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
+            var res1 = (resultSets || []).map(rs => {
+              var [g, rr] = population.fromString(rs.label);
+
+              var timespan1;
+              
+              if(rs.points.length !== 0){
+                timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              } else {
+                timespan1 = [actualData.queries[0].time.start, actualData.queries[0].time.end];
+              }              
+
+               //Recalculate xAxis timespan based on returned data. (scale)
+               // Shape a normal timeseries result for requested metrics
+               // Todo support other metrics (as client-side "average")
+               var res2 = actualData.queries[0].metrics.map(metric => ({
+                 source,
+                 timespan: timespan1,
+                 granularity: actualData.queries[0].time.granularity,
+                 metric,
+                 population: g,
+                 forecast: m===0 ? false : true, //first promise is actual data, second is forecast data
+                 data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+               }));
+              return _.flatten(res2);
+            });
+            resAll.push(_.flatten(res1)); 
+          }
+          
+          var success = res.every(x => x.success === true); 
+          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
+          var flatResAll = _.flatten(resAll);
+          var title = favourite.title;
+          var id = favourite.id;
+
+          dispatch(_chartResponse(success, errors, flatResAll, title, id));
+
+          return _.flatten(resAll);
         }
       );
     };
-  }; 
+};
   
 var getTimeline = function(favourite) {
 
@@ -417,17 +553,23 @@ var DashboardActions = {
 
         pinnedCharts.push(getDefaultChart(props)); //adding default chart
 
-        for(var m=0;m<pinnedCharts.length;m++){ 
+        for(var m=0;m<pinnedCharts.length;m++){
           dispatch(getChart(pinnedCharts[m]));
         }
 
         var pinnedMaps = response.queries.filter(fav => fav.type === "MAP" && fav.pinned === true);
         pinnedMaps.push(getDefaultMap(props)); //adding default map
-        
+
         for(var n=0;n<pinnedMaps.length;n++){
           dispatch(getTimeline(pinnedMaps[n]));
-        }     
+        }
         
+        var pinnedForecasts = response.queries.filter(fav => fav.type === "FORECAST" && fav.pinned === true);
+
+        for(var l=0;l<pinnedForecasts.length;l++){ 
+          dispatch(getForecast(pinnedForecasts[l]));
+        }
+
       }, function (error) {
         dispatch(receivedFavouriteQueries(false, error, null));
       });
