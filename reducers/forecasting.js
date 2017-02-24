@@ -5,12 +5,23 @@ var _createInitialState = function() {
   return {
     isLoading : false,
     interval : [
-      moment().subtract(60, 'day'), moment()
-    ],    
-    query : {
-      group : null,
-      user : null
-    },
+      moment().subtract(60, 'day'), moment().endOf('month')
+    ],
+    ranges : {
+      'Last 7 Days' : [
+          moment().subtract(6, 'days'), moment()
+      ],
+      'Last 30 Days' : [
+          moment().subtract(29, 'days'), moment()
+      ],
+      'This Month' : [
+          moment().startOf('month'), moment().endOf('month')
+      ],
+      'Last Month' : [
+          moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')
+      ]
+    },    
+    query : null,
     groupSeries : null,
     userSeries : null,
     group : null,
@@ -83,11 +94,11 @@ var dataReducer = function(state, action) {
   
   switch (action.type) {
     case types.GROUP_CATALOG_FILTER_TYPE :
-      var filterd = _filterRows(state || [], action.groupType, action.name);
+      var filteredRows = _filterRows(state || [], action.groupType, action.name);
 
       return {
         groups : state || [],
-        filtered : filterd,
+        filtered : filteredRows,
         features : _extractFeatures(state || [])
       };
     
@@ -142,7 +153,8 @@ var admin = function(state, action) {
         isLoading : true,
         groupSeries: null,
         groupDraw: true,
-        groupFinished: false
+        groupFinished: false,
+        query:action.query
       });
 
     case types.GROUP_CHART_DATA_RESPONSE:
@@ -195,16 +207,13 @@ var admin = function(state, action) {
       return Object.assign({}, state, {
         isLoading : false,
         groups : dataReducer(state.data, action)
-      });  
+      });
     case types.GROUP_CATALOG_FILTER_TYPE:
       action.name = state.query.name;
 
       var groups = dataReducer(state.groups.groups, action);
       return Object.assign({}, state, {
-        query : Object.assign({}, state.query, {
-          type: (action.groupType === 'UNDEFINED' ? null : action.groupType),
-          population : groups
-        }),
+        populationType : (action.groupType === 'UNDEFINED' ? null : action.groupType),
         groups : groups,
         group : null
       }); 
@@ -216,7 +225,11 @@ var admin = function(state, action) {
     case types.SET_GROUP:
       return Object.assign({}, state, {
         group : action.group,
-      });  
+      });
+    case types.SET_INTERVAL:
+      return Object.assign({}, state, {
+        interval : action.interval,
+      });       
     case types.USER_RECEIVED_LOGOUT:
       return _createInitialState();
 
