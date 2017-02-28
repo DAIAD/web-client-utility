@@ -237,8 +237,7 @@ var reducer = function(state, action) {
       return Object.assign({}, state);
 
     case types.GROUP_CATALOG_REQUEST:
-    case types.GROUP_CATALOG_DELETE_REQUEST:
-    case types.GROUP_CATALOG_CHART_REQUEST:
+    case types.GROUP_CATALOG_DELETE_REQUEST:  
     case types.GROUP_CATALOG_ADD_FAVORITE_REQUEST:
     case types.GROUP_CATALOG_REMOVE_FAVORITE_REQUEST:
       
@@ -273,23 +272,53 @@ var reducer = function(state, action) {
       return Object.assign({}, state, {
         isLoading : false
       });
-
-    case types.GROUP_CATALOG_CHART_RESPONSE:
+      
+    case types.GROUP_CATALOG_CHART_REQUEST:
       var charts = state.charts;
- 
-      if (action.data) {
-        charts[action.groupKey] = _fillGroupSeries(state.interval, action.label, action.data);
+      charts[action.groupKey] = {groupSeries: null, query:action.query};
+      
+      return Object.assign({}, state, {
+        isLoading : true,
+        charts : charts,
+        groupFinished: false           
+      });  
+      
+    case types.GROUP_CATALOG_CHART_RESPONSE:
+//      var charts = state.charts;
+// 
+//      if (action.data) {
+//        charts[action.groupKey] = _fillGroupSeries(state.interval, action.label, action.data);
+//      }
+//
+//      return Object.assign({}, state, {
+//        isLoading : false,
+//        charts:charts
+//      });    
+      var charts = state.charts;
+      if (action.success) {
+
+        charts[action.groupKey] = {groupSeries: action.dataChart};    
+
+        return Object.assign({}, state, {
+          isLoading : false,
+          charts : charts,
+          groupFinished: action.timestamp
+        });
+      } else {
+        charts[action.groupKey] = {groupSeries: null};
+        return Object.assign({}, state, {
+          isLoading : false,
+          charts : charts,
+          groupFinished: action.timestamp          
+        });      
       }
 
-      return Object.assign({}, state, {
-        isLoading : false,
-        charts:charts
-      });
 
     case types.GROUP_CATALOG_CLEAR_CHART:
       return Object.assign({}, state, {
         isLoading : false,
-        charts : {}
+        charts : {},
+        groupFinished: null
       });
 
     case types.GROUP_CATALOG_FILTER_NAME :
@@ -323,7 +352,8 @@ var reducer = function(state, action) {
       
     case types.GROUP_CATALOG_SET_METRIC:
       return Object.assign({}, state, {
-        metric: action.metric || 'AVERAGE'
+        metric: action.metric || 'AVERAGE',
+        charts : {}
       });
 
     default:
