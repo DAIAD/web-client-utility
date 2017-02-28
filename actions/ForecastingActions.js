@@ -86,27 +86,27 @@ var _buildUserQuery = function(id, name, timezone, from, to) {
 
 var _setInterval = function(interval) {
   return {
-    type : types.SET_INTERVAL,
+    type : types.FORECASTING_SET_INTERVAL,
     interval : interval
   }; 
 };
 
 var _groupChartRequest = function(query) {
   return {
-    type : types.GROUP_CHART_DATA_REQUEST,
+    type : types.FORECASTING_GROUP_CHART_DATA_REQUEST,
     query : query
   };
 };
 
 var _userChartRequest = function() {
   return {
-    type : types.USER_DATA_REQUEST
+    type : types.FORECASTING_USER_DATA_REQUEST
   };
 };
 
 var _groupChartResponse = function(success, errors, data, t=null) {
   return {
-    type : types.GROUP_CHART_DATA_RESPONSE,
+    type : types.FORECASTING_GROUP_CHART_DATA_RESPONSE,
     success : success,
     errors : errors,
     data : data,
@@ -116,7 +116,7 @@ var _groupChartResponse = function(success, errors, data, t=null) {
 
 var _userChartResponse = function(success, errors, data, t=null) {
   return {
-    type : types.USER_DATA_RESPONSE,
+    type : types.FORECASTING_USER_DATA_RESPONSE,
     success : success,
     errors : errors,
     data : data,
@@ -126,13 +126,13 @@ var _userChartResponse = function(success, errors, data, t=null) {
 
 var getGroupsInit = function() {
   return {
-    type : types.GROUP_CATALOG_REQUEST
+    type : types.FORECASTING_GROUP_CATALOG_REQUEST
   };
 };
 
 var getGroupsComplete = function(success, errors, total, groups, index, size) {
   return {
-    type : types.GROUP_CATALOG_RESPONSE,
+    type : types.FORECASTING_GROUP_CATALOG_RESPONSE,
     success : success,
     errors : errors,
     total : total,
@@ -144,13 +144,13 @@ var getGroupsComplete = function(success, errors, total, groups, index, size) {
 
 var addFavouriteRequest = function () {
   return {
-    type: types.ADD_FAVOURITE_REQUEST
+    type: types.FORECASTING_ADD_FAVOURITE_REQUEST
   };
 };
 
 var addFavouriteResponse = function (success, errors) {
   return {
-    type: types.ADD_FAVOURITE_RESPONSE,
+    type: types.FORECASTING_ADD_FAVOURITE_RESPONSE,
     success: success,
     errors: errors
   };
@@ -160,14 +160,14 @@ var ForecastingActions = {
 
   setUser : function(user) {
     return {
-      type : types.SET_USER,
+      type : types.FORECASTING_SET_USER,
       user : user
     };
   },
 
   setGroup : function(group) {
     return {
-      type : types.SET_GROUP,
+      type : types.FORECASTING_SET_GROUP,
       group : group
     };
   },
@@ -329,7 +329,7 @@ var ForecastingActions = {
   
   filterByType : function(type) {
     return {
-      type : types.GROUP_CATALOG_FILTER_TYPE,
+      type : types.FORECASTING_GROUP_CATALOG_FILTER_TYPE,
       groupType : type
     };
   },

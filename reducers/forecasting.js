@@ -93,7 +93,7 @@ var _filterRows = function(rows, type, name) {
 var dataReducer = function(state, action) {
   
   switch (action.type) {
-    case types.GROUP_CATALOG_FILTER_TYPE :
+    case types.FORECASTING_GROUP_CATALOG_FILTER_TYPE :
       var filteredRows = _filterRows(state || [], action.groupType, action.name);
 
       return {
@@ -102,7 +102,7 @@ var dataReducer = function(state, action) {
         features : _extractFeatures(state || [])
       };
     
-    case types.GROUP_CATALOG_RESPONSE:
+    case types.FORECASTING_GROUP_CATALOG_RESPONSE:
 
       if (action.success === true) {
         action.groups.forEach( g => {
@@ -148,7 +148,7 @@ var dataReducer = function(state, action) {
 
 var admin = function(state, action) {
   switch (action.type) {
-    case types.GROUP_CHART_DATA_REQUEST:
+    case types.FORECASTING_GROUP_CHART_DATA_REQUEST:
       return Object.assign({}, state, {
         isLoading : true,
         groupSeries: null,
@@ -157,7 +157,7 @@ var admin = function(state, action) {
         query:action.query
       });
 
-    case types.GROUP_CHART_DATA_RESPONSE:
+    case types.FORECASTING_GROUP_CHART_DATA_RESPONSE:
       if (action.success) {
         return Object.assign({}, state, {
           isLoading : false,
@@ -173,7 +173,7 @@ var admin = function(state, action) {
         groupFinished: action.timestamp,
         groupSeries: null
       });
-    case types.USER_DATA_REQUEST:
+    case types.FORECASTING_USER_DATA_REQUEST:
 
       return Object.assign({}, state, {
         isLoading : true,
@@ -182,7 +182,7 @@ var admin = function(state, action) {
         userFinished: false
       });
 
-    case types.USER_DATA_RESPONSE:
+    case types.FORECASTING_USER_DATA_RESPONSE:
       if (action.success) {
         return Object.assign({}, state, {
           isLoading : false,
@@ -197,18 +197,18 @@ var admin = function(state, action) {
         userFinished: action.timestamp,
         userSeries: null
       });
-    case types.GROUP_CATALOG_REQUEST: 
+    case types.FORECASTING_GROUP_CATALOG_REQUEST: 
       return Object.assign({}, state, {
         isLoading : false
       });
-    case types.GROUP_CATALOG_RESPONSE:
+    case types.FORECASTING_GROUP_CATALOG_RESPONSE:
       action.groupType = state.query.type;
       action.name = state.query.name;
       return Object.assign({}, state, {
         isLoading : false,
         groups : dataReducer(state.data, action)
       });
-    case types.GROUP_CATALOG_FILTER_TYPE:
+    case types.FORECASTING_GROUP_CATALOG_FILTER_TYPE:
       action.name = state.query.name;
 
       var groups = dataReducer(state.groups.groups, action);
@@ -217,20 +217,20 @@ var admin = function(state, action) {
         groups : groups,
         group : null
       }); 
-    case types.SET_USER:
+    case types.FORECASTING_SET_USER:
       return Object.assign({}, state, {
         user : action.user ? action.user : null,
         userSeries: action.user ? state.userSeries : null
       });      
-    case types.SET_GROUP:
+    case types.FORECASTING_SET_GROUP:
       return Object.assign({}, state, {
         group : action.group,
       });
-    case types.SET_INTERVAL:
+    case types.FORECASTING_SET_INTERVAL:
       return Object.assign({}, state, {
         interval : action.interval,
       });       
-    case types.USER_RECEIVED_LOGOUT:
+    case types.FORECASTING_USER_RECEIVED_LOGOUT:
       return _createInitialState();
 
     default:
