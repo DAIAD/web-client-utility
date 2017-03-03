@@ -5,32 +5,44 @@ var types = require('../constants/GroupCatalogActionTypes');
 var groupAPI = require('../api/group');
 var queryAPI = require('../api/query');
 
-var _buildGroupQuery = function(key, label, timezone) {
-  var interval = [
-      moment().subtract(30, 'days').valueOf(), moment().valueOf()
-  ];
+var population = require('../model/population');
 
+var _buildGroupQuery = function(population, metric, timezone, from, to) {
   return {
-    'query' : {
-      'timezone' : timezone,
-      'time' : {
-        'type' : 'ABSOLUTE',
-        'start' : interval[0],
-        'end' : interval[1],
-        'granularity' : 'DAY'
+    "level":"week",
+    "field":"volume",
+    "overlap":null,
+    "queries":[{
+      "time": {
+        "type":"ABSOLUTE",
+        "granularity":"DAY",
+        "start":from,
+        "end":to
       },
-      'population' : [
-        {
-          'type' : 'GROUP',
-          'label' : label,
-          'group' : key
-        }
-      ],
-      'source' : 'METER',
-      'metrics' : [
-        'AVERAGE', 'MIN', 'MAX'
-      ]
-    }
+      "population":population,
+      "source":"METER",
+      "metrics":[metric]
+      }
+    ]
+  };
+};
+
+var _groupChartRequest = function(query, key) {
+  return {
+    type : types.GROUP_CATALOG_CHART_REQUEST,
+    query : query,
+    groupKey : key
+  };
+};
+
+var _groupChartResponse = function(success, errors, data, key, t=null) {
+  return {
+    type : types.GROUP_CATALOG_CHART_RESPONSE,
+    success : success,
+    errors : errors,
+    dataChart : data,
+    groupKey : key,
+    timestamp: (t || new Date()).getTime()
   };
 };
 
@@ -56,25 +68,6 @@ var changeIndex = function(index) {
   return {
     type : types.GROUP_CATALOG_INDEX_CHANGE,
     index : index
-  };
-};
-
-var getChartInit = function(groupKey, label) {
-  return {
-    type : types.GROUP_CATALOG_CHART_REQUEST,
-    groupKey : groupKey,
-    label : label
-  };
-};
-
-var getChartComplete = function(success, errors, groupKey, label, data) {
-  return {
-    type : types.GROUP_CATALOG_CHART_RESPONSE,
-    success : success,
-    errors : errors,
-    groupKey : groupKey,
-    label : label,
-    data : data
   };
 };
 
@@ -144,27 +137,68 @@ var GroupCatalogActionCreators = {
       type : types.GROUP_CATALOG_CLEAR_CHART
     };
   },
+  
+  getGroupChart : function(group, key, name, timezone) {
 
-  getChart : function(groupKey, label, timezone) {
     return function(dispatch, getState) {
-      dispatch(getChartInit(groupKey, label));
+      var promises =[];
 
-      var query = _buildGroupQuery(groupKey, label, timezone);
+      var interval = getState().forecasting.interval;
+      var metric = getState().groupCatalog.metric;
 
-      return queryAPI.queryMeasurements(query).then(function(response) {
-        if (response.success) {
-          var data = ((response.meters) && (response.meters.length > 0)) ? response.meters[0] : null;
+      var query = _buildGroupQuery(group, metric, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
+      dispatch(_groupChartRequest(query, group[0].group)); //group[0].group -> group key
 
-          dispatch(getChartComplete(response.success, response.errors, groupKey, label, data));
-        } else {
-          dispatch(getChartComplete(response.success, response.errors, groupKey, label, []));
+      promises.push(queryAPI.queryMeasurements({query: query.queries[0]}));
+
+      Promise.all(promises).then(
+        res => {
+
+          var source = query.queries[0].source; //source is same for all queries
+          var resAll = [];
+          for(let m=0; m< res.length; m++){
+            if (res[m].errors.length) {
+              throw 'The request is rejected: ' + res[m].errors[0].description; 
+            }
+            var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
+            var res1 = (resultSets || []).map(rs => {
+            var [g, rr] = population.fromString(rs.label);
+
+              var timespan1;  
+              if(rs.points.length !== 0){
+                timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              } else {
+                timespan1 = [query.queries[0].time.start, query.queries[0].time.end];
+              }              
+
+               //Recalculate xAxis timespan based on returned data. (scale)
+               // Shape a normal timeseries result for requested metrics
+               // Todo support other metrics (as client-side "average")
+               var res2 = query.queries[0].metrics.map(metric => ({
+                 source,
+                 timespan: timespan1,
+                 granularity: query.queries[0].time.granularity,
+                 metric,
+                 population: g,
+                 forecast: m===0 ? false : true, //first promise is actual data, second is forecast data
+                 data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+               }));
+              return _.flatten(res2);
+            });
+            resAll.push(_.flatten(res1)); 
+          }
+          
+          var success = res.every(x => x.success === true); 
+          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
+
+          dispatch(_groupChartResponse(success, errors, _.flatten(resAll), group[0].group));
+
+          return _.flatten(resAll);
         }
-      }, function(error) {
-        dispatch(getChartComplete(false, error));
-      });
+      );
     };
   },
-
+  
   addFavorite : function(groupKey) {
     return function(dispatch, getState) {
       dispatch({

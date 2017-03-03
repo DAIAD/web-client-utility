@@ -5,12 +5,11 @@ var { connect } = require('react-redux');
 var Select = require('react-select');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
-var Chart = require('../Chart');
+var Chart = require('../reports-measurements/chart');
 var theme = require('../chart/themes/shine');
 
-var { getGroups, changeIndex, deleteGroup,
-      getChart, clearChart, setChartMetric,
-      removeFavorite, addFavorite,
+var { getGroups, changeIndex, deleteGroup, getGroupChart, 
+      clearChart, setChartMetric, removeFavorite, addFavorite,
       filterByType, filterByName, clearFilter } = require('../../actions/GroupCatalogActions');
 
 var _handleKeyPress = function(e) {
@@ -31,7 +30,6 @@ var _filterByType = function(e) {
   this.props.actions.filterByType(e.value === 'UNDEFINED' ? null : e.value);
 };
 
-
 var _filterByName = function(e) {
   this.props.actions.filterByName(this.refs.nameFilter.getValue());
 };
@@ -40,7 +38,13 @@ var GroupCatalog  = React.createClass({
   contextTypes: {
       intl: React.PropTypes.object
   },
-
+  
+  getInitialState: function() {
+    return {
+      draw: false
+    };
+  },
+  
   componentWillMount : function() {
     if(this.props.groupCatalog.groups == null) {
       this.props.actions.getGroups();
@@ -56,6 +60,7 @@ var GroupCatalog  = React.createClass({
   },
 
   render: function() {
+    var self = this;
     var tableConfiguration = {
       fields: [{
         name: 'id',
@@ -104,7 +109,20 @@ var GroupCatalog  = React.createClass({
         handler : (function(field, row) {
           var utility = this.props.profile.utility;
 
-          this.props.actions.getChart(row.key, row.text, utility.timezone);
+          var population;
+          if(row.type === 'SEGMENT'){
+            var clusterKey = self.props.config.utility.clusters.filter((cluster) => cluster.name == row.cluster);
+            population = [{group: row.key, label:"CLUSTER:" + clusterKey[0].key + ":" + row.key, type:"GROUP"}];
+            this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone);      
+            self.setState({draw:true});
+            
+          } else if(row.type === 'SET'){
+          
+            population = [{group: row.key, label:"GROUP:" + row.key + '/' + row.name, type:"GROUP"}];
+            this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone); 
+            self.setState({draw:true});
+          }          
+
         }).bind(this)
       }, {
         name : 'delete',
@@ -255,39 +273,41 @@ var GroupCatalog  = React.createClass({
         },
         type: 'line'
       };
-
+      var multipleSeries = [];
       for(var key in this.props.groupCatalog.charts) {
-        var c = this.props.groupCatalog.charts[key];
+        var tempSeries = this.props.groupCatalog.charts[key].groupSeries;
 
-        if((c.points) && (c.points.length > 0)) {
-          data = [];
-
-          for(v=0; v < c.points.length; v++) {
-            data.push({
-              volume: c.points[v][this.props.groupCatalog.metric],
-              date: new Date(c.points[v].timestamp)
-            });
-          }
-
-          chartConfig.data.series.push({
-            legend: c.label,
-            xAxis: 'date',
-            yAxis: 'volume',
-            data: data,
-            yAxisName: 'Volume (lt)'
-          });
+        if(tempSeries){
+          multipleSeries.push(tempSeries);
         }
       }
 
+      var defaults= {
+        chartProps: {
+          width: 780,
+          height: 300,
+        }
+      };
+
+      var fSeries = _.flatten(multipleSeries);
+
+      var series = fSeries[0] ? fSeries : null;
+
+      var reportName = this.props.groupCatalog.metric.toLowerCase();
       chart = (
-        <Chart  style={{ width: '100%', height: 400 }}
-                elementClassName='mixin'
-                prefix='chart'
-                type={chartConfig.type}
-                options={chartConfig.options}
-                data={chartConfig.data}
-                theme={theme}/>
-      );
+        <Chart
+          {...defaults.chartProps}
+          draw={this.state.draw}
+          field={"volume"}
+          level={"week"}
+          reportName={"avg-daily-avg"}
+          finished={this.props.groupCatalog.groupFinished}
+          series={series}
+          context={this.props.config}
+          overlap={null}
+          overlapping={false}
+        />
+      ); 
     }
 
     return (
@@ -304,9 +324,9 @@ var GroupCatalog  = React.createClass({
                 {filterOptions}
                 <Bootstrap.ListGroupItem>
                   <Table  data={tableConfiguration}
-                          onPageIndexChange={this.onPageIndexChange}
-                          template={{empty : dataNotFound}}
-                          style={tableStyle}
+                    onPageIndexChange={this.onPageIndexChange}
+                    template={{empty : dataNotFound}}
+                    style={tableStyle}
                   ></Table>
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
@@ -334,16 +354,16 @@ function mapStateToProps(state) {
   return {
       groupCatalog: state.groupCatalog,
       profile: state.session.profile,
-      routing: state.routing
+      routing: state.routing,
+      config: state.config
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(
-      Object.assign({}, {getGroups, changeIndex, deleteGroup,
-                         getChart, clearChart, setChartMetric,
-                         removeFavorite, addFavorite,
+      Object.assign({}, {getGroups, changeIndex, deleteGroup, getGroupChart, 
+                         clearChart, setChartMetric, removeFavorite, addFavorite,
                          filterByType, filterByName, clearFilter }) , dispatch
   )};
 }

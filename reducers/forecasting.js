@@ -5,12 +5,23 @@ var _createInitialState = function() {
   return {
     isLoading : false,
     interval : [
-      moment().subtract(60, 'day'), moment()
-    ],    
-    query : {
-      group : null,
-      user : null
-    },
+      moment().subtract(60, 'day'), moment().endOf('month')
+    ],
+    ranges : {
+      'Last 7 Days' : [
+          moment().subtract(6, 'days'), moment()
+      ],
+      'Last 30 Days' : [
+          moment().subtract(29, 'days'), moment()
+      ],
+      'This Month' : [
+          moment().startOf('month'), moment().endOf('month')
+      ],
+      'Last Month' : [
+          moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')
+      ]
+    },    
+    query : null,
     groupSeries : null,
     userSeries : null,
     group : null,
@@ -82,16 +93,16 @@ var _filterRows = function(rows, type, name) {
 var dataReducer = function(state, action) {
   
   switch (action.type) {
-    case types.GROUP_CATALOG_FILTER_TYPE :
-      var filterd = _filterRows(state || [], action.groupType, action.name);
+    case types.FORECASTING_GROUP_CATALOG_FILTER_TYPE :
+      var filteredRows = _filterRows(state || [], action.groupType, action.name);
 
       return {
         groups : state || [],
-        filtered : filterd,
+        filtered : filteredRows,
         features : _extractFeatures(state || [])
       };
     
-    case types.GROUP_CATALOG_RESPONSE:
+    case types.FORECASTING_GROUP_CATALOG_RESPONSE:
 
       if (action.success === true) {
         action.groups.forEach( g => {
@@ -137,15 +148,16 @@ var dataReducer = function(state, action) {
 
 var admin = function(state, action) {
   switch (action.type) {
-    case types.GROUP_CHART_DATA_REQUEST:
+    case types.FORECASTING_GROUP_CHART_DATA_REQUEST:
       return Object.assign({}, state, {
         isLoading : true,
         groupSeries: null,
         groupDraw: true,
-        groupFinished: false
+        groupFinished: false,
+        query:action.query
       });
 
-    case types.GROUP_CHART_DATA_RESPONSE:
+    case types.FORECASTING_GROUP_CHART_DATA_RESPONSE:
       if (action.success) {
         return Object.assign({}, state, {
           isLoading : false,
@@ -161,7 +173,7 @@ var admin = function(state, action) {
         groupFinished: action.timestamp,
         groupSeries: null
       });
-    case types.USER_DATA_REQUEST:
+    case types.FORECASTING_USER_DATA_REQUEST:
 
       return Object.assign({}, state, {
         isLoading : true,
@@ -170,7 +182,7 @@ var admin = function(state, action) {
         userFinished: false
       });
 
-    case types.USER_DATA_RESPONSE:
+    case types.FORECASTING_USER_DATA_RESPONSE:
       if (action.success) {
         return Object.assign({}, state, {
           isLoading : false,
@@ -185,39 +197,40 @@ var admin = function(state, action) {
         userFinished: action.timestamp,
         userSeries: null
       });
-    case types.GROUP_CATALOG_REQUEST: 
+    case types.FORECASTING_GROUP_CATALOG_REQUEST: 
       return Object.assign({}, state, {
         isLoading : false
       });
-    case types.GROUP_CATALOG_RESPONSE:
+    case types.FORECASTING_GROUP_CATALOG_RESPONSE:
       action.groupType = state.query.type;
       action.name = state.query.name;
       return Object.assign({}, state, {
         isLoading : false,
         groups : dataReducer(state.data, action)
-      });  
-    case types.GROUP_CATALOG_FILTER_TYPE:
+      });
+    case types.FORECASTING_GROUP_CATALOG_FILTER_TYPE:
       action.name = state.query.name;
 
       var groups = dataReducer(state.groups.groups, action);
       return Object.assign({}, state, {
-        query : Object.assign({}, state.query, {
-          type: (action.groupType === 'UNDEFINED' ? null : action.groupType),
-          population : groups
-        }),
+        populationType : (action.groupType === 'UNDEFINED' ? null : action.groupType),
         groups : groups,
         group : null
       }); 
-    case types.SET_USER:
+    case types.FORECASTING_SET_USER:
       return Object.assign({}, state, {
         user : action.user ? action.user : null,
         userSeries: action.user ? state.userSeries : null
       });      
-    case types.SET_GROUP:
+    case types.FORECASTING_SET_GROUP:
       return Object.assign({}, state, {
         group : action.group,
-      });  
-    case types.USER_RECEIVED_LOGOUT:
+      });
+    case types.FORECASTING_SET_INTERVAL:
+      return Object.assign({}, state, {
+        interval : action.interval,
+      });       
+    case types.FORECASTING_USER_RECEIVED_LOGOUT:
       return _createInitialState();
 
     default:

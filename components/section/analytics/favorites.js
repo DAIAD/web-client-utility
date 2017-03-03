@@ -1,7 +1,6 @@
 var React = require('react');
 var sprintf = require('sprintf');
 var Bootstrap = require('react-bootstrap');
-
 var Breadcrumb = require('../../Breadcrumb');
 var Modal = require('../../Modal');
 var Timeline = require('../../Timeline');
@@ -11,15 +10,15 @@ var {FormattedTime} = require('react-intl');
 var { Link } = require('react-router');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-
 var Chart = require('../../reports-measurements/chart');
 var {configPropType} = require('../../../prop-types');
+var population = require('../../../model/population');
 
 var { setTimezone, fetchFavouriteQueries, openFavourite,
       closeFavourite, setActiveFavourite,
       addCopy, deleteFavourite, openWarning,
       closeWarning, resetMapState, getFavouriteMap,
-      getFavouriteChart, getFeatures, pinToDashboard } = require('../../../actions/FavouritesActions');
+      getFavouriteChart, getFavouriteForecast, getFeatures, pinToDashboard } = require('../../../actions/FavouritesActions');
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -33,9 +32,9 @@ var _getTimelineLabels = function(timeline) {
     return timeline.getTimestamps().map(function(timestamp) {
       return (
         <FormattedTime  value={new Date(timestamp)}
-                        day='numeric'
-                        month='numeric'
-                        year='numeric'/>
+          day='numeric'
+          month='numeric'
+          year='numeric'/>
       );
     });
   }
@@ -78,19 +77,40 @@ var Favourites = React.createClass({
   },
 
   clickedOpenFavourite(favourite) {
-
-    favourite.timezone = this.props.profile.utility.timezone;
+    var profile = this.props.profile;
+    favourite.timezone = profile.utility.timezone;
     this.props.actions.closeFavourite();
-    if(favourite.type == 'MAP'){
-      this.props.actions.getFavouriteMap(favourite);
-    }
-    else if(favourite.type == 'CHART'){
-      this.props.actions.getFavouriteChart(favourite);
-    }
-    else{
+    
+    switch(favourite.type) {
+      case 'MAP':
+        this.props.actions.getFavouriteMap(favourite);
+      break;
+      case 'CHART':
+        this.props.actions.getFavouriteChart(favourite);
+      break;
+      case 'FORECAST':
+        var groupType = favourite.queries[0].population[0].type;
+        var population1;
+        if(groupType === 'UTILITY'){
+          this.props.actions.getFavouriteForecast(null, profile.utility.key, profile.utility.name, profile.timezone);
+        } else if(groupType === 'GROUP'){
+          var [g, r] =  population.fromString(favourite.queries[0].population[0].label);
+          if(!g.clusterKey){
+            population1 = [{group: g.key, label:"GROUP:" + g.key + '/' + favourite.title, type:"GROUP"}];
+            this.props.actions.getFavouriteForecast(population1, profile.utility.key, profile.utility.name, profile.timezone);
+          } else {
+            population1 = [{group: g.key, label:"CLUSTER:" + g.clusterKey + ":" + g.key, type:"GROUP"}]; 
+            this.props.actions.getFavouriteForecast(population1, profile.utility.key, profile.utility.name, profile.timezone);
+          }
+        } else if (groupType === 'USER'){
+          console.error('Single user forecast favourite not supported. ', favourite.queries[0].population[0]);
+        }
+        break;
+      default:
         console.error(sprintf('Favourite type (%s) not supported.', favourite.type));
+        break;
     }
-
+    
     this.props.actions.openFavourite(favourite);
   },
 
@@ -221,7 +241,7 @@ var Favourites = React.createClass({
          }
 
          title = 'Chart: ' + this.props.selectedFavourite.title;
-             dataContent = (
+         dataContent = (
              <Bootstrap.ListGroup fill>
                <Bootstrap.ListGroupItem className="report-chart-wrapper">
                  <Chart
@@ -238,27 +258,73 @@ var Favourites = React.createClass({
                  />
               </Bootstrap.ListGroupItem>
             </Bootstrap.ListGroup>
-           );
+         );
 
-               footerContent = (
-                  <Bootstrap.ListGroupItem>
-                     <span style={{ paddingLeft : 7}}> </span>
-                     <Link 
-                       to='/analytics/panel' 
-                       style={{ paddingLeft : 7, float: 'right'}} 
-                       onClick={this.onLinkClick} 
-                        >View Charts</Link>
-                    <span style={{ paddingLeft : 7}}> </span>
-                     <Link to='/' style={{ paddingLeft : 7, float: 'right'}}>View Dashboard</Link>
-                  </Bootstrap.ListGroupItem>
-               );
+         footerContent = (
+           <Bootstrap.ListGroupItem>
+             <span style={{ paddingLeft : 7}}> </span>
+             <Link 
+               to='/analytics/panel' 
+               style={{ paddingLeft : 7, float: 'right'}} 
+               onClick={this.onLinkClick} 
+               >View Charts</Link>
+             <span style={{ paddingLeft : 7}}> </span>
+             <Link to='/' style={{ paddingLeft : 7, float: 'right'}}>View Dashboard</Link>
+           </Bootstrap.ListGroupItem>
+         );
 
-           break;
+         break;
+       case 'FORECAST':
+         var forecastObject = null;
+         var groupType = this.props.selectedFavourite.queries[0].population[0].type;
+         if(groupType === 'UTILITY'){
+           forecastObject = null;
+         } else if(groupType === 'GROUP'){
+           var [g, r] =  population.fromString(this.props.selectedFavourite.queries[0].population[0].label);
+           if(!g.clusterKey){
+             forecastObject = {group: g.key, label:this.props.selectedFavourite.title, type:"GROUP"};
+           } else {
+             forecastObject = {group: g.key, label:"CLUSTER:" + g.clusterKey + ":" + g.key, type:"GROUP"};
+           }
+        } 
+
+        title = 'Chart: ' + this.props.selectedFavourite.title;
+           dataContent = (
+             <Bootstrap.ListGroup fill>
+               <Bootstrap.ListGroupItem className="report-chart-wrapper">
+                 <Chart
+                   {...defaults.chartProps}
+                   draw={this.props.draw}
+                   field={this.props.selectedFavourite.field}
+                   level={this.props.selectedFavourite.level}
+                   reportName={this.props.selectedFavourite.reportName}
+                   finished={this.props.finished}
+                   series={this.props.data}
+                   context={this.props.config}
+                   forecast={forecastObject}
+                 />
+              </Bootstrap.ListGroupItem>
+            </Bootstrap.ListGroup>
+         );
+
+         footerContent = (
+           <Bootstrap.ListGroupItem>
+             <span style={{ paddingLeft : 7}}> </span>
+               <Link 
+                 to='/analytics/panel' 
+                 style={{ paddingLeft : 7, float: 'right'}} 
+                 onClick={this.onLinkClick} 
+                 >View Charts</Link>
+               <span style={{ paddingLeft : 7}}> </span>
+             <Link to='/' style={{ paddingLeft : 7, float: 'right'}}>View Dashboard</Link>
+           </Bootstrap.ListGroupItem>
+         );
+         break;
        default:
          title = this.props.selectedFavourite.type;
      }
 
-       toggleTitle = (
+     toggleTitle = (
         <span>
              <span>
                <i className={'fa fa-' + icon + ' fa-fw'}></i>
@@ -270,7 +336,7 @@ var Favourites = React.createClass({
                 </Bootstrap.Button>
              </span>
        </span>
-        );
+     );
 
      togglePanel = (
        <Bootstrap.Panel expanded={this.state.expanded} onSelect={this.toggleExpanded} header={toggleTitle}>
@@ -320,7 +386,9 @@ var Favourites = React.createClass({
         }, {
            name: 'edit',
            type:'action',
-           icon: 'pencil',
+           icon: function(field, row) {
+             return (row.type === 'FORECAST' ? null : 'pencil'); //forecast edit action disabled
+           },
            hidden: false,
            handler: function() {
              self.editFavourite(this.props.row);
@@ -470,7 +538,7 @@ function mapDispatchToProps(dispatch) {
                                                      openFavourite, closeFavourite, setActiveFavourite,
                                                      addCopy, deleteFavourite, openWarning, closeWarning,
                                                      resetMapState, getFavouriteMap, getFavouriteChart,
-                                                     getFeatures, pinToDashboard }) , dispatch)
+                                                     getFavouriteForecast, getFeatures, pinToDashboard }) , dispatch)
   };
 }
 

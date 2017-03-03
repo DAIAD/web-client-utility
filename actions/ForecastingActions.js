@@ -1,5 +1,6 @@
 var queryAPI = require('../api/query');
 var groupAPI = require('../api/group');
+var favouritesAPI = require('../api/favourites');
 var types = require('../constants/ForecastingActionTypes');
 var population = require('../model/population');
 var moment = require('moment');
@@ -83,21 +84,29 @@ var _buildUserQuery = function(id, name, timezone, from, to) {
  * Actions
  */
 
-var _groupChartRequest = function() {
+var _setInterval = function(interval) {
   return {
-    type : types.GROUP_CHART_DATA_REQUEST
+    type : types.FORECASTING_SET_INTERVAL,
+    interval : interval
+  }; 
+};
+
+var _groupChartRequest = function(query) {
+  return {
+    type : types.FORECASTING_GROUP_CHART_DATA_REQUEST,
+    query : query
   };
 };
 
 var _userChartRequest = function() {
   return {
-    type : types.USER_DATA_REQUEST
+    type : types.FORECASTING_USER_DATA_REQUEST
   };
 };
 
 var _groupChartResponse = function(success, errors, data, t=null) {
   return {
-    type : types.GROUP_CHART_DATA_RESPONSE,
+    type : types.FORECASTING_GROUP_CHART_DATA_RESPONSE,
     success : success,
     errors : errors,
     data : data,
@@ -107,7 +116,7 @@ var _groupChartResponse = function(success, errors, data, t=null) {
 
 var _userChartResponse = function(success, errors, data, t=null) {
   return {
-    type : types.USER_DATA_RESPONSE,
+    type : types.FORECASTING_USER_DATA_RESPONSE,
     success : success,
     errors : errors,
     data : data,
@@ -117,13 +126,13 @@ var _userChartResponse = function(success, errors, data, t=null) {
 
 var getGroupsInit = function() {
   return {
-    type : types.GROUP_CATALOG_REQUEST
+    type : types.FORECASTING_GROUP_CATALOG_REQUEST
   };
 };
 
 var getGroupsComplete = function(success, errors, total, groups, index, size) {
   return {
-    type : types.GROUP_CATALOG_RESPONSE,
+    type : types.FORECASTING_GROUP_CATALOG_RESPONSE,
     success : success,
     errors : errors,
     total : total,
@@ -133,18 +142,32 @@ var getGroupsComplete = function(success, errors, total, groups, index, size) {
   };
 };
 
+var addFavouriteRequest = function () {
+  return {
+    type: types.FORECASTING_ADD_FAVOURITE_REQUEST
+  };
+};
+
+var addFavouriteResponse = function (success, errors) {
+  return {
+    type: types.FORECASTING_ADD_FAVOURITE_RESPONSE,
+    success: success,
+    errors: errors
+  };
+};
+
 var ForecastingActions = {
 
   setUser : function(user) {
     return {
-      type : types.SET_USER,
+      type : types.FORECASTING_SET_USER,
       user : user
     };
   },
 
   setGroup : function(group) {
     return {
-      type : types.SET_GROUP,
+      type : types.FORECASTING_SET_GROUP,
       group : group
     };
   },
@@ -155,17 +178,19 @@ var ForecastingActions = {
 
       var promises =[];
 
-      dispatch(_groupChartRequest());
-
       var interval = getState().forecasting.interval;
       var actualData, forecast;
 
       if(group) {
         actualData = _buildGroupQuery(group, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
-        forecast = _buildGroupQuery(group, timezone, interval[0].toDate().getTime(), moment().endOf('month').toDate().getTime());    
+        forecast = _buildGroupQuery(group, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());
+
+        dispatch(_groupChartRequest(actualData));
       } else {
-        actualData = _buildUtilityQuery(key, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime(), false);   
-        forecast = _buildUtilityQuery(key, timezone, interval[0].toDate().getTime(), moment().endOf('month').toDate().getTime());
+        actualData = _buildUtilityQuery(key, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
+        forecast = _buildUtilityQuery(key, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());
+
+        dispatch(_groupChartRequest(actualData));
       }
 
       //don' t change push order. It is used below for forecast labels in each serie
@@ -304,8 +329,27 @@ var ForecastingActions = {
   
   filterByType : function(type) {
     return {
-      type : types.GROUP_CATALOG_FILTER_TYPE,
+      type : types.FORECASTING_GROUP_CATALOG_FILTER_TYPE,
       groupType : type
+    };
+  },
+  
+  setInterval : function(interval) {
+    return function(dispatch, getState) {
+      if(!_.isEqual(interval, getState().forecasting.interval)){
+        dispatch(_setInterval(interval));
+      }   
+    }
+  },
+  
+  addFavourite: function(favourite) {
+    return function(dispatch, getState) {
+      dispatch(addFavouriteRequest());
+      return favouritesAPI.addFavourite(favourite).then(function (response) {
+        dispatch(addFavouriteResponse(response.success, response.errors));
+      }, function (error) {
+        dispatch(addFavouriteResponse(false, error));
+      });
     };
   }
 };

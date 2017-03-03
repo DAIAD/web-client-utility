@@ -543,26 +543,10 @@ var ReportPanel = React.createClass({
   render: function () {
     var {defaults} = this.constructor;
     var {dirty, draw, error} = this.state;
-//    if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'
-//       && this.props.defaultFavouriteValues.source
-//       && this.props.defaultFavouriteValues.timespan
-//       && this.props.defaultFavouriteValues.population
-//       && this.props.defaultFavouriteValues.metricLevel) {
-//
-//      this.props.favouriteChart.finished = this.props.finished;
-//
-//      if(this.props.favouriteSeries){
-//        this.props.favouriteChart.series = this.props.favouriteSeries;
-//      }
-//      else{
-//        this.props.favouriteChart.series = this.props.series;
-//      }
-//      var {field, title, level, reportName, finished, series} = this.props.favouriteChart;
-//    } else {
 
-      var {field, title, level, reportName, finished} = this.props;
-      var series = this.props.series2;
-    //}
+    var {field, title, level, reportName, finished} = this.props;
+    var series = this.props.series2;
+
     var toolbarSpec = this._specForToolbar();
     var parameters = this._specForParameters();
     var header = (
@@ -1456,17 +1440,18 @@ var ReportPanel = React.createClass({
       namedQuery.queries[m].population =  
          _.uniqBy(tempPop, function(popu) 
            { return [popu.label, popu.key, popu.group, popu.utility, popu.ranking].join(); });
-      var request =  {
-        'namedQuery' : namedQuery
-      };
-    }
 
-      if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'){
-        namedQuery.id = this.props.favouriteChart.id;
-        this.props.updateFavourite(request);
-      } else{
-        this.props.addFavourite(request);
-      }
+    }
+    var request =  {
+      'namedQuery' : namedQuery
+    };
+    
+    if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'){
+      namedQuery.id = this.props.favouriteChart.id;
+      this.props.updateFavourite(request);
+    } else{
+      this.props.addFavourite(request);
+    }
     this.setState({dirty: true});
   },
 
