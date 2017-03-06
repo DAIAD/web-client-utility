@@ -7,14 +7,13 @@ var { connect } = require('react-redux');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
 var LeafletMap = require('../LeafletMap');
-var Chart = require('../Chart');
-var theme = require('../chart/themes/shine');
+var Chart = require('../reports-measurements/chart');
 var InputTextModal = require('../InputTextModal');
 
-var { getAccounts, changeIndex, filterText, filterSerial, clearFilter, getMeter, clearChart,
-      setSearchModeText, setSearchModeMap, setGeometry,
-      removeFavorite, addFavorite,
-      setSelectionMode, discardBagOfConsumers, toggleConsumer, saveBagOfConsumers } = require('../../actions/UserCatalogActions');
+var { getAccounts, changeIndex, filterText, filterSerial, clearFilter, 
+      getMeter, getUserChart, clearChart, setSearchModeText, setSearchModeMap, 
+      setGeometry, removeFavorite, addFavorite, setSelectionMode, discardBagOfConsumers, 
+      toggleConsumer, saveBagOfConsumers } = require('../../actions/UserCatalogActions');
 
 var _setSelectionMode = function(e) {
   this.props.actions.setSelectionMode(!this.props.userCatalog.selection.enabled);
@@ -129,7 +128,8 @@ var UserCatalog = React.createClass({
 
   getInitialState: function() {
     return {
-      modal: false
+      modal: false,
+      draw : false
     };
   },
 
@@ -160,6 +160,7 @@ var UserCatalog = React.createClass({
   },
 
   render: function() {
+    var self = this;
     var tableConfiguration = {
       fields: [{
         name: 'id',
@@ -206,7 +207,9 @@ var UserCatalog = React.createClass({
         icon : 'bar-chart-o',
         handler : (function(field, row) {
           if(row.serial) {
-            this.props.actions.getMeter(row.id, row.meter.key, row.fullname);
+            var profile = this.props.profile;
+            this.props.actions.getUserChart(row.id, row.fullname + ' - ' + row.serial, profile.timezone);
+            self.setState({draw:true});
           }
         }).bind(this),
         visible : (function(field, row) {
@@ -376,7 +379,7 @@ var UserCatalog = React.createClass({
         break;
     }
 
-    var v, chartTitleText, chartConfig = null, chart = (<span>Select a meter ...</span>), data = [];
+    var chartTitleText, chart = (<span>Select a meter ...</span>);
 
     if(Object.keys(this.props.userCatalog.charts).length) {
       chartTitleText = (
@@ -393,52 +396,38 @@ var UserCatalog = React.createClass({
         </span>
       );
 
-      chartConfig = {
-        options: {
-          tooltip: {
-            show: true
-          },
-          dataZoom: {
-            show: true,
-            format: 'day'
-          }
-        },
-        data: {
-          series: []
-        },
-        type: 'line'
-      };
-
+      var multipleSeries = [];
       for(var key in this.props.userCatalog.charts) {
-        var c = this.props.userCatalog.charts[key];
-        if((c.values) && (c.values.length > 0)) {
-          data = [];
-
-          for(v=0; v < c.values.length; v++) {
-            data.push({
-              volume: c.values[v].difference,
-              date: new Date(c.values[v].timestamp)
-            });
-          }
-
-          chartConfig.data.series.push({
-            legend: c.label,
-            xAxis: 'date',
-            yAxis: 'volume',
-            data: data,
-            yAxisName: 'Volume (lt)'
-          });
+        var tempSeries = this.props.userCatalog.charts[key].series;
+        if(tempSeries){
+          multipleSeries.push(tempSeries);
         }
       }
 
+      var defaults= {
+        chartProps: {
+          width: 780,
+          height: 300,
+        }
+      };
+
+      var fSeries = _.flatten(multipleSeries);
+
+      var series = fSeries[0] ? fSeries : null;
+
       chart = (
-        <Chart  style={{ width: '100%', height: 400 }}
-                elementClassName='mixin'
-                prefix='chart'
-                type={chartConfig.type}
-                options={chartConfig.options}
-                data={chartConfig.data}
-                theme={theme}/>
+        <Chart
+          {...defaults.chartProps}
+          draw={this.state.draw}
+          field={"volume"}
+          level={"week"}
+          reportName={"avg-daily-avg"}
+          finished={this.props.userCatalog.finished}
+          series={series}
+          context={this.props.config}
+          overlap={null}
+          overlapping={false}
+        />
       );
     }
 
@@ -509,16 +498,16 @@ function mapStateToProps(state) {
   return {
       userCatalog: state.userCatalog,
       profile: state.session.profile,
-      routing: state.routing
+      routing: state.routing,
+      config: state.config
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(
-      Object.assign({}, {getAccounts, changeIndex, filterSerial, filterText, clearFilter, getMeter, clearChart,
-                         setSearchModeText, setSearchModeMap, setGeometry,
-                         removeFavorite, addFavorite,
+      Object.assign({}, {getAccounts, changeIndex, filterSerial, filterText, clearFilter, getMeter, getUserChart, 
+                         clearChart, setSearchModeText, setSearchModeMap, setGeometry, removeFavorite, addFavorite,
                          setSelectionMode, discardBagOfConsumers, toggleConsumer, saveBagOfConsumers }) , dispatch
   )};
 }
