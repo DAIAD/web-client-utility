@@ -118,25 +118,25 @@ var Chart = React.createClass({
         formatter: (t) => (moment(t).utc().format(xf)),
       };    
     }
-    
-    return (
-      <div className="report-chart" id={['chart', field, level, reportName].join('--')}>
-        <echarts.LineChart
-          width={this.props.width}
-          height={this.props.height}
-          loading={this.props.finished? null : {text: 'Loading data...'}}
-          tooltip={defaults.tooltip}
-          theme={theme}
-          xAxis={xAxis}
-          yAxis={{
-            name: fieldName + (unit? (' (' + unit + ')') : ''),
-            numTicks: 4,
-            formatter: (y) => (numeral(y).format('0.0a')),
-          }}
-          series={series}
-         />
-      </div>
-    );
+
+      return (
+        <div className="report-chart" id={['chart', field, level, reportName].join('--')}>
+          <echarts.LineChart
+            width={this.props.width}
+            height={this.props.height}
+            loading={this.props.finished? null : {text: 'Loading data...'}}
+            tooltip={defaults.tooltip}
+            theme={theme}
+            xAxis={xAxis}
+            yAxis={{
+              name: fieldName + (unit? (' (' + unit + ')') : ''),
+              numTicks: 4,
+              formatter: (y) => (numeral(y).format('0.0a')),
+            }}
+            series={series}
+           />
+        </div>
+      );
   },
 
   // Helpers
@@ -227,7 +227,7 @@ var Chart = React.createClass({
     if (!series || !series.length || series.every(s => !s.data.length)){
       return result; // no data available    
     }
-    
+
     var maxDuration = 0;
     var minStart = moment();
 
@@ -245,7 +245,7 @@ var Chart = React.createClass({
         minStart = start1;
       }
     }
-    
+
     var {config} = this.context;
     var _config;
     var {bucket, duration} = typeof config === "undefined" ? this.props.context.reports.levels[level] : config.reports.levels[level];
@@ -342,10 +342,18 @@ var Chart = React.createClass({
       }
       label = cluster.name + ': ' +
           cluster.groups.find(g => (g.key == target.key)).name + timeLabel;
+    } else if (target instanceof population.User) {
+    
+      label = target.name;
+      
     } else {
-      label = this.props.forecast? this.props.forecast.label : 'Custom Group';
+
+      var customGroup = target.name ? target.name : 'Custom Group';
+
+      label = this.props.forecast? this.props.forecast.label : customGroup;
     }
     var tpl;
+    
     if(forecast){ //label per serie if multiple
       tpl = nameTemplates.forecast;
     } else {

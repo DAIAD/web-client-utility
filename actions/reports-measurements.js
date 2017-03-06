@@ -1,8 +1,6 @@
-
 var _ = require('lodash');
 var moment = require('moment');
 var sprintf = require('sprintf');
-
 var ActionTypes = require('../action-types');
 var {computeKey} = require('../reports').measurements;
 var TimeSpan = require('../model/timespan');
@@ -10,7 +8,6 @@ var population = require('../model/population');
 var {toUtcTime} = require('../helpers/timestamps');
 var {queryMeasurements} = require('../service/query');
 var favouritesAPI = require('../api/favourites');
-
 
 var addFavouriteRequest = function () {
   return {
@@ -280,14 +277,14 @@ var actions = {
     if(!queries){
       return;
     }
-    
+
     var promiseArray = [];
     for(var i =0; i < queries.length; i++){
     
       var tempQuery = queries[i].query;
       var target = tempQuery.population;
       var ts = tempQuery.timespan;
-      
+
       // Prepare population target
       if (!target) {
         // Assume target is the entire utility
@@ -334,7 +331,7 @@ var actions = {
       var queryPromise = queryMeasurements(source, field, q2, {metrics, tim});
       promiseArray.push(queryPromise);
     }
-    
+
     Promise.all(promiseArray).then(
       (data) => (
         dispatch(actions.setMultipleData(field, level, reportName, key, data))
