@@ -12,7 +12,6 @@ var Timeline = require('../Timeline');
 var GroupSearchTextBox = require('../GroupSearchTextBox');
 var {FormattedTime} = require('react-intl');
 var moment = require('moment');
-var toolbars = require('../toolbars');
 
 var { getTimeline, getFeatures, getChart,
       setEditor, setEditorValue,
