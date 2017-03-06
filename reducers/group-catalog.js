@@ -44,81 +44,6 @@ var _createInitialeState = function() {
   };
 };
 
-var _fillGroupSeries = function(interval, label, data) {
-  var d;
-  var allPoints = [];
-
-  var ref = interval[1].clone();
-  var days = interval[1].diff(interval[0], 'days') + 1;
-
-  if ((!data) || (data.points.length === 0)) {
-    for (d = days; d > 0; d--) {
-      allPoints.push({
-        MIN: 0,
-        MAX: 0,
-        SUM: 0,
-        AVERAGE : 0,
-        timestamp : ref.clone().toDate().getTime()
-      });
-
-      ref.subtract(1, 'days');
-    }
-  } else {
-    var index = 0;
-    var points = data.points;
-
-    points.sort(function(p1, p2) {
-      return (p2.timestamp - p1.timestamp);
-    });
-
-    for (d = days; d > 0; d--) {
-      if (index === points.length) {
-        allPoints.push({
-          MIN: 0,
-          MAX: 0,
-          SUM: 0,
-          AVERAGE : 0,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isBefore(points[index].timestamp, 'day')) {
-        index++;
-      } else if (ref.isAfter(points[index].timestamp, 'day')) {
-        allPoints.push({
-          MIN: 0,
-          MAX: 0,
-          SUM: 0,
-          AVERAGE : 0,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isSame(points[index].timestamp, 'day')) {
-        allPoints.push({
-          MIN: points[index].volume.MIN,
-          MAX: points[index].volume.MAX,
-          SUM : points[index].volume.SUM,
-          AVERAGE : points[index].volume.AVERAGE,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        index++;
-        ref.subtract(1, 'days');
-      }
-    }
-  }
-
-  allPoints.sort(function(p1, p2) {
-    return (p1.timestamp - p2.timestamp);
-  });
-
-  data.points = allPoints;
-  data.label = label;
-
-  return data;
-};
-
 var _extractFeatures = function(groups) {
   var geojson = {
     type : 'FeatureCollection',
@@ -282,37 +207,26 @@ var reducer = function(state, action) {
         charts : charts,
         groupFinished: false           
       });  
-      
-    case types.GROUP_CATALOG_CHART_RESPONSE:
-//      var charts = state.charts;
-// 
-//      if (action.data) {
-//        charts[action.groupKey] = _fillGroupSeries(state.interval, action.label, action.data);
-//      }
-//
-//      return Object.assign({}, state, {
-//        isLoading : false,
-//        charts:charts
-//      });    
-      var charts = state.charts;
+
+    case types.GROUP_CATALOG_CHART_RESPONSE:  
+      var groupCharts = state.charts;
       if (action.success) {
 
-        charts[action.groupKey] = {groupSeries: action.dataChart};    
+        groupCharts[action.groupKey] = {groupSeries: action.dataChart};    
 
         return Object.assign({}, state, {
           isLoading : false,
-          charts : charts,
+          charts : groupCharts,
           groupFinished: action.timestamp
         });
       } else {
-        charts[action.groupKey] = {groupSeries: null};
+        groupCharts[action.groupKey] = {groupSeries: null};
         return Object.assign({}, state, {
           isLoading : false,
-          charts : charts,
+          charts : groupCharts,
           groupFinished: action.timestamp          
         });      
       }
-
 
     case types.GROUP_CATALOG_CLEAR_CHART:
       return Object.assign({}, state, {

@@ -1,5 +1,3 @@
-var moment = require('moment');
-
 var types = require('../constants/GroupCatalogActionTypes');
 
 var groupAPI = require('../api/group');
@@ -146,6 +144,8 @@ var GroupCatalogActionCreators = {
       var interval = getState().forecasting.interval;
       var metric = getState().groupCatalog.metric;
 
+      var targetGroup = getState().groupCatalog.data.groups.find(g => (g.key == group[0].group));
+
       var query = _buildGroupQuery(group, metric, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
       dispatch(_groupChartRequest(query, group[0].group)); //group[0].group -> group key
 
@@ -162,8 +162,9 @@ var GroupCatalogActionCreators = {
             }
             var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
             var res1 = (resultSets || []).map(rs => {
-            var [g, rr] = population.fromString(rs.label);
-
+            
+              var [g, rr] = population.fromString(rs.label);
+              g.name = targetGroup.name; //set group name for custom groups
               var timespan1;  
               if(rs.points.length !== 0){
                 timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
@@ -187,7 +188,7 @@ var GroupCatalogActionCreators = {
             });
             resAll.push(_.flatten(res1)); 
           }
-          
+
           var success = res.every(x => x.success === true); 
           var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
 
