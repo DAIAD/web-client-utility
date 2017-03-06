@@ -1,5 +1,5 @@
 var moment = require('moment');
-
+var _ = require('lodash');
 var types = require('../constants/UserActionTypes');
 
 var initialState = {
@@ -22,7 +22,8 @@ var initialState = {
   ],
   export : {
     token : null
-  }
+  },
+  charts : {}
 };
 
 var _fillMeterSeries = function(interval, data) {
@@ -193,7 +194,8 @@ var user = function(state, action) {
           devices : null,
           groups : {},
           deviceKey : null
-        }
+        },
+        charts : {}
       });
 
     case types.USER_RECEIVE_USER_INFO:
@@ -287,7 +289,64 @@ var user = function(state, action) {
           deviceKey : null
         }
       });
+    case types.USER_CHART_REQUEST:
+      var requestUserCharts = state.charts;
+      requestUserCharts[action.userKey] = {series: null, query:action.query};
+      
+      return Object.assign({}, state, {
+        isLoading : true,
+        charts : requestUserCharts,
+        finished: false
+      });  
 
+    case types.USER_CHART_RESPONSE:
+      var responseCharts = state.charts;
+      if (action.success) {
+        responseCharts[action.userKey] = {series: action.dataChart};    
+
+        return Object.assign({}, state, {
+          isLoading : false,
+          charts : responseCharts,
+          finished: action.timestamp
+        });
+      } else {
+        responseCharts[action.userKey] = {series: null};
+        return Object.assign({}, state, {
+          isLoading : false,
+          charts : responseCharts,
+          finished: action.timestamp
+        });      
+      }
+
+    case types.USER_GROUP_CHART_REQUEST:
+      var requestGroupCharts = state.charts;
+      requestGroupCharts[action.groupKey] = {series: null, query:action.query};
+      
+      return Object.assign({}, state, {
+        isLoading : true,
+        charts : requestGroupCharts,
+        finished: false
+      });  
+
+    case types.USER_GROUP_CHART_RESPONSE:
+      var responseUserCharts = state.charts;
+      if (action.success) {
+        responseUserCharts[action.groupKey] = {series: action.dataChart};    
+
+        return Object.assign({}, state, {
+          isLoading : false,
+          charts : responseUserCharts,
+          finished: action.timestamp
+        });
+      } else {
+        responseCharts[action.userKey] = {series: null};
+        return Object.assign({}, state, {
+          isLoading : false,
+          charts : responseCharts,
+          finished: action.timestamp
+        });
+      }
+      
     case types.GROUP_DATA_REQUEST:
       return Object.assign({}, state, {
         isLoading : true
@@ -311,14 +370,11 @@ var user = function(state, action) {
       });
 
     case types.GROUP_DATA_CLEAR:
+      var userKey = state.user.id;
+      var userChart = _.pick(state.charts, [userKey]);
       return Object.assign({}, state, {
         isLoading : false,
-        data : {
-          meters : state.data.meters,
-          devices : state.data.devices,
-          groups : {},
-          deviceKey : state.data.deviceKey
-        }
+        charts : userChart
       });
 
     case types.EXPORT_REQUEST:
