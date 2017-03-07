@@ -13,6 +13,12 @@ var types = mirrorToPath({
   AMPHIRO_REQUEST : null,
   AMPHIRO_RESPONSE : null,
 
+  USER_CHART_REQUEST : null,
+  USER_CHART_RESPONSE : null,
+  
+  USER_GROUP_CHART_REQUEST : null,
+  USER_GROUP_CHART_RESPONSE : null,
+  
   METER_REQUEST : null,
   METER_RESPONSE : null,
 

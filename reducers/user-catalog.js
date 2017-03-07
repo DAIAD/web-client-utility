@@ -33,78 +33,10 @@ var _createInitialeState = function() {
     interval : [
         moment().subtract(30, 'days'), moment()
     ],
-    charts : {
-
-    },
+    charts : {},
     search : 'text',
     selection : _createInitialSelectionState()
   };
-};
-
-var _fillMeterSeries = function(interval, data) {
-  var d;
-  var allPoints = [];
-
-  var ref = interval[1].clone();
-  var days = interval[1].diff(interval[0], 'days') + 1;
-
-  if ((!data) || (data.values.length === 0)) {
-    for (d = days; d > 0; d--) {
-      allPoints.push({
-        volume : 0,
-        difference : 0,
-        timestamp : ref.clone().toDate().getTime()
-      });
-
-      ref.subtract(1, 'days');
-    }
-  } else {
-    var index = 0;
-    var values = data.values;
-
-    values.sort(function(p1, p2) {
-      return (p2.timestamp - p1.timestamp);
-    });
-
-    for (d = days; d > 0; d--) {
-      if (index === values.length) {
-        allPoints.push({
-          volume : 0,
-          difference : 0,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isBefore(values[index].timestamp, 'day')) {
-        index++;
-      } else if (ref.isAfter(values[index].timestamp, 'day')) {
-        allPoints.push({
-          volume : 0,
-          difference : 0,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isSame(values[index].timestamp, 'day')) {
-        allPoints.push({
-          difference : values[index].difference,
-          volume : values[index].volume,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        index++;
-        ref.subtract(1, 'days');
-      }
-    }
-  }
-
-  allPoints.sort(function(p1, p2) {
-    return (p1.timestamp - p2.timestamp);
-  });
-
-  data.values = allPoints;
-
-  return data;
 };
 
 var _extractFeatures = function(accounts) {
@@ -336,24 +268,36 @@ var userCatalog = function(state, action) {
       } else {
         return state;
       }
+
+    case types.USER_CATALOG_CHART_REQUEST:
+      var requestCharts = state.charts;
+      requestCharts[action.userKey] = {series: null, query:action.query};
       
-    case types.USER_CATALOG_METER_REQUEST:
       return Object.assign({}, state, {
-        isLoading : true
-      });
+        isLoading : true,
+        charts : requestCharts,
+        finished: false           
+      });  
 
-    case types.USER_CATALOG_METER_RESPONSE:
-      var charts = state.charts;
+    case types.USER_CATALOG_CHART_RESPONSE:
+      var responseCharts = state.charts;
+      if (action.success) {
+        responseCharts[action.userKey] = {series: action.dataChart};    
 
-      if (action.data) {
-        charts[action.userKey] = _fillMeterSeries(state.interval, action.data);
+        return Object.assign({}, state, {
+          isLoading : false,
+          charts : responseCharts,
+          finished: action.timestamp
+        });
+      } else {
+        responseCharts[action.userKey] = {series: null};
+        return Object.assign({}, state, {
+          isLoading : false,
+          charts : responseCharts,
+          finished: action.timestamp          
+        });      
       }
-
-      return Object.assign({}, state, {
-        isLoading : false,
-        charts : charts
-      });
-
+      
     case types.USER_CATALOG_CLEAR_CHART:
       return Object.assign({}, state, {
         isLoading : false,

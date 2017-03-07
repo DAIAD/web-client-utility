@@ -6,7 +6,6 @@ var Select = require('react-select');
 var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
 var Chart = require('../reports-measurements/chart');
-var theme = require('../chart/themes/shine');
 
 var { getGroups, changeIndex, deleteGroup, getGroupChart, 
       clearChart, setChartMetric, removeFavorite, addFavorite,
@@ -234,7 +233,7 @@ var GroupCatalog  = React.createClass({
       </span>
     );
 
-    var v, chartTitleText, chartConfig = null, chart = (<span>Select a group ...</span>), data = [];
+    var chartTitleText, chart = (<span>Select a group ...</span>);
 
     if(!Object.keys(this.props.groupCatalog.charts).length) {
       chartTitleText = (
@@ -257,22 +256,7 @@ var GroupCatalog  = React.createClass({
           </span>
         </span>
       );
-
-      chartConfig = {
-        options: {
-          tooltip: {
-            show: true
-          },
-          dataZoom: {
-            show: true,
-            format: 'day'
-          }
-        },
-        data: {
-          series: []
-        },
-        type: 'line'
-      };
+     
       var multipleSeries = [];
       for(var key in this.props.groupCatalog.charts) {
         var tempSeries = this.props.groupCatalog.charts[key].groupSeries;
@@ -293,7 +277,6 @@ var GroupCatalog  = React.createClass({
 
       var series = fSeries[0] ? fSeries : null;
 
-      var reportName = this.props.groupCatalog.metric.toLowerCase();
       chart = (
         <Chart
           {...defaults.chartProps}

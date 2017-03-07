@@ -4,7 +4,7 @@ var favouritesAPI = require('../api/favourites');
 var population = require('../model/population');
 var types = require('../constants/DashboardActionTypes');
 var moment = require('moment');
-
+var _ = require('lodash');
 var defaultChartTitle = "Last 30 Days Average Consumption";
 var defaultMapTitle = "Last 30 Days Consumption";
 

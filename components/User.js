@@ -3,8 +3,10 @@ var Bootstrap = require('react-bootstrap');
 var {FormattedMessage, FormattedTime, FormattedDate} = require('react-intl');
 var { Link } = require('react-router');
 var Table = require('./Table');
-var Chart = require('./Chart');
-var theme = require('./chart/themes/shine');
+var Chart = require('./reports-measurements/chart');
+var echarts = require('react-echarts');
+var numeral = require('numeral');
+var theme = require('./chart/themes/blue');
 
 var { connect } = require('react-redux');
 var { bindActionCreators } = require('redux');
@@ -100,10 +102,10 @@ var _showChart = function(type, key, e) {
   switch(type) {
     case 'METER':
       this.props.getMeters(this.props.user.id);
-      break;
+    break;
     case 'AMPHIRO':
       this.props.getSessions(this.props.user.id, key);
-      break;
+    break;
   }
 };
 
@@ -127,9 +129,19 @@ var User = React.createClass({
   contextTypes: {
       intl: React.PropTypes.object
   },
-
+  
+  getInitialState: function() {
+    return {
+      draw : false
+    };
+  },
+  
   componentWillMount : function() {
-    this.props.showUser(this.props.params.id);
+
+    var profile = this.props.profile;
+    this.props.showUser(this.props.params.id, profile.timezone);
+    this.setState({draw:true});
+
   },
 
   getSimplifiedGroups : function (groups){
@@ -164,6 +176,7 @@ var User = React.createClass({
   },
 
   render: function() {
+    var userContext = this;
     var groupTableConfig = {
       fields : [{
         name : 'id',
@@ -184,9 +197,35 @@ var User = React.createClass({
         type : 'action',
         icon : 'bar-chart-o',
         handler : (function(field, row) {
-          var utility = this.props.profile.utility;
+          if(userContext.props.data.devices) {
+            return;
+          }
 
-          this.props.getGroupSeries(row.id, row.name, utility.timezone);
+          var selectedGroup = userContext.props.groups.filter((g) => g.name == row.name);
+          var utility = userContext.props.profile.utility;
+          var clusters = userContext.props.config.utility.clusters;
+          
+          for(var i=0; i<clusters.length;i++){
+            var clusterGroups = clusters[i].groups;
+            var clusterGroup = clusterGroups.filter((group) => group.key == selectedGroup[0].id);
+            if(clusterGroup.length > 0){
+              var pop = clusterGroup[0];
+              break;
+            }
+          }
+
+          if(!pop){
+            population1 = [{group: selectedGroup[0].id, label:"GROUP:" + selectedGroup[0].id + '/' + row.name, type:"GROUP"}];
+            this.props.getGroupChart(population1, row.name, utility.timezone); 
+
+          } else {
+            var clusterKey = pop.clusterKey;
+            var population1 = [{group: pop.key, label:"CLUSTER:" + clusterKey + ":" + pop.key, type:"GROUP"}];
+            this.props.getGroupChart(population1, row.name, utility.timezone);              
+          }
+          
+          userContext.setState({draw:true});
+
         }).bind(this)
       }],
       rows : []
@@ -428,9 +467,8 @@ var User = React.createClass({
       </span>
     );
 
-    var chartConfig = null, chart = (<span>No meter data found.</span>), data = [];
+    var chart = (<span>No meter data found.</span>);
 
-    if(this.props.data.meters) {
       chartTitleText = (
         <span>
           <span>
@@ -445,90 +483,40 @@ var User = React.createClass({
         </span>
       );
 
-      chartConfig = {
-        options: {
-          tooltip: {
-            show: true
-          },
-          dataZoom: {
-            show: true,
-            format: 'day'
-          }
-        },
-        data: {
-          series: []
-        },
-        type: 'line'
+      var multipleSeries = [];
+      for(var key in this.props.charts) {
+        var tempSeries = this.props.charts[key].series;
+        if(tempSeries){
+          multipleSeries.push(tempSeries);
+        }
+      }
+
+      var defaults= {
+        chartProps: {
+          width: 780,
+          height: 300,
+        }
       };
 
-      var v, meters = this.props.data.meters;
-
-      for(var m=0; m<meters.length; m++) {
-        var meter = meters[m];
-        data = [];
-
-        for(v=0; v < meter.values.length; v++) {
-          data.push({
-            volume: meter.values[v].difference,
-            date: new Date(meter.values[v].timestamp)
-          });
-        }
-
-        chartConfig.data.series.push({
-          legend: meter.serial || meter.deviceKey,
-          xAxis: 'date',
-          yAxis: 'volume',
-          data: data,
-          yAxisName: 'Volume (lt)'
-        });
-      }
-
-      for(var key in this.props.data.groups) {
-        var group = this.props.data.groups[key];
-        if((group.points) && (group.points.length > 0)) {
-          data = [];
-
-          for(v=0; v < group.points.length; v++) {
-            data.push({
-              volume: group.points[v].volume.AVERAGE,
-              date: new Date(group.points[v].timestamp)
-            });
-          }
-
-          chartConfig.data.series.push({
-            legend: group.label + ' (Average)',
-            xAxis: 'date',
-            yAxis: 'volume',
-            data: data,
-            yAxisName: 'Volume (lt)'
-          });
-        }
-      }
+      var fSeries = _.flatten(multipleSeries);
+      var series = fSeries[0] ? fSeries : null;
 
       chart = (
-        <Chart  style={{ width: '100%', height: 400 }}
-                elementClassName='mixin'
-                prefix='chart'
-                type={chartConfig.type}
-                options={chartConfig.options}
-                data={chartConfig.data}
-                theme={theme}/>
+        <Chart
+          {...defaults.chartProps}
+          draw={this.state.draw}
+          field={"volume"}
+          level={"week"}
+          reportName={"avg-daily-avg"}
+          finished={this.props.finished}
+          series={series}
+          context={this.props.config}
+          overlap={null}
+          overlapping={false}
+        />
       );
-    } else if(this.props.data.devices) {
-      chartConfig = {
-        options: {
-          tooltip: {
-            show: true
-          },
-          dataZoom: {
-            show: true
-          }
-        },
-        data: {
-          series: []
-        },
-        type: 'bar'
-      };
+
+    if(this.props.data.devices) {
 
       var devices = this.props.data.devices, deviceIndex = 0, d;
 
@@ -539,9 +527,8 @@ var User = React.createClass({
         }
       }
 
-      var size = devices[deviceIndex].sessions.length, device = devices[deviceIndex], index = 1;
-      data = [];
-
+      var size = devices[deviceIndex].sessions.length, device = devices[deviceIndex];
+      var yData = [];
       chartTitleText = (
         <span>
           <span>
@@ -552,51 +539,38 @@ var User = React.createClass({
       );
 
       for(var s=size-1; s >=0; s--) {
-        data.push({
-          volume: device.sessions[s].volume,
-          duration: device.sessions[s].duration,
-          energy: device.sessions[s].energy.toFixed(0),
-          flow: device.sessions[s].flow.toFixed(2),
-          history: device.sessions[s].history,
-          temperature: device.sessions[s].temperature,
-          id:  device.sessions[s].id
-        });
-        index++;
+        yData.push(device.sessions[s].volume);
       }
 
-      chartConfig.data.series.push({
-        legend: device.name || device.deviceKey,
-        xAxis: 'id',
-        yAxis: 'volume',
-        data: data,
-        yAxisName: 'Volume (lt)',
-        formatter: function(params) {
-          var item = data[params.dataIndex];
-          var text = [];
-          text.push("Id : " + item.id);
-          text.push('<br/>');
-          text.push("Volume : " + item.volume + ' lt');
-          text.push('<br/>');
-          text.push("Duration : " + item.duration + ' seconds');
-          text.push('<br/>');
-          text.push("Energy : " + item.energy + ' W');
-          text.push('<br/>');
-          text.push("Flow : " + item.flow + ' lt/minute');
-          text.push('<br/>');
-          text.push("Temperature : " + item.temperature + ' °C');
-          text.push('<br/>');
+      //add two nulls at the start and end of x axis to avoid bars to overlap with y axis
+      var yArray = [null];
+      var bars =[{name : 'amphiro b1', data:yArray.concat(yData,[null])}];
 
-          return text.join('');
-        }
-      });
-
+      var xItems=['-'];
+      for(var n=1;n<bars[0].data.length-1;n++){
+        xItems.push('#' + n);
+      }
+      xItems.push('-');
+      
+      var xAxis = {name: "Sessions", data:xItems};
+      
       chart = (
-        <Chart  style={{ width: '100%', height: 400 }}
-                elementClassName='mixin'
-                prefix='chart'
-                type={chartConfig.type}
-                options={chartConfig.options}
-                data={chartConfig.data}/>
+        <div className="report-chart" >
+          <echarts.BarChart
+            width={780}
+            height={300}
+            loading={this.props.finished? null : {text: 'Loading data...'}}
+            tooltip={true}
+            theme={theme}
+            xAxis={xAxis}
+            yAxis={{
+              name: 'Volume (lt)',
+              numTicks: 3,
+              formatter: (y) => (numeral(y).format('0.0a')),
+            }}
+            series={bars}
+          />
+        </div> 
       );
     }
 
@@ -795,7 +769,10 @@ function mapStateToProps(state) {
     application : state.user.application,
     activeDevice : state.user.activeDevice,
     accountId : state.user.accountId,
-    profile: state.session.profile
+    profile: state.session.profile,
+    charts: state.user.charts,
+    finished: state.user.finished,
+    config: state.config
   };
 }
 
@@ -806,6 +783,7 @@ function mapDispatchToProps(dispatch) {
     hideFavouriteAccountForm : bindActionCreators(UserActions.hideFavouriteAccountForm, dispatch),
     getSessions : bindActionCreators(UserActions.getSessions, dispatch),
     getMeters : bindActionCreators(UserActions.getMeters, dispatch),
+    getGroupChart : bindActionCreators(UserActions.getGroupChart, dispatch),
     clearGroupSeries : bindActionCreators(UserActions.clearGroupSeries, dispatch),
     getGroupSeries : bindActionCreators(UserActions.getGroupSeries, dispatch),
     exportData : bindActionCreators(UserActions.exportData, dispatch),

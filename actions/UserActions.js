@@ -6,6 +6,7 @@ var types = require('../constants/UserActionTypes');
 var userAPI = require('../api/user');
 var adminAPI = require('../api/admin');
 var queryAPI = require('../api/query');
+var population = require('../model/population');
 
 var _buildGroupQuery = function(key, label, timezone) {
   var interval = [
@@ -33,6 +34,95 @@ var _buildGroupQuery = function(key, label, timezone) {
         'AVERAGE'
       ]
     }
+  };
+};
+
+var _buildUserQuery = function(id, name, timezone, from, to) {
+  return {
+    'queries' : [{
+      'timezone' : timezone,
+      'time' : {
+        'type' : 'ABSOLUTE',
+        'start' : from,
+        'end' : to,
+        'granularity' : 'DAY'
+      },
+      'population' : [
+        {
+          'type' : 'USER',
+          'label' : name,
+          'users' : [
+            id
+          ]
+        }
+      ],
+      'overlap':null,
+      'source' : 'METER',
+      'metrics' : [
+        'AVERAGE'
+      ]}
+    ]
+  };
+};
+
+var _buildPopulationQuery = function(population, timezone) {
+  var interval = [
+      moment().subtract(30, 'days').valueOf(), moment().valueOf()
+  ];
+  return {
+    "level":"week",
+    "field":"volume",
+    "overlap":null,
+    "queries":[{
+      "time": {
+        "type":"ABSOLUTE",
+        "granularity":"DAY",
+        "start":interval[0],
+        "end":interval[1]
+      },
+      "population":population,
+      "source":"METER",
+      "metrics":["AVERAGE"]
+      }
+    ]
+  };
+};
+
+var _userChartRequest = function(query, userKey) {
+  return {
+    type : types.USER_CHART_REQUEST,
+    query : query,
+    userKey : userKey    
+  };
+};
+
+var _userChartResponse = function(success, errors, data, userKey, t=null) {
+  return {
+    type : types.USER_CHART_RESPONSE,
+    success : success,
+    errors : errors,
+    dataChart : data,
+    userKey : userKey,
+    timestamp: (t || new Date()).getTime()
+  };
+};
+
+var _groupChartRequest = function(query, key) {
+  return {
+    type : types.USER_GROUP_CHART_REQUEST,
+    query : query,
+    groupKey : key
+  };
+};
+
+var _groupChartResponse = function(success, errors, data, key, t=null) {
+  return {
+    type : types.USER_GROUP_CHART_RESPONSE,
+    success : success,
+    errors : errors,
+    dataChart : data,
+    groupKey : key,
+    timestamp: (t || new Date()).getTime()
   };
 };
 
@@ -134,20 +224,70 @@ var receivedExport = function(success, errors, token) {
 
 var UserActions = {
 
-  showUser : function(userId) {
+  showUser : function(id, timezone) {
     return function(dispatch, getState) {
       dispatch(requestedUser());
 
-      return userAPI.fetchUser(userId).then(
+      return userAPI.fetchUser(id).then(
           function(response) {
             dispatch(receivedUser(response.success, response.errors, response.user, response.meters, response.devices,
                 response.configurations, response.groups, response.favorite));
 
             if (response.meters.length > 0) {
-              return adminAPI.getMeters(response.user.id, response.user.email).then(function(response) {
-                dispatch(receivedMeters(response.success, response.errors, response.series));
-              }, function(error) {
-                dispatch(receivedMeters(false, error, null));
+              var promises =[];
+
+              var interval = getState().user.interval;
+
+              var name = response.user.fullname;
+              var query = _buildUserQuery(id, name, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
+
+              dispatch(_userChartRequest(query, id));
+
+              promises.push(queryAPI.queryMeasurements({query: query.queries[0]}));
+
+              Promise.all(promises).then(
+                res => {
+                var source = query.queries[0].source; //source is same for all queries
+                var resAll = [];
+                for(let m=0; m< res.length; m++){
+                  if (res[m].errors.length) {
+                    throw 'The request is rejected: ' + res[m].errors[0].description; 
+                  }
+                  var resultSets = res[m].meters;
+                  var res1 = (resultSets || []).map(rs => {
+                    var g = new population.User(id, rs.label);
+                    g.name = name;
+                    var timespan1;
+                    if(rs.points.length !== 0){
+                      //Recalculate xAxis timespan based on returned data. (scale). If no data, keep timespan from query
+                      timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+                    } else {
+                      timespan1 = [query.queries[0].time.start, query.queries[0].time.end];
+                    }
+                    var res2;
+                    // Shape a normal timeseries result for requested metrics
+                    // Todo support other metrics (as client-side "average")
+                    res2 = query.queries[0].metrics.map(metric => ({
+                      source,
+                      timespan: timespan1,
+                      granularity: query.queries[0].time.granularity,
+                      metric,
+                      population: g,
+                      forecast: m===0 ? false : true, //first promise is actual data, second is forecast data
+                      data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+                    }));
+                    return _.flatten(res2);
+                  });
+
+                  resAll.push(_.flatten(res1)); 
+                }
+
+                var success = res.every(x => x.success === true); 
+                var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
+
+                dispatch(_userChartResponse(success, errors, _.flatten(resAll), id));
+
+                return _.flatten(resAll);
               });
             }
           }, function(error) {
@@ -156,6 +296,65 @@ var UserActions = {
     };
   },
 
+  getGroupChart : function(group, name, timezone) {
+
+    return function(dispatch, getState) {
+      var promises =[];
+      var query = _buildPopulationQuery(group, timezone);   
+
+      dispatch(_groupChartRequest(query, group[0].group)); //group[0].group -> group key
+
+      promises.push(queryAPI.queryMeasurements({query: query.queries[0]}));
+
+      Promise.all(promises).then(
+        res => {
+
+          var source = query.queries[0].source; //source is same for all queries
+          var resAll = [];
+          for(let m=0; m< res.length; m++){
+            if (res[m].errors.length) {
+              throw 'The request is rejected: ' + res[m].errors[0].description; 
+            }
+            var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
+            var res1 = (resultSets || []).map(rs => {
+            
+              var [g, rr] = population.fromString(rs.label);
+              g.name = name; 
+              var timespan1;  
+              if(rs.points.length !== 0){
+                timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              } else {
+                timespan1 = [query.queries[0].time.start, query.queries[0].time.end];
+              }              
+
+               //Recalculate xAxis timespan based on returned data. (scale)
+               // Shape a normal timeseries result for requested metrics
+               // Todo support other metrics (as client-side "average")
+               var res2 = query.queries[0].metrics.map(metric => ({
+                 source,
+                 timespan: timespan1,
+                 granularity: query.queries[0].time.granularity,
+                 metric,
+                 population: g,
+                 forecast: m===0 ? false : true, //first promise is actual data, second is forecast data
+                 data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+               }));
+              return _.flatten(res2);
+            });
+            resAll.push(_.flatten(res1)); 
+          }
+
+          var success = res.every(x => x.success === true); 
+          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
+
+          dispatch(_groupChartResponse(success, errors, _.flatten(resAll), group[0].group));
+
+          return _.flatten(resAll);
+        }
+      );
+    };
+  },
+  
   getSessions : function(userKey, deviceKey) {
     return function(dispatch, getState) {
       var data = getState().user.data;

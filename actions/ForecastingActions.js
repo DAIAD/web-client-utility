@@ -3,7 +3,6 @@ var groupAPI = require('../api/group');
 var favouritesAPI = require('../api/favourites');
 var types = require('../constants/ForecastingActionTypes');
 var population = require('../model/population');
-var moment = require('moment');
 
 /**
  * Query builders

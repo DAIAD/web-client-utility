@@ -1,8 +1,37 @@
 var types = require('../constants/UserCatalogActionTypes');
 
 var userAPI = require('../api/user');
-var adminAPI = require('../api/admin');
 var groupAPI = require('../api/group');
+var queryAPI = require('../api/query');
+var population = require('../model/population');
+
+var _buildUserQuery = function(id, name, timezone, from, to) {
+  return {
+    'queries' : [{
+      'timezone' : timezone,
+      'time' : {
+        'type' : 'ABSOLUTE',
+        'start' : from,
+        'end' : to,
+        'granularity' : 'DAY'
+      },
+      'population' : [
+        {
+          'type' : 'USER',
+          'label' : name,
+          'users' : [
+            id
+          ]
+        }
+      ],
+      'overlap':null,
+      'source' : 'METER',
+      'metrics' : [
+        'SUM'
+      ]}
+    ]
+  };
+};
 
 var getAccountsInit = function() {
   return {
@@ -35,28 +64,29 @@ var clearFilter = function() {
   };
 };
 
-var meterRequestInit = function(userKey, deviceKey) {
-  return {
-    type : types.USER_CATALOG_METER_REQUEST,
-    userKey : userKey,
-    deviceKey : deviceKey
-  };
-};
-
-var meterRequestComplete = function(success, errors, userKey, data) {
-  return {
-    type : types.USER_CATALOG_METER_RESPONSE,
-    success : success,
-    errors : errors,
-    userKey : userKey,
-    data : data
-  };
-};
-
 var setGeometry = function(geometry) {
   return {
     type : types.USER_CATALOG_SET_SEARCH_GEOMETRY,
     geometry : geometry
+  };
+};
+
+var _userChartRequest = function(query, userKey) {
+  return {
+    type : types.USER_CATALOG_CHART_REQUEST,
+    query : query,
+    userKey : userKey    
+  };
+};
+
+var _userChartResponse = function(success, errors, data, userKey, t=null) {
+  return {
+    type : types.USER_CATALOG_CHART_RESPONSE,
+    success : success,
+    errors : errors,
+    dataChart : data,
+    userKey : userKey,
+    timestamp: (t || new Date()).getTime()
   };
 };
 
@@ -120,30 +150,67 @@ var UserCatalogActionCreators = {
     };
   },
 
-  getMeter : function(userKey, deviceKey, label) {
+  getUserChart : function(id, name, timezone) {
+  
     return function(dispatch, getState) {
-      dispatch(meterRequestInit(userKey, deviceKey));
 
-      return adminAPI.getMeters(userKey).then(function(response) {
-        var data = null;
+      var promises =[];
 
-        if (response.series) {
-          for ( var index in response.series) {
-            if (response.series[index].deviceKey === deviceKey) {
-              response.series[index].label = label + ' - ' + response.series[index].serial;
-              dispatch(meterRequestComplete(response.success, response.errors, userKey, response.series[index]));
-              break;
+      var interval = getState().userCatalog.interval;
+
+      var query = _buildUserQuery(id, name, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
+      
+      dispatch(_userChartRequest(query, id));
+      
+      promises.push(queryAPI.queryMeasurements({query: query.queries[0]}));
+
+      Promise.all(promises).then(
+        res => {
+          var source = query.queries[0].source; //source is same for all queries
+          var resAll = [];
+          for(let m=0; m< res.length; m++){
+            if (res[m].errors.length) {
+              throw 'The request is rejected: ' + res[m].errors[0].description; 
             }
-          }
-        }
+            var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
+            var res1 = (resultSets || []).map(rs => {            
+              var g = new population.User(id, rs.label);
 
-        dispatch(meterRequestComplete(response.success, response.errors, userKey, data));
-      }, function(error) {
-        dispatch(meterRequestComplete(false, error, userKey, null));
-      });
+              var timespan1;
+              if(rs.points.length !== 0){
+                //Recalculate xAxis timespan based on returned data. (scale). If no data, keep timespan from query
+                timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              } else {
+                timespan1 = [query.queries[0].time.start, query.queries[0].time.end];
+              }
+              var res2;
+              // Shape a normal timeseries result for requested metrics
+              // Todo support other metrics (as client-side "average")
+              res2 = query.queries[0].metrics.map(metric => ({
+                source,
+                timespan: timespan1,
+                granularity: query.queries[0].time.granularity,
+                metric,
+                population: g,
+                forecast: m===0 ? false : true, //first promise is actual data, second is forecast data
+                data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+              }));
+                return _.flatten(res2);
+            });
+            resAll.push(_.flatten(res1)); 
+          }
+          
+          var success = res.every(x => x.success === true); 
+          var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
+
+          dispatch(_userChartResponse(success, errors, _.flatten(resAll), id));
+
+          return _.flatten(resAll);
+        }
+      );
     };
   },
-
+  
   clearChart : function() {
     return {
       type : types.USER_CATALOG_CLEAR_CHART
