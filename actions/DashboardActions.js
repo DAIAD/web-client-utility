@@ -322,7 +322,13 @@ var getChart = function(favourite) {
               var [g, rr] = population.fromString(rs.label);
               
               //Recalculate xAxis timespan based on returned data. (scale)
-              var timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              var timespan1;
+              if(rs.points[rs.points.length-1]){
+                timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              } else {
+                //empty result, use initial timespan
+                timespan1 = [favourite.queries[0].time.start, favourite.queries[0].time.end];
+              }
               for(let j=0; j<favourite.queries.length; j++){
                 var res2;
                 if (rr) {
