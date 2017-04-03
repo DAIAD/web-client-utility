@@ -3,7 +3,6 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
-var Breadcrumb = require('../Breadcrumb');
 var LeafletMap = require('../LeafletMap');
 var Select = require('react-select');
 var DateRangePicker = require('react-bootstrap-daterangepicker');
@@ -443,11 +442,6 @@ var AnalyticsMap = React.createClass({
 
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
-        <div className='row'>
-          <div className='col-md-12'>
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className='row'>
           <div className='col-md-12'>
             {mapPanel}

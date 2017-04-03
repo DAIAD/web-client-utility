@@ -1,7 +1,6 @@
 var React = require('react');
 var sprintf = require('sprintf');
 var Bootstrap = require('react-bootstrap');
-var Breadcrumb = require('../../Breadcrumb');
 var Modal = require('../../Modal');
 var Timeline = require('../../Timeline');
 var LeafletMap = require('../../LeafletMap');
@@ -454,11 +453,6 @@ var Favourites = React.createClass({
       return (
            <div className='container-fluid' style={{ paddingTop: 10 }}>
               <div className='row'>
-                 <div className='col-md-12'>
-                    <Breadcrumb routes={this.props.routes}/>
-                 </div>
-              </div>
-              <div className='row'>
                  <div className='col-lg-12'>
                     <Bootstrap.Panel header={configTitle}>
                        <Bootstrap.ListGroup fill>
@@ -482,11 +476,6 @@ var Favourites = React.createClass({
    if(this.props.favourites && !this.props.isLoading){
        return (
           <div className='container-fluid' style={{ paddingTop: 10 }}>
-             <div className='row'>
-                <div className='col-md-12'>
-                   <Breadcrumb routes={this.props.routes}/>
-                </div>
-             </div>
              <div className='row'>
                 <div className='col-lg-12'>
                    <Bootstrap.Panel header={configTitle}>

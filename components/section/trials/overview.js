@@ -4,7 +4,6 @@ var { connect } = require('react-redux');
 
 var Bootstrap = require('react-bootstrap');
 
-var Breadcrumb = require('../../Breadcrumb');
 var Table = require('../../Table');
 var Chart = require('../../Chart');
 var DropDown = require('../../DropDown');
@@ -690,11 +689,6 @@ var Overview = React.createClass({
 
     return (
       <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-12">
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         {visiblePart}
       </div>);
     }

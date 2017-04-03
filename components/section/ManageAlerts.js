@@ -1,6 +1,5 @@
 var React = require('react');
 var Bootstrap = require('react-bootstrap');
-var Breadcrumb = require('../Breadcrumb');
 var UtilityDropDown = require('../UtilityDropDown');
 var ManageAlertsActions = require('../../actions/ManageAlertsActions');
 var { connect } = require('react-redux');
@@ -263,11 +262,6 @@ var ManageAlerts = React.createClass({
 
       return (
       <div className="container-fluid" style={{ paddingTop: 10 }}>
-        <div className="row">
-          <div className="col-md-12">
-                  <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         {visiblePart}
       </div>);
 

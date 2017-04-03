@@ -3,7 +3,6 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
-var Breadcrumb = require('../../Breadcrumb');
 var DateRangePicker = require('react-bootstrap-daterangepicker');
 var FilterTag = require('../../chart/dimension/FilterTag');
 var GroupSearchTextBox = require('../../GroupSearchTextBox');
@@ -312,11 +311,6 @@ var MessageAnalytics = React.createClass({
 
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
-        <div className='row'>
-          <div className='col-md-12'>
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className='row'>
           <div className='col-md-12'>
             {statisticsPanel}

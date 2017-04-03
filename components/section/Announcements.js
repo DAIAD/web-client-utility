@@ -1,6 +1,5 @@
 var React = require('react');
 var Bootstrap = require('react-bootstrap');
-var Breadcrumb = require('../Breadcrumb');
 var Table = require('../UserTable');
 var Modal = require('../Modal');
 var {FormattedMessage} = require('react-intl');
@@ -495,11 +494,6 @@ var Announcements = React.createClass({
     if(this.props.groups && this.props.accounts && this.props.announcements && !this.props.isLoading){
       return (
         <div className="container-fluid" style={{ paddingTop: 10 }}>
-          <div className="row">
-           <div className="col-md-12">
-            <Breadcrumb routes={this.props.routes}/>
-           </div>
-          </div>
           <div className="row">
             <div className='col-md-5 equal-height-col'>
               <Bootstrap.Panel header={usersTitle}>

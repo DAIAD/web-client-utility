@@ -9,8 +9,6 @@ var { saveToProfile } = require('../../../actions/SessionActions');
 
 const { COUNTRIES, TIMEZONES } = require('../../../constants/Constants');
 
-var Breadcrumb = require('../../Breadcrumb');
-
 var UserSettings = React.createClass({
 	contextTypes: {
     intl: React.PropTypes.object
@@ -37,11 +35,6 @@ var UserSettings = React.createClass({
     const timezoneKey = this.state.timezone ? "Timezones."+this.state.timezone : "UserSettings.TimezonePlaceholder";
     return (
     <div className="container-fluid" style={{ paddingTop: 10 }}>
-      <div className="row">
-        <div className="col-md-12">
-          <Breadcrumb routes={this.props.routes}/>
-        </div>
-      </div>
       <div className="row">
         <div className='col-md-12' style={{marginTop: 10}}>
           <bs.Panel>

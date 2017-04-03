@@ -1,6 +1,5 @@
 var React = require('react');
 var {connect} = require('react-redux');
-var Breadcrumb = require('../../Breadcrumb');
 
 var PropTypes = React.PropTypes;
 var {configPropType} = require('../../../prop-types');
@@ -22,11 +21,6 @@ var Page = React.createClass({
   render: function() {
     return (
       <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-12">
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className="row">
           <div className="col-md-12">
             <PilotReports config={this.props.config} />

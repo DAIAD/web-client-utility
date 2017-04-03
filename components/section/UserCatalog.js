@@ -4,7 +4,6 @@ var React = require('react');
 var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
 var LeafletMap = require('../LeafletMap');
 var Chart = require('../reports-measurements/chart');
@@ -445,11 +444,6 @@ var UserCatalog = React.createClass({
           }
           handler={_setTitle.bind(this)}
         />
-        <div className="row">
-          <div className="col-md-12">
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className="row">
           <div className="col-md-7">
             <Bootstrap.Panel header={filterTitle}>

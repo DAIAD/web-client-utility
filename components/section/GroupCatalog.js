@@ -3,7 +3,6 @@ var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Select = require('react-select');
-var Breadcrumb = require('../Breadcrumb');
 var Table = require('../Table');
 var Chart = require('../reports-measurements/chart');
 
@@ -295,11 +294,6 @@ var GroupCatalog  = React.createClass({
 
     return (
       <div className="container-fluid" style={{ paddingTop: 10 }}>
-        <div className="row">
-          <div className="col-md-12">
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className="row">
           <div className="col-md-12">
             <Bootstrap.Panel header={filterTitle}>

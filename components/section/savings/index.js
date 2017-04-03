@@ -8,18 +8,10 @@ var Actions = require('../../../actions/SavingsActions');
 var Table = require('../../../components/Table');
 var util = require('../../../helpers/wizard');
 
-var Breadcrumb = require('../../../components/Breadcrumb');
-
-
 function SavingsPotential (props) {
   const { routes, children } = props;
   return (
     <div className='container-fluid' style={{ paddingTop: 10 }}>
-      <div className='row'>
-        <div className='col-md-12'>
-          <Breadcrumb routes={routes}/>
-        </div>
-      </div>
       <div className='row'>
         <div className='col-md-12 col-sm-12' style={{marginTop: 10}}>
           <bs.Panel header='Savings scenarios'>
