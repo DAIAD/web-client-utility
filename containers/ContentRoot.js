@@ -2,14 +2,15 @@ var React = require('react');
 var {bindActionCreators} = require('redux');
 var {connect} = require('react-redux');
 var ScrollToTop = require('react-scroll-up');
+var _ = require('lodash');
 
 var LoginForm = require('../components/LoginForm');
 var LocaleSwitcher = require('../components/LocaleSwitcher');
 
 var {login, logout} = require('../actions/SessionActions');
+var { resize } = require('../actions/ViewportActions');
 var {setLocale} = require('../actions/LocaleActions');
 var {configure} = require('../actions/config');
-
 var NavigationTree = require('../components/NavigationTree');
 
 var ContentRoot = React.createClass({
@@ -80,6 +81,17 @@ var ContentRoot = React.createClass({
     if (this.props.isAuthenticated) {
       this.props.actions.configure();
     }
+    
+    this.viewportListener = _.debounce(this.setViewport, 100, {maxWait: 1000});
+    window.addEventListener('resize', this.viewportListener);
+  },
+
+  componentWillUnmount: function() {
+    window.removeEventListener('resize', this.viewportListener);
+  },
+
+  setViewport: function() {
+    this.props.actions.resize(document.documentElement.clientWidth, document.documentElement.clientHeight);
   },
 
   componentDidUpdate: function (prevProps, prevState) {
@@ -112,7 +124,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(
-      Object.assign({}, {login, logout, setLocale, configure}),
+      Object.assign({}, {login, logout, setLocale, configure, resize}),
       dispatch
     )
   };

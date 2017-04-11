@@ -1,6 +1,6 @@
 var moment = require('moment');
-
 var types = require('../constants/GroupCatalogActionTypes');
+var { extractFeatures } = require('../helpers/common');
 
 var _createInitialGroupState = function() {
   return {
@@ -44,42 +44,79 @@ var _createInitialeState = function() {
   };
 };
 
-var _extractFeatures = function(groups) {
-  var geojson = {
-    type : 'FeatureCollection',
-    features : [],
-    crs : {
-      type : 'name',
-      properties : {
-        name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
-      }
-    }
-  };
+var _fillGroupSeries = function(interval, label, data) {
+  var d;
+  var allPoints = [];
 
-  groups = groups || [];
+  var ref = interval[1].clone();
+  var days = interval[1].diff(interval[0], 'days') + 1;
 
-  for ( var index in groups) {
-    if (groups[index].location) {
-      var meter = groups[index].hasOwnProperty('meter') ? groups[index].meter : null;
-
-      geojson.features.push({
-        'type' : 'Feature',
-        'geometry' : groups[index].location,
-        'properties' : {
-          'groupKey' : groups[index].id,
-          'deviceKey' : meter.key,
-          'name' : groups[index].fullname,
-          'address' : groups[index].address,
-          'meter' : {
-            'key' : meter.key,
-            'serial' : meter.serial
-          }
-        }
+  if ((!data) || (data.points.length === 0)) {
+    for (d = days; d > 0; d--) {
+      allPoints.push({
+        MIN: 0,
+        MAX: 0,
+        SUM: 0,
+        AVERAGE : 0,
+        timestamp : ref.clone().toDate().getTime()
       });
+
+      ref.subtract(1, 'days');
+    }
+  } else {
+    var index = 0;
+    var points = data.points;
+
+    points.sort(function(p1, p2) {
+      return (p2.timestamp - p1.timestamp);
+    });
+
+    for (d = days; d > 0; d--) {
+      if (index === points.length) {
+        allPoints.push({
+          MIN: 0,
+          MAX: 0,
+          SUM: 0,
+          AVERAGE : 0,
+          timestamp : ref.clone().toDate().getTime()
+        });
+
+        ref.subtract(1, 'days');
+      } else if (ref.isBefore(points[index].timestamp, 'day')) {
+        index++;
+      } else if (ref.isAfter(points[index].timestamp, 'day')) {
+        allPoints.push({
+          MIN: 0,
+          MAX: 0,
+          SUM: 0,
+          AVERAGE : 0,
+          timestamp : ref.clone().toDate().getTime()
+        });
+
+        ref.subtract(1, 'days');
+      } else if (ref.isSame(points[index].timestamp, 'day')) {
+        allPoints.push({
+          MIN: points[index].volume.MIN,
+          MAX: points[index].volume.MAX,
+          SUM : points[index].volume.SUM,
+          AVERAGE : points[index].volume.AVERAGE,
+          timestamp : ref.clone().toDate().getTime()
+        });
+
+        index++;
+        ref.subtract(1, 'days');
+      }
     }
   }
 
-  return geojson;
+  allPoints.sort(function(p1, p2) {
+    return (p1.timestamp - p2.timestamp);
+  });
+
+  data.points = allPoints;
+  data.label = label;
+
+  return data;
 };
 
 var dataReducer = function(state, action) {
@@ -106,7 +143,7 @@ var dataReducer = function(state, action) {
       return {
         groups : state.groups || [],
         filtered : _filterRows(state.groups || [], action.groupType, action.name),
-        features : _extractFeatures(state.groups || [])
+        features : extractFeatures(state.groups || [])
       };
     
     case types.GROUP_CATALOG_RESPONSE:
@@ -137,7 +174,7 @@ var dataReducer = function(state, action) {
           size : action.size || 10,
           groups : action.groups || [],
           filtered : _filterRows(action.groups || [], action.groupType, action.name),
-          features : _extractFeatures(action.groups || [])
+          features : extractFeatures(action.groups || [])
         };
       } else {
         return {
@@ -146,7 +183,7 @@ var dataReducer = function(state, action) {
           size : 10,
           groups : [],
           filtered: [],
-          features : _extractFeatures([])
+          features : extractFeatures([])
         };
       }
 

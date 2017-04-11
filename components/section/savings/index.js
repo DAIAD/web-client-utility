@@ -2,11 +2,20 @@ var React = require('react');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var bs = require('react-bootstrap');
+var Modal = require('../../Modal');
+
 var { push } = require('react-router-redux');
 
 var Actions = require('../../../actions/SavingsActions');
+var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
+
 var Table = require('../../../components/Table');
 var util = require('../../../helpers/wizard');
+
+const SPATIAL_CLUSTERS = [{
+  key: 'area',
+  name: 'Areas'
+}];
 
 function SavingsPotential (props) {
   const { routes, children } = props;
@@ -25,65 +34,62 @@ function SavingsPotential (props) {
   );
 }
 
-function mapStateToProps(state) {
+//components used in more than one savings sub-sections
+
+function RemoveConfirmation (props) {
+  const { scenario, confirmRemoveScenario, removeSavingsScenario, goToListView } = props;
+  const reset = () => confirmRemoveScenario(null);
+  if (scenario == null) {
+    return <div/>;
+  }
+  const { id, name } = scenario;
+  return (
+    <Modal
+      title='Confirmation'
+      className='confirmation-modal'
+      show={true}
+      text={<span>Are you sure you want to delete <b>{name}</b> (id:{id})</span>}
+      onClose={reset}
+      actions={[
+        {
+          name: 'Cancel',
+          action: reset,
+        },
+        {
+          name: 'Delete',
+          action: () => { removeSavingsScenario(id); confirmRemoveScenario(null); goToListView(); },
+          style: 'danger',
+        },
+      ]}
+    />
+  );
+}
+
+function mapStateToProps(state, ownProps) {
   return {
     routing: state.routing,
-    user: state.session.profile ? {value: state.session.profile.username, label: state.session.profile.firstname + ' ' + state.session.profile.lastname} : null,
-    clusters: !state.config.utility.clusters ? [] :
-      state.config.utility.clusters.map(cluster => ({
-        label: cluster.name,
-        value: cluster.key
-      })),
-    groups: !state.config.utility.clusters ? [] :
-      state.config.utility.clusters
-      .reduce((p, c) => [...p, ...c.groups.map(
-        g => ({
-          value: c.name + ':' + g.name,
-          cluster: g.clusterKey,
-          group: g.key,
-          label: c.name + ': ' + g.name
-        }))], [])
-        .sort((s1, s2) => (s2.label == s1.label) ? 0 : ((s2.label < s1.label) ? 1 : -1)),
-     segments: [{
-       value: 'area',
-       label: 'Area'
-     }],
-     areas: [{
-       value: 'kallithea',
-       label: 'Kallithea',
-       cluster: 'area',
-     },
-     {
-       value: 'pangkrati',
-       label: 'Pangkrati',
-       cluster: 'area',
-     },
-     {
-       value: 'lykavittos',
-       label: 'Lykavittos',
-       cluster: 'area',
-     }],
-     scenarios: state.savings.scenarios.map(scenario => ({
-       ...scenario, 
-       paramsShort: util.getFriendlyParams(scenario.parameters, 'short')
-        .map(x => `${x.key}: ${x.value}`).join(', '),
-       paramsLong: util.getFriendlyParams(scenario.parameters, 'long')
-       .map(x => `${x.key}: ${x.value}`).join(', ')
-     })),
-
-     removeScenario: state.savings.scenarios.find(s => s.id === state.savings.removeScenario),
-     searchFilter: state.savings.searchFilter,
-     validationError: state.savings.validationError,
+    viewportWidth: state.viewport.width,
+    profile: state.session.profile,
+    utility: state.config.utility.key,
+    clusters: state.config.utility.clusters,
+    segments: SPATIAL_CLUSTERS,
+    scenarios: state.savings.scenarios,
+    scenarioToRemove: state.savings.scenarios.find(s => s.id === state.savings.scenarioToRemove),
+    searchFilter: state.savings.searchFilter,
+    areas: state.map.map.areas,
+    metersLocations: state.map.metersLocations,
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     actions : {
-      ...bindActionCreators(Actions, dispatch), 
+      ...bindActionCreators({...Actions, getTimeline, getMetersLocations}, dispatch), 
       goToAddView: () => dispatch(push('/savings/add')),
       goToExploreView: (id) => dispatch(push(`/savings/${id}`)),
-      goToListView: () => dispatch(push('/savings'))
+      goToListView: () => dispatch(push('/savings')),
+      
+
     }
   };
 }

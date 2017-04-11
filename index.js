@@ -46,3 +46,7 @@ if (develop) {
     api: require('./api/base'),
   };
 }
+
+//custom leaflet image path
+var L = require('leaflet');
+L.Icon.Default.imagePath = '/assets/lib/leaflet/images/';

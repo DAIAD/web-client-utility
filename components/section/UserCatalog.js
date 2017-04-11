@@ -5,7 +5,6 @@ var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Table = require('../Table');
-var LeafletMap = require('../LeafletMap');
 var Chart = require('../reports-measurements/chart');
 var InputTextModal = require('../InputTextModal');
 
@@ -13,6 +12,15 @@ var { getAccounts, changeIndex, filterText, filterSerial, clearFilter,
       getMeter, getUserChart, clearChart, setSearchModeText, setSearchModeMap, 
       setGeometry, removeFavorite, addFavorite, setSelectionMode, discardBagOfConsumers, 
       toggleConsumer, saveBagOfConsumers } = require('../../actions/UserCatalogActions');
+var theme = require('../chart/themes/shine');
+
+var { Map, TileLayer, GeoJSON, FeatureGroup, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
+/*
+var { getAccounts, changeIndex, filterText, filterSerial, clearFilter, getMeter, clearChart,
+      setSearchModeText, setSearchModeMap, setGeometry,
+      removeFavorite, addFavorite,
+      setSelectionMode, discardBagOfConsumers, toggleConsumer, saveBagOfConsumers } = require('../../actions/UserCatalogActions');
+      */
 
 var _setSelectionMode = function(e) {
   this.props.actions.setSelectionMode(!this.props.userCatalog.selection.enabled);
@@ -58,66 +66,16 @@ var _setSearchMode = function(e) {
   }
 };
 
-var _featureRenderer = function(feature) {
-  var container = $('<div style="margin: 10px" />');
-
-  var self = this;
-
-  container.on('click', '.add-meter-chart', function(e) {
-    e.stopPropagation();
-    e.preventDefault();
-
-    self.props.actions.getMeter(feature.properties.userKey, feature.properties.deviceKey, feature.properties.name);
-  });
-
-  container.on('click', '.add-consumer-to-collection', function(e) {
-    e.stopPropagation();
-    e.preventDefault();
-
-    self.props.actions.toggleConsumer(feature.properties.userKey);
-  });
-
-  var content = [];
-
-  content.push('<span style="font-size: 14px; font-weight: bold;">');
-  content.push(feature.properties.name + '&nbsp');
-  if(this.props.userCatalog.selection.enabled) {
-    content.push('<span class="add-consumer-to-collection" style="cursor: pointer; text-decoration: underline; font-size: 14px;">');
-    content.push('<i class="fa fa-shopping-basket fa-fw">&nbsp</i>');
-    content.push('</span>');
-  }
-  content.push('</span>');
-
-  content.push('<br/>');
-  content.push('<br/>');
-  content.push('<span style="font-weight: bold;">Address</span>');
-  content.push('<br/>');
-  content.push('<span style="font-size: 14px;">');
-  content.push(feature.properties.address);
-  content.push('</span>');
-  content.push('<br/>');
-  content.push('<br/>');
-  content.push('<span style="font-weight: bold;">Meter Id</span>');
-  content.push('<br/>');
-  content.push('<span class="add-meter-chart" style="cursor: pointer; text-decoration: underline; font-size: 14px;">');
-  content.push(feature.properties.meter.serial);
-  content.push('</span>');
-
-  container.html(content.join(''));
-
-  return container[0];
-};
-
 var _onFeatureChange = function(features) {
-  if((!features) || (features.length===0)){
+  if(!features || !features.features || !Array.isArray(features.features) || features.features.length===0){
     this.props.actions.setGeometry(null);
   } else {
-    this.props.actions.setGeometry(features[0].geometry);
+    this.props.actions.setGeometry(features.features[0].geometry);
   }
 };
 
-var _clearChart = function(e) {
-  this.props.actions.clearChart();
+var _clearChart = function() {
+  this.props.actions.setGeometry(null);
 };
 
 var UserCatalog = React.createClass({
@@ -339,46 +297,51 @@ var UserCatalog = React.createClass({
       </span>
     );
 
-    var map = null;
-
-    switch(this.props.userCatalog.search) {
-      case 'map':
-        map = (
-          <LeafletMap style={{ width: '100%', height: 600}}
-                      elementClassName='mixin'
-                      prefix='map'
-                      center={[38.35, -0.48]}
-                      zoom={13}
-                      mode={[LeafletMap.MODE_DRAW, LeafletMap.MODE_VECTOR]}
-                      draw={{
-                        onFeatureChange: _onFeatureChange.bind(this)
-                      }}
-                      vector={{
-                        data : this.props.userCatalog.data.features,
-                        renderer : _featureRenderer.bind(this)
-                      }}
+    var map = (
+      <Map
+        width='100%'
+        height={600}
+        center={[38.35, -0.48]}
+        zoom={13}
+        >
+        <TileLayer />
+        { 
+          this.props.userCatalog.search === 'map' ?
+            <DrawControl
+              onFeatureChange={_onFeatureChange.bind(this)}
+            />
+            : 
+              <div />
+          } 
+          <GeoJSON
+            name='Users'
+            data={this.props.userCatalog.data.features}
+            popupContent={feature => {
+              return (
+              <div>
+                <h4>{feature.properties.name}</h4>
+                <h5>Address: <span>{feature.properties.address}</span></h5>
+                <h5>Meter id: 
+                  <a 
+                    href='#' 
+                    onClick={(e) => { 
+                      e.preventDefault();  
+                      this.props.actions.getMeter(feature.properties.userKey,
+                                                  feature.properties.deviceKey,
+                                                  feature.properties.name
+                                                 );
+                    }}
+                  >
+                  {feature.properties.meter.serial}
+                </a>
+              </h5>
+            </div>
+            )}}
           />
+      </Map>
         );
-        break;
-
-      default:
-        map = (
-          <LeafletMap style={{ width: '100%', height: 600}}
-                      elementClassName='mixin'
-                      prefix='map'
-                      center={[38.35, -0.48]}
-                      zoom={13}
-                      mode={LeafletMap.MODE_VECTOR}
-                      vector={{
-                        data : this.props.userCatalog.data.features,
-                        renderer : _featureRenderer.bind(this)
-                      }}
-          />
-        );
-        break;
-    }
-
-    var chartTitleText, chart = (<span>Select a meter ...</span>);
+       
+        var v, chartTitleText, chartConfig = null, chart = (<span>Select a meter ...</span>), data = [];
 
     if(Object.keys(this.props.userCatalog.charts).length) {
       chartTitleText = (
@@ -500,10 +463,14 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(
-      Object.assign({}, {getAccounts, changeIndex, filterSerial, filterText, clearFilter, getMeter, getUserChart, 
-                         clearChart, setSearchModeText, setSearchModeMap, setGeometry, removeFavorite, addFavorite,
-                         setSelectionMode, discardBagOfConsumers, toggleConsumer, saveBagOfConsumers }) , dispatch
-  )};
+                    Object.assign({}, {
+                      getAccounts, changeIndex, filterSerial, filterText, clearFilter, 
+                      getMeter, getUserChart, clearChart, setSearchModeText, 
+                      setSearchModeMap, setGeometry, removeFavorite, addFavorite,
+                      setSelectionMode, discardBagOfConsumers, toggleConsumer, 
+                      saveBagOfConsumers 
+                    }), dispatch),
+  };
 }
 
 module.exports = connect(mapStateToProps, mapDispatchToProps)(UserCatalog);
