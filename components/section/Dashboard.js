@@ -31,14 +31,14 @@ var getDefaultChart = function(props) {
     title:defaultChartTitle,
     type:"CHART",
     tags:"Chart - Meter",
-    reportName:"avg-daily-avg",
-    level:"week",
+    reportName:"avg",
+    level:"day",
     field:"volume",
     queries:[{
       time:{
         type:"ABSOLUTE",
-        granularity:"WEEK",
-        start:moment().subtract(350, 'day').valueOf(),
+        granularity:"DAY",
+        start:moment().subtract(30, 'day').valueOf(),
         end:moment().valueOf(),
         durationTimeUnit:"HOUR"},
       population:[{
@@ -225,8 +225,8 @@ var Dashboard = React.createClass({
           {...defaults.chartProps}
           draw={pChart.draw} 
           field={'volume'}
-          level={'week'}
-          reportName={'avg-daily-avg'}
+          level={pinnedCharts[i].level}
+          reportName={pinnedCharts[i].reportName}
           finished={pChart.finished}
           series={pChart.data}
           context={props.config}
@@ -303,7 +303,7 @@ var Dashboard = React.createClass({
         <span style={{ paddingLeft: 4 }}>{pMap? pMap.title : 'Loading...'}</span>
         <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
           {unpinButton}
-        </span>       
+        </span>
 
       </span>
       );
@@ -608,8 +608,8 @@ var Dashboard = React.createClass({
             onResizeStop={onResizeStop.bind(this)}
             onDragStop={onDragStop.bind(this)}
             layouts={{ lg: this.props.savedLayout, md: this.props.savedLayout, sm: this.props.savedLayout }}
-            breakpoints={{ lg: 1080, md: 650, sm: 200 }}            
-            cols={{lg: 16, md: 12, sm: 8, xs: 6, xxs: 4}}
+            breakpoints={{ lg: 2160, md: 1080, sm: 720, xs: 480, xxs: 200 }}  //lg: 1080, md: 650, sm: 200
+            cols={{lg: 24, md: 20, sm: 16, xs: 12, xxs: 8}}  //lg: 16, md: 12, sm: 8, xs: 6, xxs: 4
             autoSize={true}
             verticalCompact={true}
             isResizable={false}
