@@ -157,7 +157,7 @@ var Favourites = React.createClass({
   },
   
   render: function() {
-      var icon = 'list';
+    var icon = 'list';
     var self = this;
 
       const dashboardLinkFooter = (
@@ -499,8 +499,7 @@ var Favourites = React.createClass({
             </div>
       </div>
      );
-   }
-   else{
+   } else{
       return (
         <div>
           <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
@@ -508,8 +507,7 @@ var Favourites = React.createClass({
         </div>
       );
    }
-
-  }
+ }
 });
 
 function mapStateToProps(state) {

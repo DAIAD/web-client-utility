@@ -260,17 +260,50 @@ var FavouritesActions = {
     return function(dispatch, getState) {
       dispatch(addFavouriteRequest());
       var fav = getState(event).favourites.favouriteToBeDeleted;
-      return favouritesAPI.deleteFavourite(fav).then(function (response) {
-        dispatch(deleteFavouriteResponse(response.success, response.errors));
-        dispatch(requestedFavouriteQueries());
-        return favouritesAPI.fetchFavouriteQueries().then(function (response) {
-          dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
-        }, function (error) {
-          dispatch(receivedFavouriteQueries(false, error, null));
-        });
+      if(!fav.namedQuery.pinned){
+        
+        return favouritesAPI.deleteFavourite(fav).then(function (response) {
+          dispatch(deleteFavouriteResponse(response.success, response.errors));
+          dispatch(requestedFavouriteQueries());
+          return favouritesAPI.fetchFavouriteQueries().then(function (response) {
+            dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
           }, function (error) {
-            dispatch(deleteFavouriteResponse(false, error));
-        });
+            dispatch(receivedFavouriteQueries(false, error, null));
+          });
+        }, function (error) {
+          dispatch(deleteFavouriteResponse(false, error));
+        });      
+      }
+
+      return adminAPI.getLayout().then(function(response) {
+        if(response.success){
+          var lays = JSON.parse(response.profile.configuration);
+          var lay = lays.layout.filter(function( component ) {
+            return component.i !== fav.namedQuery.title;
+          });  
+          var layoutRequest = {"configuration" : JSON.stringify({"layout": lay})};
+          
+          return adminAPI.saveLayout(layoutRequest).then(function(response) {
+
+            if(response.success){
+              return favouritesAPI.deleteFavourite(fav).then(function (response) {
+                dispatch(deleteFavouriteResponse(response.success, response.errors));
+                return favouritesAPI.fetchFavouriteQueries().then(function (response) {
+                  dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));
+                }, function (error) {
+                  dispatch(receivedFavouriteQueries(false, error, null));
+                });
+              }, function (error) {
+                dispatch(deleteFavouriteResponse(false, error));
+              });            
+            }
+          }, function(error) {
+            dispatch(_saveLayoutResponse(false, error));
+          });      
+        }
+      }, function(error) {
+        dispatch(_saveLayoutResponse(false, error));
+      });   
     };
   },
   
@@ -529,9 +562,9 @@ var FavouritesActions = {
 
             var layoutComponent;
             if(query.namedQuery.type === 'CHART' || query.namedQuery.type === 'FORECAST'){
-              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 1, h: 1};
+              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 8, h: 1}; //try 5 columns for chart
             } else if(query.namedQuery.type === 'MAP' ) {
-              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 1, h: 1};
+              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 12, h: 1}; //try 8 columns for map
             }
             lay.push(layoutComponent);
             dispatch(_saveLayoutRequest());
