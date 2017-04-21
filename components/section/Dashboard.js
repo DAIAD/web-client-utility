@@ -3,7 +3,6 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
-var Breadcrumb = require('../Breadcrumb');
 var Counter = require('../Counter');
 var Chart = require('../reports-measurements/chart');
 var {configPropType} = require('../../prop-types');
@@ -593,11 +592,6 @@ var Dashboard = React.createClass({
 
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
-        <div className='row'>
-          <div className='col-md-12'>
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         {counterComponents}
         <div className='row' >
           <ResponsiveReactGridLayout  

@@ -1,6 +1,5 @@
 var React = require('react');
 var Bootstrap = require('react-bootstrap');
-var Breadcrumb = require('../../Breadcrumb');
 var EditTable = require('../../EditTable');
 var Modal = require('../../Modal');
 var FilterPanel = require('../../FilterPanel');
@@ -159,11 +158,6 @@ var ModeManagementComponent = React.createClass({
     );
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
-        <div className='row'>
-          <div className='col-md-12'>
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className='row'>
           <div className='col-md-12'>
             <Modal   show = {this.props.modal.show}

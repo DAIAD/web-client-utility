@@ -1,6 +1,5 @@
 var React = require('react');
 var Redux = require('react-redux');
-var Breadcrumb = require('../../Breadcrumb');
 
 var {MeasurementsReportPanel} = require('../../reports');
 
@@ -23,11 +22,6 @@ var Page = React.createClass({
     var {routes, config} = this.props;
     return (
       <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-12">
-            <Breadcrumb routes={routes}/>
-          </div>
-        </div>
         <div className="row">
           <div className="col-md-12">
             <MeasurementsReportPanel config={config} />

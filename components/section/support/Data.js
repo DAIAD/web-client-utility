@@ -6,7 +6,6 @@ var $ = require('jquery');
 var Bootstrap = require('react-bootstrap');
 var Dropzone = require('react-dropzone');
 
-var Breadcrumb = require('../../Breadcrumb');
 var Checkbox = require('../../Checkbox');
 
 var UPLOAD_NONE = 0;
@@ -377,11 +376,6 @@ var DataManagement = React.createClass({
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         {modal}
-        <div className='row' style={{ marginBottom: 10 }}>
-          <div className='col-md-12'>
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className='row' style={{ marginBottom: 10 }}>
           <div className='col-md-12'>
             <Bootstrap.Panel header={header}>

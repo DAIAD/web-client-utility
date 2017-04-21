@@ -3,7 +3,6 @@ var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Select = require('react-select');
-var Breadcrumb = require('../../Breadcrumb');
 var Table = require('../../Table');
 
 var { getEvents, changeIndex, filterAccount, filterLevel, clearFilter } = require('../../../actions/LoggingActions');
@@ -160,11 +159,6 @@ var Logging = React.createClass({
 
     return (
       <div className="container-fluid" style={{ paddingTop: 10 }}>
-        <div className="row">
-          <div className="col-md-12">
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className="row">
           <div className="col-md-12">
             <Bootstrap.Panel header={eventHeader}>

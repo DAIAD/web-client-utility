@@ -1,12 +1,15 @@
-
 var api = require('./base');
 
 var QueryAPI = {
-  queryMeasurements: function(query) {
-    return api.json('/action/query', query);
+  queryMeasurements : function(request) {
+    request.query.usingPreAggregation = properties.dataApiUseAggregatedData || false;
+
+    return api.json('/action/query', request);
   },
-  queryForecast: function(query) {
-    return api.json('/action/data/meter/forecast', query);
+  queryForecast : function(request) {
+    request.query.usingPreAggregation = properties.dataApiUseAggregatedData || false;
+
+    return api.json('/action/data/meter/forecast', request);
   }
 };
 

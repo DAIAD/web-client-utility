@@ -11,8 +11,6 @@ var {FormattedTime} = require('react-intl');
 var Bootstrap = require('react-bootstrap');
 var Dropzone = require('react-dropzone');
 
-var Breadcrumb = require('../../Breadcrumb');
-
 var { submitQuery } = require('../../../actions/QueryActions');
 var { createUser, createAmphiro, generateAmphiroData, setTimezone, setErrors, getFeatures } = require('../../../actions/DebugActions');
 
@@ -187,11 +185,6 @@ var Development = React.createClass({
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         {modal}
-        <div className='row' style={{ marginBottom: 10 }}>
-          <div className='col-md-12'>
-            <Breadcrumb routes={this.props.routes}/>
-          </div>
-        </div>
         <div className='row' style={{ marginBottom: 10 }}>
           <div className='col-md-6'>
             <Bootstrap.Panel header='Automatically register users and Amphiro devices'>
