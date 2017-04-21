@@ -1001,8 +1001,6 @@ var ReportPanel = React.createClass({
     var fragment1; // single element or array of keyed elements
     switch (this.state.formFragment) {
       case 'favourite':
-        console.log('clicked fav:');
-        console.log(this.props.favouriteChart);
         var favouriteButtonText = this.props.favouriteChart ? 'Update Favourite' : 'Add Favourite';
         {
           //Calculate tags

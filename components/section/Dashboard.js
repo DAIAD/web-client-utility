@@ -530,18 +530,18 @@ var Dashboard = React.createClass({
     );
 
     var onLayoutChange = function(e) {
-      console.log('onLayoutChange');
-      console.log(e);
+      //console.log('onLayoutChange');
+      //console.log(e);
     };
 
     var onBreakpointChange = function(e) {
-      console.log('onBreakpointChange');
-      console.log(e);
+      //console.log('onBreakpointChange');
+      //console.log(e);
     };
 
     var onResizeStop = function(e) {
-      console.log('onResizeStop');
-      console.log(e);
+      //console.log('onResizeStop');
+      //console.log(e);
     };
 
     var onDragStop = function(e) {
