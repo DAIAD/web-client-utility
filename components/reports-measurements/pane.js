@@ -1001,6 +1001,8 @@ var ReportPanel = React.createClass({
     var fragment1; // single element or array of keyed elements
     switch (this.state.formFragment) {
       case 'favourite':
+        console.log('clicked fav:');
+        console.log(this.props.favouriteChart);
         var favouriteButtonText = this.props.favouriteChart ? 'Update Favourite' : 'Add Favourite';
         {
           //Calculate tags
@@ -1962,9 +1964,11 @@ ReportPanel = ReactRedux.connect(
     stateProps.overlapping = state.reports.measurements.overlapping;
     stateProps.multipleQueries = state.reports.measurements.multipleQueries;
 
-    stateProps.defaultFavouriteValues = state.defaultFavouriteValues;
-    stateProps.favouriteChart = state.favourites.selectedFavourite;
-    stateProps.favouriteSeries = state.favourites.data;
+    if(state.favourites.selectedFavourite && state.favourites.selectedFavourite.type == 'CHART') {
+      stateProps.defaultFavouriteValues = state.defaultFavouriteValues;
+      stateProps.favouriteChart = state.favourites.selectedFavourite;
+      stateProps.favouriteSeries = state.favourites.data;    
+    }
 
     return stateProps;
   },
