@@ -9,8 +9,8 @@ var defaultChartTitle = "Last 30 Days Average Consumption";
 var defaultMapTitle = "Last 30 Days Consumption";
 
 var defaultLayout = [
-      {"i":defaultChartTitle,"x":0,"y":1,"w":1,"h":1},
-      {"i":defaultMapTitle,"x":0,"y":0,"w":1,"h":1}
+      {"i":defaultChartTitle,"x":0,"y":1,"w":8,"h":1},
+      {"i":defaultMapTitle,"x":0,"y":0,"w":12,"h":1}
 ];
 
 var getDefaultChart = function(props) {
@@ -20,13 +20,13 @@ var getDefaultChart = function(props) {
     title:defaultChartTitle,
     type:"CHART",
     tags:"Chart - Meter",
-    reportName:"avg-daily-avg",
-    level:"week",
+    reportName:"avg",
+    level:"day",
     field:"volume",
     queries:[{
       time:{
         type:"ABSOLUTE",
-        granularity:"WEEK",
+        granularity:"DAY",
         start:moment().subtract(30, 'day').valueOf(),
         end:moment().valueOf(),
         durationTimeUnit:"HOUR"},
@@ -322,7 +322,13 @@ var getChart = function(favourite) {
               var [g, rr] = population.fromString(rs.label);
               
               //Recalculate xAxis timespan based on returned data. (scale)
-              var timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              var timespan1;
+              if(rs.points[rs.points.length-1]){
+                timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+              } else {
+                //empty result, use initial timespan
+                timespan1 = [favourite.queries[0].time.start, favourite.queries[0].time.end];
+              }
               for(let j=0; j<favourite.queries.length; j++){
                 var res2;
                 if (rr) {

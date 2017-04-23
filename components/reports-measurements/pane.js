@@ -1962,9 +1962,11 @@ ReportPanel = ReactRedux.connect(
     stateProps.overlapping = state.reports.measurements.overlapping;
     stateProps.multipleQueries = state.reports.measurements.multipleQueries;
 
-    stateProps.defaultFavouriteValues = state.defaultFavouriteValues;
-    stateProps.favouriteChart = state.favourites.selectedFavourite;
-    stateProps.favouriteSeries = state.favourites.data;
+    if(state.favourites.selectedFavourite && state.favourites.selectedFavourite.type == 'CHART') {
+      stateProps.defaultFavouriteValues = state.defaultFavouriteValues;
+      stateProps.favouriteChart = state.favourites.selectedFavourite;
+      stateProps.favouriteSeries = state.favourites.data;    
+    }
 
     return stateProps;
   },
