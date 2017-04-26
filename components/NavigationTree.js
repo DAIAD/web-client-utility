@@ -177,6 +177,20 @@ var NavigationTree = React.createClass({
                       </span>
                     </Link>
                   </li>
+                  <li>
+                    <Link to='/savings'>
+                      <span  style={{paddingLeft: 18}}>
+                        <i className='fa fa-tint fa-fw'></i>{' ' + _t({ id: 'Section.Savings'})}
+                      </span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to='/budgets'>
+                      <span  style={{paddingLeft: 18}}>
+                        <i className='fa fa-pie-chart fa-fw'></i>{' ' + _t({ id: 'Section.Budgets'})}
+                      </span>
+                    </Link>
+                  </li>
                 </ul>
               </Collapsible>
             </li>

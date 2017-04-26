@@ -4,9 +4,9 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Table = require('../../Table');
 
-var { fileChangeIndex, getFiles, setFilter, clearFilter, download } = require('../../../actions/DataExportActions');
+var { fileChangeIndex, getFiles, getTrialFinalFiles, setFilter, clearFilter, download } = require('../../../actions/DataExportActions');
 
-var docs = (
+var descriptionText = (
   <div>
     <p style={{textAlign: 'justify'}}>All the exported data file names follow the naming convention shown below:</p>
     <p style={{color:'#565656'}}><b>[data source]-[utility]-[population]-[date].zip</b></p>
@@ -83,6 +83,7 @@ var DataExport = React.createClass({
   componentWillMount : function() {
     if(this.props.files.items == null) {
       this.props.actions.getFiles();
+      this.props.actions.getTrialFinalFiles();
     }
   },
 
@@ -100,8 +101,41 @@ var DataExport = React.createClass({
 
   render: function() {
     var files = this.props.files;
+    var pinnedFiles = this.props.pinnedFiles;
 
-    var executionTableConfig = {
+    var finalExportTableConfig = {
+        fields: [{
+          name: 'key',
+          title: 'key',
+          hidden: true
+        }, {
+          name: 'utility',
+          title: 'Utility'
+        }, {
+          name: 'filename',
+          title: 'Name'
+        }, {
+          name: 'description',
+          title: 'Description'
+        }, {
+          name: 'size',
+          title: 'Size'
+        }, {
+          name: 'completedOn',
+          title: 'Created On',
+          type: 'datetime'
+        }, {
+          name: 'download',
+          type:'action',
+          icon: 'cloud-download',
+          handler: (function(field, row) {
+            this.props.actions.download(row.key, row.filename);
+          }).bind(this)
+        }],
+        rows: pinnedFiles || []
+      };
+
+    var exportTableConfig = {
       fields: [{
         name: 'key',
         title: 'key',
@@ -127,7 +161,7 @@ var DataExport = React.createClass({
         type:'action',
         icon: 'cloud-download',
         handler: (function(field, row) {
-          this.props.actions.download(row.key);
+          this.props.actions.download(row.key, row.filename);
         }).bind(this)
       }],
       rows: files.items || [],
@@ -154,10 +188,23 @@ var DataExport = React.createClass({
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>
           <div className='col-md-12'>
-            <Bootstrap.Panel header={header}>
+            <Bootstrap.Panel>
               <Bootstrap.ListGroup fill>
-                  <Bootstrap.ListGroupItem>
-                  <Table  data={executionTableConfig}
+                <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
+                  <i className='fa fa-exclamation  fa-fw'></i>
+                  <span style={{ paddingLeft: 4 }}>Trial Final Data Export</span>
+                </Bootstrap.ListGroupItem>
+                <Bootstrap.ListGroupItem>
+                  <Table  data={finalExportTableConfig}
+                          template={{empty : fileNotFound}}
+                  ></Table>
+                </Bootstrap.ListGroupItem>
+                <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
+                  <i className='fa fa-file-archive-o fa-fw'></i>
+                  <span style={{ paddingLeft: 4 }}>Files</span>
+                </Bootstrap.ListGroupItem>
+                <Bootstrap.ListGroupItem>
+                  <Table  data={exportTableConfig}
                           onPageIndexChange={this.onFilePageIndexChange}
                           template={{empty : fileNotFound}}
                   ></Table>
@@ -167,7 +214,7 @@ var DataExport = React.createClass({
                   <span style={{ paddingLeft: 4 }}>Description</span>
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem>
-                  {docs}
+                  {descriptionText}
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
                   <i className='fa fa-arrow-right  fa-fw'></i>
@@ -206,6 +253,7 @@ function mapStateToProps(state) {
   return {
       query: state.dataExport.query,
       files: state.dataExport.files,
+      pinnedFiles: state.dataExport.pinnedFiles,
       isLoading: state.dataExport.isLoading,
       routing: state.routing
   };
@@ -216,6 +264,7 @@ function mapDispatchToProps(dispatch) {
     actions : bindActionCreators({
       fileChangeIndex,
       getFiles,
+      getTrialFinalFiles,
       setFilter,
       clearFilter,
       download

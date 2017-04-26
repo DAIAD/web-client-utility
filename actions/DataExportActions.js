@@ -1,9 +1,6 @@
 var dataExportAPI = require('../api/data-export');
 var types = require('../constants/DataExportActionTypes');
 
-//TODO : Remove jquery dependency
-var $ = require('jquery');
-
 var fileChangeIndex = function(index) {
   return {
     type : types.FILE_CHANGE_INDEX,
@@ -17,19 +14,53 @@ var fileRequestInitialize = function() {
   };
 };
 
-var fileRequestComplete = function(success, errors, total, items, index, size) {
+var fileRequestCompleteSuccess = function(response) {
   return {
     type : types.FILE_RESPONSE,
-    success,
-    errors,
+    success : response.success,
+    errors: response.errors,
     files : {
-      total,
-      index,
-      size,
-      items
+      total: response.total,
+      index: response.index,
+      size: response.size,
+      items: response.files
     }
   };
 };
+
+var fileRequestCompleteFailure = function(errors) {
+  return {
+    type : types.FILE_RESPONSE,
+    success : false,
+    errors : errors,
+    files : null
+  };
+};
+
+var trialFileRequestInitialize = function() {
+  return {
+    type : types.TRIAL_FILE_REQUEST
+  };
+};
+
+var trialFileRequestCompleteSuccess = function(response) {
+  return {
+    type : types.TRIAL_FILE_RESPONSE,
+    success : response.success,
+    errors: response.errors,
+    files : response.files
+  };
+};
+
+var trialFileRequestCompleteFailure = function(errors) {
+  return {
+    type : types.TRIAL_FILE_RESPONSE,
+    success : false,
+    errors : errors,
+    files : null
+  };
+};
+
 
 var setFilter = function(filter) {
   return {
@@ -52,16 +83,11 @@ var DataExportActions = {
       dispatch(fileRequestInitialize());
 
       return dataExportAPI.getFiles(getState().dataExport.query).then(
-          function(response) {
-            dispatch(fileRequestComplete(response.success,
-                                         response.errors,
-                                         response.total,
-                                         response.files,
-                                         response.index,
-                                         response.size));
-          }, function(error) {
-            dispatch(fileRequestComplete(false, error));
-          });
+        function(response) {
+          dispatch(fileRequestCompleteSuccess(response));
+        }, function(error) {
+          dispatch(fileRequestCompleteFailure(error));
+        });
     };
   },
 
@@ -70,16 +96,24 @@ var DataExportActions = {
       dispatch(fileRequestInitialize());
 
       return dataExportAPI.getFiles(getState().dataExport.query).then(
-          function(response) {
-            dispatch(fileRequestComplete(response.success,
-                                         response.errors,
-                                         response.total,
-                                         response.files,
-                                         response.index,
-                                         response.size));
-          }, function(error) {
-            dispatch(fileRequestComplete(false, error));
-          });
+        function(response) {
+          dispatch(fileRequestCompleteSuccess(response));
+        }, function(error) {
+          dispatch(fileRequestCompleteFailure(error));
+        });
+    };
+  },
+
+  getTrialFinalFiles : function() {
+    return function(dispatch, getState) {
+      dispatch(trialFileRequestInitialize());
+
+      return dataExportAPI.getTrialFinalFiles().then(
+        function(response) {
+          dispatch(trialFileRequestCompleteSuccess(response));
+        }, function(error) {
+          dispatch(trialFileRequestCompleteFailure(error));
+        });
     };
   },
 
@@ -90,16 +124,11 @@ var DataExportActions = {
       dispatch(fileRequestInitialize());
 
       return dataExportAPI.getFiles(getState().dataExport.query).then(
-          function(response) {
-            dispatch(fileRequestComplete(response.success,
-                                         response.errors,
-                                         response.total,
-                                         response.files,
-                                         response.index,
-                                         response.size));
-          }, function(error) {
-            dispatch(fileRequestComplete(false, error));
-          });
+        function(response) {
+          dispatch(fileRequestComplete(response));
+        }, function(error) {
+          dispatch(fileRequestCompleteFailure(error));
+        });
     };
   },
 
@@ -110,32 +139,26 @@ var DataExportActions = {
       dispatch(fileRequestInitialize());
 
       return dataExportAPI.getFiles(getState().dataExport.query).then(
-          function(response) {
-            dispatch(fileRequestComplete(response.success,
-                                         response.errors,
-                                         response.total,
-                                         response.files,
-                                         response.index,
-                                         response.size));
-          }, function(error) {
-            dispatch(fileRequestComplete(false, error));
-          });
+        function(response) {
+          dispatch(fileRequestComplete(response));
+        }, function(error) {
+          dispatch(fileRequestCompleteFailure(error));
+        });
     };
   },
 
-  download : function(key) {
-    var content = [], src = `/action/export/download/${key}`
-
-    content.push('<div id="export-download-frame" style="display: none">');
-    content.push('<iframe src="' + src + '"></iframe>');
-    content.push('</div>');
-
-    $('#export-download-frame').remove();
-    $('body').append(content.join(''));
+  download : function(key, filename) {
+    var link = document.createElement('a');
+    link.href = `/action/export/download/${key}`;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
     return {
       type : types.FILE_DOWNLOAD_REQUEST,
-      key : key
+      key : key,
+      filename: filename
     };
   }
 

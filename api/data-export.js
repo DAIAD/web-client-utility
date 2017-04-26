@@ -2,9 +2,20 @@ var api = require('./base');
 
 var DataExportAPI = {
 
-  getFiles : function(query = { index: 0, size: 10} ) {
+  getFiles : function(query = { } ) {
     return api.json('/action/export/files', {
-      query : query
+      query : {
+        ...query,
+        type: 'DATA_EXPORT'
+      }
+    });
+  },
+
+  getTrialFinalFiles : function() {
+    return api.json('/action/export/files', {
+      query : {
+        type: 'DATA_EXPORT_TRIAL'
+      }
     });
   }
 

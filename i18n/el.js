@@ -64,7 +64,9 @@
         "Data": "Διαχείριση Δεδομένων",
         "Development": "Ανάπτυξη",
         "DataExport": "Data Export"
-	    }
+	    },
+      "Savings": "Savings Potential",
+      "Budgets": "Budgets"
 	},
 	"Page": {
 	  "PasswordReset":"Reset Password"
