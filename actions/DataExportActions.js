@@ -125,7 +125,7 @@ var DataExportActions = {
 
       return dataExportAPI.getFiles(getState().dataExport.query).then(
         function(response) {
-          dispatch(fileRequestComplete(response));
+          dispatch(fileRequestCompleteSuccess(response));
         }, function(error) {
           dispatch(fileRequestCompleteFailure(error));
         });
@@ -140,7 +140,7 @@ var DataExportActions = {
 
       return dataExportAPI.getFiles(getState().dataExport.query).then(
         function(response) {
-          dispatch(fileRequestComplete(response));
+          dispatch(fileRequestCompleteSuccess(response));
         }, function(error) {
           dispatch(fileRequestCompleteFailure(error));
         });
