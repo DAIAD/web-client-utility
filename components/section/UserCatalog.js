@@ -382,8 +382,8 @@ var UserCatalog = React.createClass({
           {...defaults.chartProps}
           draw={this.state.draw}
           field={"volume"}
-          level={"week"}
-          reportName={"avg-daily-avg"}
+          level={"day"}
+          reportName={"avg"}
           finished={this.props.userCatalog.finished}
           series={series}
           context={this.props.config}

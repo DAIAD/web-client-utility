@@ -71,7 +71,8 @@
         "Development": "Development",
         "DataExport": "Data Export"
       },
-      "Savings": "Savings Potential"
+      "Savings": "Savings Potential",
+      "Budgets": "Budgets"
 	},
   "Page": {
     "PasswordReset":"Reset Password"

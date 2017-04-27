@@ -12,8 +12,28 @@ var initialize = function() {
       index : 0,
       size : 10,
       items : null
-    }
+    },
+    pinnedFiles : []
   };
+};
+
+var processFiles = function(files) {
+  files = files || [];
+
+  return files.map( f => {
+    var size = f.size.toString + 'b';
+
+    if (f.size > 1048576) {
+      size = (f.size / 1048576).toFixed(2) + ' mb';
+    } else if (f.size > 1024) {
+      size = (f.size / 1024).toFixed(2) + ' kb';
+    }
+
+    return {
+      ...f,
+      size: size
+    };
+  });
 };
 
 var reducer = function(state, action) {
@@ -34,27 +54,27 @@ var reducer = function(state, action) {
         isLoading : true
       };
 
+    case types.TRIAL_FILE_REQUEST:
+      return {
+        ...state,
+        isLoading : true
+      };
+
     case types.FILE_RESPONSE:
       return {
         ...state,
         isLoading : false,
         files: {
           ...action.files,
-          items: action.files.items.map( f => {
-            var size = f.size.toString + 'b';
-            
-            if (f.size > 1048576) {
-              size = (f.size / 1048576).toFixed(2) + ' mb';
-            } else if (f.size > 1024) {
-              size = (f.size / 1024).toFixed(2) + ' kb';
-            }
-
-            return {
-              ...f,
-              size: size
-            };
-          })
+          items: processFiles(action.files.items)
         }
+      };
+
+    case types.TRIAL_FILE_RESPONSE:
+      return {
+        ...state,
+        isLoading : false,
+        pinnedFiles: processFiles(action.files)
       };
 
     case types.FILE_FILTER_SET:
