@@ -15,6 +15,8 @@ var Breadcrumb = require('../../../components/Breadcrumb');
 
 var Budgets = React.createClass({ 
   render: function() {
+    const { groups, clusters, segments, areas, savings, validationError, tableData, tableStyle, searchFilter, budgetType, children } = this.props;
+    const { setErrorModal, resetErrorModal, setValidationError, switchMode, addBudgetScenario, removeBudgetScenario, toggleRemoveConfirmation, setSearchFilter, setBudgetType } = this.props.actions;
     return (
 			<div className='container-fluid' style={{ paddingTop: 10 }}>
 				<div className='row'>
@@ -25,7 +27,7 @@ var Budgets = React.createClass({
         <div className='row'>
           <div className='col-md-12' style={{marginTop: 10}}>
             {
-              React.cloneElement(this.props.children, this.props)
+              React.cloneElement(children, this.props)
             }
           </div>
         </div>
@@ -55,8 +57,29 @@ function mapStateToProps(state) {
         .sort((s1, s2) => (s2.label == s1.label) ? 0 : ((s2.label < s1.label) ? 1 : -1)),
      segments: [{
        value: 'area',
-       label: 'Areas'
+       label: 'Area'
      }],
+     areas: [{
+       value: 'kallithea',
+       label: 'Kallithea',
+       cluster: 'area',
+     },
+     {
+       value: 'pangkrati',
+       label: 'Pangkrati',
+       cluster: 'area',
+     },
+     {
+       value: 'lykavittos',
+       label: 'Lykavittos',
+       cluster: 'area',
+     }],
+     validationError: state.budget.validationError,
+     budgetToRemoveIdx: state.budget.budgetToRemove,
+     confirmSetBudgetIdx: state.budget.confirmSetBudget,
+     confirmResetBudgetIdx: state.budget.confirmResetBudget,
+     searchFilter: state.budget.searchFilter,
+     savings: state.savings.scenarios,
      budgets: state.budget.scenarios.map(scenario => ({
        ...scenario, 
        active: scenario.activatedOn != null,
@@ -68,9 +91,6 @@ function mapStateToProps(state) {
      })),
      wizardType: state.budget.wizardType,
      initialActiveIdx: state.budget.initialActiveIdx,
-     areas: state.map.map.areas,
-     profile: state.session.profile,
-
   };
 }
 

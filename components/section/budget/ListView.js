@@ -5,7 +5,7 @@ var Modal = require('../../Modal');
 var Table = require('../../Table');
 
 function RemoveConfirmation (props) {
-  const { scenario, confirmRemoveScenario, removeSavingsScenario } = props;
+  const { scenario, confirmRemoveScenario, removeScenario } = props;
   const reset = () => confirmRemoveScenario(null);
   if (scenario == null) {
     return <div/>;
@@ -24,7 +24,7 @@ function RemoveConfirmation (props) {
         },
         {
           name: 'Delete',
-          action: () => { removeSavingsScenario(id); confirmRemoveScenario(null); },
+          action: () => { removeScenario(id); confirmRemoveScenario(null); },
           style: 'danger',
         },
       ]}
@@ -32,21 +32,22 @@ function RemoveConfirmation (props) {
   );
 }
 
-function SavingsPotentialList (props) {
-  const { tableData, tableFields, tableStyle, tableSorter, actions, removeScenario, searchFilter } = props;
-  const { removeSavingsScenario, confirmRemoveScenario, setSearchFilter, goToAddView } = actions;
+function BudgetsList (props) {
+  const { groups, clusters, segments, areas, budgetFields, budgetData, budgetSorter, actions, budgetToRemove, searchFilter } = props;
+  const { removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView } = actions;
   return (
-    <bs.Panel header='Scenarios'>
+    <bs.Panel header='Budgets'>
       <bs.Row>
         <bs.Col sm={4} md={5}>
-        <bs.Input 
-          type='text'
-          placeholder='Search...'
-          onChange={(e) => setSearchFilter(e.target.value)}
-          value={searchFilter}
-         />
+          <bs.Input 
+            style={{width: '80%', float: 'left'}}
+            type='text'
+            placeholder='Search...'
+            onChange={(e) => setSearchFilter(e.target.value)}
+            value={searchFilter}
+          />
        </bs.Col>
-        <bs.Col sm={5} md={7} style={{textAlign: 'right'}}>
+        <bs.Col sm={8} md={7} style={{textAlign: 'right'}}>
          <bs.Button 
            bsStyle='success' 
            onClick={() => { goToAddView(); }}
@@ -57,19 +58,19 @@ function SavingsPotentialList (props) {
         <hr/>
         <Table  
           sortable
-          data={tableData} 
-          fields={tableFields}
-          sorter={tableSorter}
+          fields={budgetFields}
+          sorter={budgetSorter}
+          data={budgetData} 
           template={{empty : (<span>{ 'No data found.' }</span>)}}
         />
         
       <RemoveConfirmation
-        scenario={removeScenario}
-        removeSavingsScenario={removeSavingsScenario}
-        confirmRemoveScenario={confirmRemoveScenario}
+        scenario={budgetToRemove}
+        removeScenario={removeBudgetScenario}
+        confirmRemoveScenario={confirmRemoveBudgetScenario}
       />
     </bs.Panel>
   );
 }
 
-module.exports = SavingsPotentialList;
+module.exports = BudgetsList;
