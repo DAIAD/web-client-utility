@@ -101,9 +101,11 @@ var _getOsView = function(os) {
 var _showChart = function(type, key, e) {
   switch(type) {
     case 'METER':
+      this.setState({groupChartButtonsHidden:false});
       this.props.getMeters(this.props.user.id);
     break;
     case 'AMPHIRO':
+      this.setState({groupChartButtonsHidden:true});
       this.props.getSessions(this.props.user.id, key);
     break;
   }
@@ -132,7 +134,8 @@ var User = React.createClass({
   
   getInitialState: function() {
     return {
-      draw : false
+      draw : false,
+      groupChartButtonsHidden : false
     };
   },
   
@@ -195,6 +198,7 @@ var User = React.createClass({
       }, {
         name : 'chart',
         type : 'action',
+        hidden : userContext.state.groupChartButtonsHidden,
         icon : 'bar-chart-o',
         handler : (function(field, row) {
           if(userContext.props.data.devices) {
@@ -785,7 +789,6 @@ function mapDispatchToProps(dispatch) {
     getMeters : bindActionCreators(UserActions.getMeters, dispatch),
     getGroupChart : bindActionCreators(UserActions.getGroupChart, dispatch),
     clearGroupSeries : bindActionCreators(UserActions.clearGroupSeries, dispatch),
-    getGroupSeries : bindActionCreators(UserActions.getGroupSeries, dispatch),
     exportData : bindActionCreators(UserActions.exportData, dispatch),
     addFavorite : bindActionCreators(UserActions.addFavorite, dispatch),
     removeFavorite : bindActionCreators(UserActions.removeFavorite, dispatch),
