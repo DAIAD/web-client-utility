@@ -323,6 +323,9 @@ var getChart = function(favourite) {
               
               //Recalculate xAxis timespan based on returned data. (scale)
               var timespan1;
+
+              rs.points = _.sortBy(rs.points, 'timespamp').reverse();
+
               if(rs.points[rs.points.length-1]){
                 timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
               } else {
