@@ -321,15 +321,20 @@ var UserCatalog = React.createClass({
               <div>
                 <h4>{feature.properties.name}</h4>
                 <h5>Address: <span>{feature.properties.address}</span></h5>
-                <h5>Meter id: 
+                <h5>Meter id: &nbsp; 
                   <a 
                     href='#' 
                     onClick={(e) => { 
-                      e.preventDefault();  
-                      this.props.actions.getMeter(feature.properties.userKey,
-                                                  feature.properties.deviceKey,
-                                                  feature.properties.name
-                                                 );
+                      e.preventDefault();
+                      const { userKey, name, meter: { serial } } = feature.properties;
+                      const { profile } = this.props;
+                      if(serial) {
+                        this.props.actions.getUserChart(userKey, 
+                                                        `${name} - ${serial}`,
+                                                        profile.timezone
+                                                       );
+                        this.setState({draw:true});
+                      }
                     }}
                   >
                   {feature.properties.meter.serial}

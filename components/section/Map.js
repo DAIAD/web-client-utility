@@ -394,7 +394,9 @@ var AnalyticsMap = React.createClass({
     mapFilterTags.push(
       <FilterTag key='source' text={ this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source} icon='database' />
     );
-
+    
+    const timelineMin = this.props.map.timeline && this.props.map.timeline.min || 0;
+    const timelineMax = this.props.map.timeline && this.props.map.timeline.max || 1000;
     map = (
       <Bootstrap.ListGroup fill>
         {filter}
@@ -404,7 +406,6 @@ var AnalyticsMap = React.createClass({
             zoom={13}
             width='100%'
             height={600}
-            info='topright'
             >
             <LayersControl position='topright'> 
               <TileLayer />
@@ -420,12 +421,18 @@ var AnalyticsMap = React.createClass({
                   legend='bottomright'
                   valueProperty='value'
                   scale={['white', 'red']}
-                  limits={[ this.props.map.timeline ? this.props.map.timeline.min : 0, this.props.map.timeline ? this.props.map.timeline.max : 1000 ]}
+                  limits={[timelineMin, timelineMax]}
                   steps={6}
                   mode='e'
-                  infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
+                  infoContent={feature => feature && feature.properties ? 
+                    <div>
+                      <h5>{feature.properties.label}</h5>
+                      <span>{feature.properties.value}</span>
+                    </div> 
+                      : <div><h5>Hover over an area...</h5></div>
+                  }
                   highlightStyle={{ weight: 3 }}
-                  onClick={(map, layer) => map.fitBounds(layer.getBounds()) }
+                  onClick={(feature, layer, map) => map.fitBounds(layer.getBounds()) }
                   style={{
                     fillColor: "#ffff00",
                     color: "#000",
@@ -438,7 +445,12 @@ var AnalyticsMap = React.createClass({
               <GeoJSON
                 name='Meters'
                 data={this.props.metersLocations}
-                popupContent={feature => <div><h5>Serial:</h5><h5>{feature.properties.serial}</h5></div>}
+                popupContent={feature => 
+                  <div>
+                    <h5>Serial:</h5>
+                    <h5>{feature.properties.serial}</h5>
+                  </div>
+                  }
                 circleMarkers
                 style={{
                   radius: 8,

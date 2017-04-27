@@ -380,7 +380,6 @@ var Dashboard = React.createClass({
             zoom={13}
             width='100%'
             height={600}
-            info='topright'
             >
             <TileLayer />
             <InfoControl position='topright'> 
@@ -391,12 +390,18 @@ var Dashboard = React.createClass({
                 valueProperty='value'
                 scale={['white', 'red']}
                 limits={[ 
-                  pMap && pMap.timeline ? pMap.timeline.min : 0, 
-                  pMap && pMap.timeline ? pMap.timeline.max : 0
+                  pMap && pMap.timeline && pMap.timeline.min || 0, 
+                  pMap && pMap.timeline && pMap.timeline.max || 0
                 ]}
                 steps={6}
                 mode='e'
-                infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
+                infoContent={feature => feature ? 
+                  <div>
+                    <h5>{feature.properties.label}</h5>
+                    <span>{feature.properties.value}</span>
+                  </div> 
+                    : <div><h5>Hover over an area...</h5></div>
+                  }
                 highlightStyle={{ weight: 4 }}
                 style={{
                   fillColor: "#ffff00",
@@ -410,7 +415,12 @@ var Dashboard = React.createClass({
             <GeoJSON
               name='Meters'
               data={this.props.metersLocations}
-              popupContent={feature => <div><h5>Serial:</h5><h5>{feature.properties.serial}</h5></div>}
+              popupContent={feature => 
+                <div>
+                  <h5>Serial:</h5>
+                  <h5>{feature.properties.serial}</h5>
+                </div>
+                }
               circleMarkers
               style={{
                 radius: 8,

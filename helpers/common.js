@@ -18,8 +18,6 @@ const extractFeatures = accounts => {
   for ( var index in accounts) {
     if (accounts[index].location) {
       var meter = accounts[index].hasOwnProperty('meter') ? accounts[index].meter : null;
-      console.log('extracting', accounts[index]);
-
       geojson.features.push({
         'type' : 'Feature',
         'geometry' : accounts[index].location,
