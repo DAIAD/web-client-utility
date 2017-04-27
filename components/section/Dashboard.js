@@ -8,6 +8,7 @@ var Counter = require('../Counter');
 var Chart = require('../reports-measurements/chart');
 var {configPropType} = require('../../prop-types');
 var moment = require('moment');
+
 var FilterTag = require('../chart/dimension/FilterTag');
 var Timeline = require('../Timeline');
 var {FormattedTime} = require('react-intl');
@@ -18,9 +19,7 @@ var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 //var Maximizable = require('../Maximizable');
 
-var { getFeatures, getCounters, getProfileLayout, 
-      fetchFavouriteQueries, saveLayout, unpin } = require('../../actions/DashboardActions');
-      //var { getTimeline, getChart } = require('../../actions/DashboardActions');
+var { getTimeline, getFeatures, getCounters, getProfileLayout, fetchFavouriteQueries, saveLayout, unpin, getChart } = require('../../actions/DashboardActions');
 var { getMetersLocations } = require('../../actions/MapActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
@@ -142,7 +141,6 @@ var Dashboard = React.createClass({
     var request =  {
       'namedQuery' : fav
     };
-
     this.props.actions.unpin(request, this.props);
   },
 
@@ -723,9 +721,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { getFeatures, getCounters, fetchFavouriteQueries,  
-                                                     getProfileLayout, saveLayout, unpin, getMetersLocations }) , dispatch)
-                                                     //actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters, getChart, getMetersLocations }) , dispatch)
+actions : bindActionCreators(Object.assign({}, { 
+  getFeatures, getCounters, fetchFavouriteQueries, getProfileLayout, saveLayout, unpin, getMetersLocations, getTimeline, getChart }) , dispatch)
   };
 }
 

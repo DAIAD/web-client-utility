@@ -66,6 +66,8 @@ var Favourites = React.createClass({
   componentWillMount : function() {
     this.props.actions.resetMapState();
     this.props.actions.fetchFavouriteQueries();
+    // ??
+    //this.setState({points : createPoints()});
   
     if (!this.props.metersLocations) {
       this.props.actions.getMetersLocations();
@@ -399,81 +401,87 @@ var Favourites = React.createClass({
      );
    }
 
-    var favs = {
-        fields: [{
-           name: 'id',
-           hidden: true
-        }, {
-           name: 'title',
-           title: 'Label'
-        }, {
-           name: 'tags',
-           title: 'Tags'
-        }, {
-           name: 'createdOn',
-           title: 'Date',
-           type: 'datetime'
-        }, {
-           name: 'view',
-           type:'action',
-           icon: 'eye',
-           handler: function() {
-             self.clickedOpenFavourite(this.props.row);
-           }
-        }, {
-           name: 'edit',
-           type:'action',
-           icon: function(field, row) {
+   const favsFields = [{
+       name: 'id',
+       hidden: true
+    }, {
+       name: 'title',
+       title: 'Label'
+    }, {
+       name: 'tags',
+       title: 'Tags'
+    }, {
+       name: 'createdOn',
+       title: 'Date',
+       type: 'datetime'
+    }, {
+       name: 'view',
+       type:'action',
+       icon: 'eye',
+       handler: function(field, row) {
+         self.clickedOpenFavourite(row);
+       }
+    }, {
+       name: 'edit',
+       type:'action',
+       icon: function(field, row) {
              return (row.type === 'FORECAST' ? null : 'pencil'); //forecast edit action disabled
-           },
-           hidden: false,
-           handler: function() {
-             self.editFavourite(this.props.row);
-           }
-        }, {
-           name: 'copy',
-           type:'action',
-           icon: 'copy',
-           handler: function() {
-             self.duplicateFavourite(this.props.row);
-           }
-        }, 
-//          {
-//           name: 'link',
-//           type:'action',
-//           icon: 'link',
-//           handler: function() {
-//           }
-//        }, 
-        {
-           name: 'pin',
-           type:'action',
-           icon: function(field, row) {
-             return (row.pinned === false ? 'map-pin' : null);
-           },
-           hidden: false,
-           handler: function() {
-             self.pinToDashboard(this.props.row);
-           }
-        }, {
-           name: 'remove',
-           type:'action',
-           icon: 'remove',
-           handler: function() {
-             self.clickedDeleteFavourite(this.props.row);
-           }
-        }],
-        rows: this.props.favourites ? this.props.favourites : [],
-        pager: {
-           index: 0,
-           size: 5,
-           count: this.props.favourites ? this.props.favourites.length : 0
-        }
-     };
+       },
+       hidden: false,
+       handler: function(field, row) {
+         self.editFavourite(row);
+       }
+    }, {
+       name: 'copy',
+       type:'action',
+       icon: 'copy',
+       handler: function(field, row) {
+         self.duplicateFavourite(row);
+       }
+    }, 
+    /* {
+       name: 'link',
+       type:'action',
+       icon: 'link',
+       handler: function() {
+       }
+       }, */
+    {
+       name: 'pin',
+       type:'action',
+       icon: function(field, row) {
+         return (row.pinned === false ? 'map-pin' : null);
+       },
+       hidden: false,
+       handler: function(field, row) {
+         self.pinToDashboard(row);
+       }
+    },
+    {
+       name: 'remove',
+       type:'action',
+       icon: 'remove',
+       handler: function(field, row) {
+         self.clickedDeleteFavourite(row);
+       }
+    }];
+    
+    const favsData = this.props.favourites || [];
+
+    const favsPager = {
+       index: 0,
+       size: 5,
+       count: this.props.favourites ? this.props.favourites.length : 0
+    };
 
      var favouriteContent = (
        <div style={{ padding: 10}}>
-           <Table data={favs}></Table>
+         <Table 
+           fields={favsFields}
+           data={favsData}
+           pager={favsPager}
+           template={{empty : (<span>No favorites found.</span>)}}
+         />
          </div>
      );
 
@@ -504,7 +512,7 @@ var Favourites = React.createClass({
             onClose = {this.props.actions.closeWarning}
             title = {warning}
             text = {'You are about to delete the favourite with label "' +
-              this.props.favouriteToBeDeleted.namedQuery.title + '". Are you sure?'}
+              this.props.favouriteToBeDeleted.namedQuery && this.props.favouriteToBeDeleted.namedQuery.title || '' + '". Are you sure?'}
               actions = {actions}
             />
         </div>

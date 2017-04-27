@@ -28,6 +28,8 @@ var overview = require('./overview');
 var trials = require('./trials');
 var dataExport =require('./data-export');
 var savings = require('./savings');
+
+var budget = require('./budget');
 var viewport = require('./viewport');
 
 var rootReducer = combineReducers({
@@ -60,6 +62,7 @@ var rootReducer = combineReducers({
   trials,
   dataExport,
   savings,
+  budget,
 });
 
 module.exports = rootReducer;

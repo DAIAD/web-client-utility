@@ -67,6 +67,12 @@ var Timeline = React.createClass({
     });
   },
 
+  componentWillUnmount: function() {
+    if (this.state.timeout) { 
+      clearInterval(this.state.timeout);
+    }
+  },
+
   getDefaultProps: function() {
     return {
       labels: [],

@@ -176,64 +176,63 @@ var User = React.createClass({
   },
 
   render: function() {
-    var userContext = this;
-    var groupTableConfig = {
-      fields : [{
-        name : 'id',
-        title : 'Table.Group.id',
-        hidden : true
-      }, {
-        name : 'name',
-        title : 'Table.Group.name',
-        link : '/group/{id}'
-      }, {
-        name : 'size',
-        title : 'Table.Group.size'
-      }, {
-        name : 'createdOn',
-        title : 'Table.Group.createdOn'
-      }, {
-        name : 'chart',
-        type : 'action',
-        icon : 'bar-chart-o',
-        handler : (function(field, row) {
-          if(userContext.props.data.devices) {
+    const groupFields = [{
+      name : 'id',
+      title : 'Table.Group.id',
+      hidden : true
+    }, {
+      name : 'name',
+      title : 'Table.Group.name',
+      link : '/group/{id}'
+    }, {
+      name : 'size',
+      title : 'Table.Group.size'
+    }, {
+      name : 'createdOn',
+      type: 'datetime',
+      title : 'Table.Group.createdOn'
+    }, {
+      name : 'chart',
+      type : 'action',
+      icon : 'bar-chart-o',
+      handler : (function(field, row) {
+        if(this.props.data.devices) {
             return;
+        }
+
+        var selectedGroup = this.props.groups.filter((g) => g.name == row.name);
+        var utility = this.props.profile.utility;
+        var clusters = this.props.config.utility.clusters;
+        
+        for(var i=0; i<clusters.length;i++){
+          var clusterGroups = clusters[i].groups;
+          var clusterGroup = clusterGroups.filter((group) => group.key == selectedGroup[0].id);
+          if(clusterGroup.length > 0){
+            var pop = clusterGroup[0];
+            break;
           }
+        }
 
-          var selectedGroup = userContext.props.groups.filter((g) => g.name == row.name);
-          var utility = userContext.props.profile.utility;
-          var clusters = userContext.props.config.utility.clusters;
-          
-          for(var i=0; i<clusters.length;i++){
-            var clusterGroups = clusters[i].groups;
-            var clusterGroup = clusterGroups.filter((group) => group.key == selectedGroup[0].id);
-            if(clusterGroup.length > 0){
-              var pop = clusterGroup[0];
-              break;
-            }
-          }
+        if(!pop){
+          population1 = [{group: selectedGroup[0].id, label:"GROUP:" + selectedGroup[0].id + '/' + row.name, type:"GROUP"}];
+          this.props.getGroupChart(population1, row.name, utility.timezone); 
 
-          if(!pop){
-            population1 = [{group: selectedGroup[0].id, label:"GROUP:" + selectedGroup[0].id + '/' + row.name, type:"GROUP"}];
-            this.props.getGroupChart(population1, row.name, utility.timezone); 
+        } else {
+          var clusterKey = pop.clusterKey;
+          var population1 = [{group: pop.key, label:"CLUSTER:" + clusterKey + ":" + pop.key, type:"GROUP"}];
+          this.props.getGroupChart(population1, row.name, utility.timezone);              
+        }
+        
+        this.setState({draw:true});
 
-          } else {
-            var clusterKey = pop.clusterKey;
-            var population1 = [{group: pop.key, label:"CLUSTER:" + clusterKey + ":" + pop.key, type:"GROUP"}];
-            this.props.getGroupChart(population1, row.name, utility.timezone);              
-          }
-          
-          userContext.setState({draw:true});
+        /*
+        var utility = this.props.profile.utility;
+        this.props.getGroupSeries(row.id, row.name, utility.timezone);
+        */
+      }).bind(this)
+    }];
 
-        }).bind(this)
-      }],
-      rows : []
-    };
-
-    if (this.props.groups) {
-      groupTableConfig.rows = this.getSimplifiedGroups(this.membersObjectToArray(Object.assign({}, this.props.groups))).sort(this.compareGroups);
-    }
+    const groupData = this.props.groups ? this.getSimplifiedGroups(this.membersObjectToArray(Object.assign({}, this.props.groups))).sort(this.compareGroups) : [];
 
     const profileTitle = (
       <span>
@@ -721,7 +720,10 @@ var User = React.createClass({
               <Bootstrap.Panel header={groupTitle}>
                 <Bootstrap.ListGroup fill>
                   <Bootstrap.ListGroupItem>
-                    <Table data={groupTableConfig}></Table>
+                    <Table 
+                      fields={groupFields}
+                      data={groupData}
+                    />
                   </Bootstrap.ListGroupItem>
                   <Bootstrap.ListGroupItem className='clearfix'>
                     <Link className='pull-right' to='/groups' style={{ paddingLeft : 7, paddingTop: 12 }}>Browse all groups</Link>

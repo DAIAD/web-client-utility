@@ -58,97 +58,100 @@ var GroupCatalog  = React.createClass({
   },
 
   render: function() {
-    var self = this;
-    var tableConfiguration = {
-      fields: [{
-        name: 'id',
-        title: 'Id',
-        hidden: true
-      }, {
-        name: 'type',
-        title: 'Type',
-        width: 100
-      }, {
-        name: 'text',
-        title: 'Name',
-        link: function(row) {
-          if(row.key) {
-            return '/group/{key}/';
-          }
-          return null;
+    const tableFields = [{
+      name: 'id',
+      title: 'Id',
+      hidden: true
+    }, {
+      name: 'type',
+      title: 'Type',
+      width: 100
+    }, {
+      name: 'text',
+      title: 'Name',
+      link: function(row) {
+        if(row.key) {
+          return '/group/{key}/';
         }
-      }, {
-        name: 'size',
-        title: '# of members'
-      }, {
-        name: 'createdOn',
-        title: 'Updated On',
-        type: 'datetime'
-      }, {
-        name : 'favorite',
-        type : 'action',
-        icon : function(field, row) {
-          return (row.favorite ? 'star' : 'star-o');
-        },
-        handler : (function(field, row) {
-          if(row.favorite) {
-            this.props.actions.removeFavorite(row.key);
-          } else {
-            this.props.actions.addFavorite(row.key);
-          }
-        }).bind(this),
-        visible : (function(field, row) {
-          return (row.type == 'SET');
-        }).bind(this)
-      }, {
-        name : 'chart',
-        type : 'action',
-        icon : 'bar-chart-o',
-        handler : (function(field, row) {
-          var utility = this.props.profile.utility;
-
-          var population;
-          if(row.type === 'SEGMENT'){
-            var clusterKey = self.props.config.utility.clusters.filter((cluster) => cluster.name == row.cluster);
-            population = [{group: row.key, label:"CLUSTER:" + clusterKey[0].key + ":" + row.key, type:"GROUP"}];
-            this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone);      
-            self.setState({draw:true});
-            
-          } else if(row.type === 'SET'){
-          
-            population = [{group: row.key, label:"GROUP:" + row.key + '/' + row.name, type:"GROUP"}];
-            this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone); 
-            self.setState({draw:true});
-          }          
-
-        }).bind(this)
-      }, {
-        name : 'delete',
-        type : 'action',
-        icon : function(field, row) {
-          return (row.type == 'SET' ? 'remove' : null);
-        },
-        handler : (function(field, row) {
-          if(row.type == 'SET') {
-            this.props.actions.deleteGroup(row.key);
-          }
-        }).bind(this),
-        visible : (function(field, row) {
-          return (row.type == 'SET');
-        }).bind(this)
-      }],
-      rows: this.props.groupCatalog.data.filtered || [],
-      pager: {
-        index: 0,
-        size: 10,
-        count: this.props.groupCatalog.data.filtered.length || 0,
-        mode: Table.PAGING_CLIENT_SIDE
+        return null;
       }
-    };
+    }, {
+      name: 'size',
+      title: '# of members'
+    }, {
+      name: 'createdOn',
+      title: 'Updated On',
+      type: 'datetime'
+    }, {
+      name : 'favorite',
+      type : 'action',
+      icon : function(field, row) {
+        return (row.favorite ? 'star' : 'star-o');
+      },
+      handler : (function(field, row) {
+        if(row.favorite) {
+          this.props.actions.removeFavorite(row.key);
+        } else {
+          this.props.actions.addFavorite(row.key);
+        }
+      }).bind(this),
+      visible : (function(field, row) {
+        return (row.type == 'SET');
+      }).bind(this)
+    }, {
+      name : 'chart',
+      type : 'action',
+      icon : 'bar-chart-o',
+      handler : (function(field, row) {
+        var utility = this.props.profile.utility;
 
-    var tableStyle = {
+        var population;
+        if(row.type === 'SEGMENT'){
+          var clusterKey = self.props.config.utility.clusters.filter((cluster) => cluster.name == row.cluster);
+          population = [{group: row.key, label:"CLUSTER:" + clusterKey[0].key + ":" + row.key, type:"GROUP"}];
+          this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone);      
+          self.setState({draw:true});
+          
+        } else if(row.type === 'SET'){
+        
+          population = [{group: row.key, label:"GROUP:" + row.key + '/' + row.name, type:"GROUP"}];
+          this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone); 
+          self.setState({draw:true});
+        }
+      }).bind(this)
+    }, {
+      name : 'delete',
+      type : 'action',
+      icon : function(field, row) {
+        return (row.type == 'SET' ? 'remove' : null);
+      },
+      handler : (function(field, row) {
+        if(row.type == 'SET') {
+          this.props.actions.deleteGroup(row.key);
+        }
+      }).bind(this),
+      visible : (function(field, row) {
+        return (row.type == 'SET');
+      }).bind(this)
+    
+    }];
+    
+    const tableData = this.props.groupCatalog.data.filtered || [];
+    
+    const tablePager = {
+      index: 0,
+      size: 10,
+      //count: this.props.groupCatalog.data.filtered.length || 0,
+      //onPageIndexChange: this.onPageIndexChange,
+    };
+    const tableSorter = {
+      defaultSort: 'size',
+      defaultOrder: 'desc'
+    }; 
+
+    const tableStyle = {
       row : {
-        rowHeight: 50
+        height: 50
       }
     };
 
@@ -300,11 +303,15 @@ var GroupCatalog  = React.createClass({
               <Bootstrap.ListGroup fill>
                 {filterOptions}
                 <Bootstrap.ListGroupItem>
-                  <Table  data={tableConfiguration}
-                    onPageIndexChange={this.onPageIndexChange}
-                    template={{empty : dataNotFound}}
+                  <Table
+                    sortable 
+                    fields={tableFields}
+                    data={tableData}
+                    pager={tablePager} 
+                    sorter={tableSorter}
+                    template={{ empty: dataNotFound }}
                     style={tableStyle}
-                  ></Table>
+                  />
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
                   {chartTitleText}

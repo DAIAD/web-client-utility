@@ -5,6 +5,22 @@ var sprintf = require('sprintf');
 var ActionTypes = require('../action-types');
 var {getGroups} = require('../api/admin');
 
+const sortGroups = (a, b) => { 
+  if (b.name.startsWith('<') || a.name.startsWith('>')) { 
+    return 1;
+  }
+  else if (b.name.startsWith('>') || a.name.startsWith('<')) {
+    return -1;
+  }
+  else if (a.name > b.name) {
+    return 1;
+  }
+  else if (a.name < b.value) {
+    return -1;
+  }
+  return 0;
+};
+
 var actions = {
 
   // Plain actions
@@ -41,6 +57,7 @@ var actions = {
 
         var {name, key} = _.first(res.groups.filter(g => g.type == 'UTILITY'));
         var clusters = res.groups.filter(g => g.utilityKey == key && g.type == 'CLUSTER');
+        
         var config = {
           name,
           key,
@@ -52,7 +69,8 @@ var actions = {
               key: g.key,
               name: g.name,
               size: g.size,
-            })),
+            }))
+            .sort(sortGroups),
           })),
         };
 
