@@ -6,12 +6,14 @@ var Modal = React.createClass({
   getDefaultProps: function() {
     return {
       backdrop: true,
+      className: ''
     };
   },  
 	render: function(){
 		return (
       <Bootstrap.Modal 
         animation={false} 
+        dialogClassName={this.props.className}
         show={this.props.show} 
         backdrop={this.props.backdrop}
         onHide={this.props.onClose} >

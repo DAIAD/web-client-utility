@@ -1,8 +1,9 @@
 
 module.exports = {
   color: [
-    '#1790cf', '#1bb2d8', '#99d2dd', '#88b0bb',
-    '#1c7099', '#038cc4', '#75abd0', '#afd6dd'
+    '#060b49', '#0f165c', '#1c236c', '#2d3480', 
+    '#464c8f', '#575d99', '#6e73a6', '#8185b2', 
+    '#979abe', '#abaecc', '#c4c6d9'
   ],
 
   title: {
@@ -138,25 +139,6 @@ module.exports = {
     symbol: 'emptyCircle',
     symbolSize: 4,
   },
-  
-  bar: {
-    barGap: '20%',
-    barCategoryGap: '25%',
-    itemStyle: {
-      normal: {
-        barBorderWidth: 0,
-        barBorderRadius: 0,
-        label: {
-          position: 'right',
-          textStyle: {
-            fontSize: 11,
-          },
-        },
-      },
-      emphasis: {
-      }
-    }
-  },
 
   timeline : {
     lineStyle: {
@@ -207,6 +189,25 @@ module.exports = {
             color: '#c12e34'
           }
         }
+      }
+    }
+  },
+  
+  bar: {
+    barGap: '20%',
+    barCategoryGap: '25%',
+    itemStyle: {
+      normal: {
+        barBorderWidth: 0,
+        barBorderRadius: 0,
+        label: {
+          position: 'right',
+          textStyle: {
+            fontSize: 11,
+          },
+        },
+      },
+      emphasis: {
       }
     }
   },

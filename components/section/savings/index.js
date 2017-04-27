@@ -5,11 +5,12 @@ var bs = require('react-bootstrap');
 var Modal = require('../../Modal');
 
 var { push } = require('react-router-redux');
+var { injectIntl } = require('react-intl');
 
 var Actions = require('../../../actions/SavingsActions');
 var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
 
-var Table = require('../../../components/Table');
+var Modal = require('../../Modal');
 var util = require('../../../helpers/wizard');
 
 const SPATIAL_CLUSTERS = [{
@@ -18,17 +19,23 @@ const SPATIAL_CLUSTERS = [{
 }];
 
 function SavingsPotential (props) {
-  const { routes, children } = props;
+  const { routes, children, actions, scenarioToRemove } = props;
+  const { goToListView, confirmRemoveScenario, removeSavingsScenario } = actions;
   return (
     <div className='container-fluid' style={{ paddingTop: 10 }}>
       <div className='row'>
         <div className='col-md-12 col-sm-12' style={{marginTop: 10}}>
-          <bs.Panel header='Savings scenarios'>
-            {
-              React.cloneElement(children, props)
-            }
-        </bs.Panel>
+          {
+            React.cloneElement(children, props)
+          }
         </div>
+  
+        <RemoveConfirmation
+          goToListView={goToListView}
+          scenario={scenarioToRemove}
+          removeSavingsScenario={removeSavingsScenario}
+          confirmRemoveScenario={confirmRemoveScenario}
+        />
       </div> 
     </div>
   );
@@ -69,6 +76,7 @@ function mapStateToProps(state, ownProps) {
   return {
     routing: state.routing,
     viewportWidth: state.viewport.width,
+    viewportHeight: state.viewport.height,
     profile: state.session.profile,
     utility: state.config.utility.key,
     clusters: state.config.utility.clusters,
@@ -88,109 +96,29 @@ function mapDispatchToProps(dispatch) {
       goToAddView: () => dispatch(push('/savings/add')),
       goToExploreView: (id) => dispatch(push(`/savings/${id}`)),
       goToListView: () => dispatch(push('/savings')),
-      
-
     }
   };
 }
 
 function mergeProps(stateProps, dispatchProps, ownProps) {
-  const filteredScenarios = stateProps.searchFilter ? stateProps.scenarios.filter(s => matches(s.name, stateProps.searchFilter) || matches(s.user, stateProps.searchFilter)) : stateProps.scenarios;
-
-  const tableFields = [{
-      name: 'id',
-      title: 'Id',
-      hidden: true
-    }, 
-    {
-      name: 'name',
-      title: 'Name',
-      width: 120,
-      link: function(row) {
-        if(row.id) {
-          return '/savings/{id}/';
-        }
-        return null;
-      }
-    }, 
-    {
-      name: 'potential',
-      title: 'Potential',
-    }, 
-    {
-      name: 'user',
-      title: 'User',
-    }, 
-    {
-      name: 'paramsShort',
-      title: 'Parameters',
-    //  width: 150
-    },
-    {
-      name: 'createdOn',
-      title: 'Created on',
-      type: 'datetime',
-      width: 100
-    }, 
-    {
-      name: 'completedOn',
-      title: 'Finished on',
-      type: 'datetime',
-      width: 100
-    }, 
-    {
-      name: 'completed',
-      title: 'Completed',
-      type: 'action',
-      icon: function(field, row) {
-        return row.completedOn !=null ? 'check' : '';
-      },
-      handler: function(field, row) { return; }
-    }, 
-    {
-      name : 'explore',
-      title: 'Explore',
-      type : 'action',
-      icon : 'info-circle',
-      handler : (function(field, row) {
-        dispatchProps.actions.goToExploreView(row.id);
-      }),
-      visible : true
-    }, 
-    {
-      name : 'delete',
-      title: 'Delete',
-      type : 'action',
-      icon : 'remove',
-      handler : (function(field, row) {
-        dispatchProps.actions.confirmRemoveScenario(row.id);
-      }),
-      visible : true 
-    }];
-
-    const tableData = filteredScenarios || [];
-
-
-    const tableSorter = {
-      defaultSort: 'completedOn',
-      defaultOrder: 'desc'
-    };
-
   return {
-    ...ownProps,
-    ...dispatchProps,
     ...stateProps,
-    tableData,
-    tableFields,
-    tableSorter,
+    ...dispatchProps,
+    ...ownProps,
+    user: stateProps.profile ? {value: stateProps.profile.username, label: stateProps.profile.firstname + ' ' + stateProps.profile.lastname} : null,
+    scenarios: stateProps.scenarios.map(scenario => ({
+      ...scenario, 
+      paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
+      params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
+    })),
   };
 }
 
-function matches(str1, str2) {
-  return str1.toLowerCase().indexOf(str2.toLowerCase()) != -1;
-}
 
-SavingsPotential.icon = 'percent';
-SavingsPotential.title = 'Section.Savings';
 
-module.exports = connect(mapStateToProps, mapDispatchToProps, mergeProps)(SavingsPotential);
+const SavingsPotentialContainer = injectIntl(connect(mapStateToProps, mapDispatchToProps, mergeProps)(SavingsPotential));
+
+SavingsPotentialContainer.icon = 'percent';
+SavingsPotentialContainer.title = 'Section.Savings';
+
+module.exports = SavingsPotentialContainer;

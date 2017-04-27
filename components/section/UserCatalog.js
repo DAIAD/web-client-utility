@@ -15,6 +15,7 @@ var { getAccounts, changeIndex, filterText, filterSerial, clearFilter,
 var theme = require('../chart/themes/shine');
 
 var { Map, TileLayer, GeoJSON, FeatureGroup, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
+
 /*
 var { getAccounts, changeIndex, filterText, filterSerial, clearFilter, getMeter, clearChart,
       setSearchModeText, setSearchModeMap, setGeometry,

@@ -3,6 +3,7 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
+
 var Select = require('react-select');
 var DateRangePicker = require('react-bootstrap-daterangepicker');
 var FilterTag = require('../chart/dimension/FilterTag');
@@ -406,7 +407,7 @@ var AnalyticsMap = React.createClass({
             zoom={13}
             width='100%'
             height={600}
-            >
+          >
             <LayersControl position='topright'> 
               <TileLayer />
               

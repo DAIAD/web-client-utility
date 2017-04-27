@@ -66,6 +66,8 @@ var Favourites = React.createClass({
   componentWillMount : function() {
     this.props.actions.resetMapState();
     this.props.actions.fetchFavouriteQueries();
+    // ??
+    //this.setState({points : createPoints()});
   
     if (!this.props.metersLocations) {
       this.props.actions.getMetersLocations();
@@ -463,7 +465,7 @@ var Favourites = React.createClass({
          self.clickedDeleteFavourite(row);
        }
     }];
-
+    
     const favsData = this.props.favourites || [];
 
     const favsPager = {
