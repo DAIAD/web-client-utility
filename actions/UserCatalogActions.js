@@ -176,6 +176,9 @@ var UserCatalogActionCreators = {
             var res1 = (resultSets || []).map(rs => {            
               var g = new population.User(id, rs.label);
 
+              //sort points on timestamp in order to handle pre-aggregated data.
+              rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
+
               var timespan1;
               if(rs.points.length !== 0){
                 //Recalculate xAxis timespan based on returned data. (scale). If no data, keep timespan from query

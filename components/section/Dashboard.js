@@ -126,7 +126,7 @@ var Dashboard = React.createClass({
   },
 
   toggleSize : function() {
-    console.log(this);
+    //console.log(this);
   },
 
   _unpin : function(fav, e) {
@@ -443,7 +443,7 @@ var Dashboard = React.createClass({
       chartFilterTags.push(
         <FilterTag key='source' text={pChart.data ? pChart.data[0].source : ' ... '} icon='database' />
       );
-
+      
       var chart = (
         <Chart 
           {...defaults.chartProps}
