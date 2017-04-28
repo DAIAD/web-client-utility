@@ -25,6 +25,7 @@ var Group = React.createClass({
   },
 
   compareGroupMembers : function (a, b){
+    if (a.user == null) return -1;
     return a.user.localeCompare(b.user);
   },
 
@@ -46,33 +47,26 @@ var Group = React.createClass({
     var self = this;
     var _t = this.context.intl.formatMessage;
 
-    var currentMembersFields = GroupTablesSchema.Members.fields;
+    if (!this.props.currentMembers) return null;
 
-    var currentMembers = null;
     var rows = this.membersObjectToArray(Object.assign({}, this.props.currentMembers)).sort(this.compareGroupMembers);
-    if (this.props.currentMembers) {
-      currentMembers = {
-          fields : currentMembersFields,
-          rows : rows,
-          pager: {
-            index: 0,
-            size: 10,
-            count: rows.length || 0,
-            mode: Table.PAGING_CLIENT_SIDE
-          }
-      };
 
-      currentMembers.fields.forEach(function(field){
+    var currentMemberFields = GroupTablesSchema.Members.fields.map(function(field){
         if(field.hasOwnProperty('name') && field.name === 'bookmark'){
-          field.handler = function (){
+          const handler = function (){
             self.props.showFavouriteAccountForm(this.props.row.id);
           };
+          return Object.assign({}, field, {handler});
         }
+        return field;
       });
-    }
-
-
-
+      
+    var pager = {
+      index: 0,
+      size: 10,
+      count: rows.length || 0,
+      mode: Table.PAGING_CLIENT_SIDE
+    };
 
       var groupTitle = null;
       if (this.props.groupInfo) {
@@ -133,7 +127,11 @@ var Group = React.createClass({
                 <Bootstrap.Panel header={memberTitle}>
                   <Bootstrap.ListGroup fill>
                     <Bootstrap.ListGroupItem>
-                      <Table data={currentMembers}></Table>
+                      <Table 
+                        data={rows}
+                        fields={currentMemberFields}
+                        pager={pager}
+                      />
                     </Bootstrap.ListGroupItem>
                     <Bootstrap.ListGroupItem className='clearfix'>
                       <Link className='pull-right' to='/users' style={{ paddingLeft : 7, paddingTop: 12 }}>Browse all users</Link>

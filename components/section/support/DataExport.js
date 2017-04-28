@@ -103,40 +103,7 @@ var DataExport = React.createClass({
     var files = this.props.files;
     var pinnedFiles = this.props.pinnedFiles;
 
-    var finalExportTableConfig = {
-        fields: [{
-          name: 'key',
-          title: 'key',
-          hidden: true
-        }, {
-          name: 'utility',
-          title: 'Utility'
-        }, {
-          name: 'filename',
-          title: 'Name'
-        }, {
-          name: 'description',
-          title: 'Description'
-        }, {
-          name: 'size',
-          title: 'Size'
-        }, {
-          name: 'completedOn',
-          title: 'Created On',
-          type: 'datetime'
-        }, {
-          name: 'download',
-          type:'action',
-          icon: 'cloud-download',
-          handler: (function(field, row) {
-            this.props.actions.download(row.key, row.filename);
-          }).bind(this)
-        }],
-        rows: pinnedFiles || []
-      };
-
-    var exportTableConfig = {
-      fields: [{
+    var finalExportTableFields = [{
         name: 'key',
         title: 'key',
         hidden: true
@@ -163,14 +130,47 @@ var DataExport = React.createClass({
         handler: (function(field, row) {
           this.props.actions.download(row.key, row.filename);
         }).bind(this)
-      }],
-      rows: files.items || [],
-      pager: {
-        index: files.index || 0,
-        size: files.size || 10,
-        count: files.total || 0,
-        mode: Table.PAGING_SERVER_SIDE
-      }
+      }];
+
+    const finalExportTableData = pinnedFiles || [];
+
+    var exportTableFields = [{
+        name: 'key',
+        title: 'key',
+        hidden: true
+      }, {
+        name: 'utility',
+        title: 'Utility'
+      }, {
+        name: 'filename',
+        title: 'Name'
+      }, {
+        name: 'description',
+        title: 'Description'
+      }, {
+        name: 'size',
+        title: 'Size'
+      }, {
+        name: 'completedOn',
+        title: 'Created On',
+        type: 'datetime'
+      }, {
+        name: 'download',
+        type:'action',
+        icon: 'cloud-download',
+        handler: (function(field, row) {
+          this.props.actions.download(row.key, row.filename);
+        }).bind(this)
+      }];
+
+    const exportTableData = files.items || [];
+
+    const exportPager = {
+      index: files.index || 0,
+      size: files.size || 10,
+      count: files.total || 0,
+      mode: Table.PAGING_SERVER_SIDE,
+      onPageIndexChange : this.onFilePageIndexChange
     };
 
     const fileNotFound = (
@@ -195,19 +195,24 @@ var DataExport = React.createClass({
                   <span style={{ paddingLeft: 4 }}>Trial Final Data Export</span>
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem>
-                  <Table  data={finalExportTableConfig}
-                          template={{empty : fileNotFound}}
-                  ></Table>
+                  <Table  
+                    fields={finalExportTableFields}
+                    data={finalExportTableData}
+                    template={{empty : fileNotFound}}
+                  />
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
                   <i className='fa fa-file-archive-o fa-fw'></i>
                   <span style={{ paddingLeft: 4 }}>Files</span>
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem>
-                  <Table  data={exportTableConfig}
-                          onPageIndexChange={this.onFilePageIndexChange}
-                          template={{empty : fileNotFound}}
-                  ></Table>
+                  <Table  
+                    fields={exportTableFields}
+                    data={exportTableData}
+                    pager={exportPager}
+                    template={{empty : fileNotFound}}
+                  />
+
                 </Bootstrap.ListGroupItem>
                 <Bootstrap.ListGroupItem style={{background : '#f5f5f5'}}>
                   <i className='fa fa-life-ring fa-fw'></i>

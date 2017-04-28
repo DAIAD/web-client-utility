@@ -1,6 +1,7 @@
 var moment = require('moment');
-
 var types = require('../constants/UserCatalogActionTypes');
+
+var { extractFeatures } = require('../helpers/common');
 
 var _createInitialSelectionState = function() {
   return {
@@ -39,42 +40,70 @@ var _createInitialeState = function() {
   };
 };
 
-var _extractFeatures = function(accounts) {
-  var geojson = {
-    type : 'FeatureCollection',
-    features : [],
-    crs : {
-      type : 'name',
-      properties : {
-        name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
-      }
-    }
-  };
+var _fillMeterSeries = function(interval, data) {
+  var d;
+  var allPoints = [];
 
-  accounts = accounts || [];
+  var ref = interval[1].clone();
+  var days = interval[1].diff(interval[0], 'days') + 1;
 
-  for ( var index in accounts) {
-    if (accounts[index].location) {
-      var meter = accounts[index].hasOwnProperty('meter') ? accounts[index].meter : null;
-
-      geojson.features.push({
-        'type' : 'Feature',
-        'geometry' : accounts[index].location,
-        'properties' : {
-          'userKey' : accounts[index].id,
-          'deviceKey' : meter.key,
-          'name' : accounts[index].fullname,
-          'address' : accounts[index].address,
-          'meter' : {
-            'key' : meter.key,
-            'serial' : meter.serial
-          }
-        }
+  if ((!data) || (data.values.length === 0)) {
+    for (d = days; d > 0; d--) {
+      allPoints.push({
+        volume : 0,
+        difference : 0,
+        timestamp : ref.clone().toDate().getTime()
       });
+
+      ref.subtract(1, 'days');
+    }
+  } else {
+    var index = 0;
+    var values = data.values;
+
+    values.sort(function(p1, p2) {
+      return (p2.timestamp - p1.timestamp);
+    });
+
+    for (d = days; d > 0; d--) {
+      if (index === values.length) {
+        allPoints.push({
+          volume : 0,
+          difference : 0,
+          timestamp : ref.clone().toDate().getTime()
+        });
+
+        ref.subtract(1, 'days');
+      } else if (ref.isBefore(values[index].timestamp, 'day')) {
+        index++;
+      } else if (ref.isAfter(values[index].timestamp, 'day')) {
+        allPoints.push({
+          volume : 0,
+          difference : 0,
+          timestamp : ref.clone().toDate().getTime()
+        });
+
+        ref.subtract(1, 'days');
+      } else if (ref.isSame(values[index].timestamp, 'day')) {
+        allPoints.push({
+          difference : values[index].difference,
+          volume : values[index].volume,
+          timestamp : ref.clone().toDate().getTime()
+        });
+
+        index++;
+        ref.subtract(1, 'days');
+      }
     }
   }
 
-  return geojson;
+  allPoints.sort(function(p1, p2) {
+    return (p1.timestamp - p2.timestamp);
+  });
+
+  data.values = allPoints;
+
+  return data;
 };
 
 var selectionReducer = function(state, action) {
@@ -151,7 +180,7 @@ var dataReducer = function(state, action) {
           index : action.index || 0,
           size : action.size || 10,
           accounts : action.accounts || [],
-          features : _extractFeatures(action.accounts || [])
+          features : extractFeatures(action.accounts || [])
         });
       } else {
         return Object.assign({}, state, {
@@ -159,7 +188,7 @@ var dataReducer = function(state, action) {
           index : 0,
           size : 10,
           accounts : [],
-          features : _extractFeatures([])
+          features : extractFeatures([])
         });
       }
 

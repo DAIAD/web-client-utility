@@ -29,8 +29,12 @@ var trials = require('./trials');
 var dataExport =require('./data-export');
 var savings = require('./savings');
 
+var budget = require('./budget');
+var viewport = require('./viewport');
+
 var rootReducer = combineReducers({
   i18n,
+  viewport,
   config,
   session,
   dashboard,
@@ -57,7 +61,8 @@ var rootReducer = combineReducers({
   overview,
   trials,
   dataExport,
-  savings
+  savings,
+  budget,
 });
 
 module.exports = rootReducer;

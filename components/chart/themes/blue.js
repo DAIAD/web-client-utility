@@ -138,6 +138,25 @@ module.exports = {
     symbol: 'emptyCircle',
     symbolSize: 4,
   },
+  
+  bar: {
+    barGap: '20%',
+    barCategoryGap: '25%',
+    itemStyle: {
+      normal: {
+        barBorderWidth: 0,
+        barBorderRadius: 0,
+        label: {
+          position: 'right',
+          textStyle: {
+            fontSize: 11,
+          },
+        },
+      },
+      emphasis: {
+      }
+    }
+  },
 
   timeline : {
     lineStyle: {

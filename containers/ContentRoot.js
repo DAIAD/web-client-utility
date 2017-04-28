@@ -2,14 +2,15 @@ var React = require('react');
 var {bindActionCreators} = require('redux');
 var {connect} = require('react-redux');
 var ScrollToTop = require('react-scroll-up');
+var _ = require('lodash');
 
 var LoginForm = require('../components/LoginForm');
 var LocaleSwitcher = require('../components/LocaleSwitcher');
 
 var {login, logout} = require('../actions/SessionActions');
+var { resize } = require('../actions/ViewportActions');
 var {setLocale} = require('../actions/LocaleActions');
 var {configure} = require('../actions/config');
-
 var NavigationTree = require('../components/NavigationTree');
 
 var ContentRoot = React.createClass({
@@ -18,10 +19,8 @@ var ContentRoot = React.createClass({
   },
 
   render: function() {
-    var content = null;
-
-    if(!this.props.isAuthenticated) {
-      content = (
+    return (
+     !this.props.isAuthenticated ? ( 
         <div className='login-wrapper'>
           <nav className='navbar navbar-default navbar-fixed-top'>
             <div className='navbar-header' style={{ paddingLeft: 15}} >
@@ -37,16 +36,14 @@ var ContentRoot = React.createClass({
             <LoginForm
               action='login'
               isAuthenticated={this.props.isAuthenticated}
-              errors={this.props.session.errors}
+              errors={this.props.errors}
               onLogin={this.props.actions.login}
-              isLoading={this.props.session.isLoading}
+              isLoading={this.props.isLoading}
              />
           </div>
         </div>
-      );
-    } else {
-      content = (
-        <div className='wrapper'>
+       ) : (
+         <div className='wrapper'>
           <nav className='navbar navbar-default navbar-fixed-top'>
             <div className='navbar-header' style={{ paddingLeft: 15 }} >
               <a className='navbar-brand' href='#' style={{ padding: 0, margin: 0}}>
@@ -55,14 +52,16 @@ var ContentRoot = React.createClass({
             </div>
             <div style={{float: 'right', marginTop: 12, marginLeft: 10, paddingRight: 45}}>
               <span style={{marginRight: 10}}>
-                {this.props.session.username}
+                {this.props.username}
               </span>
               <i className='fa fa-sign-out fa-fw' style={{color : '#d9534f', cursor : 'pointer'}} onClick={this.props.actions.logout}></i>
             </div>
-            <NavigationTree roles={this.props.session.roles} />
+            <NavigationTree roles={this.props.roles} />
           </nav>
           <div className='page-wrapper'>
-            {this.props.children}
+            {
+              this.props.children
+            }
           </div>
           <ScrollToTop showUnder={160}>
             <div style={{marginRight: -30}}>
@@ -70,16 +69,25 @@ var ContentRoot = React.createClass({
             </div>
           </ScrollToTop>
         </div>
-      );
-    }
-
-    return content;
+       )
+    );
   },
 
   componentDidMount: function () {
     if (this.props.isAuthenticated) {
       this.props.actions.configure();
     }
+    
+    this.viewportListener = _.debounce(this.setViewport, 100, {maxWait: 1000});
+    window.addEventListener('resize', this.viewportListener);
+  },
+
+  componentWillUnmount: function() {
+    window.removeEventListener('resize', this.viewportListener);
+  },
+
+  setViewport: function() {
+    this.props.actions.resize(document.documentElement.clientWidth, document.documentElement.clientHeight);
   },
 
   componentDidUpdate: function (prevProps, prevState) {
@@ -99,12 +107,10 @@ var ContentRoot = React.createClass({
 function mapStateToProps(state) {
   return {
       isAuthenticated: state.session.isAuthenticated,
-      session: {
-        errors: state.session.errors,
-        isLoading: state.session.isLoading,
-        username: (state.session.profile ? state.session.profile.username : ''),
-        roles: state.session.roles
-      },
+      errors: state.session.errors,
+      isLoading: state.session.isLoading,
+      username: state.session.profile ? state.session.profile.username : null,
+      roles: state.session.roles,
       routing: state.routing
   };
 }
@@ -112,7 +118,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(
-      Object.assign({}, {login, logout, setLocale, configure}),
+      Object.assign({}, {login, logout, setLocale, configure, resize}),
       dispatch
     )
   };

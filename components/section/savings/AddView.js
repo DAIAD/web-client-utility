@@ -1,86 +1,156 @@
 var React = require('react');
 var bs = require('react-bootstrap');
 var Modal = require('../../Modal');
-var Wizard = require('../../common/Wizard');
-var { SetNameItem, WhoItem, WhereItem, WhenItem } = require('../../common/WizardReusableItems');
+var Wizard = require('../../wizard/Wizard');
+var { SetName, SelectWho, SelectWhere, SelectWhen } = require('../../wizard/items/');
+var util = require('../../../helpers/wizard');
+var { nameToId } = require('../../../helpers/common');
 
-function ValidationError (props) {
-  const { validationError, setValidationError } = props;
-  if (validationError == null) {
-    return <div/>;
+const initialEmpty = {};
+
+const validateWho = (value) => {
+  if ((!Array.isArray(value) && value.selected !== 'all') || 
+      (Array.isArray(value) && value.length === 0)) {
+    throw 'noWho';
   }
-  const reset = () => setValidationError(null);
-  return (
-    <Modal
-        title='Validation Error'
-        show={true}
-        text={validationError}
-        onClose={reset}
-        actions={[
-          {
-            name: 'OK',
-            action: reset,
-          }]}
-      />
-  );
-}
+};
 
+const validateWhere = value => {
+  if ((!Array.isArray(value) && value.selected !== 'all') || 
+     (Array.isArray(value) && value.length == 0)) {
+    throw 'noWhere';
+  }
+};
 
-function SavingsPotentialAdd (props) {
-  const { groups, clusters, segments, areas, actions, validationError } = props;
-  const { setValidationError, addSavingsScenario, goToListView } = actions;
-  return (
-    <div>
-      <bs.Row>
-      <bs.Col md={6}>
-        <h4>Add new Scenario</h4> 
-      </bs.Col>
-      <bs.Col md={6} style={{textAlign: 'right'}}>
-        <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
-      </bs.Col>
-    </bs.Row>
-    <hr/>
-      <Wizard
-        showAll={true}
-        showPrevious={false}
-        onValidationFail={(err) => { setValidationError(err); }}
-        onComplete={(values) => { addSavingsScenario(values); goToListView(); }}
-        onReset={() => {setValidationError(null); }}
-        > 
-        <WhoItem
-          id='who'
-          title='Who'
-          description='Select all population or narrow savings potential calculation to selected groupsn'
-          groups={groups}
-          clusters={clusters}
-        />
-        <WhereItem
-          id='where'
-          title='Where'
-          description='Select all areas or narrow savings potential calculation to selected areas'
-          clusters={segments}
-          groups={areas}
-        />
-        <WhenItem
-          id='when'
-          title='Data'
-          description='Data to be used for savings potential calculation, last year or custom'
-        />
-        <SetNameItem
-          title='Name'
-          description='Select a descriptive name for your scenario'
-          id='name'
-        />
-      </Wizard>
+const validateWhen = (value) => {
+  if (!value || !value.startDate || !value.endDate) {
+    throw 'noWhen';
+  }
+  else if (isNaN(Date.parse(new Date(value.startDate)))) {
+    throw 'fromInvalid';
+  }
+  else if (isNaN(Date.parse(new Date(value.endDate)))) {
+    throw 'toInvalid';
+  }
+  else if (value.startDate > value.endDate)  {
+    throw 'fromAfterTo';
+  }
+  else if (value.endDate > new Date().valueOf()) {
+    throw 'noFuture';
+  }
+};
 
+const validateName = function (value) { 
+  const existing = this.props.scenarios.map(scenario => nameToId(scenario.name));
+  if (!value.name) {
+    throw 'noName';
+  }
+  else if (existing.includes(nameToId(value.name))) {
+    throw 'nameExists';
+  }
+};
 
-      <ValidationError
-        validationError={validationError}
-        setValidationError={setValidationError}
-      />
-
-  </div>
-  );
-}
+var SavingsPotentialAdd = React.createClass({
+  componentWillMount: function() {
+    const utility = this.props.profile.utility;
+    //TODO: temp way to load areas in state
+    if(!this.props.areas) {
+      const population = {
+          utility: utility.key,
+          label: utility.name,
+          type: 'UTILITY'
+      };
+      this.props.actions.getTimeline(population);
+    }
+  },
+  //TODO: have to create geojson from areas object since API not ready yet
+  getGeoJSON: function(areasObj) {
+    if (!areasObj) return {};
+    const areas = Object.keys(areasObj).map(key => areasObj[key]);
+    return {
+      type : 'FeatureCollection',
+      features : areas.map(area => ({
+        'type' : 'Feature',
+        'geometry' : area.geometry,
+        'properties' : {
+          'label' : area.label,
+          'cluster': 'area'
+        }
+      })),
+      crs : {
+        type : 'name',
+        properties : {
+          name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
+        }
+      }
+    };
+  },
+  render: function() {
+    const { utility, groups, clusters, segments, areas, actions, validationError, intl } = this.props;
+    const { setValidationError, addSavingsScenario, goToListView } = actions;
+    const _t = x => intl.formatMessage({ id: x });
+    const geojson = this.getGeoJSON(areas);
+    return (
+      <bs.Panel header={<h3>{_t('Savings.Add.title')}</h3>}>
+        <bs.Row>
+        <bs.Col md={12} style={{textAlign: 'right'}}>
+          <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
+        </bs.Col>
+      </bs.Row>
+      <hr/>
+        <Wizard
+          onComplete={(values) => { addSavingsScenario(values); goToListView(); }}
+          validateLive
+          childrenProps={{ intl }}
+          > 
+          <SelectWho
+            id='who'
+            title='Who'
+            description='Select all population or narrow savings potential calculation to selected groupsn'
+            utility={utility}
+            clusters={clusters}
+            initialValue={{}}
+            validate={validateWho}
+          />
+          <SelectWhere
+            id='where'
+            title='Where'
+            description='Select all areas or narrow savings potential calculation to selected areas'
+            utility={utility}
+            clusters={segments.map(segment => ({ 
+              ...segment, 
+              groups: geojson.features ? geojson.features.map(f => ({ 
+                feature: f,
+                clusterKey: f.properties.cluster, 
+                name: f.properties.label, 
+                key: f.properties.label 
+              })) : [] 
+            }))}
+            initialValue={{}}
+            validate={validateWhere}
+          />
+          <SelectWhen
+            id='when'
+            title='Data'
+            description='Data to be used for savings potential calculation, last year or custom'
+            initialValue={{}}
+            validate={validateWhen}
+          />
+          <SetName
+            title='Name'
+            description='Select a descriptive name for your scenario'
+            id='name'
+            initialValue=''
+            validate={validateName.bind(this)}
+          />
+          <div
+            id='confirmation'
+            initialValue={{}}
+          />
+        </Wizard>
+      </bs.Panel>
+    );
+  }
+});
 
 module.exports = SavingsPotentialAdd;

@@ -3,7 +3,7 @@ var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
-var LeafletMap = require('../LeafletMap');
+
 var Select = require('react-select');
 var DateRangePicker = require('react-bootstrap-daterangepicker');
 var FilterTag = require('../chart/dimension/FilterTag');
@@ -12,9 +12,11 @@ var GroupSearchTextBox = require('../GroupSearchTextBox');
 var {FormattedTime} = require('react-intl');
 var moment = require('moment');
 
+var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
+
 var { getTimeline, getFeatures, getChart,
       setEditor, setEditorValue,
-      setTimezone, addFavourite, updateFavourite, setEditorValuesBatch } = require('../../actions/MapActions');
+      setTimezone, addFavourite, updateFavourite, setEditorValuesBatch, getMetersLocations } = require('../../actions/MapActions');
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -70,10 +72,10 @@ var _setEditor = function(key) {
 };
 
 var _onFeatureChange = function(features) {
-  if((!features) || (features.length===0)){
+  if(!features || !features.features || !Array.isArray(features.features) || features.features.length===0){
     this.props.actions.setEditorValue('spatial', null);
   } else {
-    this.props.actions.setEditorValue('spatial', features[0].geometry);
+    this.props.actions.setEditorValue('spatial', features.features[0].geometry);
   }
 };
 
@@ -103,9 +105,11 @@ var AnalyticsMap = React.createClass({
 
       this.props.actions.setEditorValuesBatch(isDefault);
     }
-  },
 
-  componentDidMount : function() {
+    if (!this.props.metersLocations) {
+      this.props.actions.getMetersLocations();
+    }
+
     var utility = this.props.profile.utility;
 
     this.props.actions.setTimezone(utility.timezone);
@@ -118,6 +122,9 @@ var AnalyticsMap = React.createClass({
       };
       this.props.actions.getTimeline(population);
     }
+  },
+
+  componentDidMount : function() {
   },
 
   clickedAddFavourite : function() {
@@ -388,32 +395,75 @@ var AnalyticsMap = React.createClass({
     mapFilterTags.push(
       <FilterTag key='source' text={ this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source} icon='database' />
     );
-
+    
+    const timelineMin = this.props.map.timeline && this.props.map.timeline.min || 0;
+    const timelineMax = this.props.map.timeline && this.props.map.timeline.max || 1000;
     map = (
       <Bootstrap.ListGroup fill>
         {filter}
         <Bootstrap.ListGroupItem>
-          <LeafletMap style={{ width: '100%', height: 600}}
-                      elementClassName='mixin'
-                      prefix='map'
-                      center={[38.36, -0.479]}
-                      zoom={13}
-                      mode={[LeafletMap.MODE_DRAW, LeafletMap.MODE_CHOROPLETH]}
-                      draw={{
-                        onFeatureChange: _onFeatureChange.bind(this)
-                      }}
-                      choropleth= {{
-                        colors : ['#2166ac', '#67a9cf', '#d1e5f0', '#fddbc7', '#ef8a62', '#b2182b'],
-                        min : this.props.map.timeline ? this.props.map.timeline.min : 0,
-                        max : this.props.map.timeline ? this.props.map.timeline.max : 0,
-                        data : this.props.map.features
-                      }}
-                      overlays={[
-                        { url : '/assets/data/meters.geojson',
-                          popupContent : 'serial'
-                        }
-                      ]}
-          />
+          <Map
+            center={[38.36, -0.479]}
+            zoom={13}
+            width='100%'
+            height={600}
+          >
+            <LayersControl position='topright'> 
+              <TileLayer />
+              
+              <DrawControl
+                onFeatureChange={_onFeatureChange.bind(this)}
+              />
+
+              <InfoControl position='bottomleft'> 
+                <Choropleth
+                  name='Areas'
+                  data={this.props.map.features}
+                  legend='bottomright'
+                  valueProperty='value'
+                  scale={['white', 'red']}
+                  limits={[timelineMin, timelineMax]}
+                  steps={6}
+                  mode='e'
+                  infoContent={feature => feature && feature.properties ? 
+                    <div>
+                      <h5>{feature.properties.label}</h5>
+                      <span>{feature.properties.value}</span>
+                    </div> 
+                      : <div><h5>Hover over an area...</h5></div>
+                  }
+                  highlightStyle={{ weight: 3 }}
+                  onClick={(feature, layer, map) => map.fitBounds(layer.getBounds()) }
+                  style={{
+                    fillColor: "#ffff00",
+                    color: "#000",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.5
+                  }}
+                />
+              </InfoControl>
+              <GeoJSON
+                name='Meters'
+                data={this.props.metersLocations}
+                popupContent={feature => 
+                  <div>
+                    <h5>Serial:</h5>
+                    <h5>{feature.properties.serial}</h5>
+                  </div>
+                  }
+                circleMarkers
+                style={{
+                  radius: 8,
+                  fillColor: "#ff7800",
+                  color: "#000",
+                  weight: 1,
+                  opacity: 1,
+                  fillOpacity: 0.8
+                }}
+              />
+            </LayersControl>
+          </Map>
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem>
           <Timeline   onChange={_onChangeTimeline.bind(this)}
@@ -470,7 +520,8 @@ function mapStateToProps(state) {
       favourite: state.favourites.selectedFavourite,
       isBeingEdited: state.map.isBeingEdited,
       filtersChanged: state.map.filterChanged,
-      defaultFavouriteValues : state.map.defaultFavouriteValues
+      defaultFavouriteValues : state.map.defaultFavouriteValues,
+      metersLocations: state.map.metersLocations
   };
 }
 
@@ -478,7 +529,7 @@ function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getChart,
                                                      setEditor, setEditorValue, setTimezone,
-                                                     addFavourite, updateFavourite, setEditorValuesBatch}) , dispatch)
+                                                     addFavourite, updateFavourite, setEditorValuesBatch, getMetersLocations}) , dispatch)
   };
 }
 

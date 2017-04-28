@@ -212,7 +212,6 @@ var Wizard = React.createClass({
   }
 });
 
-
 function WizardItem (props) {
   const { idx, active, title, description, value, activateMe, clearedIdx, cleared, showAll, children } = props;
   //const labels = Array.isArray(value) ? value.map(x => x.label || '-') : (value.label ? [value.label] : ['-']);

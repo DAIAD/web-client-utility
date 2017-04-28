@@ -72,7 +72,7 @@
         "DataExport": "Data Export"
       },
       "Savings": "Savings Potential",
-      "Budgets": "Budgets"
+      "Budgets": "Budget"
 	},
   "Page": {
     "PasswordReset":"Reset Password"
@@ -178,7 +178,9 @@
     "UpdateFavourite" : "Update Favourite",
     "Actions" : "Actions",
     "DeleteGroup" : "Delete Group",
-    "DeleteFavourite" : "Remove Favourite"
+    "DeleteFavourite" : "Remove Favourite",
+    "All": "All",
+    "None": "None"
   },
   "Form" : {
     "ErrorsDetected" : "Errors were detected:",
@@ -222,6 +224,168 @@
 		"Users" : "Users",
 		"Meters" : "Smart Meters",
 		"Devices" : "Amphiro Devices"
+  },
+  "Wizard": {
+    "common": { 
+      "choose": "Let me choose",
+      "multiple": "Multiple"
+    },
+    "items": {
+      "budgetType": {
+        "title": "Method",
+        "description": "Select predefined savings scenario, or global savings to run the wizard",
+        "options": {
+          "scenario": {
+            "label": "Use savings scenario",
+            "value": "Savings scenario"
+          },
+          "estimate": {
+            "label": "Set global savings",
+            "value": "Global savings"
+          }
+        }
+      },
+      "scenario": {
+        "title": "Scenario",
+        "description": "Select a precomputed savings scenario"
+      },
+      "savings": {
+        "title": "Goal",
+        "description": "Set global savings percentage",
+        "help": "0-100 of max"
+      },
+      "goal": {
+        "title": "Goal",
+        "description": "Set budget goal percentage"
+      },
+      "distribution": {
+        "title": "Distribution",
+        "description": " ",
+        "options": {
+          "equally": {
+            "label": "Equally",
+            "value": "Equally"
+          },
+          "fairly": {
+            "label": "Fairly",
+            "value": "Fairly"
+          }
+        }
+      },
+      "who": {
+        "title": "Who",
+        "description": "Select all population or narrow savings potential calculation to selected groups",
+        "modal": "Segmentation filtering"
+      },
+      "where": {
+        "title": "Where",
+        "description": "Select all areas or narrow savings potential calculation to selected areas",
+        "modal": "Location filtering"
+      },
+      "excludeWho": {
+        "title": "Exclude groups",
+        "description": " ",
+        "modal": "Segmentation exclusions"
+      },
+      "excludeWhere": {
+        "title": "Exclude areas",
+        "description": " ",
+        "modal": "Location exclusions"
+      },
+      "when": {
+        "title": "Data",
+        "description": "Data reference range",
+        "options": {
+          "last": {
+            "value": "Last year"
+          }
+        },
+        "modal": "Date range",
+        "from": "From",
+        "to": "To",
+        "help": "Specify the time range you are interested in"
+      },
+      "name": {
+        "title": "Name",
+        "description": "Select descriptive name",
+        "help": "Enter name..."
+      },
+      "confirmation": {
+        "title": "Confirmation",
+        "description": "This job will take a while to finish. Are you sure you want to continue?"
+      }
+    }, 
+    "validation": {
+      "noBudget": "A budget type must be selected",
+      "noWho": "Who not set",
+      "noWhere": "Where not set",
+      "notANumber": "Input should be a number",
+      "notPercentage": "Input needs to be between 0 and 100",
+      "noDistribution": "A distribution must be selected",
+      "noSavingsScenario": "A predefined scenario must be selected",
+      "noName": "A descriptive name must be selected",
+      "nameExists": "Name already exists. Please try another",
+      "noWhen": "Date range not set",
+      "fromInvalid": "Start date is not valid",
+      "toInvalid": "End date is not valid",
+      "fromAfterTo": "Start date is after end date",
+      "noFuture": "Date range must be in the past"
+    }
+  },
+  "Savings": {
+    "List": {
+      "title": "Available scenarios",
+      "empty": "No data",
+      "name": "Name",
+      "potential": "Savings Potential",
+      "user": "User",
+      "paramsShort": "Parameters",
+      "createdOn": "Created",
+      "completedOn": "Calculated",
+      "explore": "Explore",
+      "delete": "Delete"
+    },
+    "Explore": {
+      "notFound": "Sorry, savings scenario not found",
+      "delete": "Delete scenario",
+      "overview": " Overview",
+      "stats": "Savings statistics"
+    },
+    "Add": {
+      "title": "Add scenario" 
+    }
+  },
+  "Budgets": {
+    "List": {
+      "title": "Available budgets",
+      "search": "Search...",
+      "name": "Name",
+      "active": "Active",
+      "paramsShort": "Parameters",
+      "user": "User",
+      "createdOn": "Created",
+      "completedOn": "Calculated",
+      "activatedOn": "Activated",
+      "explore": "Explore",
+      "delete": "Delete"
+
+    },
+    "Explore": {
+      "notFound": "Sorry, budget not found",
+      "stats": "Budget statistics",
+      "details": " in detail",
+      "overview": " Overview",
+      "loading": "Loading data...",
+      "empty": "No data",
+      "set": "Set Budget",
+      "reset": "Deactivate Budget",
+      "delete": "Delete Budget",
+      "monitorActive": "Monitor all active",
+      "resetForm": "Reset"
+    },
+    "Add": {
+      "title": "Add budget"
+    }
   },
 	"Error": {
 		"400" : "Bad request",

@@ -415,8 +415,9 @@ var Overview = React.createClass({
           type:'action',
           image: '/assets/images/utility/meter.svg',
           handler: function(field, row) {
+            console.log('handling meter', this.props);
             if((row.key) && (row.numberOfMeters > 0)) {
-              self.props.actions.getMeters(this.props.row.key, this.props.row.username);
+              self.props.actions.getMeters(row.key, row.username);
             }
           },
           visible: function(field, row) {
@@ -427,8 +428,9 @@ var Overview = React.createClass({
           type:'action',
           image: '/assets/images/utility/amphiro.svg',
           handler: function(field, row) {
+
             if((row.key) && (row.numberOfAmphiroDevices > 0)) {
-              self.props.actions.getSessions(this.props.row.key, this.props.row.username);
+              self.props.actions.getSessions(row.key, row.username);
             }
           },
           visible: function(field, row) {
@@ -441,19 +443,20 @@ var Overview = React.createClass({
           color: '#2D3580',
           handler: function(field, row) {
             if((row.key) && ((row.numberOfAmphiroDevices > 0) || (row.numberOfMeters > 0))) {
-              self.props.actions.exportUserData(this.props.row.key, this.props.row.username);
+              self.props.actions.exportUserData(row.key, row.username);
             }
           },
           visible: function(field, row) {
             return ((row.key) && ((row.numberOfAmphiroDevices > 0) || (row.numberOfMeters > 0)));
           }
         }],
-        rows: rows,
+        rows: rows.filter(row => row.key && row.username),
         pager: {
-          index: 0,
-          size: 10,
-          count:rows.length
-        }
+        //  index: 0,
+        //  size: 10,
+          //onPageIndexChange: this.onPageIndexChange,
+          //count:rows.length
+         }
     };
 
     var header = null, filter = null, addUserButton = null, table = null, chart = null;
@@ -493,7 +496,11 @@ var Overview = React.createClass({
             <Bootstrap.Panel header={groupTitle}>
               <Bootstrap.ListGroup fill>
                 <Bootstrap.ListGroupItem>
-                  <Table data={model.table} onPageIndexChange={this.onPageIndexChange}></Table>
+                  <Table 
+                    fields={model.table.fields}
+                    data={model.table.rows}
+                    pager={model.table.pager}
+                  />
                 </Bootstrap.ListGroupItem>
               </Bootstrap.ListGroup>
             </Bootstrap.Panel>

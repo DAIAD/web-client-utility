@@ -1,4 +1,5 @@
 var queryAPI = require('../api/query');
+var mapAPI = require('../api/map');
 var favouritesAPI = require('../api/favourites');
 var moment = require('moment');
 var types = require('../constants/MapActionTypes');
@@ -132,6 +133,21 @@ var _setEditorValue = function(editor, value) {
     value : value
   };
 };
+
+var metersLocationsRequest = function () {
+  return {
+    type: types.MAP_METERS_LOCATIONS_REQUEST
+  };
+}
+
+var metersLocationsResponse = function(success, errors, data) {
+  return {
+    type: types.MAP_METERS_LOCATIONS_RESPONSE,
+    success,
+    errors,
+    data
+  };
+}
 
 var MapActions = {
   setEditor : function(key) {
@@ -336,6 +352,17 @@ var MapActions = {
       }, function (error) {
         dispatch(addFavouriteResponse(false, error));
       });
+    };
+  },
+  getMetersLocations: function() {
+    return function(dispatch, getState) {
+      dispatch(metersLocationsRequest());
+      return mapAPI.getMetersLocations().then(function (response) {
+        dispatch(metersLocationsResponse(true, null, response));
+      },
+       function (error) {
+         dispatch(metersLocationsResponse(false, error));
+       });
     };
   }
 };
