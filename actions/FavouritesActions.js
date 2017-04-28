@@ -577,7 +577,7 @@ var FavouritesActions = {
             if(query.namedQuery.type === 'CHART' || query.namedQuery.type === 'FORECAST'){
               layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 8, h: 1}; //try 5 columns for chart
             } else if(query.namedQuery.type === 'MAP' ) {
-              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 12, h: 1}; //try 8 columns for map
+              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 10, h: 1}; //try 8 columns for map
             }
             lay.push(layoutComponent);
             dispatch(_saveLayoutRequest());
