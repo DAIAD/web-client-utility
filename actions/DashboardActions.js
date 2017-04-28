@@ -320,15 +320,19 @@ var getChart = function(favourite) {
             var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
             var res1 = (resultSets || []).map(rs => {
               var [g, rr] = population.fromString(rs.label);
-              
-              //Recalculate xAxis timespan based on returned data. (scale)
+
+              //sort points on timestamp in order to handle pre-aggregated data
+              rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
+           
               var timespan1;
               if(rs.points[rs.points.length-1]){
+                //Recalculate xAxis timespan based on returned data. (scale)
                 timespan1 =[rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
               } else {
                 //empty result, use initial timespan
                 timespan1 = [favourite.queries[0].time.start, favourite.queries[0].time.end];
               }
+              
               for(let j=0; j<favourite.queries.length; j++){
                 var res2;
                 if (rr) {
@@ -433,15 +437,17 @@ var getForecast = function(favourite) {
             var res1 = (resultSets || []).map(rs => {
               var [g, rr] = population.fromString(rs.label);
 
+              //sort points on timestamp in order to handle pre-aggregated data
+              rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
+           
               var timespan1;
-              
               if(rs.points.length !== 0){
+                //Recalculate xAxis timespan based on returned data. (scale)
                 timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
               } else {
                 timespan1 = [actualData.queries[0].time.start, actualData.queries[0].time.end];
               }              
 
-               //Recalculate xAxis timespan based on returned data. (scale)
                // Shape a normal timeseries result for requested metrics
                // Todo support other metrics (as client-side "average")
                var res2 = actualData.queries[0].metrics.map(metric => ({

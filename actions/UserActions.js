@@ -1,8 +1,6 @@
 var $ = require('jquery');
 var moment = require('moment');
-
 var types = require('../constants/UserActionTypes');
-
 var userAPI = require('../api/user');
 var adminAPI = require('../api/admin');
 var queryAPI = require('../api/query');
@@ -162,12 +160,13 @@ var requestedSessions = function(userKey, deviceKey) {
   };
 };
 
-var receivedSessions = function(success, errors, devices) {
+var receivedSessions = function(success, errors, devices, t=null) {
   return {
     type : types.AMPHIRO_RESPONSE,
     success : success,
     errors : errors,
-    devices : devices
+    devices : devices,
+    timestamp: (t || new Date()).getTime()
   };
 };
 
@@ -233,15 +232,14 @@ var UserActions = {
             dispatch(receivedUser(response.success, response.errors, response.user, response.meters, response.devices,
                 response.configurations, response.groups, response.favorite));
 
+            var interval = getState().user.interval;
+            var query = _buildUserQuery(id, name, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime()); 
+            dispatch(_userChartRequest(query, id));
+            
             if (response.meters.length > 0) {
               var promises =[];
 
-              var interval = getState().user.interval;
-
               var name = response.user.fullname;
-              var query = _buildUserQuery(id, name, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
-
-              dispatch(_userChartRequest(query, id));
 
               promises.push(queryAPI.queryMeasurements({query: query.queries[0]}));
 
@@ -257,6 +255,10 @@ var UserActions = {
                   var res1 = (resultSets || []).map(rs => {
                     var g = new population.User(id, rs.label);
                     g.name = name;
+                    
+                    //sort points on timestamp in order to handle pre-aggregated data.
+                    rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
+              
                     var timespan1;
                     if(rs.points.length !== 0){
                       //Recalculate xAxis timespan based on returned data. (scale). If no data, keep timespan from query
@@ -289,6 +291,8 @@ var UserActions = {
 
                 return _.flatten(resAll);
               });
+            } else {
+              dispatch(_userChartResponse(true, [], [], id)); //no meters available, return empty data.
             }
           }, function(error) {
             dispatch(receivedUser(false, error, null));
@@ -319,15 +323,19 @@ var UserActions = {
             var res1 = (resultSets || []).map(rs => {
             
               var [g, rr] = population.fromString(rs.label);
-              g.name = name; 
+              g.name = name;
+
+              //sort points on timestamp in order to handle pre-aggregated data.
+              rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
+              
               var timespan1;  
               if(rs.points.length !== 0){
+                //Recalculate xAxis timespan based on returned data. (scale)
                 timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
               } else {
                 timespan1 = [query.queries[0].time.start, query.queries[0].time.end];
               }              
 
-               //Recalculate xAxis timespan based on returned data. (scale)
                // Shape a normal timeseries result for requested metrics
                // Todo support other metrics (as client-side "average")
                var res2 = query.queries[0].metrics.map(metric => ({

@@ -440,7 +440,7 @@ var Favourites = React.createClass({
      );
 
     if(this.props.showDeleteMessage){
-      var warning = 'Delete Announcement?';
+      var warning = 'Delete Favourite?';
          var actions = [{
               action: this.props.actions.closeWarning,
               name: "Cancel"

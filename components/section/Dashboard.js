@@ -126,7 +126,7 @@ var Dashboard = React.createClass({
   },
 
   toggleSize : function() {
-    console.log(this);
+    //console.log(this);
   },
 
   _unpin : function(fav, e) {
@@ -149,17 +149,17 @@ var Dashboard = React.createClass({
 
     var chPanels = [];
     pinnedCharts.push(getDefaultChart(this.props));
-    
+
     for(var i=0; i<pinnedCharts.length; i++){
-    
+
       var pCharts = props.chart.length > 0 ? 
           props.chart.filter(function(propChart) { return propChart.id === pinnedCharts[i].id; }) : [];
-          
+
       var pChart = pCharts[0];
 
       if(!pChart){
         return [];
-      }  
+      }
 
       var unpinButton = pChart.id === 100000 ? null : (
         <Bootstrap.Button 
@@ -218,7 +218,7 @@ var Dashboard = React.createClass({
       } else {
          overlap = null;
          overlapping = false;
-      }      
+      }
       var chart = (
         <Chart 
           {...defaults.chartProps}
@@ -443,7 +443,7 @@ var Dashboard = React.createClass({
       chartFilterTags.push(
         <FilterTag key='source' text={pChart.data ? pChart.data[0].source : ' ... '} icon='database' />
       );
-
+      
       var chart = (
         <Chart 
           {...defaults.chartProps}
