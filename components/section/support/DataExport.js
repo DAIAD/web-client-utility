@@ -169,7 +169,8 @@ var DataExport = React.createClass({
       index: files.index || 0,
       size: files.size || 10,
       count: files.total || 0,
-      mode: Table.PAGING_SERVER_SIDE
+      mode: Table.PAGING_SERVER_SIDE,
+      onPageIndexChange : this.onFilePageIndexChange
     };
 
     const fileNotFound = (
@@ -197,7 +198,6 @@ var DataExport = React.createClass({
                   <Table  
                     fields={finalExportTableFields}
                     data={finalExportTableData}
-                    pager={exportPager}
                     template={{empty : fileNotFound}}
                   />
                 </Bootstrap.ListGroupItem>
@@ -209,7 +209,6 @@ var DataExport = React.createClass({
                   <Table  
                     fields={exportTableFields}
                     data={exportTableData}
-                    onPageIndexChange={this.onFilePageIndexChange}
                     pager={exportPager}
                     template={{empty : fileNotFound}}
                   />
