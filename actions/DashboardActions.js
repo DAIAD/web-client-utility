@@ -10,7 +10,7 @@ var defaultMapTitle = "Last 30 Days Consumption";
 
 var defaultLayout = [
       {"i":defaultChartTitle,"x":0,"y":1,"w":8,"h":1},
-      {"i":defaultMapTitle,"x":0,"y":0,"w":12,"h":1}
+      {"i":defaultMapTitle,"x":0,"y":0,"w":10,"h":1}
 ];
 
 var getDefaultChart = function(props) {
