@@ -86,7 +86,11 @@ var GroupCatalog  = React.createClass({
       name : 'favorite',
       type : 'action',
       icon : function(field, row) {
-        return (row.favorite ? 'star' : 'star-o');
+        if(row.type === 'SET'){
+          return (row.favorite ? 'star' : 'star-o');
+        } else {
+          return null;
+        }
       },
       handler : (function(field, row) {
         if(row.favorite) {
@@ -107,16 +111,16 @@ var GroupCatalog  = React.createClass({
 
         var population;
         if(row.type === 'SEGMENT'){
-          var clusterKey = self.props.config.utility.clusters.filter((cluster) => cluster.name == row.cluster);
+          var clusterKey = this.props.config.utility.clusters.filter((cluster) => cluster.name == row.cluster);
           population = [{group: row.key, label:"CLUSTER:" + clusterKey[0].key + ":" + row.key, type:"GROUP"}];
           this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone);      
-          self.setState({draw:true});
+          this.setState({draw:true});
           
         } else if(row.type === 'SET'){
         
           population = [{group: row.key, label:"GROUP:" + row.key + '/' + row.name, type:"GROUP"}];
           this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone); 
-          self.setState({draw:true});
+          this.setState({draw:true});
         }
       }).bind(this)
     }, {
