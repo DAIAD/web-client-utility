@@ -141,11 +141,41 @@
         "PilotReports": "Pilot Reports",
         "System": "System Reports"
       },
-	    "Scheduler": "Job Management",
+      "Scheduler": {
+        "Title": "Job Management",
+        "Table1": {
+          "Id": "Id",
+          "Category": "Category",
+          "Framwork": "Framwork",
+          "Name": "Name",
+          "Description": "Description",
+          "LastExecution": "Last Execution",
+          "NextExecution": "Next Execution"
+        },
+        "Table2": {
+          "Name": "Name",
+          "StartedOn": "Started On",
+          "CompletedOn": "Completed On",
+          "StatusCode": "Status Code",
+          "ExitCode": "Exit Code"
+        }
+      },
 	    "Consumers": "Consumers",
       "Support" : {
         "Group": "Support",
-        "Logging": "Logs",
+        "Logging": {
+          "Title": "Logs",
+          "Table1": {
+            "Id" : "Id",
+            "Level" : "Level",
+            "Category" : "Category",
+            "Code": "Code",
+            "CreatedOn": "Created On",
+            "Message": "Message",
+            "Source": "Source",
+            "Account": "Account"
+          }
+        },
         "Data": "Data Management",
         "Development": "Development",
         "DataExport": {
@@ -208,12 +238,15 @@
     "Submit" : "Update"
   },
 	"Group" : {
-    "FavouriteGroupInfo" : "Favourite Group Info",
+	  "Table1": {
+	    "Name" : "Name",
+	    "Email" : "Email",
+	    "RegisteredOn" : "Registered On"
+	  },
     "Name" : "Name",
-    "Description" : "Description",
-    "CreatedOn" : "CreatedOn",
-    "Size" : "Size",
+    "CreatedOn" : "Created On",
     "Country" : "Country",
+    "Size" : "Size",
     "Members" : "Members"
 	},
 	"Table" : {
