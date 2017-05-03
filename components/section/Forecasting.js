@@ -24,31 +24,31 @@ var _filterByType = function(e) {
 
 var _groupSelect = function(e) {
 
-  var profile = this.props.profile;
+  //var profile = this.props.profile;
   this.props.actions.setGroup(e);
-  var population;
-  if(e.group.type === 'SEGMENT'){
-    
-    var clusterKey = this.props.config.utility.clusters.filter((cluster) => cluster.name == e.group.cluster);
-    population = [{group: e.group.key, label:"CLUSTER:" + clusterKey[0].key + ":" + e.group.key, type:"GROUP"}];
-    this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
-    
-  } else if (e.group.type === 'SET') {
-  
-    population = [{group: e.group.key, label:"GROUP:" + e.group.key + '/' + e.name, type:"GROUP"}];
-    this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
-  }
+//  var population;
+//  if(e.group.type === 'SEGMENT'){
+//    
+//    var clusterKey = this.props.config.utility.clusters.filter((cluster) => cluster.name == e.group.cluster);
+//    population = [{group: e.group.key, label:"CLUSTER:" + clusterKey[0].key + ":" + e.group.key, type:"GROUP"}];
+//    this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
+//    
+//  } else if (e.group.type === 'SET') {
+//  
+//    population = [{group: e.group.key, label:"GROUP:" + e.group.key + '/' + e.name, type:"GROUP"}];
+//    this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
+//  }
   
   this.setState({isFavourite:false});
 };
 
 var _onUserSelect= function(e) {
-  var profile = this.props.profile;
-  if(e) {
-    if(e.value) {
-      this.props.actions.getUserChart(e.value, e.label, profile.timezone);
-    }
-  }
+//  var profile = this.props.profile;
+//  if(e) {
+//    if(e.value) {
+//      this.props.actions.getUserChart(e.value, e.label, profile.timezone);
+//    }
+//  }
   this.props.actions.setUser(e);
 };
 
@@ -87,30 +87,30 @@ var Forecasting = React.createClass({
     
     this.props.actions.setInterval([picker.startDate, picker.endDate]);
     
-    var profile = this.props.profile;
-    var group = null;
-    var q = this.props.forecasting.query;
-    
-    var groupType = q.queries[0].population[0].type;
-
-    if(groupType === 'UTILITY'){
-      group = null;
-      this.props.actions.getUtilityChart(null, profile.utility.key, profile.utility.name, profile.timezone);
-    } else if(groupType === 'GROUP'){
-      var [g, r] =  population.fromString(q.queries[0].population[0].label);
-      if(!g.clusterKey){
-        group = [{group: g.key, label:"GROUP:" + g.key + '/' + q.title, type:"GROUP"}];
-        this.props.actions.getUtilityChart(group, profile.utility.key, profile.utility.name, profile.timezone);
-
-      } else {
-        group = [{group: g.key, label:"CLUSTER:" + g.clusterKey + ":" + g.key, type:"GROUP"}];
-        this.props.actions.getUtilityChart(group, profile.utility.key, profile.utility.name, profile.timezone);
-      }
-    } 
-    
-    if(this.props.forecasting.user){
-      this.props.actions.getUserChart(this.props.forecasting.user.value, this.props.forecasting.user.label, profile.timezone);
-    }
+//    var profile = this.props.profile;
+//    var group = null;
+//    var q = this.props.forecasting.query;
+//    
+//    var groupType = q.queries[0].population[0].type;
+//
+//    if(groupType === 'UTILITY'){
+//      group = null;
+//      this.props.actions.getUtilityChart(null, profile.utility.key, profile.utility.name, profile.timezone);
+//    } else if(groupType === 'GROUP'){
+//      var [g, r] =  population.fromString(q.queries[0].population[0].label);
+//      if(!g.clusterKey){
+//        group = [{group: g.key, label:"GROUP:" + g.key + '/' + q.title, type:"GROUP"}];
+//        this.props.actions.getUtilityChart(group, profile.utility.key, profile.utility.name, profile.timezone);
+//
+//      } else {
+//        group = [{group: g.key, label:"CLUSTER:" + g.clusterKey + ":" + g.key, type:"GROUP"}];
+//        this.props.actions.getUtilityChart(group, profile.utility.key, profile.utility.name, profile.timezone);
+//      }
+//    } 
+//    
+//    if(this.props.forecasting.user){
+//      this.props.actions.getUserChart(this.props.forecasting.user.value, this.props.forecasting.user.label, profile.timezone);
+//    }
   },
 
   _addFavourite: function() {
@@ -136,7 +136,30 @@ var Forecasting = React.createClass({
     }
     this.setState({isFavourite:true});
   },
-  
+
+  _refresh: function() {
+
+    var population;
+    var e = this.props.forecasting.group;
+    var profile = this.props.profile;
+    if(!e){
+       this.props.actions.getUtilityChart(null, profile.utility.key, profile.utility.name, profile.timezone);
+    } else {
+      if(e.group.type === 'SEGMENT'){
+        var clusterKey = this.props.config.utility.clusters.filter((cluster) => cluster.name == e.group.cluster);
+        population = [{group: e.group.key, label:"CLUSTER:" + clusterKey[0].key + ":" + e.group.key, type:"GROUP"}];
+        this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
+      } else if (e.group.type === 'SET') {
+        population = [{group: e.group.key, label:"GROUP:" + e.group.key + '/' + e.name, type:"GROUP"}];
+        this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
+      }
+    }
+    
+    if(this.props.forecasting.user){
+      this.props.actions.getUserChart(this.props.forecasting.user.value, this.props.forecasting.user.label, profile.timezone);
+    }
+  },
+
   render: function() {
 
     var defaults= {
@@ -153,9 +176,12 @@ var Forecasting = React.createClass({
           <i className={'fa fa-bar-chart fa-fw'}></i>
           <span style={{ paddingLeft: 4 }}>Water Consumption Forecasting</span>
         </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5}}>
-          <Bootstrap.Button bsStyle='default' className='btn-circle' onClick={this._addFavourite}>
+        <span style={{float: 'right',  marginTop: -6, marginLeft: 5}}>
+          <Bootstrap.Button bsStyle='default' /*className='btn-circle'*/ onClick={this._addFavourite}>
             <i className={'fa fa-' + favIcon + ' fa-fw'}></i>
+          </Bootstrap.Button>
+          <Bootstrap.Button bsStyle='default' onClick={this._refresh}>
+           <i className='fa fa-rotate-right fa-fw'></i>
           </Bootstrap.Button>
         </span>
       </span>
@@ -211,7 +237,7 @@ var Forecasting = React.createClass({
         };
       });
     }
-    
+
     var intervalLabel = '';
     if(this.props.forecasting.interval.length>0) {
       var start = this.props.forecasting.interval[0].format('DD/MM/YYYY');
@@ -228,9 +254,13 @@ var Forecasting = React.createClass({
         <Select name='groupType'
           value={this.props.forecasting.populationType ? this.props.forecasting.populationType : 'UNDEFINED'}
           options={[
-            { value: 'UNDEFINED', label: this.props.profile.utility.name },
-            { value: 'SEGMENT', label: 'Segment' },
-            { value: 'SET', label: 'Set' }
+            { value: 'UNDEFINED', label: this.props.profile.utility.name},
+            { value: 'Income', label: 'Income' },
+            { value: 'Apartment Size', label: 'Apartment Size' },
+            { value: 'Household Members', label: 'Household Members' },
+            { value: 'Age', label: 'Age' },
+            { value: 'Consumption Class', label: 'Consumption Class' },
+            { value: 'SET', label: <i>Custom Group</i> }
           ]}
           onChange={_filterByType.bind(this)}
           clearable={false}
@@ -243,7 +273,8 @@ var Forecasting = React.createClass({
     <div>
       <Select name='group'
         value={this.props.forecasting.group ? 
-        {name:this.props.forecasting.group.name,label:this.props.forecasting.group.label} : 'UNDEFINED'}
+            {name:this.props.forecasting.group.name,label:this.props.forecasting.group.label} : 
+                {name:'UNDEFINED', label:<i>Everyone</i>}}
         options={typeOptions}
         onChange={_groupSelect.bind(this)}
         clearable={false}
