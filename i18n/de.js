@@ -37,18 +37,106 @@
   },
   "Section": {
       "Dashboard": "Dashboard",
-      "Analytics":"Analytics",
+      "Analytics": {
+        "Fav": {
+          "Title": "Favorites",
+          "Table1": {
+            "Id": "Id",
+            "Label": "Label",
+            "Tags": "Tags",
+            "Date": "Date"
+          }
+        },
+        "BasicReports": "Reports",
+        "ReportPanel": "Charts",
+        "Maps": "Maps"
+      },
       "Forecasting": "Forecasting",
       "ModeManagement": "Mode Management",
-      "Users": "Users",
-      "Groups": "Groups",
-      "Messages": "Messages",
+      "Users": {
+        "Title": "Users",
+        "Table1": {
+          "User": "User",
+          "Name": "Name",
+          "SWM": "SWM",
+          "RegisteredOn": "Registered On"
+        }
+      },
+      "Groups": {
+        "Title": "Groups",
+        "Table1": {
+          "Id": "Id",
+          "Type": "Type",
+          "Name": "Name",
+          "NumberOfMembers": "# of members",
+          "UpdatedOn": "Updated On"
+        }
+      },
+      "Engagement": {
+        "Title": "Engagement",
+        "Messages": {
+          "Title": "Messages",
+          "Table1": {
+            "Id": "Id",
+            "Title": "Title",
+            "Description": "Description",
+            "Created": "Created",
+            "Modified": "Modified",
+            "Active": "Active"
+          },
+          "Button": {
+            "Save": "Save Static Tip",
+            "Cancel": "Cancel"
+          }
+        },
+        "Announcements": {
+          "Title": "Announcements",
+          "Table1": {
+            "Id": "Id",
+            "Title": "Title",
+            "Content": "Content",
+            "DispatchedOn": "Dispatched On",
+            "Details": "Details",
+            "Delete": "Delete"
+          },
+          "Table2": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username",
+            "All": "All"
+          },
+          "Table3": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username"
+          },
+          "Table4": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username"
+          },
+          "Button": {
+            "Broadcast": "Broadcast",
+            "Cancel": "Cancel"
+          }
+        }
+      },
       "Settings": "Settings",
-      "Reports": {
+      "Trials": {
+        "Overview": {
+          "Title": "Overview",
+          "Table1": {
+            "Id": "Id",
+            "Key": "Key",
+            "UserName": "Username",
+            "RegisteredOn": "Registered On",
+            "NumberOfAmphiro": "# of Amphiro",
+            "AmphiroRegisteredOn": "Amphiro registered on",
+            "LastLogin": "Last login on"
+          }
+        },
         "Group": "Trial Management",
-        "Overview": "Overview",
-        "Charts": "Charts",
-        "Measurements": "Pilot Reports",
+        "PilotReports": "Pilot Reports",
         "System": "System Reports"
       },
       "Announcements" : "Announcements",
@@ -62,7 +150,40 @@
         "Logging": "Logs",
         "Data": "Data Management",
         "Development": "Development",
-        "DataExport": "Data Export"
+        "DataExport": {
+          "Title": "Data Export",
+          "Table1": {
+            "Key": "Key",
+            "Utility": "Utility",
+            "Name": "Name",
+            "Description": "Description",
+            "Size": "Size",
+            "CreatedOn": "Created On"
+          },
+          "Table2": {
+            "Key": "Key",
+            "Utility": "Utility",
+            "Name": "Name",
+            "Description": "Description",
+            "Size": "Size",
+            "CreatedOn": "Created On"
+          }
+        },
+        "Messages": {
+          "Title": "Messages",
+          "Table1": {
+            "Id": "Id",
+            "LastName": "LastName",
+            "UserName": "UserName",
+            "AcknowledgedOn": "Acknowledged On"
+          },
+          "Table2": {
+            "Id": "Id",
+            "Message": "Message",
+            "Type": "Type",
+            "TotalReceivers": "Total Receivers"
+          }
+        }
       },
       "Savings": "Savings Potential",
       "Budgets": "Budgets"

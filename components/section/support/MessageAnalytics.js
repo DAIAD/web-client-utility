@@ -55,21 +55,20 @@ var MessageAnalytics = React.createClass({
   render: function() {
     var self = this;
     if(this.props.showReceivers && !this.props.isLoading){
-
       var receiversFields = {
         fields: [{
           name: 'accountId',
-          title: 'id',
+          title: 'Section.Support.Messages.Table1.Id',
           hidden: true
         }, {
           name: 'lastName',
-          title: 'Last Name'
+          title: 'Section.Support.Messages.Table1.LastName'
         }, {
           name: 'username',
-          title: 'Username'
+          title: 'Section.Support.Messages.Table1.UserName'
         }, {
           name: 'acknowledgedOn',
-          title: 'Acknowledged On',
+          title: 'Section.Support.Messages.Table1.AcknowledgedOn',
           type: 'datetime'
         }],
         rows: this.props.receivers,
@@ -256,16 +255,16 @@ var MessageAnalytics = React.createClass({
     var messageFields = {
       fields: [{
         name: 'id',
-        title: 'ID'
+        title: 'Section.Support.Messages.Table2.Id'
       }, {
           name: 'title',
-          title: 'Message'
+          title: 'Section.Support.Messages.Table2.Message'
       }, {
         name: 'type',
-        title: 'Type'
+        title: 'Section.Support.Messages.Table2.Type'
       }, {
         name: 'receiversCount',
-        title: 'Total Receivers'
+        title: 'Section.Support.Messages.Table2.TotalReceivers'
       }, {
           name: 'details',
           type:'action',
@@ -347,6 +346,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 MessageAnalytics.icon = 'commenting';
-MessageAnalytics.title = 'Section.ManageAlerts.Messages';
+MessageAnalytics.title = 'Section.Support.Messages.Title';
 
 module.exports = connect(mapStateToProps, mapDispatchToProps)(MessageAnalytics);

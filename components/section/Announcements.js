@@ -73,35 +73,35 @@ var Announcements = React.createClass({
       var historyTable = {
           fields: [{
              name: 'id',
-             title: 'Id',
+             title: 'Section.Engagement.Announcements.Table1.Id',
              hidden: true
           }, {
              name: 'title',
-             title: 'Title'
+             title: 'Section.Engagement.Announcements.Table1.Title'
           }, {
              name: 'content',
-             title: 'Content'
+             title: 'Section.Engagement.Announcements.Table1.Content'
           }, {
              name: 'dispatchedOn',
-             title: 'Dispatched On',
+             title: 'Section.Engagement.Announcements.Table1.DispatchedOn',
              type: 'datetime'
           }, {
-        name: 'view',
-        title: 'Details',
-        type:'action',
-        icon: 'group',
-        handler: function() {
-          self.props.showAnnouncementDetails(this.props.row);
-        },
-      }, {
-        name: 'cancel',
-        title: 'Delete',
-        type:'action',
-        icon: 'remove',
-        handler: function() {
-          self.props.setShowModal(this.props.row);
-        }
-      }],
+            name: 'view',
+            title: 'Section.Engagement.Announcements.Table1.Details',
+            type:'action',
+            icon: 'group',
+            handler: function() {
+              self.props.showAnnouncementDetails(this.props.row);
+            },
+          }, {
+            name: 'cancel',
+            title: 'Section.Engagement.Announcements.Table1.Delete',
+            type:'action',
+            icon: 'remove',
+            handler: function() {
+              self.props.setShowModal(this.props.row);
+            }
+          }],
           rows: this.props.announcements,
           pager: {
             index: 0,
@@ -128,17 +128,17 @@ var Announcements = React.createClass({
     var currentUsersFields = {
         fields: [{
           name: 'accountId',
-          title: 'id',
+          title: 'Section.Engagement.Announcements.Table2.Id',
           hidden: true
         }, {
           name: 'lastName',
-          title: 'Last Name'
+          title: 'Section.Engagement.Announcements.Table2.LastName'
         }, {
           name: 'username',
-          title: 'Username'
+          title: 'Section.Engagement.Announcements.Table2.UserName'
         }, {
           name: 'all',
-          title: 'All'
+          title: 'Section.Engagement.Announcements.Table2.All'
         }, {
           name: 'selected',
           type:'alterable-boolean',
@@ -157,14 +157,14 @@ var Announcements = React.createClass({
     var addedUsersFields = {
       fields: [{
         name: 'accountId',
-        title: 'id',
+        title: 'Section.Engagement.Announcements.Table3.Id',
         hidden: true
       }, {
           name: 'lastName',
-          title: 'Last Name'
+          title: 'Section.Engagement.Announcements.Table3.LastName'
       }, {
         name: 'username',
-        title: 'Username'
+        title: 'Section.Engagement.Announcements.Table3.UserName'
       }, {
         name: 'selected',
         type:'boolean',
@@ -183,14 +183,14 @@ var Announcements = React.createClass({
     var finalUsersFields = {
       fields: [{
         name: 'accountId',
-        title: 'id',
+        title: 'Section.Engagement.Announcements.Table4.Id',
         hidden: true
       }, {
           name: 'lastName',
-          title: 'Last Name'
+          title: 'Section.Engagement.Announcements.Table4.LastName'
       }, {
         name: 'username',
-        title: 'Username'
+        title: 'Section.Engagement.Announcements.Table4.UserName'
       }],
       rows: this.props.addedUsers,
       pager: {
@@ -321,7 +321,7 @@ var Announcements = React.createClass({
                 className = 'btn btn-primary'
                 onClick = {this.props.broadcastAnnouncement}
                   style={{height: 33}}>
-                <FormattedMessage id='Broadcast' />
+                <FormattedMessage id='Section.Engagement.Announcements.Button.Broadcast' />
               </button>
               <button id='cancel'
                 label = 'Cancel'
@@ -329,7 +329,7 @@ var Announcements = React.createClass({
                 className = 'btn btn-primary'
                 onClick={this.props.cancelShowForm}
                   style={{ height: 33, marginLeft : 10}}>
-                <FormattedMessage id='Cancel' />
+                <FormattedMessage id='Section.Engagement.Announcements.Button.Cancel' />
               </button>
             </div>
           </Bootstrap.Col>
@@ -631,5 +631,5 @@ function mapDispatchToProps(dispatch) {
 }
 
 Announcements.icon = 'wechat';
-Announcements.title = 'Section.ManageAlerts.Announcements';
+Announcements.title = 'Section.Messages.Announcements.Title';
 module.exports = connect(mapStateToProps, mapDispatchToProps)(Announcements);

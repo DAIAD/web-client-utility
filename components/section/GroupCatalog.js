@@ -60,15 +60,15 @@ var GroupCatalog  = React.createClass({
   render: function() {
     const tableFields = [{
       name: 'id',
-      title: 'Id',
+      title: 'Section.Groups.Table1.Id',
       hidden: true
     }, {
       name: 'type',
-      title: 'Type',
+      title: 'Section.Groups.Table1.Type',
       width: 100
     }, {
       name: 'text',
-      title: 'Name',
+      title: 'Section.Groups.Table1.Name',
       link: function(row) {
         if(row.key) {
           return '/group/{key}/';
@@ -77,10 +77,10 @@ var GroupCatalog  = React.createClass({
       }
     }, {
       name: 'size',
-      title: '# of members'
+      title: 'Section.Groups.Table1.NumberOfMembers'
     }, {
       name: 'createdOn',
-      title: 'Updated On',
+      title: 'Section.Groups.Table1.UpdatedOn',
       type: 'datetime'
     }, {
       name : 'favorite',
@@ -336,7 +336,7 @@ var GroupCatalog  = React.createClass({
 });
 
 GroupCatalog.icon = 'group';
-GroupCatalog.title = 'Section.Groups';
+GroupCatalog.title = 'Section.Groups.Title';
 
 function mapStateToProps(state) {
   return {

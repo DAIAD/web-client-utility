@@ -5,7 +5,7 @@ var { FormattedTime } = require('react-intl');
 
 var WidgetRow = require('../../WidgetRow');
 var theme = require('../../chart/themes/blue-palette');
-console.log('theme:', theme);
+
 var SavingsPotentialExplore = React.createClass({ 
   componentWillMount: function() {
     if (!this.props.metersLocations || !this.props.metersLocations.features) {

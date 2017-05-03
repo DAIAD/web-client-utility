@@ -309,7 +309,7 @@ var ReportPanel = React.createClass({
             key: 'add',
             tooltip: {message: 'Add additional series', placement: 'bottom'},
             iconName: 'plus',
-            text: 'Add Serie',
+            text: 'Add Series',
             buttonProps: {bsStyle: 'default', /*className: 'btn-circle'*/},
           },          
         ],

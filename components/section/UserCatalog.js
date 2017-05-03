@@ -125,7 +125,7 @@ var UserCatalog = React.createClass({
         hidden: true
       }, {
         name: 'email',
-        title: 'User',
+        title: 'Section.Users.Table1.User',
         link: function(row) {
           if(row.id) {
             return '/user/{id}/';
@@ -134,13 +134,13 @@ var UserCatalog = React.createClass({
         }
       }, {
         name: 'fullname',
-        title: 'Name'
+        title: 'Section.Users.Table1.Name'
       }, {
         name: 'serial',
-        title: 'SWM'
+        title: 'Section.Users.Table1.SWM'
       }, {
         name: 'registrationDateMils',
-        title: 'Registered On',
+        title: 'Section.Users.Table1.RegisteredOn',
         type: 'datetime'
       }, {
         name : 'favorite',
@@ -461,7 +461,7 @@ var UserCatalog = React.createClass({
 });
 
 UserCatalog.icon = 'user';
-UserCatalog.title = 'Section.Users';
+UserCatalog.title = 'Section.Users.Title';
 
 function mapStateToProps(state) {
   return {

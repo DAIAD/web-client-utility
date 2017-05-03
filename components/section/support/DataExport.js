@@ -105,23 +105,23 @@ var DataExport = React.createClass({
 
     var finalExportTableFields = [{
         name: 'key',
-        title: 'key',
+        title: 'Section.Support.DataExport.Table1.Key',
         hidden: true
       }, {
         name: 'utility',
-        title: 'Utility'
+        title: 'Section.Support.DataExport.Table1.Utility'
       }, {
         name: 'filename',
-        title: 'Name'
+        title: 'Section.Support.DataExport.Table1.Name'
       }, {
         name: 'description',
-        title: 'Description'
+        title: 'Section.Support.DataExport.Table1.Description'
       }, {
         name: 'size',
-        title: 'Size'
+        title: 'Section.Support.DataExport.Table1.Size'
       }, {
         name: 'completedOn',
-        title: 'Created On',
+        title: 'Section.Support.DataExport.Table1.CreatedOn',
         type: 'datetime'
       }, {
         name: 'download',
@@ -136,23 +136,23 @@ var DataExport = React.createClass({
 
     var exportTableFields = [{
         name: 'key',
-        title: 'key',
+        title: 'Section.Support.DataExport.Table2.Key',
         hidden: true
       }, {
         name: 'utility',
-        title: 'Utility'
+        title: 'Section.Support.DataExport.Table2.Utility'
       }, {
         name: 'filename',
-        title: 'Name'
+        title: 'Section.Support.DataExport.Table2.Name'
       }, {
         name: 'description',
-        title: 'Description'
+        title: 'Section.Support.DataExport.Table2.Description'
       }, {
         name: 'size',
-        title: 'Size'
+        title: 'Section.Support.DataExport.Table2.Size'
       }, {
         name: 'completedOn',
-        title: 'Created On',
+        title: 'Section.Support.DataExport.Table2.CreatedOn',
         type: 'datetime'
       }, {
         name: 'download',
@@ -252,7 +252,7 @@ var DataExport = React.createClass({
 });
 
 DataExport.icon = 'fa-file-archive-o';
-DataExport.title = 'Section.Support.DataExport';
+DataExport.title = 'Section.Support.DataExport.Title';
 
 function mapStateToProps(state) {
   return {

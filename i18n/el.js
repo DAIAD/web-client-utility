@@ -37,24 +37,109 @@
   },
 	"Section": {
       "Dashboard": "Περίληψη",
-	    "Analytics":"Ανάλυση",
-	    "Forecasting": "Πρόβλεψη",
-	    "ModeManagement": "Διαχείριση Κατάστασης",
-	    "Users": "Χρήστες",
-      "Groups": "Ομάδες",
-	    "Messages": "Μηνύματα",
-	    "Settings": "Ρυθμίσεις",
-      "Reports": {
-        "Group": "Δοκιμές",
-        "Overview": "Επισκόπηση",
-        "Charts": "Γραφήματα",
-        "Measurements": "Αναφορές",
-        "System": "Αναφορές Συστήματος"
+      "Map": "Map",
+      "Analytics-Group": "Analytics",
+      "Analytics": {
+        "Fav": {
+          "Title": "Favorites",
+          "Table1": {
+            "Id": "Id",
+            "Label": "Label",
+            "Tags": "Tags",
+            "Date": "Date"
+          }
+        },
+        "BasicReports": "Reports",
+        "ReportPanel": "Charts",
+        "Maps": "Maps"
       },
-      "ManageAlerts": {
-        "Engagement": "Engagement",
-        "Messages": "Μηνύματα",
-        "Announcements": "Ανακοινώσεις"
+      "Forecasting": "Πρόβλεψη",
+	    "ModeManagement": "Διαχείριση Κατάστασης",
+	    "Users": {
+        "Title": "Χρήστες",
+        "Table1": {
+          "User": "User",
+          "Name": "Name",
+          "SWM": "SWM",
+          "RegisteredOn": "Registered On"
+        }
+      },
+      "Groups": {
+        "Title": "Groups",
+        "Table1": {
+          "Id": "Id",
+          "Type": "Type",
+          "Name": "Name",
+          "NumberOfMembers": "# of members",
+          "UpdatedOn": "Updated On"
+        }
+      },
+      "Engagement": {
+        "Title": "Engagement",
+        "Messages": {
+          "Title": "Μηνύματα",
+          "Table1": {
+            "Id": "Id",
+            "Title": "Title",
+            "Description": "Description",
+            "Created": "Created",
+            "Modified": "Modified",
+            "Active": "Active"
+          },
+          "Button": {
+            "Save": "Save Static Tip",
+            "Cancel": "Cancel"
+          }
+        },
+        "Announcements": {
+          "Title": "Announcements",
+          "Table1": {
+            "Id": "Id",
+            "Title": "Title",
+            "Content": "Content",
+            "DispatchedOn": "Dispatched On",
+            "Details": "Details",
+            "Delete": "Delete"
+          },
+          "Table2": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username",
+            "All": "All"
+          },
+          "Table3": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username"
+          },
+          "Table4": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username"
+          },
+          "Button": {
+            "Broadcast": "Broadcast",
+            "Cancel": "Cancel"
+          }
+        }
+      },
+	    "Settings": "Ρυθμίσεις",
+      "Trials": {
+        "Overview": {
+          "Title": "Επισκόπηση",
+          "Table1": {
+            "Id": "Id",
+            "Key": "Key",
+            "UserName": "Username",
+            "RegisteredOn": "Registered On",
+            "NumberOfAmphiro": "# of Amphiro",
+            "AmphiroRegisteredOn": "Amphiro registered on",
+            "LastLogin": "Last login on"
+          }
+        },
+        "Group": "Δοκιμές",
+        "PilotReports": "Αναφορές",
+        "System": "Αναφορές Συστήματος"
       },
 	    "Scheduler": "Διαχείριση Εργασιών",
 	    "Consumers": "Καταναλωτές",
@@ -63,7 +148,40 @@
         "Logging": "Καταγραφή Συμβάντων",
         "Data": "Διαχείριση Δεδομένων",
         "Development": "Ανάπτυξη",
-        "DataExport": "Data Export"
+        "DataExport": {
+          "Title": "Data Export",
+          "Table1": {
+            "Key": "Key",
+            "Utility": "Utility",
+            "Name": "Name",
+            "Description": "Description",
+            "Size": "Size",
+            "CreatedOn": "Created On"
+          },
+          "Table2": {
+            "Key": "Key",
+            "Utility": "Utility",
+            "Name": "Name",
+            "Description": "Description",
+            "Size": "Size",
+            "CreatedOn": "Created On"
+          }
+        },
+        "Messages": {
+          "Title": "Messages",
+          "Table1": {
+            "Id": "Id",
+            "LastName": "LastName",
+            "UserName": "UserName",
+            "AcknowledgedOn": "Acknowledged On"
+          },
+          "Table2": {
+            "Id": "Id",
+            "Message": "Message",
+            "Type": "Type",
+            "TotalReceivers": "Total Receivers"
+          }
+        }
 	    },
       "Savings": "Savings Potential",
       "Budgets": "Budgets"
@@ -171,7 +289,7 @@
     "UpdateFavourite" : "Ενημέρωση Αγαπημένου",
     "Actions" : "Ενέργειες",
     "DeleteGroup" : "Διαγραφή Ομάδας",
-    "DeleteFavourite" : "Διαγραφή Αγα�",
+    "DeleteFavourite" : "Διαγραφή",
     "All": "Όλα",
     "None": "Κανένα"
   },

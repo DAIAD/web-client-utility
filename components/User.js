@@ -535,7 +535,7 @@ var User = React.createClass({
         <span>
           <span>
             <i className='fa fa-bar-chart fa-fw'></i>
-            <span style={{ paddingLeft: 4 }}>{device.name} - Last 20 sessions (most recent first) </span>
+            <span style={{ paddingLeft: 4 }}>{device.name} - Last 20 showers (most recent first) </span>
           </span>
         </span>
       );
@@ -678,7 +678,7 @@ var User = React.createClass({
                             </tr>
                             <tr>
                               <td>Gender</td>
-                              <td><FormattedMessage id={'Gender.' + this.props.user.gender} /></td>
+                              <td>{this.props.user.gender ? <FormattedMessage id={'Gender.' + this.props.user.gender} /> : ''}</td>
                             </tr>
                             <tr>
                               <td>Registered on</td>
