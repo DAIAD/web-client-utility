@@ -76,7 +76,7 @@ var _onFeatureChange = function(features) {
 };
 
 var _clearChart = function() {
-  this.props.actions.setGeometry(null);
+  this.props.actions.clearChart();
 };
 
 var UserCatalog = React.createClass({
