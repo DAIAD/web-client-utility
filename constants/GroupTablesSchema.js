@@ -1,27 +1,28 @@
 
 var GroupTablesSchema = {
-    
+
   Members: {
     fields: [
       {
-        name: 'id',
+        name: 'key',
         hidden: true
       }, {
-        name: 'user',
-      title: 'User',
-        link: '/user/{id}'
+        name: 'fullName',
+        title: 'Group.Table1.Name',
+        link: '/user/{key}'
       }, {
-        name: 'email',
-        title: 'Email'
+        name: 'username',
+        title: 'Group.Table1.Email'
       }, {
-        name: 'registeredOn',
-        title: 'Registered On',
+        name: 'createdOn',
+        title: 'Group.Table1.RegisteredOn',
         type: 'datetime'
+      }, {
+        name : 'favourite',
+        type : 'action'
       }
     ],
-      
     rows : [],
-      
     pager: {
       index: 0,
       size: 10
