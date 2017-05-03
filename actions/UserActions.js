@@ -1,4 +1,3 @@
-var $ = require('jquery');
 var moment = require('moment');
 var types = require('../constants/UserActionTypes');
 var userAPI = require('../api/user');
@@ -439,13 +438,13 @@ var UserActions = {
       return adminAPI.exportUserData(userKey).then(function(response) {
         dispatch(receivedExport(response.success, response.errors, response.token));
 
-        var content = [];
-        content.push('<div id="export-download-frame" style="display: none">');
-        content.push('<iframe src="/action/data/download/' + response.token + '/"></iframe>');
-        content.push('</div>');
+        var link = document.createElement('a');
+        link.href = `/action/data/download/${response.token}`;
+        link.download = 'user-export-data.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-        $('#export-download-frame').remove();
-        $('body').append(content.join(''));
       }, function(error) {
         dispatch(receivedExport(false, error, null));
       });
