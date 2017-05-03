@@ -60,7 +60,7 @@ var NavigationTree = React.createClass({
       scheduler = (
         <li>
           <Link to='/scheduler'>
-            <i className='fa fa-clock-o fa-fw'></i>{' ' + _t({ id: 'Section.Scheduler'})}
+            <i className='fa fa-clock-o fa-fw'></i>{' ' + _t({ id: 'Section.Scheduler.Title'})}
           </Link>
         </li>
       );
@@ -69,7 +69,7 @@ var NavigationTree = React.createClass({
         <li>
           <Link to='/support/logging'>
             <span  style={{paddingLeft: 18}}>
-              <i className='fa fa-history fa-fw'></i>{' ' + _t({ id: 'Section.Support.Logging'})}
+              <i className='fa fa-history fa-fw'></i>{' ' + _t({ id: 'Section.Support.Logging.Title'})}
             </span>
           </Link>
         </li>

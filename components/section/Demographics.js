@@ -30,7 +30,6 @@ var Demographics = React.createClass({
 
   componentWillMount : function() {
     this.props.getGroupsAndFavourites();
-    //this.props.getGroupMembers('c1403676-de58-4960-bd0a-5d406f533807');
   },
 
   componentWillUnmount : function() {
