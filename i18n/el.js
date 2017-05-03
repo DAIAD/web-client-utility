@@ -141,11 +141,41 @@
         "PilotReports": "Αναφορές",
         "System": "Αναφορές Συστήματος"
       },
-	    "Scheduler": "Διαχείριση Εργασιών",
+      "Scheduler": {
+        "Title": "Διαχείριση Εργασιών",
+        "Table1": {
+          "Id": "Id",
+          "Category": "Category",
+          "Framwork": "Framwork",
+          "Name": "Name",
+          "Description": "Description",
+          "LastExecution": "Last Execution",
+          "NextExecution": "Next Execution"
+        },
+        "Table2": {
+          "Name": "Name",
+          "StartedOn": "Started On",
+          "CompletedOn": "Completed On",
+          "StatusCode": "Status Code",
+          "ExitCode": "Exit Code"
+        }
+      },
 	    "Consumers": "Καταναλωτές",
 	    "Support" : {
         "Group": "Υποστήριξη",
-        "Logging": "Καταγραφή Συμβάντων",
+        "Logging": {
+          "Title": "Καταγραφή Συμβάντων",
+          "Table1": {
+            "Id" : "Id",
+            "Level" : "Level",
+            "Category" : "Category",
+            "Code": "Code",
+            "CreatedOn": "Created On",
+            "Message": "Message",
+            "Source": "Source",
+            "Account": "Account"
+          }
+        },
         "Data": "Διαχείριση Δεδομένων",
         "Development": "Ανάπτυξη",
         "DataExport": {
@@ -207,13 +237,17 @@
     "Locale": "Γλώσσα",
     "Submit" : "Ενημέρωση"
   },
-	"Group" : {
-    "Name" : "Όνομα",
-    "Description" : "Περιγραφή",
-    "CreatedOn" : "Δημιουργήθηκε",
-    "Size" : "Μέγεθος",
-    "Country" : "Χώρα",
-    "Members" : "Μέλη"
+  "Group" : {
+    "Table1": {
+      "Name" : "Name",
+      "Email" : "Email",
+      "RegisteredOn" : "Registered On"
+    },
+    "Name" : "Name",
+    "CreatedOn" : "Created On",
+    "Country" : "Country",
+    "Size" : "Size",
+    "Members" : "Members"
   },
 	"Table" : {
 		"Group" : {

@@ -44,15 +44,15 @@ var Logging = React.createClass({
     this.props.actions.getEvents();
   },
   
-  render: function() {     
-    var tableConfiguration = {
-      fields: [{
+  render: function() {
+    console.log(this.props.logging);
+    var tableFields = [{
         name: 'id',
-        title: 'Id',
+        title: 'Section.Support.Logging.Table1.Id',
         hidden: true
       }, {
         name: 'level',
-        title: 'Level',
+        title: 'Section.Support.Logging.Table1.Level',
         align: 'center',
         className: function(value) {
           switch(value) {
@@ -69,31 +69,31 @@ var Logging = React.createClass({
         }
       }, {
         name: 'category',
-        title: 'Category'
+        title: 'Section.Support.Logging.Table1.Category'
       }, {
         name: 'code',
-        title: 'Code'
+        title: 'Section.Support.Logging.Table1.Code'
       }, {
         name: 'timestamp',
-        title: 'Created On',
+        title: 'Section.Support.Logging.Table1.CreatedOn',
         type: 'datetime'
       }, {
         name: 'message',
-        title: 'Message'
+        title: 'Section.Support.Logging.Table1.Message'
       }, {
         name: 'remoteAddress',
-        title: 'Source'
+        title: 'Section.Support.Logging.Table1.Source'
       }, {
         name: 'account',
-        title: 'Account'
-      }],
-      rows: this.props.logging.data.events || [],
-      pager: {
-        index: this.props.logging.data.index || 0,
-        size: this.props.logging.data.size || 10,
-        count:this.props.logging.data.total || 0,
-        mode: Table.PAGING_SERVER_SIDE
-      }
+        title: 'Section.Support.Logging.Table1.Account'
+      }];
+    var tableData = this.props.logging.data.events || [];
+    var tablePager = {
+      index: this.props.logging.data.index || 0,
+      size: this.props.logging.data.size || 10,
+      count:this.props.logging.data.total || 0,
+      mode: Table.PAGING_SERVER_SIDE,
+      onPageIndexChange: this.onPageIndexChange
     };
     
     var resetButton = ( <div />);
@@ -165,8 +165,9 @@ var Logging = React.createClass({
               <Bootstrap.ListGroup fill>
                 {filterOptions}
                 <Bootstrap.ListGroupItem> 
-                  <Table  data={tableConfiguration} 
-                          onPageIndexChange={this.onPageIndexChange}
+                  <Table  fields={tableFields}
+                          data={tableData}
+                          pager={tablePager}
                           template={{empty : dataNotFound}}
                   ></Table>
                 </Bootstrap.ListGroupItem>
@@ -180,7 +181,7 @@ var Logging = React.createClass({
 });
 
 Logging.icon = 'history';
-Logging.title = 'Section.Support.Logging';
+Logging.title = 'Section.Support.Logging.Title';
 
 function mapStateToProps(state) {
   return {

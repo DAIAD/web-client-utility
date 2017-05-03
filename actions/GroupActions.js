@@ -1,5 +1,6 @@
-var types = require('../constants/ActionTypes');
-var GroupAPI = require('../api/group');
+var types = require('../constants/GroupActionTypes');
+var groupAPI = require('../api/group');
+var userAPI = require('../api/user');
 
 var requestedGroup = function (){
   return {
@@ -32,10 +33,10 @@ var GroupActions = {
     return function (dispatch, getState) {
       dispatch(requestedGroup());
 
-      return GroupAPI.getGroup(groupId).then(function(response) {
+      return groupAPI.getGroup(groupId).then(function(response) {
         dispatch(receivedGroupInfo(response.success, response.errors, response.groupInfo));
 
-        return GroupAPI.getGroupMembers(groupId).then( function (response) {
+        return groupAPI.getGroupMembers(groupId).then( function (response) {
           dispatch(receivedGroupMembers(response.success, response.errors, response.members));
         }, function (error) {
           dispatch(receivedGroupMembers(false, error, null));
@@ -47,35 +48,59 @@ var GroupActions = {
     };
   },
 
-  showFavouriteGroupForm : function(groupId){
-    return {
-      type : types.GROUP_SHOW_FAVOURITE_GROUP_FORM,
-      groupId : groupId
-    };
-  },
-
-  hideFavouriteGroupForm : function(){
-    return {
-      type : types.GROUP_HIDE_FAVOURITE_GROUP_FORM
-    };
-  },
-
-  resetDemograhpics : function() {
+  resetComponent : function() {
     return {
       type : types.GROUP_RESET_COMPONENT
     };
   },
 
-  showFavouriteAccountForm : function (accountId){
-    return {
-      type : types.GROUP_SHOW_FAVOURITE_ACCOUNT_FORM,
-      accountId : accountId
+  addFavorite : function(userKey) {
+    return function(dispatch, getState) {
+      dispatch({
+        type : types.ADD_FAVORITE_REQUEST,
+        userKey : userKey
+      });
+
+      return userAPI.addFavorite(userKey).then(function(response) {
+        dispatch({
+          type : types.ADD_FAVORITE_RESPONSE,
+          success : response.success,
+          errors : response.errors,
+          key: userKey,
+          favourite: true
+        });
+      }, function(error) {
+        dispatch({
+          type : types.ADD_FAVORITE_RESPONSE,
+          success : false,
+          errors : error
+        });
+      });
     };
   },
 
-  hideFavouriteAccountForm : function(){
-    return {
-      type : types.GROUP_HIDE_FAVOURITE_ACCOUNT_FORM
+  removeFavorite : function(userKey) {
+    return function(dispatch, getState) {
+      dispatch({
+        type : types.REMOVE_FAVORITE_REQUEST,
+        userKey : userKey
+      });
+
+      return userAPI.removeFavorite(userKey).then(function(response) {
+        dispatch({
+          type : types.REMOVE_FAVORITE_RESPONSE,
+          success : response.success,
+          errors : response.errors,
+          key: userKey,
+          favourite: false
+        });
+      }, function(error) {
+        dispatch({
+          type : types.REMOVE_FAVORITE_RESPONSE,
+          success : false,
+          errors : error
+        });
+      });
     };
   }
 
