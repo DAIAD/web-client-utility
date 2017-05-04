@@ -60,10 +60,12 @@ var GroupCatalog  = React.createClass({
   render: function() {
     const tableFields = [{
       name: 'id',
-      title: 'Section.Groups.Table1.Id',
       hidden: true
     }, {
       name: 'type',
+      hidden: true
+    },{
+      name: 'typeLabel',
       title: 'Section.Groups.Table1.Type',
       width: 100
     }, {
@@ -178,7 +180,7 @@ var GroupCatalog  = React.createClass({
                     value={this.props.groupCatalog.query.type || 'UNDEFINED'}
                     options={[
                       { value: 'UNDEFINED', label: '-' },
-                      { value: 'SEGMENT', label: 'Segment' },
+                      { value: 'SEGMENT', label: 'Group' },
                       { value: 'SET', label: 'Set' }
                     ]}
                     onChange={_filterByType.bind(this)}
