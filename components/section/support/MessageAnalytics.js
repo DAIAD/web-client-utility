@@ -178,10 +178,11 @@ var MessageAnalytics = React.createClass({
 
     var intervalEditor = (
       <div className='col-md-3'>
-        <DateRangePicker  startDate={this.props.interval[0]}
-                  endDate={this.props.interval[1]}
-                  ranges={this.props.ranges}
-                  onEvent={_onIntervalEditorChange.bind(this)}>
+        <DateRangePicker startDate={this.props.interval[0]}
+                         endDate={this.props.interval[1]}
+                         ranges={this.props.ranges}
+                         onEvent={_onIntervalEditorChange.bind(this)}
+                         locale={this.props.dateRangePickerLocale}>
           <div className='clearfix Select-control' style={{ cursor: 'pointer', padding: '5px 10px', width: '100%'}}>
             <span>{intervalLabel}</span>
           </div>
@@ -332,7 +333,8 @@ function mapStateToProps(state) {
       selectedMessage: state.messages.selectedMessage,
       interval: state.messages.interval,
       editor: state.messages.editor,
-      timezone: state.messages.timezone
+      timezone: state.messages.timezone,
+      dateRangePickerLocale: state.i18n.data[state.i18n.locale].messages['Library.DateRangePicker.$locale']
   };
 }
 
