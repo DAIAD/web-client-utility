@@ -83,12 +83,12 @@ var _buildUserQuery = function(id, name, timezone, from, to) {
  * Actions
  */
 
-var _setInterval = function(interval) {
-  return {
-    type : types.FORECASTING_SET_INTERVAL,
-    interval : interval
-  }; 
-};
+//var _setInterval = function(interval) {
+//  return {
+//    type : types.FORECASTING_SET_INTERVAL,
+//    interval : interval
+//  }; 
+//};
 
 var _groupChartRequest = function(query) {
   return {
@@ -170,7 +170,19 @@ var ForecastingActions = {
       group : group
     };
   },
-
+  
+  setInterval : function(interval) {
+    //return function(dispatch, getState) {
+      //if(!_.isEqual(interval, getState().forecasting.interval)){
+        return {
+          type : types.FORECASTING_SET_INTERVAL,
+          interval : interval
+        };
+        //dispatch(_setInterval(interval));
+      //}   
+    //}
+  },
+  
   getUtilityChart : function(group, key, name, timezone) {
     //Build two queries, one for real data and one for forecast data.
     return function(dispatch, getState) {
@@ -336,14 +348,6 @@ var ForecastingActions = {
       type : types.FORECASTING_GROUP_CATALOG_FILTER_TYPE,
       groupType : type
     };
-  },
-  
-  setInterval : function(interval) {
-    return function(dispatch, getState) {
-      if(!_.isEqual(interval, getState().forecasting.interval)){
-        dispatch(_setInterval(interval));
-      }   
-    }
   },
   
   addFavourite: function(favourite) {
