@@ -1,5 +1,3 @@
-var $ = require('jquery');
-
 var React = require('react');
 var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
@@ -7,21 +5,15 @@ var { connect } = require('react-redux');
 var Table = require('../Table');
 var Chart = require('../reports-measurements/chart');
 var InputTextModal = require('../InputTextModal');
+var Switch = require('rc-switch');
 
 var { getAccounts, changeIndex, filterText, filterSerial, clearFilter, 
       getMeter, getUserChart, clearChart, setSearchModeText, setSearchModeMap, 
       setGeometry, removeFavorite, addFavorite, setSelectionMode, discardBagOfConsumers, 
-      toggleConsumer, saveBagOfConsumers } = require('../../actions/UserCatalogActions');
+      toggleConsumer, saveBagOfConsumers, toggleFilterFavorite } = require('../../actions/UserCatalogActions');
 var theme = require('../chart/themes/shine');
 
 var { Map, TileLayer, GeoJSON, FeatureGroup, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
-
-/*
-var { getAccounts, changeIndex, filterText, filterSerial, clearFilter, getMeter, clearChart,
-      setSearchModeText, setSearchModeMap, setGeometry,
-      removeFavorite, addFavorite,
-      setSelectionMode, discardBagOfConsumers, toggleConsumer, saveBagOfConsumers } = require('../../actions/UserCatalogActions');
-      */
 
 var _setSelectionMode = function(e) {
   this.props.actions.setSelectionMode(!this.props.userCatalog.selection.enabled);
@@ -154,9 +146,6 @@ var UserCatalog = React.createClass({
           } else {
             this.props.actions.addFavorite(row.id);
           }
-        }).bind(this),
-        visible : (function(field, row) {
-          return (row.meter !== null);
         }).bind(this)
       }, {
         name : 'chart',
@@ -237,7 +226,18 @@ var UserCatalog = React.createClass({
                value={this.props.userCatalog.query.serial || ''} />
               <span className='help-block'>Filter meter serial number</span>
           </div>
-          <div className="col-md-4" style={{float: 'right'}}>
+          <div className="col-md-4">
+            <div className="clearfix form-group" style={{paddingBottom: 7}}>
+              <Switch className="col-sm-2" style={{marginTop:7}}
+                      onChange={this.props.actions.toggleFilterFavorite}
+                      checked={this.props.userCatalog.query.favorite}
+              />
+            </div>
+            <span className='help-block'>Filter favorites</span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-12" style={{float: 'right'}}>
             {resetButton}
             <div style={{float: 'right'}}>
               <Bootstrap.Button bsStyle='primary' onClick={this.refresh}>Refresh</Bootstrap.Button>
@@ -480,7 +480,7 @@ function mapDispatchToProps(dispatch) {
                       getMeter, getUserChart, clearChart, setSearchModeText, 
                       setSearchModeMap, setGeometry, removeFavorite, addFavorite,
                       setSelectionMode, discardBagOfConsumers, toggleConsumer, 
-                      saveBagOfConsumers 
+                      saveBagOfConsumers, toggleFilterFavorite
                     }), dispatch),
   };
 }
