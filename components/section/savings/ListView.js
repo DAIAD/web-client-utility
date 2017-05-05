@@ -22,15 +22,28 @@ function sortIdToSortBy (id) {
 }
 
 function SavingsPotentialList (props) {
-  const { actions, removeScenario, query, scenarios, intl } = props;
+  const { actions, removeScenario, query, intl } = props;
   const { removeSavingsScenario, confirmRemoveScenario, setSearchFilter, goToAddView } = actions;
 
   const { name: searchFilter } = query;
   const _t = x => intl.formatMessage({ id: x });
 
+  const scenarios = props.scenarios
+  .map(scenario => ({
+    ...scenario,
+    paramsShort: scenario.paramsShort
+    .map(x => (
+      <span>
+        <span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> 
+        (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) 
+        &nbsp;
+      </span>
+    )),
+  }));
+  /*
   const savingsScenarios = scenarios
   .map(scenario => ({ ...scenario, paramsShort: scenario.paramsShort.map(x => <span><span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>) }));
-
+  */
   const tableSorter = {
     defaultSort: 'createdOn',
     defaultOrder: 'desc',
@@ -68,7 +81,7 @@ function SavingsPotentialList (props) {
         <hr/>
         <Table  
           sortable
-          data={savingsScenarios} 
+          data={scenarios} 
           fields={savingsSchema(actions)}
           pager={{ 
             count: query.total,

@@ -83,6 +83,7 @@ const removeSavingsScenario = function (scenarioKey) {
     
     return savingsAPI.remove(options)
     .then((response) => {
+      return response;
     })
     .catch((error) => {
       console.error('caught error in remove savings scenario');
@@ -91,20 +92,37 @@ const removeSavingsScenario = function (scenarioKey) {
   }
 };
 
-const querySavingsScenarios = function() {
+const fetchSavings = function (query) {
   return function (dispatch, getState) {
-    const data = {
-      query: getState().savings.query,
-    };
-    return savingsAPI.query(data)
+    return savingsAPI.query({ query })
     .then((response) => {
-      dispatch(setQuery({ total: response.total }));
-      return response.scenarios || [];
+      return response;
     })
-    .then(scenarios => dispatch(setSavingsScenarios(scenarios)))
     .catch((error) => {
       console.error('caught error in query savings scenarios', error);
     });
+  };
+};
+
+const fetchCompleted = function () {
+  return function (dispatch, getState) {
+    const query = {
+      sortBy: 'CREATED_ON',
+      sortAscending: false,
+      status: 'COMPLETED',
+    };
+    return dispatch(fetchSavings(query));
+  };
+};
+
+const querySavingsScenarios = function() {
+  return function (dispatch, getState) {
+    return dispatch(fetchSavings(getState().savings.query))
+    .then((res) => { 
+      dispatch(setQuery({ total: res.total }));
+      return res.scenarios || [];
+    })
+    .then(scenarios => dispatch(setSavingsScenarios(scenarios))); 
   };
 };
 
@@ -129,6 +147,7 @@ module.exports = {
   confirmRemoveScenario,
   setSearchFilter,
   querySavingsScenarios,
+  fetchCompleted,
   setQuery,
   setQueryAndFetch,
   fetchAllAreas,

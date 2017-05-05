@@ -1,15 +1,15 @@
 
 const budgetSchema = actions => [{
-    name: 'id',
-    title: 'Id',
+    name: 'key',
+    title: 'Key',
     hidden: true
   }, 
   {
     name: 'name',
     title: 'Budgets.List.name',
     link: function(row) {
-      if(row.id) {
-        return '/budgets/{id}/';
+      if(row.key) {
+        return '/budgets/{key}/';
       }
       return null;
     },
@@ -36,8 +36,8 @@ const budgetSchema = actions => [{
     title: 'Budgets.List.paramsShort'
   },
   {
-    name: 'user',
-    title: 'Budgets.List.user'
+    name: 'owner',
+    title: 'Budgets.List.owner'
   },
   {
     name: 'createdOn',
@@ -64,7 +64,7 @@ const budgetSchema = actions => [{
       fontSize: '1.3em'
     },
     handler : (function(field, row) {
-      actions.goToExploreView(row.id);
+      actions.goToExploreView(row.key);
     }),
     visible : (function(field, row) {
       return true;
@@ -76,7 +76,7 @@ const budgetSchema = actions => [{
     type : 'action',
     icon : 'remove',
     handler : (function(field, row) {
-      actions.confirmRemoveBudgetScenario(row.id);
+      actions.confirmRemoveBudgetScenario(row.key);
     }),
     visible : true 
   }
@@ -84,15 +84,15 @@ const budgetSchema = actions => [{
 
 const exploreBudgetSchema = actions => [
   {
-    name: 'id',
-    title: 'Id',
+    name: 'key',
+    title: 'Key',
     hidden: true
   }, {
     name: 'email',
     title: 'User',
     link: function(row) {
-      if(row.id) {
-        return '/user/{id}/';
+      if(row.key) {
+        return '/user/{key}/';
       }
       return null;
     }

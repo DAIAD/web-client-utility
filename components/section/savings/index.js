@@ -12,10 +12,6 @@ var { getTimeline, getMetersLocations, querySavingsScenarios } = require('../../
 var Modal = require('../../Modal');
 var util = require('../../../helpers/wizard');
 
-const SPATIAL_CLUSTERS = [{
-  key: 'area',
-  name: 'Areas'
-}];
 
 const SavingsPotential = React.createClass({
   componentWillMount: function() {
@@ -115,7 +111,6 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     ...stateProps,
     ...dispatchProps,
     ...ownProps,
-    segments: SPATIAL_CLUSTERS,
     areas,
     user: stateProps.profile ? {value: stateProps.profile.username, label: stateProps.profile.firstname + ' ' + stateProps.profile.lastname} : null,
     scenarios: stateProps.scenarios
@@ -125,7 +120,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     }))
     .map(scenario => ({
       ...scenario, 
-      paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
+      paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'), 
       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
     })),
   };

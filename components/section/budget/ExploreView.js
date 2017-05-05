@@ -19,7 +19,7 @@ function BudgetDetails (props) {
   const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
   const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry, resetQuery } = actions;
   const { cluster: selectedCluster, group: selectedGroup, geometry: selectedGeometry, serial: selectedSerial, text: selectedText, loading } = query;
-  const { id, name, potential, user, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
+  const { key, name, potential, user, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
   const goal = parameters.goal;
   const completed = budget.completedOn != null;
 
@@ -180,21 +180,18 @@ function BudgetDetails (props) {
 
 var BudgetExplore = React.createClass({ 
   componentWillMount: function() {
-    if (!this.props.metersLocations || !this.props.metersLocations.features) {
-      this.props.actions.getMetersLocations();
-    }
-    this.props.actions.requestExploreData();
+    //this.props.actions.requestExploreData();
   },
   componentWillUnmount: function() {
-    this.props.actions.resetQuery();
+    //this.props.actions.resetQuery();
   },
   render: function() {
-    const { budget, budgets, groups, clusters, segments, areas, actions, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreData, explorePager, exploreQuery, intl, details, stats } = this.props;
+    const { budgets, groups, clusters, segments, areas, actions, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreData, explorePager, exploreQuery, intl, details, stats } = this.props;
     const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario, resetQuery } = actions;
     
     const { id } = this.props.params;
     //TODO: here normally the budget will be fetched from API in componentWillMount
-    //const budget = budgets.find(budget => budget.id === id);
+    const budget = budgets.find(budget => budget.key === id);
     
     const _t = x => intl.formatMessage({ id: x });
     if (!clusters) return null;
@@ -213,9 +210,9 @@ var BudgetExplore = React.createClass({
       );
     } 
     
-    const { id:budgetId, name, potential, user, createdOn, completedOn, activatedOn, updatedOn, nextUpdateOn, parameters, params, active } = budget;
+    const { key:budgetKey, name, potential, user, createdOn, completedOn, activatedOn, updatedOn, nextUpdateOn, parameters, params, active } = budget;
     const goal = parameters.goal;
-    const completed = completedOn != null;
+    const completed = updatedOn != null;
 
     return (
       <div>
@@ -234,7 +231,7 @@ var BudgetExplore = React.createClass({
                 <bs.Button
                   bsStyle='danger'
                   style={{ float: 'right', marginRight: 25 }}
-                  onClick={() => confirmRemoveBudgetScenario(budgetId)}
+                  onClick={() => confirmRemoveBudgetScenario(budgetKey)}
                   >
                   { _t('Budgets.Explore.delete') }
                 </bs.Button>
@@ -246,7 +243,7 @@ var BudgetExplore = React.createClass({
                 <bs.Button 
                   bsStyle='primary' 
                   style={{float: 'right', marginRight: 25}}
-                  onClick={() => { confirmSetBudget(budgetId);  }}
+                  onClick={() => { confirmSetBudget(budgetKey);  }}
                 >
                 { _t('Budgets.Explore.set') }
                 </bs.Button>
@@ -257,7 +254,7 @@ var BudgetExplore = React.createClass({
                   <bs.Button 
                     bsStyle='warning' 
                     style={{float: 'right', marginRight: 25}}
-                    onClick={() => { confirmResetBudget(budgetId); }}
+                    onClick={() => { confirmResetBudget(budgetKey); }}
                   >
                   { _t('Budgets.Explore.reset') }
                   </bs.Button>
@@ -331,12 +328,12 @@ var BudgetExplore = React.createClass({
                <div />
         }
         {
-          budgetToSet === budgetId ? 
+          budgetToSet === budgetKey ? 
             <Modal
               show
               className='confirmation-modal'
               title='Confirmation'
-              text={<span>Are you sure you want to <i>set</i> <b>{name}</b> (id:{budgetId}) ?</span>}
+              text={<span>Are you sure you want to <i>set</i> <b>{name}</b> ({budgetKey}) ?</span>}
               onClose={() => confirmSetBudget(null)}
               actions={[
                 {
@@ -346,7 +343,7 @@ var BudgetExplore = React.createClass({
                 {
                   name: 'Set Budget',
                   style: 'primary',
-                  action: () => { setActiveBudget(budgetId); confirmSetBudget(null); }
+                  action: () => { setActiveBudget(budgetKey); confirmSetBudget(null); }
                 },
               ]}
             />
@@ -354,12 +351,12 @@ var BudgetExplore = React.createClass({
               <div />
       }
       {
-        budgetToReset === budgetId ? 
+        budgetToReset === budgetKey ? 
           <Modal
             show
             className='confirmation-modal'
             title='Confirmation'
-            text={<span>Are you sure you want to <i>deactivate</i> <b>{name}</b> (id:{budgetId}) ?</span>}
+            text={<span>Are you sure you want to <i>deactivate</i> <b>{name}</b> ({budgetKey}) ?</span>}
             onClose={() => confirmResetBudget(null)}
             actions={[
               {
@@ -369,7 +366,7 @@ var BudgetExplore = React.createClass({
               {
                 name: 'Deactivate budget',
                 style: 'warning',
-                action: () => { resetActiveBudget(budgetId); confirmResetBudget(null); }
+                action: () => { resetActiveBudget(budgetKey); confirmResetBudget(null); }
               },
             ]}
           />
@@ -409,12 +406,12 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
 
   const { metersLocations, viewportWidth, viewportHeight } = stateProps;
   const { budgets, clusters=[] } = ownProps;
-  const budget = budgets.find(budget => budget.id === ownProps.params.id);
+  const budget = budgets.find(budget => budget.key === ownProps.params.id);
   const details = [], stats = [];
   
   if (budget) {
     const { activatedOn, createdOn, completedOn, params, paramsShort, user, updatedOn, expectation, actual, overlap, consumers } = budget;
-    const completed = completedOn != null;
+    const completed = updatedOn != null;
     const active = activatedOn != null;
     
     //const goal = parameters.goal;

@@ -2,6 +2,9 @@ var mirrorToPath = require('../helpers/path-mirror.js');
 
 var types = mirrorToPath({
 
+  BUDGET_SET_QUERY: null,
+  BUDGET_SET_BUDGETS: null,
+  BUDGET_SET_SAVINGS_SCENARIOS: null,
   BUDGET_ADD_SCENARIO: null,
   BUDGET_REMOVE_SCENARIO: null,
   BUDGET_UPDATE_SCENARIO: null,

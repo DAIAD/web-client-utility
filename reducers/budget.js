@@ -5,63 +5,14 @@ const initialState = {
   searchFilter: null,
   budgetToSet: null,
   budgetToReset: null,
-  scenarios: [{
-       id: 'budget-1',
-       name: 'Budget 1',
-       user: 'foofootos',
-       parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, goal: {value: -5, label: '-5 %'}},
-       createdOn: new Date("1990-01-01"),
-       activatedOn: new Date("1995-03-04"),
-       completedOn: new Date(),
-       updatedOn: null,
-       nextUpdateOn: new Date("2018-12-31"),
-       consumers: 12520,
-       expectation: {
-         savings: -5,
-         budget: 8,
-         max: 12,
-         min: 2
-       },
-       actual: {}
-     },
-     {
-       id: 'budget-2',
-       name: 'Budget 2',
-       user: 'foofootos',
-       parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, excludeWho: [{value: 'age:18-21', label: 'Age 18-21'}, {value: 'age:21-55', label: 'Age 21-55'}], budgetType: {value: 'fairly', label: 'Fairly'}},
-       createdOn: new Date('1990-01-01'),
-       completedOn: null, 
-     },
-     {
-       id: 'budget-3',
-       name: 'Budget 3',
-       user: 'foofootos',
-       parameters: {who: {value: 'all', label: 'All'}, where: {value: 'all', label: 'All'}, goal: {value: -3, label: '-3 %'}},
-       createdOn: new Date('1990-01-01'),
-       completedOn: new Date('1999-01-01'),
-       activatedOn: new Date("1999-01-01"),
-       updatedOn: new Date("2000-01-01"),
-       nextUpdateOn: new Date("2017-12-31"),
-       consumers: 12320,
-       expectation: {
-         savings: -3,
-         budget: 12,
-         max: 16,
-         min: 2
-       },
-       actual: {
-         savings: -1,
-         budget: -6,
-         max: 22,
-         min: -10,
-       },
-       overlap: {
-         savings: -5,
-         original: 10000,
-         current: 9700
-       },
-     }
-  ],
+  savings: [],
+  query: {
+    pageIndex: 0,
+    sortBy: 'CREATED_ON',
+    sortAscending: false,
+    name: null,
+  },
+  budgets: [],
   explore: {
     query: {
       cluster: 'none',
@@ -86,6 +37,11 @@ var budget = function (state=initialState, action) {
 
   switch (action.type) {
     
+    case types.BUDGET_SET_BUDGETS: 
+      return Object.assign({}, state, {
+        budgets: action.budgets,
+      });
+
     case types.BUDGET_CONFIRM_REMOVE_SCENARIO: 
       return Object.assign({}, state, {
        budgetToRemove: action.id 
@@ -101,6 +57,10 @@ var budget = function (state=initialState, action) {
        budgetToReset: action.id 
       }); 
 
+    case types.BUDGET_SET_SAVINGS_SCENARIOS: 
+      return Object.assign({}, state, {
+        savings: action.scenarios,
+      });
 
     case types.BUDGET_ADD_SCENARIO: { 
       const newScenarios = [...state.scenarios, {...action.options}];
@@ -125,6 +85,14 @@ var budget = function (state=initialState, action) {
         scenarios: budgets
       });
     }
+    case types.BUDGET_SET_QUERY: 
+      return {
+        ...state,
+        query: {
+          ...state.query,
+          ...action.query,
+        },
+      };
 
    case types.BUDGET_SET_SEARCH_FILTER: 
       return Object.assign({}, state, {

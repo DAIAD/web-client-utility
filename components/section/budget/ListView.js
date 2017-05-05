@@ -4,15 +4,25 @@ var Table = require('../../Table');
 var { budgetSchema } = require('../../../schemas/budget'); 
 
 function BudgetsList (props) {
-  const { groups, clusters, segments, areas, budgets, actions, budgetToRemove, searchFilter, intl } = props;
-  const { removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView, goToActiveView } = actions;
+  const { groups, clusters, segments, areas, actions, budgetToRemove, searchFilter, intl } = props;
+  const { setQueryAndFetch, removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView, goToActiveView } = actions;
   const budgetFields = budgetSchema(actions);
   const budgetSorter = {
     defaultSort: 'completedOn',
     defaultOrder: 'desc'
   };
-  const budgetData  = searchFilter ? budgets.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : ( Array.isArray(budgets) ? budgets : [])
-  .map(budget => ({ ...budget, paramsShort: budget.paramsShort.map(x => <span>{x.key} (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>)}));
+  const budgets = props.budgets
+  .map(scenario => ({
+    ...scenario,
+    paramsShort: scenario.paramsShort
+    .map(x => (
+      <span>
+        <span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> 
+        (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) 
+        &nbsp;
+      </span>
+    )),
+  }));
 
   const _t = x => intl.formatMessage({ id: x });
 
@@ -24,7 +34,7 @@ function BudgetsList (props) {
             style={{width: '80%', float: 'left'}}
             type='text'
             placeholder={_t('Budgets.List.search')}
-            onChange={(e) => setSearchFilter(e.target.value)}
+            onChange={(e) => setQueryAndFetch({ name: e.target.value })}
             value={searchFilter}
           />
        </bs.Col>
@@ -48,7 +58,7 @@ function BudgetsList (props) {
           sortable
           fields={budgetFields}
           sorter={budgetSorter}
-          data={budgetData} 
+          data={budgets} 
           template={{empty : (<span>{ _t('Budgets.List.empty') }</span>)}}
         />
     </bs.Panel>

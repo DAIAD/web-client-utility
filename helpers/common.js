@@ -1,6 +1,18 @@
 const nameToId = str => 
   str.replace(/\s+/g, '-').toLowerCase();
 
+const getFeature = (area) => {
+  return {
+    'type' : 'Feature',
+    'geometry' : area.geometry,
+    'properties' : {
+      'label' : area.title,
+      'clusterKey': area.groupKey,
+      'value': area.key,
+    }
+  };
+};
+
 const extractFeatures = accounts => {
   var geojson = {
     type : 'FeatureCollection',
@@ -41,5 +53,6 @@ const extractFeatures = accounts => {
 
 module.exports = {
   nameToId,
-  extractFeatures
+  extractFeatures,
+  getFeature,
 };

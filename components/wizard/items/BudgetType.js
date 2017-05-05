@@ -6,10 +6,10 @@ function SelectBudgetType (props) {
   const { value, setValue, intl } = props;
   const budgetTypes = [
     {selected: 'scenario', type: 'SCENARIO', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.scenario.value' }) }, 
-    {selected: 'estimate', type: 'GLOBAL', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.estimate.value' }) }
+    {selected: 'estimate', type: 'GOAL', label: intl.formatMessage({ id: 'Wizard.items.budgetType.options.estimate.value' }) }
   ];
   return (
-    <bs.Col md={4}>
+    <bs.Col md={6}>
       {
         budgetTypes.map(budget =>  
           <bs.Button 

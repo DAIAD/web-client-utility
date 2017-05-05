@@ -1,62 +1,28 @@
 var types = require('../constants/BudgetActionTypes');
+const budgetAPI = require('../api/budget');
 var userAPI = require('../api/user');
+var { fetchCompleted } = require('./SavingsActions');
+
 var { extractFeatures, nameToId } = require('../helpers/common');
 
-
-const addBudgetScenario = function (values) {
-  return function(dispatch, getState) {
-    const scenarios = getState().budget.scenarios;
-
-    const name = values.name.name;
-
-    if (!values.name || !values.name.name) {
-      throw 'Oops, no name provided to add savings scenario';
-    }
-
-    const id = nameToId(name);
-
-    if (scenarios.map(scenario => scenario.id).includes(id)) {
-      throw `Oops, scenario with id ${id} already exists`;
-    }
-
-    const createdOn = new Date().valueOf();
-    const completedOn = null;
-    const potential = null;
-
-    const newScenario = {
-      type: types.BUDGET_ADD_SCENARIO,
-      options: {
-        name,
-        id,
-        parameters:values,
-        createdOn,
-        completedOn,
-        potential
-      }
-    };
-    dispatch(newScenario);
-  }
-};
-
-const removeBudgetScenario = function(id) {
+const setQuery = function(query) {
   return {
-    type: types.BUDGET_REMOVE_SCENARIO,
-    id
+    type: types.BUDGET_SET_QUERY,
+    query,
   };
 };
 
-const setActiveBudget = function(id) {
+const setBudgets = function (budgets) {
   return {
-    type: types.BUDGET_SET_ACTIVE,
-    id,
-    date: new Date()
+    type: types.BUDGET_SET_BUDGETS,
+    budgets,
   };
 };
 
-const resetActiveBudget = function(id) {
+const setSavingsScenarios = function(scenarios) {
   return {
-    type: types.BUDGET_SET_INACTIVE,
-    id
+    type: types.BUDGET_SET_SAVINGS_SCENARIOS,
+    scenarios,
   };
 };
 
@@ -88,14 +54,15 @@ const setSearchFilter = function(searchFilter) {
   };
 }
 
-const setQuery = function(query) {
+/*
+const setExploreQuery = function(query) {
   return {
     type: types.BUDGET_EXPLORE_SET_QUERY,
     query
   };
 }
 
-const resetQuery = function() {
+const resetExploreQuery = function() {
   return setQuery({
     cluster: 'none',
     group: 'all',
@@ -142,6 +109,7 @@ const setQuerySerial = function(serial) {
 const setQueryText = function(text) {
   return setQuery({ text });
 }
+*/
 
 const requestData = function() {
   return {
@@ -156,6 +124,156 @@ const setData = function(data, errors) {
     errors
   };
 }
+
+const fetchCompletedSavingsScenarios = function () {
+  return function (dispatch, getState) {
+    return dispatch(fetchCompleted())
+    .then(res => dispatch(setSavingsScenarios(res.scenarios || [])));
+  };
+};
+
+const addBudget = function (values) {
+  return function(dispatch, getState) {
+
+    if (!values.title || !values.title.name) {
+      throw 'Oops, no name provided to add budget scenario';
+    }
+    const title = values.title.name;
+    const utility = getState().config.utility.key;
+    
+    const population = Array.isArray(values.population) ? values.population : [{ type: 'UTILITY', key: utility }];
+    const spatial = Array.isArray(values.spatial) ? values.spatial.map(area => ({ type: 'AREA', areas: [area.area] })) : null;
+
+    const excludePopulation = Array.isArray(values.excludePopulation) ? values.excludePopulation : null;
+
+    const excludeSpatial = Array.isArray(values.excludeSpatial) ? values.excludeSpatial.map(area => ({ type: 'AREA', areas: [area.area] })) : null;
+    
+    const parameters = {
+      goal: values.goal && values.goal.goal || null,
+      distribution: values.distribution && values.distribution.type || null,
+      scenario: values.budgetType.type === 'SCENARIO' ? {
+        key: values.scenario && values.scenario.key || null,
+        percent: values.savings && values.savings.savings || null,
+      } : null,
+      include: {
+        population,
+        spatial,
+      },
+      exclude: {
+        population: excludePopulation,
+        spatial: excludeSpatial,
+      },
+    };
+
+    const options = {
+      title,
+      parameters,
+    };
+    return budgetAPI.create(options)
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in create budget');
+      throw error;
+    });
+  }
+};
+
+const removeBudget = function (budgetKey) {
+  return function(dispatch, getState) {
+    const options = {
+      budgetKey,
+    };
+    return budgetAPI.remove(options)
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in remove budget');
+      throw error;
+    });
+  };
+};
+
+const fetchBudget = function(budgetKey) {
+  return function(dispatch, getState) {
+    const options = {
+      budgetKey,
+    };
+    return budgetAPI.find(options)
+    .then((response) => {
+      return response.scenario;
+    })
+    .catch((error) => {
+      console.error('caught error in fetch budget');
+      throw error;
+    });
+  }
+};
+
+const fetchBudgets = function (query) {
+  return function (dispatch, getState) {
+    return budgetAPI.query({ query })
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in query budgets', error);
+    });
+  };
+};
+
+const queryBudgets = function() {
+  return function (dispatch, getState) {
+    return dispatch(fetchBudgets(getState().budget.query))
+    .then((res) => { 
+      dispatch(setQuery({ total: res.total }));
+      return res.budgets || [];
+    })
+    .then(budgets => dispatch(setBudgets(budgets))); 
+  };
+};
+
+const setQueryAndFetch = function(query) {
+  return function (dispatch, getState) {
+    dispatch(setQuery(query));
+    return dispatch(queryBudgets());
+  };
+};
+
+
+const setActiveBudget = function(budgetKey) {
+  return function(dispatch, getState) {
+    const options = {
+      budgetKey,
+    };
+    return budgetAPI.activate(options)
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in activate budget');
+      throw error;
+    });
+  }
+};
+
+const resetActiveBudget = function(budgetKey) {
+  return function(dispatch, getState) {
+    const options = {
+      budgetKey,
+    };
+    return budgetAPI.deactivate(options)
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in deactivate budget');
+      throw error;
+    });
+  }
+};
 
 const requestExploreData = function() {
   return function(dispatch, getState) {
@@ -182,17 +300,18 @@ const requestExploreData = function() {
     error => {
       console.error('error:', error);
       dispatch(setData(null, error));
-
     });
-      
   };
 }
 
 module.exports = {
+  fetchCompletedSavingsScenarios,
+  queryBudgets,
+  fetchBudget,
   //add
-  addBudgetScenario,
+  addBudget,
+  removeBudget,
   //common
-  removeBudgetScenario,
   confirmRemoveBudgetScenario,
   //explore
   resetActiveBudget,
@@ -200,6 +319,7 @@ module.exports = {
   confirmSetBudget,
   confirmResetBudget,
   setSearchFilter,
+  /*
   setQueryIndex,
   setQuerySize,
   setQueryGroup,
@@ -211,5 +331,8 @@ module.exports = {
   setQueryText,
   setQuery,
   resetQuery,
+  */
+  setQuery,
+  setQueryAndFetch,
   requestExploreData,
 };

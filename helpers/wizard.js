@@ -54,10 +54,12 @@ function getAllSpatialGroups (areas) {
 }
 
 function getLabelByParam (paramKey, param, props) {
-  //console.log('param:', paramKey, param, props.clusters, props.groups);
   switch (paramKey) {
     case 'population':
-      if (param.type === 'UTILITY') {
+    case 'excludePopulation':
+      if (!param) {
+        return '-';
+      } else if (param.type === 'UTILITY') {
         return props.intl.formatMessage({ id: 'Buttons.All' });
       } else {
         const group = getAllPopulationGroups(props.clusters, props.utility)
@@ -66,8 +68,11 @@ function getLabelByParam (paramKey, param, props) {
         return `${cluster && cluster.name ? cluster.name + ': ' : ''}${group && group.name}`;
       }
     case 'spatial':
-      if (!param || param.type === 'UTILITY') {
+    case 'excludeSpatial':
+      if (paramKey === 'spatial' && (!param || param.type === 'UTILITY')) {
         return props.intl.formatMessage({ id: 'Buttons.All' });
+      } else if (paramKey === 'excludeSpatial' && !param) {
+        return '-';
       } else {
         const key = Array.isArray(param.areas) && param.areas.length > 0 && param.areas[0];
         const area = getAllSpatialGroups(props.areas)
@@ -82,6 +87,16 @@ function getLabelByParam (paramKey, param, props) {
       props.intl.formatDate(param.end, { 
         month: 'numeric', year: 'numeric',
       });
+    case 'distribution':
+      return props.intl.formatMessage({ id: `Wizard.items.distribution.options.${param.toLowerCase()}.label` });
+    case 'goal':
+      return `${param}%`;
+    case 'savings':
+      return `${param}%`;
+    case 'scenario': {
+      const scenario = props.savings.find(s => s.key === param);
+      return scenario && scenario.name;
+    }
     default:
       return '-';
   }
@@ -91,9 +106,34 @@ function getParamsWithLabels (paramsObj, props) {
   return Object.keys(paramsObj).reduce((p, paramKey) => {
     const param = paramsObj[paramKey];
     const obj = { ...p };
-    obj[paramKey] = Array.isArray(param) ? param.map(p => ({ ...p, label: getLabelByParam(paramKey, p, props) })) : { ...param, label: getLabelByParam(paramKey, param, props) };
+    if (Array.isArray(param)) {
+      obj[paramKey] = param.map(p => ({ ...p, label: getLabelByParam(paramKey, p, props) }));
+    } else if (typeof param === 'object') {
+      obj[paramKey] = { ...param, label: getLabelByParam(paramKey, param, props) };
+    } else {
+      obj[paramKey] = { param, label: getLabelByParam(paramKey, param, props) };
+    }
     return obj;
   }, {});
+}
+
+function flattenBudgetParams (paramsObj) {
+  if (paramsObj.scenario == null) {
+    return {
+      population: paramsObj && paramsObj.include && paramsObj.include.population,
+      spatial: paramsObj && paramsObj.include && paramsObj.include.spatial,
+      excludePopulation: paramsObj && paramsObj.exclude && paramsObj.exclude.population,
+      excludeSpatial: paramsObj && paramsObj.exclude && paramsObj.exclude.spatial,
+      goal: paramsObj && paramsObj.goal,
+      distribution: paramsObj && paramsObj.distribution,
+    }; 
+  }
+  return {
+    population: paramsObj && paramsObj.include && paramsObj.include.population,
+    spatial: paramsObj && paramsObj.include && paramsObj.include.spatial,
+    scenario: paramsObj && paramsObj.scenario && paramsObj.scenario.key,
+    savings: paramsObj && paramsObj.scenario && paramsObj.scenario.percent,
+  }; 
 }
 
 module.exports = {
@@ -103,4 +143,5 @@ module.exports = {
   getAllPopulationGroups,
   getSpatialValue,
   getAllSpatialGroups,
+  flattenBudgetParams,
 }; 

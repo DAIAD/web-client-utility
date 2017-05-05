@@ -6,7 +6,7 @@ var Modal = require('../../Modal');
 var { FormattedMessage } = require('react-intl');
 var Wizard = require('../../wizard/Wizard');
 var { SetName, SelectWho, SelectWhere, SelectWhen, SelectBudgetType, SelectSavingsScenario, SetSavingsPercentage, SetGoal, SelectDistribution  } = require('../../wizard/items/');
-var { nameToId } = require('../../../helpers/common');
+var { nameToId, getFeature } = require('../../../helpers/common');
 
 const validateBudgetType = ({type:value}) => {
   if (!value) {
@@ -51,7 +51,7 @@ const validateGoal = ({goal:value}) => {
   }
 };
 
-const validateSavingsScenario = ({id:value}) => {
+const validateSavingsScenario = ({key:value}) => {
   if (!value) {
       throw 'noSavingsScenario';
   }
@@ -69,51 +69,25 @@ const validateName = function ({name:value}) {
 };
 
 var BudgetsAdd = React.createClass ({
-  componentWillMount: function() {
-
-    //TODO: temp way to load areas in state
-    const utility = this.props.profile.utility;
-    if(!this.props.areas) {
-      const population = {
-          utility: utility.key,
-          label: utility.name,
-          type: 'UTILITY'
-      };
-      this.props.actions.getTimeline(population);
-    }
+  componentWillMount: function () {
+    this.props.actions.fetchCompletedSavingsScenarios(); 
   },
-//TODO: have to create geojson from areas object since API not ready yet
-  getGeoJSON: function(areasObj) {
-    if (!areasObj) return {};
-    const areas = Object.keys(areasObj).map(key => areasObj[key]);
-    return {
-      type : 'FeatureCollection',
-      features : areas.map(area => ({
-        'type' : 'Feature',
-        'geometry' : area.geometry,
-        'properties' : {
-          'label' : area.label,
-          'cluster': 'area'
-        }
-      })),
-      crs : {
-        type : 'name',
-        properties : {
-          name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
-        }
-      }
-    };
-  },
-
   render: function() {
-    const { utility, groups, clusters, segments, areas, actions, wizardType, validationError, savings, intl } = this.props;
-    const { setValidationError, setAddBudgetWizardType, goToListView, addBudgetScenario } = actions;
-    const geojson = this.getGeoJSON(areas);
+    const { utility, groups, clusters, actions, wizardType, validationError, savings, intl } = this.props;
+    const { setValidationError, setAddBudgetWizardType, goToListView, addBudget } = actions;
+    const areas =  this.props.areas.map(area => ({
+      key: area.key,
+      value: area.key,
+      label: area.title,
+      feature: getFeature(area),
+    })); 
 
-    const savingsItems = savings.filter(scenario => scenario.completedOn != null)
+
+    const savingsItems = savings
+    //.filter(scenario => scenario.completedOn != null)
     .map(scenario => ({ 
         label: scenario.name, 
-        value: scenario.id, 
+        value: scenario.key, 
         parameters: scenario.parameters 
     }));
     const _t = x => intl.formatMessage({ id: x });
@@ -129,7 +103,10 @@ var BudgetsAdd = React.createClass ({
         <hr/>
         
         <Wizard
-          onComplete={(values) => { addBudgetScenario({...values}); goToListView();  }}
+          onComplete={(values) => { 
+            addBudget(values); 
+            goToListView();  
+          }}
           validateLive
           childrenProps={{ intl }}
         >
@@ -149,7 +126,7 @@ var BudgetsAdd = React.createClass ({
             id='savings'
             initialValue={{savings: 0}}
             validate={validateSavingsPercentage}
-            next={value => 'name'} 
+            next={value => 'title'} 
           />
           <SetGoal
             id='goal'
@@ -162,7 +139,7 @@ var BudgetsAdd = React.createClass ({
             validate={validateDistribution}
           />
           <SelectWho
-            id='who'
+            id='population'
             utility={utility}
             groups={groups}
             clusters={clusters}
@@ -170,43 +147,26 @@ var BudgetsAdd = React.createClass ({
             validate={validateWho}
           />
           <SelectWhere
-           id='where'
-           utility={utility}
-           clusters={segments.map(segment => ({ 
-             ...segment, 
-             groups: geojson.features ? geojson.features.map(f => ({ 
-                feature: f,
-                clusterKey: f.properties.cluster, 
-                name: f.properties.label, 
-                key: f.properties.label 
-              })) : [] 
-            }))}
+           id='spatial'
+           areas={areas}
            initialValue={{}}
            validate={validateWhere}
           />
           <SelectWho
-            id='excludeWho'
+            id='excludePopulation'
             initialValue={{}}
             groups={groups}
             clusters={clusters}
             noAll
           />
           <SelectWhere
-            id='excludeWhere'
-            clusters={segments.map(segment => ({ 
-             ...segment, 
-             groups: geojson.features ? geojson.features.map(f => ({ 
-                feature: f,
-                clusterKey: f.properties.cluster, 
-                name: f.properties.label, 
-                key: f.properties.label 
-              })) : [] 
-            }))}
+            id='excludeSpatial'
+            areas={areas}
             initialValue={{}}
             noAll
           />
           <SetName
-            id='name'
+            id='title'
             initialValue=''
             validate={validateName.bind(this)}
           />
@@ -220,13 +180,4 @@ var BudgetsAdd = React.createClass ({
   }
 });
 
-function mapStateToProps(state) {
-  return {
-    utility: state.config.utility.key,
-    savings: state.savings.scenarios,
-    areas: state.map.map.areas,
-    profile: state.session.profile,
-  };
-}
-
-module.exports = connect(mapStateToProps)(BudgetsAdd);
+module.exports = BudgetsAdd;

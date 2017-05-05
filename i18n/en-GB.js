@@ -250,7 +250,7 @@
         "description": "Select a precomputed savings scenario"
       },
       "savings": {
-        "title": "Goal",
+        "title": "Scenario percent",
         "description": "Set global savings percentage",
         "help": "0-100 of max"
       },
@@ -262,11 +262,11 @@
         "title": "Distribution",
         "description": " ",
         "options": {
-          "equally": {
+          "equal": {
             "label": "Equally",
             "value": "Equally"
           },
-          "fairly": {
+          "fair": {
             "label": "Fairly",
             "value": "Fairly"
           }
@@ -282,12 +282,12 @@
         "description": "Select all areas or narrow savings potential calculation to selected areas",
         "modal": "Location filtering"
       },
-      "excludeWho": {
+      "excludePopulation": {
         "title": "Exclude groups",
         "description": " ",
         "modal": "Segmentation exclusions"
       },
-      "excludeWhere": {
+      "excludeSpatial": {
         "title": "Exclude areas",
         "description": " ",
         "modal": "Location exclusions"
@@ -335,7 +335,7 @@
   "Savings": {
     "List": {
       "title": "Available scenarios",
-      "empty": "No data",
+      "empty": "No scenarios",
       "name": "Name",
       "potential": "Savings Potential",
       "owner": "User",
@@ -359,11 +359,12 @@
   "Budgets": {
     "List": {
       "title": "Available budgets",
+      "empty": "No budgets",
       "search": "Search...",
       "name": "Name",
       "active": "Active",
       "paramsShort": "Parameters",
-      "user": "User",
+      "owner": "User",
       "createdOn": "Created",
       "completedOn": "Calculated",
       "activatedOn": "Activated",

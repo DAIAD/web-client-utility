@@ -4,7 +4,7 @@ var Modal = require('../../Modal');
 var Wizard = require('../../wizard/Wizard');
 var { SetName, SelectWho, SelectWhere, SelectWhen } = require('../../wizard/items/');
 var util = require('../../../helpers/wizard');
-var { nameToId } = require('../../../helpers/common');
+var { nameToId, getFeature } = require('../../../helpers/common');
 
 const initialEmpty = {};
 
@@ -53,40 +53,16 @@ const validateName = function (value) {
 };
 
 var SavingsPotentialAdd = React.createClass({
-  getGeoJSON: function(areas) {
-    return {
-      type : 'FeatureCollection',
-      features : areas.map(area => this.getFeature(area)),
-      crs : {
-        type : 'name',
-        properties : {
-          name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
-        }
-      }
-    };
-  },
-  getFeature: function (area) {
-    return {
-      'type' : 'Feature',
-      'geometry' : area.geometry,
-      'properties' : {
-        'label' : area.title,
-        'clusterKey': area.groupKey,
-        'value': area.key,
-      }
-    };
-  },
   render: function() {
     const { utility, groups, clusters, actions, validationError, intl } = this.props;
     const { setValidationError, addSavingsScenario, goToListView, querySavingsScenarios } = actions;
     const _t = x => intl.formatMessage({ id: x });
 
-    const geojson = this.getGeoJSON(this.props.areas);
     const areas =  this.props.areas.map(area => ({
       key: area.key,
       value: area.key,
       label: area.title,
-      feature: this.getFeature(area),
+      feature: getFeature(area),
     })); 
 
     return (
