@@ -26,6 +26,11 @@ var Table = React.createClass({
       sortable: false,
       data: [],
       fields: [], 
+      pager: {
+        size: 10,
+        index: DEFAULT_PAGE-1,
+        mode: PAGING_CLIENT_SIDE,
+      },
       template: {
         empty: null
       },
@@ -92,10 +97,7 @@ var Table = React.createClass({
   },
 
   getPager: function() {
-    return {
-      size: 10,
-      index: DEFAULT_PAGE-1,
-      mode: PAGING_CLIENT_SIDE,
+    return { 
       count: Array.isArray(this.props.data) ? this.props.data.length : 0, 
       ...this.props.pager
     };
@@ -263,7 +265,7 @@ function Header (props) {
 }
 
 function wrapWithSort (content, field, sortable, onSortChange, active, order) {
-  return (!sortable || field.type === 'action' || field.type === 'alterable-boolean') ? 
+  return (!sortable || field.sortable === false || field.type === 'action' || field.type === 'alterable-boolean') ? 
     content
       :
         <a 
@@ -355,9 +357,10 @@ function getCell (field, row) {
     if ((visible == null) || (visible)) {
       const icon = getPropertyValue(field.icon, field, row);
       const image = getPropertyValue(field.image, field, row);
-      const className = icon ? 'fa fa-' + icon + ' fa-fw' : '';
+      const className = icon ? `fa fa-${icon} fa-fw` : getPropertyValue(field.className, field, row);
+      const color = getPropertyValue(field.color, field, row);
       const clickHandler = () => getPropertyValue(field.handler, field, row);
-      const style = clickHandler ? ({ cursor: 'pointer' })  : ({});
+      const style = clickHandler ? ({ color, cursor: 'pointer' })  : ({});
 
       return (
         <i className={className}
@@ -454,7 +457,7 @@ function wrapWithLink(content, link, row) {
 
 function formatLink (route, row) {
   return Object.keys(row).reduce((link, key) => 
-          link.replace(new RegExp('\{' + key + '\}'), row[key])
+          link && link.replace(new RegExp('\{' + key + '\}'), row[key]) || ''
           , route);
 }
 
