@@ -15,6 +15,14 @@ var _createMapInitialState = function(interval) {
   };
 };
 
+var _createInitialGroupState = function() {
+  return {
+    groups : [],
+    filtered: [],
+    features : null
+  };
+};
+
 var _createChartInitialState = function(interval) {
   return {
     interval : interval,
@@ -317,8 +325,145 @@ var chartReducer = function(state, action) {
   }
 };
 
+var _extractFeatures = function(groups) {
+  var geojson = {
+    type : 'FeatureCollection',
+    features : [],
+    crs : {
+      type : 'name',
+      properties : {
+        name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
+      }
+    }
+  };
+
+  groups = groups || [];
+
+  for ( var index in groups) {
+    if (groups[index].location) {
+      var meter = groups[index].hasOwnProperty('meter') ? groups[index].meter : null;
+
+      geojson.features.push({
+        'type' : 'Feature',
+        'geometry' : groups[index].location,
+        'properties' : {
+          'groupKey' : groups[index].id,
+          'deviceKey' : meter.key,
+          'name' : groups[index].fullname,
+          'address' : groups[index].address,
+          'meter' : {
+            'key' : meter.key,
+            'serial' : meter.serial
+          }
+        }
+      });
+    }
+  }
+
+  return geojson;
+};
+
+var _filterRows = function(rows, type, name) {
+  var filteredRows = rows.filter( r => {
+    if(name) {
+      if(r.text.indexOf(name) === -1) {
+        return false;
+      }
+    }
+    if(type && type !== 'SET') {
+      return (r.cluster == type);
+    }
+    if(type && type === 'SET'){
+     return (r.type == type);
+    }
+    return true;
+  });
+  return filteredRows;
+};
+
+var groupReducer = function(state, action) {
+  
+  switch (action.type) {
+    case types.MAP_FILTER_GROUP_BY_TYPE :
+      var filteredRows = _filterRows(state || [], action.groupType, action.name);
+      return {
+        groups : state || [],
+        filtered : filteredRows,
+        features : _extractFeatures(state || [])
+      };
+    case types.MAP_SET_GROUP:
+      return Object.assign({}, state, {
+        group : action.group,
+      });      
+    case types.MAP_GROUPS_REQUEST :
+      return Object.assign({}, state, {
+        isLoading : true
+      });      
+    case types.MAP_GROUPS_RESPONSE:
+
+      if (action.success === true) {
+        action.groups.forEach( g => {
+          if(g.type == 'SEGMENT') {
+            g.text = g.cluster + ': ' + g.name;
+          } else {
+            g.text = g.name;
+          }
+        });
+        action.groups.sort( (a, b) => {
+          if (a.text < b.text) {
+            return -1;
+          }
+          if (a.text > b.text) {
+            return 1;
+          }
+          return 0;
+        });
+        return {
+          total : action.total || 0,
+          index : action.index || 0,
+          size : action.size || 10,
+          groups : action.groups || [],
+          filtered : _filterRows(action.groups || [], action.groupType, action.name),
+          features : _extractFeatures(action.groups || [])
+        };
+      } else {
+        return {
+          total : 0,
+          index : 0,
+          size : 10,
+          groups : [],
+          filtered: [],
+          features : _extractFeatures([])
+        };
+      }
+
+    default:
+      return state || _createInitialGroupState();
+  }
+};
+
 var map = function(state, action) {
   switch (action.type) {
+    case types.MAP_GROUPS_REQUEST: 
+      return Object.assign({}, state, {
+        isLoading : false
+      });
+    case types.MAP_GROUPS_RESPONSE:
+      return Object.assign({}, state, {
+        isLoading : false,
+        groups : groupReducer(state.data, action)
+      });
+    case types.MAP_FILTER_GROUP_BY_TYPE:
+      var groups = groupReducer(state.groups.groups, action);
+      return Object.assign({}, state, {
+        populationType : (action.groupType === 'UNDEFINED' ? null : action.groupType),
+        groups : groups,
+        group : null
+      });
+    case types.MAP_SET_GROUP:
+      return Object.assign({}, state, {
+        group : action.group,
+      });      
     case types.MAP_TIMELINE_REQUEST:
     case types.MAP_CHART_REQUEST:
       return Object.assign({}, state, {

@@ -14,9 +14,9 @@ var moment = require('moment');
 
 var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
 
-var { getTimeline, getFeatures, getChart,
-      setEditor, setEditorValue,
-      setTimezone, addFavourite, updateFavourite, setEditorValuesBatch, getMetersLocations } = require('../../actions/MapActions');
+var { getTimeline, getFeatures, getChart, setEditor, setEditorValue,
+      setTimezone, addFavourite, updateFavourite, setEditorValuesBatch, 
+      getMetersLocations, getGroups, filterByType, setGroup } = require('../../actions/MapActions');
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -79,6 +79,29 @@ var _onFeatureChange = function(features) {
   }
 };
 
+var _filterByType = function(e) {
+  var profile = this.props.profile;
+  this.props.actions.filterByType(e.value === 'UNDEFINED' ? null : e.value);
+
+  if(e.value === 'UNDEFINED'){
+    var utility = this.props.profile.utility;
+    var population = {
+      utility: utility.key,
+      label: utility.name,
+      type: 'UTILITY'
+    };
+    this.props.actions.getTimeline(population);
+  }
+};
+
+var _groupSelect = function(e) {
+  //this.props.actions.setGroup(e);
+  //this.setState({isFavourite:false});
+
+  this.props.actions.setGroup(e);
+  //this.props.actions.setEditorValue('population', e);
+};
+
 var AnalyticsMap = React.createClass({
 
   contextTypes: {
@@ -86,6 +109,9 @@ var AnalyticsMap = React.createClass({
   },
 
   componentWillMount : function() {
+    if(this.props.map.groups == null) {
+      this.props.actions.getGroups();
+    }
     var isDefault;
     if(this.props.favourite && this.props.favourite.type == 'MAP'){
       isDefault = false;
@@ -207,16 +233,62 @@ var AnalyticsMap = React.createClass({
       </div>
     );
 
-    var populationEditor = (
-      <div className='col-md-3'>
-        <GroupSearchTextBox
-          value={this.props.defaultFavouriteValues.population ? this.props.favourite.queries[0].population : this.props.population}
-          name='groupname'
-          onChange={onPopulationEditorChange.bind(this)}/>
-        <span className='help-block'>Select a consumer group</span>
-      </div>
-    );
+//    var populationEditor = (
+//      <div className='col-md-3'>
+//        <GroupSearchTextBox
+//          value={this.props.defaultFavouriteValues.population ? this.props.favourite.queries[0].population : this.props.population}
+//          name='groupname'
+//          onChange={onPopulationEditorChange.bind(this)}/>
+//        <span className='help-block'>Select a consumer group</span>
+//      </div>
+//    );
 
+    var typeOptions = [];
+    
+    if(this.props.groups && this.props.populationType){
+      typeOptions = this.props.groups.filtered.map((group) => {
+        return {
+          name: group.name,
+          label: group.type == 'SEGMENT' ? group.cluster + ' ' + group.name : group.name,
+          group: group
+        };
+      });
+    }
+
+    var groupTypeSelect = (
+      <div>
+        <Select name='groupType'
+          value={this.props.populationType ? this.props.populationType : 'UNDEFINED'}
+          options={[
+            { value: 'UNDEFINED', label: this.props.profile.utility.name},
+            { value: 'Income', label: 'Income' },
+            { value: 'Apartment Size', label: 'Apartment Size' },
+            { value: 'Household Members', label: 'Household Members' },
+            { value: 'Age', label: 'Age' },
+            { value: 'Consumption Class', label: 'Consumption Class' },
+            { value: 'SET', label: <i>Custom Group</i> }
+          ]}
+          onChange={_filterByType.bind(this)}
+          clearable={false}
+          searchable={false} className='form-group'/>
+        <span className='help-block'>Filter group type</span>
+    </div>
+  );
+ 
+  var groupSelect = (
+    <div>
+      <Select name='group'
+        value={this.props.group ? 
+            {name:this.props.group.name,label:this.props.group.label} : 
+                {name:'UNDEFINED', label:<i>Everyone</i>}}
+        options={typeOptions}
+        onChange={_groupSelect.bind(this)}
+        clearable={false}
+        searchable={false} className='form-group'/>
+      <span className='help-block'>Select group</span>
+    </div>
+  );
+ 
     var addFavouriteText;
     if(this.props.favourite){
       addFavouriteText = 'Buttons.UpdateFavourite';
@@ -279,7 +351,12 @@ var AnalyticsMap = React.createClass({
         filter = (
           <Bootstrap.ListGroupItem>
             <div className="row">
-              {populationEditor}
+                  <div className='col-md-3'>
+                    {groupTypeSelect}
+                  </div>
+                  <div className='col-md-3' >
+                    {groupSelect}
+                  </div>
             </div>
           </Bootstrap.ListGroupItem>
         );
@@ -321,11 +398,6 @@ var AnalyticsMap = React.createClass({
       <div className="header-wrapper">
         <i className='fa fa-map fa-fw'></i>
         <span style={{ paddingLeft: 4 }}>Map</span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 0, display : (this.props.editor ? 'block' : 'none' ) }}>
-          <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, null)}>
-            <i className='fa fa-rotate-left fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
         <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
           <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'source')}>
             <i className='fa fa-database fa-fw'></i>
@@ -395,9 +467,9 @@ var AnalyticsMap = React.createClass({
     mapFilterTags.push(
       <FilterTag key='source' text={ this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source} icon='database' />
     );
-    
+
     const timelineMin = this.props.map.timeline && this.props.map.timeline.min || 0;
-    const timelineMax = this.props.map.timeline && this.props.map.timeline.max || 1000;
+    const timelineMax = this.props.map.timeline && this.props.map.timeline.max || 0;
     map = (
       <Bootstrap.ListGroup fill>
         {filter}
@@ -410,7 +482,7 @@ var AnalyticsMap = React.createClass({
           >
             <LayersControl position='topright'> 
               <TileLayer />
-              
+
               <DrawControl
                 onFeatureChange={_onFeatureChange.bind(this)}
               />
@@ -419,7 +491,7 @@ var AnalyticsMap = React.createClass({
                 <Choropleth
                   name='Areas'
                   data={this.props.map.features}
-                  legend='bottomright'
+                  legend={timelineMax === 0 ? null : 'bottomright'}
                   valueProperty='value'
                   scale={['white', 'red']}
                   limits={[timelineMin, timelineMax]}
@@ -521,7 +593,10 @@ function mapStateToProps(state) {
       isBeingEdited: state.map.isBeingEdited,
       filtersChanged: state.map.filterChanged,
       defaultFavouriteValues : state.map.defaultFavouriteValues,
-      metersLocations: state.map.metersLocations
+      metersLocations: state.map.metersLocations,
+      groups:state.map.groups,
+      group:state.map.group,
+      populationType:state.map.populationType
   };
 }
 
@@ -529,7 +604,8 @@ function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getChart,
                                                      setEditor, setEditorValue, setTimezone,
-                                                     addFavourite, updateFavourite, setEditorValuesBatch, getMetersLocations}) , dispatch)
+                                                     addFavourite, updateFavourite, setEditorValuesBatch, 
+                                                     getMetersLocations, getGroups, filterByType, setGroup}) , dispatch)
   };
 }
 

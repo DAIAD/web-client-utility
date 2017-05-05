@@ -1,5 +1,6 @@
 var queryAPI = require('../api/query');
 var mapAPI = require('../api/map');
+var groupAPI = require('../api/group');
 var favouritesAPI = require('../api/favourites');
 var moment = require('moment');
 var types = require('../constants/MapActionTypes');
@@ -134,6 +135,13 @@ var _setEditorValue = function(editor, value) {
   };
 };
 
+var _setGroup = function(group) {
+  return {
+    type : types.MAP_SET_GROUP,
+    group : group
+  };
+};
+
 var metersLocationsRequest = function () {
   return {
     type: types.MAP_METERS_LOCATIONS_REQUEST
@@ -148,6 +156,24 @@ var metersLocationsResponse = function(success, errors, data) {
     data
   };
 }
+
+var getGroupsInit = function() {
+  return {
+    type : types.MAP_GROUPS_REQUEST
+  };
+};
+
+var getGroupsComplete = function(success, errors, total, groups, index, size) {
+  return {
+    type : types.MAP_GROUPS_RESPONSE,
+    success : success,
+    errors : errors,
+    total : total,
+    groups : groups,
+    index : index,
+    size : size
+  };
+};
 
 var MapActions = {
   setEditor : function(key) {
@@ -238,7 +264,12 @@ var MapActions = {
 
           geometry = null;
         }
-        dispatch(_setEditorValue('population', population));
+
+        var groupPop = {group:population};
+        //filterBytype
+        dispatch(MapActions.setGroup(groupPop));
+        
+        //dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
         dispatch(_setEditorValue('spatial', geometry));
         dispatch(_setEditorValue('source', source));
@@ -364,7 +395,31 @@ var MapActions = {
          dispatch(metersLocationsResponse(false, error));
        });
     };
-  }
+  },
+  getGroups : function() {
+    return function(dispatch, getState) {
+      dispatch(getGroupsInit());
+      return groupAPI.getGroups(getState().userCatalog.query).then(function(response) 
+        {
+          dispatch(getGroupsComplete(response.success, response.errors, response.total, 
+              response.groups, response.index, response.size));
+        }, function(error) {
+          dispatch(getGroupsComplete(false, error));
+      });
+    };
+  },
+  filterByType : function(type) {
+    return {
+      type : types.MAP_FILTER_GROUP_BY_TYPE,
+      groupType : type
+    };
+  },
+  setGroup : function(group) {
+    return function(dispatch, getState) {
+      dispatch(_setGroup(group));
+      dispatch(MapActions.setEditorValue('population', group.group));
+    };
+  }  
 };
 
 module.exports = MapActions;
