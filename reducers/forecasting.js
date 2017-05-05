@@ -104,7 +104,11 @@ var dataReducer = function(state, action) {
         filtered : filteredRows,
         features : _extractFeatures(state || [])
       };
-    
+
+    case types.FORECASTING_GROUP_CATALOG_REQUEST :
+      return Object.assign({}, state, {
+        isLoading : true
+      });    
     case types.FORECASTING_GROUP_CATALOG_RESPONSE:
 
       if (action.success === true) {
@@ -205,8 +209,6 @@ var admin = function(state, action) {
         isLoading : false
       });
     case types.FORECASTING_GROUP_CATALOG_RESPONSE:
-      action.groupType = state.query.type;
-      action.name = state.query.name;
       return Object.assign({}, state, {
         isLoading : false,
         groups : dataReducer(state.data, action)

@@ -23,22 +23,7 @@ var _filterByType = function(e) {
 };
 
 var _groupSelect = function(e) {
-
-  //var profile = this.props.profile;
   this.props.actions.setGroup(e);
-//  var population;
-//  if(e.group.type === 'SEGMENT'){
-//    
-//    var clusterKey = this.props.config.utility.clusters.filter((cluster) => cluster.name == e.group.cluster);
-//    population = [{group: e.group.key, label:"CLUSTER:" + clusterKey[0].key + ":" + e.group.key, type:"GROUP"}];
-//    this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
-//    
-//  } else if (e.group.type === 'SET') {
-//  
-//    population = [{group: e.group.key, label:"GROUP:" + e.group.key + '/' + e.name, type:"GROUP"}];
-//    this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
-//  }
-  
   this.setState({isFavourite:false});
 };
 
@@ -50,6 +35,7 @@ var _onUserSelect= function(e) {
 //    }
 //  }
   this.props.actions.setUser(e);
+  this.setState({dirty:true});
 };
 
 var Forecasting = React.createClass({
@@ -60,6 +46,7 @@ var Forecasting = React.createClass({
   getInitialState() {
     return {
       isFavourite: false,
+      dirty:true
     };
   },
   
@@ -86,31 +73,7 @@ var Forecasting = React.createClass({
     }
     
     this.props.actions.setInterval([picker.startDate, picker.endDate]);
-    
-//    var profile = this.props.profile;
-//    var group = null;
-//    var q = this.props.forecasting.query;
-//    
-//    var groupType = q.queries[0].population[0].type;
-//
-//    if(groupType === 'UTILITY'){
-//      group = null;
-//      this.props.actions.getUtilityChart(null, profile.utility.key, profile.utility.name, profile.timezone);
-//    } else if(groupType === 'GROUP'){
-//      var [g, r] =  population.fromString(q.queries[0].population[0].label);
-//      if(!g.clusterKey){
-//        group = [{group: g.key, label:"GROUP:" + g.key + '/' + q.title, type:"GROUP"}];
-//        this.props.actions.getUtilityChart(group, profile.utility.key, profile.utility.name, profile.timezone);
-//
-//      } else {
-//        group = [{group: g.key, label:"CLUSTER:" + g.clusterKey + ":" + g.key, type:"GROUP"}];
-//        this.props.actions.getUtilityChart(group, profile.utility.key, profile.utility.name, profile.timezone);
-//      }
-//    } 
-//    
-//    if(this.props.forecasting.user){
-//      this.props.actions.getUserChart(this.props.forecasting.user.value, this.props.forecasting.user.label, profile.timezone);
-//    }
+
   },
 
   _addFavourite: function() {
@@ -154,12 +117,19 @@ var Forecasting = React.createClass({
         this.props.actions.getUtilityChart(population, profile.utility.key, profile.utility.name, profile.timezone);
       }
     }
-    
+//    if(this.props.forecasting.user){
+//      this.props.actions.getUserChart(this.props.forecasting.user.value, this.props.forecasting.user.label, profile.timezone);
+//    }
+  },
+  
+  _userRefresh: function() {
+    var profile = this.props.profile;
     if(this.props.forecasting.user){
       this.props.actions.getUserChart(this.props.forecasting.user.value, this.props.forecasting.user.label, profile.timezone);
     }
+    this.setState({dirty:false});
   },
-
+  
   render: function() {
 
     var defaults= {
@@ -268,7 +238,7 @@ var Forecasting = React.createClass({
         <span className='help-block'>Filter group type</span>
     </div>
   );
- 
+
   var groupSelect = (
     <div>
       <Select name='group'
@@ -301,6 +271,10 @@ var Forecasting = React.createClass({
       </div>
     );
    
+    var srs = this.props.forecasting.userSeries;
+    var chartDataHelp = srs && srs.length > 0 ? null : 
+        (this.props.forecasting.user && !this.state.dirty) ? 'No data' : null;
+        
     var content = (
       <div className='row'>
         <div className='col-lg-12'>
@@ -322,17 +296,27 @@ var Forecasting = React.createClass({
               <Bootstrap.ListGroupItem>
                 {chart1}
               </Bootstrap.ListGroupItem>
-             <Bootstrap.ListGroupItem>
-             <div className='row'>
-                  <div className='col-md-3'>
-                    <UserSearchTextBox name='username' 
-                      noResults={'Type a username...'}
-                      onChange={_onUserSelect.bind(this)}/>
+              <Bootstrap.ListGroupItem>
+              <div className='row'>
+                <div className='col-md-3'>
+                  <UserSearchTextBox name='username' 
+                    noResults={'Type a username...'}
+                    onChange={_onUserSelect.bind(this)}/>
                     <span className='help-block'>Select a single user</span>
-                  </div>
-                 </div>
-                </Bootstrap.ListGroupItem>
-              {chart2}
+                </div>
+                <div className='col-md-3'>
+                  <Bootstrap.Button bsStyle='default' onClick={this._userRefresh}>
+                    <i className='fa fa-rotate-right fa-fw'></i>
+                  </Bootstrap.Button>
+                </div>
+              </div>
+             <div className='row'>
+                <div className='col-md-3'>
+                    <span className='help-block'><i>{chartDataHelp}</i></span>
+                </div>  
+             </div>
+              </Bootstrap.ListGroupItem>
+                {chart2}
               <Bootstrap.ListGroupItem className='clearfix'>
                 <Link className='pull-right' to='/scheduler' style={{ paddingLeft : 7, paddingTop: 12 }}>Job Scheduler</Link>
               </Bootstrap.ListGroupItem>
