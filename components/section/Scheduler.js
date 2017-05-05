@@ -197,10 +197,12 @@ var Scheduler = React.createClass({
       }, {
         name: 'statusCode',
         title: 'Status Code',
-        align: 'center',
-        width: 120,
-        className: function(value) {
-          switch(value) {
+        style: {
+          align: 'center',
+          width: 120,
+        },
+        className: function(field, row) {
+          switch(row[field.name]) {
             case 'FAILED':
               return 'log_error';
             case 'COMPLETED':
@@ -214,10 +216,12 @@ var Scheduler = React.createClass({
       }, {
         name: 'exitCode',
         title: 'Exit Code',
-        align: 'center',
-        width: 120,
-        className: function(value) {
-          switch(value) {
+        style: {
+          align: 'center',
+          width: 120,
+        },
+        className: function(field, row) {
+          switch(row[field.name]) {
             case 'FAILED':
               return 'log_error';
             case 'COMPLETED':
@@ -296,6 +300,11 @@ var Scheduler = React.createClass({
               <Bootstrap.ListGroup fill>
                 <Bootstrap.ListGroupItem>
                   <Table  
+                    sortable
+                    sorter={{
+                      defaultSort: 'category',
+                      defaultOrder: 'desc',
+                    }}
                     fields={jobTableFields}
                     data={jobTableData}
                     template={{empty : jobDataNotFound}}
