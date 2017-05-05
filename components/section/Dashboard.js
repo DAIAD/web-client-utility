@@ -241,7 +241,9 @@ var Dashboard = React.createClass({
           overlap={overlap}
         />
       ); 
-
+     var link = (
+       <Link className='pull-right' to='/analytics/panel' style={{ paddingLeft : 7, paddingTop: 12 }}>View Chart Analytics</Link>
+     ); 
       var chartPanel = (
       <Bootstrap.Panel header={chartTitle}>
         <Bootstrap.ListGroup fill>
@@ -253,7 +255,7 @@ var Dashboard = React.createClass({
               {chartFilterTags}
             </div>
             <span style={{ paddingLeft : 7}}> </span>
-            <Link className='pull-right' to='/analytics' style={{ paddingLeft : 7, paddingTop: 12 }}>View analytics</Link>
+           {link}
           </Bootstrap.ListGroupItem>
         </Bootstrap.ListGroup>
       </Bootstrap.Panel>
@@ -370,6 +372,9 @@ var Dashboard = React.createClass({
           </Timeline>
         </Bootstrap.ListGroupItem>
         */
+     var link = (
+       <Link className='pull-right' to='analytics/map' style={{ paddingLeft : 7, paddingTop: 12 }}>View Map Analytics</Link>
+     );  
      var map = (
       <Bootstrap.ListGroup fill>
         <Bootstrap.ListGroupItem>
@@ -446,7 +451,7 @@ var Dashboard = React.createClass({
             {mapFilterTags}
           </div>
           <span style={{ paddingLeft : 7}}> </span>
-          <Link className='pull-right' to='/analytics' style={{ paddingLeft : 7, paddingTop: 12 }}>View analytics</Link>
+         {link}
         </Bootstrap.ListGroupItem>   
       </Bootstrap.ListGroup>
       );      
@@ -538,7 +543,9 @@ var Dashboard = React.createClass({
           scaleTimeAxis={false}
         />
       ); 
-
+     var link = (
+       <Link className='pull-right' to='/forecasting' style={{ paddingLeft : 7, paddingTop: 12 }}>View Forecast</Link>
+     ); 
       var chartPanel = (
       <Bootstrap.Panel header={chartTitle}>
         <Bootstrap.ListGroup fill>
@@ -550,7 +557,7 @@ var Dashboard = React.createClass({
               {chartFilterTags}
             </div>
             <span style={{ paddingLeft : 7}}> </span>
-            <Link className='pull-right' to='/analytics' style={{ paddingLeft : 7, paddingTop: 12 }}>View analytics</Link>
+           {link}
           </Bootstrap.ListGroupItem>
         </Bootstrap.ListGroup>
       </Bootstrap.Panel>

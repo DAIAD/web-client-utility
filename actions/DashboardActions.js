@@ -486,11 +486,8 @@ var getTimeline = function(favourite) {
 
       var population, source, geometry, interval, timezone;
 
-      population = {
-          utility: favourite.queries[0].population[0].utility,
-          label: favourite.queries[0].population[0].label,
-          type: favourite.queries[0].population[0].type
-      };
+      population = favourite.queries[0].population[0];
+
       interval = [moment(favourite.queries[0].time.start),
                     moment(favourite.queries[0].time.end)];
       source = favourite.queries[0].source;
