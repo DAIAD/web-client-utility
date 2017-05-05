@@ -73,7 +73,7 @@ var group = function(state, action) {
         if (key === action.key) {
           state.currentMembers[key].favourite = action.favourite;
         }
-      };
+      }
       return Object.assign({}, state, {
         isLoading : false,
         currentMembers : state.currentMembers || [],

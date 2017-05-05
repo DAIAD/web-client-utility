@@ -84,6 +84,13 @@ var deleteGroupComplete = function(success, errors) {
   };
 };
 
+var setChartMetric = function(metric) {
+  return {
+    type : types.GROUP_CATALOG_SET_METRIC,
+    metric : metric
+  };
+};
+
 var GroupCatalogActionCreators = {
 
   changeIndex : function(index) {
@@ -137,7 +144,7 @@ var GroupCatalogActionCreators = {
   },
   
   getGroupChart : function(group, key, name, timezone) {
-
+    
     return function(dispatch, getState) {
       var promises =[];
 
@@ -274,13 +281,14 @@ var GroupCatalogActionCreators = {
     };
   },
 
-  setChartMetric : function(metric) {
-    return {
-      type : types.GROUP_CATALOG_SET_METRIC,
-      metric : metric
+  setChartMetric : function(metric, name, timezone) {
+    return function(dispatch, getState) {
+      dispatch(setChartMetric(metric));
+      var obj = getState().groupCatalog.charts;
+      Object.keys(obj).map((key) => 
+        dispatch(GroupCatalogActionCreators.getGroupChart(obj[key].query.queries[0].population, key, name, timezone)));
     };
   }
-
 };
 
 module.exports = GroupCatalogActionCreators;
