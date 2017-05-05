@@ -18,7 +18,7 @@ var SavingsPotentialExplore = React.createClass({
     const _t = x => intl.formatMessage({ id: x });
     
     const { id } = params;
-    const scenario = scenarios.find(scenario => scenario.id === id);
+    const scenario = scenarios.find(scenario => scenario.key === id);
 
     if (!clusters) return null;
     if (scenario == null) {
@@ -36,8 +36,8 @@ var SavingsPotentialExplore = React.createClass({
       );
     } 
   
-    const { id:scenarioId, name, createdOn, completedOn, user, params:parameters, paramsShort, potential } = scenario; 
-    const completed = completedOn != null;
+    const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential } = scenario; 
+    const completed = processingEndOn != null;
     const details = [{
       id: 1,
       display: 'stat',
@@ -45,7 +45,7 @@ var SavingsPotentialExplore = React.createClass({
       highlight: null,
       info: [{
         key: 'User',
-        value: user
+        value: owner,
       },
       {
         key: 'Created on',
@@ -53,7 +53,7 @@ var SavingsPotentialExplore = React.createClass({
       },
       {
         key: 'Completed on',
-        value: completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
+        value: processingEndOn ? <FormattedTime value={processingEndOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
       }]
     },
     {
@@ -89,7 +89,6 @@ var SavingsPotentialExplore = React.createClass({
       });
       
       clusters.forEach((cluster, i) => {
-
         stats.push({
           id: i + 4,
           title: cluster.name,

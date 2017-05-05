@@ -272,12 +272,12 @@
           }
         }
       },
-      "who": {
+      "population": {
         "title": "Who",
         "description": "Select all population or narrow savings potential calculation to selected groups",
         "modal": "Segmentation filtering"
       },
-      "where": {
+      "spatial": {
         "title": "Where",
         "description": "Select all areas or narrow savings potential calculation to selected areas",
         "modal": "Location filtering"
@@ -292,7 +292,7 @@
         "description": " ",
         "modal": "Location exclusions"
       },
-      "when": {
+      "time": {
         "title": "Data",
         "description": "Data reference range",
         "options": {
@@ -305,7 +305,7 @@
         "to": "To",
         "help": "Specify the time range you are interested in"
       },
-      "name": {
+      "title": {
         "title": "Name",
         "description": "Select descriptive name",
         "help": "Enter name..."
@@ -338,10 +338,11 @@
       "empty": "No data",
       "name": "Name",
       "potential": "Savings Potential",
-      "user": "User",
+      "owner": "User",
       "paramsShort": "Parameters",
       "createdOn": "Created",
       "completedOn": "Calculated",
+      "status": "Status",
       "explore": "Explore",
       "delete": "Delete"
     },

@@ -23,60 +23,40 @@ const validateWhere = value => {
 };
 
 const validateWhen = (value) => {
-  if (!value || !value.startDate || !value.endDate) {
+  if (!value || !value.start || !value.end) {
     throw 'noWhen';
   }
-  else if (isNaN(Date.parse(new Date(value.startDate)))) {
+  else if (isNaN(Date.parse(new Date(value.start)))) {
     throw 'fromInvalid';
   }
-  else if (isNaN(Date.parse(new Date(value.endDate)))) {
+  else if (isNaN(Date.parse(new Date(value.end)))) {
     throw 'toInvalid';
   }
-  else if (value.startDate > value.endDate)  {
+  else if (value.start > value.end)  {
     throw 'fromAfterTo';
   }
-  else if (value.endDate > new Date().valueOf()) {
+  else if (value.end > new Date().valueOf()) {
     throw 'noFuture';
   }
 };
 
 const validateName = function (value) { 
-  const existing = this.props.scenarios.map(scenario => nameToId(scenario.name));
+  //const existing = this.props.scenarios.map(scenario => nameToId(scenario.name));
   if (!value.name) {
     throw 'noName';
   }
+  /*
   else if (existing.includes(nameToId(value.name))) {
     throw 'nameExists';
-  }
+    }
+    */
 };
 
 var SavingsPotentialAdd = React.createClass({
-  componentWillMount: function() {
-    const utility = this.props.profile.utility;
-    //TODO: temp way to load areas in state
-    if(!this.props.areas) {
-      const population = {
-          utility: utility.key,
-          label: utility.name,
-          type: 'UTILITY'
-      };
-      this.props.actions.getTimeline(population);
-    }
-  },
-  //TODO: have to create geojson from areas object since API not ready yet
-  getGeoJSON: function(areasObj) {
-    if (!areasObj) return {};
-    const areas = Object.keys(areasObj).map(key => areasObj[key]);
+  getGeoJSON: function(areas) {
     return {
       type : 'FeatureCollection',
-      features : areas.map(area => ({
-        'type' : 'Feature',
-        'geometry' : area.geometry,
-        'properties' : {
-          'label' : area.label,
-          'cluster': 'area'
-        }
-      })),
+      features : areas.map(area => this.getFeature(area)),
       crs : {
         type : 'name',
         properties : {
@@ -85,11 +65,30 @@ var SavingsPotentialAdd = React.createClass({
       }
     };
   },
+  getFeature: function (area) {
+    return {
+      'type' : 'Feature',
+      'geometry' : area.geometry,
+      'properties' : {
+        'label' : area.title,
+        'clusterKey': area.groupKey,
+        'value': area.key,
+      }
+    };
+  },
   render: function() {
-    const { utility, groups, clusters, segments, areas, actions, validationError, intl } = this.props;
-    const { setValidationError, addSavingsScenario, goToListView } = actions;
+    const { utility, groups, clusters, actions, validationError, intl } = this.props;
+    const { setValidationError, addSavingsScenario, goToListView, querySavingsScenarios } = actions;
     const _t = x => intl.formatMessage({ id: x });
-    const geojson = this.getGeoJSON(areas);
+
+    const geojson = this.getGeoJSON(this.props.areas);
+    const areas =  this.props.areas.map(area => ({
+      key: area.key,
+      value: area.key,
+      label: area.title,
+      feature: this.getFeature(area),
+    })); 
+
     return (
       <bs.Panel header={<h3>{_t('Savings.Add.title')}</h3>}>
         <bs.Row>
@@ -99,12 +98,16 @@ var SavingsPotentialAdd = React.createClass({
       </bs.Row>
       <hr/>
         <Wizard
-          onComplete={(values) => { addSavingsScenario(values); goToListView(); }}
+          onComplete={(values) => { 
+            addSavingsScenario(values)
+            .then(() => querySavingsScenarios()); 
+            goToListView(); 
+          }}
           validateLive
           childrenProps={{ intl }}
           > 
           <SelectWho
-            id='who'
+            id='population'
             title='Who'
             description='Select all population or narrow savings potential calculation to selected groupsn'
             utility={utility}
@@ -113,24 +116,15 @@ var SavingsPotentialAdd = React.createClass({
             validate={validateWho}
           />
           <SelectWhere
-            id='where'
+            id='spatial'
             title='Where'
             description='Select all areas or narrow savings potential calculation to selected areas'
-            utility={utility}
-            clusters={segments.map(segment => ({ 
-              ...segment, 
-              groups: geojson.features ? geojson.features.map(f => ({ 
-                feature: f,
-                clusterKey: f.properties.cluster, 
-                name: f.properties.label, 
-                key: f.properties.label 
-              })) : [] 
-            }))}
+            areas={areas}
             initialValue={{}}
             validate={validateWhere}
           />
           <SelectWhen
-            id='when'
+            id='time'
             title='Data'
             description='Data to be used for savings potential calculation, last year or custom'
             initialValue={{}}
@@ -139,7 +133,7 @@ var SavingsPotentialAdd = React.createClass({
           <SetName
             title='Name'
             description='Select a descriptive name for your scenario'
-            id='name'
+            id='title'
             initialValue=''
             validate={validateName.bind(this)}
           />
