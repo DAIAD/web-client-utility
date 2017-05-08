@@ -9,17 +9,18 @@ var { FormattedDate } = require('react-intl');
 var Widget = require('../../Widget');
 
 var ActiveBudgets = React.createClass({ 
+  componentWillMount: function () {
+    this.props.actions.fetchActiveBudgets(); 
+  },
   render: function() {
-    const { budgets:AllBudgets, actions } = this.props;
+    const { active, actions } = this.props;
     const { goToListView } = actions;
-
 
     //TODO: have to unify this with Explore view widgets handling
     // leaving as is for now for mockup purposes
-    const budgets = AllBudgets
-    .filter(b => b.active)
+    const budgets = active
     .map(budget => {
-      const { activatedOn, createdOn, completedOn, parameters, params, user, updatedOn, expectation, actual, overlap, consumers } = budget;
+      const { activatedOn, createdOn, completedOn, parameters, params, user, updatedOn, expectation = {}, actual = {}, overlap = null, numberOfConsumers } = budget;
       const completed = completedOn != null;
       const active = activatedOn != null;
       const lastYear = 2015;
@@ -29,15 +30,15 @@ var ActiveBudgets = React.createClass({
         id: 1,
         display: 'stat', 
         title: 'Budget goal',
-        highlight: `${expectation.savings}%`, 
+        highlight: expectation.savings ? `${expectation.savings}%` : '-', 
         info: [{
-          value: <span><b>{`${expectation.budget} M liters`}</b> {`${expectation.budget < 0 ? 'less' : 'more'} than ${lastYear}`}</span>
+          value: <span><b>{`${expectation.budget || '-'} lt`}</b> {`${expectation.budget < 0 ? 'less' : 'more'} than ${lastYear}`}</span>
         },
         {
-          value: <span><b>{`Max ${expectation.max}% | Min ${expectation.min}%`}</b></span>
+          value: <span><b>{`Max ${expectation.max || '-'}% | Min ${expectation.min || '-'}%`}</b></span>
         },
         {
-          value: <span><b>{`${consumers} Consumers`}</b></span>
+          value: <span><b>{`${numberOfConsumers} Consumers`}</b></span>
         }],
         footer: <span>{ activatedOn ? <span>Set: <FormattedDate value={activatedOn} day='numeric' month='numeric' year='numeric' /></span> : 'Inactive'}</span>,
 
@@ -48,7 +49,7 @@ var ActiveBudgets = React.createClass({
         title: 'Savings',
         highlight: actual.savings ?  `${actual.savings}%` : '-',
         info: [{
-          value: <span><b>{`${actual.budget || '-'} M liters`}</b> {`${actual.budget ? (actual.budget < 0 ? 'less' : 'more') : '-'} than ${lastYear}`}</span>
+          value: <span><b>{`${actual.budget || '-'} lt`}</b> {`${actual.budget ? (actual.budget < 0 ? 'less' : 'more') : '-'} than ${lastYear}`}</span>
         },
         {
           value: <span><b>{`Max ${actual.max || '-'}% | Min ${actual.min || '-'}%`}</b></span>
@@ -97,7 +98,7 @@ var ActiveBudgets = React.createClass({
       }
       return {
         name: budget.name,
-        id: budget.id,
+        key: budget.key,
         widgets
       };
     });
@@ -110,14 +111,19 @@ var ActiveBudgets = React.createClass({
           </bs.Col>
         </bs.Row>
         <hr />
+        { budgets.length === 0 ?
+          <h4>No active budgets</h4>
+          :
+          <span />
+        }
         {
         budgets.map((budget, i) =>  
           <bs.Row key={i} style={{ marginBottom: 10 }} >
-            <Link to={`/budgets/${budget.id}`}><h3 style={{ marginLeft: 20, marginTop: 0 }}>{budget.name}</h3></Link>
+            <Link to={`/budgets/${budget.key}`}><h3 style={{ marginLeft: 20, marginTop: 0 }}>{budget.name}</h3></Link>
             {
               budget.widgets.map(widget => (
                 <bs.Col md={4}
-                  key={widget.id} 
+                  key={widget.key} 
                   >
                   <Widget {...widget} />
               </bs.Col>

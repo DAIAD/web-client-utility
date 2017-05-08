@@ -8,19 +8,24 @@ var theme = require('../../chart/themes/blue-palette');
 
 var SavingsPotentialExplore = React.createClass({ 
   componentWillMount: function() {
-    if (!this.props.metersLocations || !this.props.metersLocations.features) {
-      this.props.actions.getMetersLocations();
+    if (this.props.clusters) {
+      this.props.actions.exploreScenariosAllClusters(this.props.params.id);
+    }
+  },
+  componentWillReceiveProps: function (nextProps) {
+    if (nextProps.clusters && !this.props.clusters) {
+      this.props.actions.exploreScenariosAllClusters(this.props.params.id);
     }
   },
   render: function() {
-    const { scenarios, clusters, actions, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
-    const { goToListView, confirmRemoveScenario } = actions;
+    const { scenarios, actions, explore, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
+    const { clusters } = explore;
+    const { goToListView, confirmRemoveScenario, refreshSavingsScenario } = actions;
     const _t = x => intl.formatMessage({ id: x });
     
     const { id } = params;
-    const scenario = scenarios.find(scenario => scenario.id === id);
+    const scenario = scenarios.find(scenario => scenario.key === id);
 
-    if (!clusters) return null;
     if (scenario == null) {
       return (
         <bs.Panel header={<h3>404</h3>}>
@@ -36,8 +41,8 @@ var SavingsPotentialExplore = React.createClass({
       );
     } 
   
-    const { id:scenarioId, name, createdOn, completedOn, user, params:parameters, paramsShort, potential } = scenario; 
-    const completed = completedOn != null;
+    const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential, numberOfConsumers, status } = scenario; 
+    const completed = processingEndOn != null;
     const details = [{
       id: 1,
       display: 'stat',
@@ -45,7 +50,7 @@ var SavingsPotentialExplore = React.createClass({
       highlight: null,
       info: [{
         key: 'User',
-        value: user
+        value: owner,
       },
       {
         key: 'Created on',
@@ -53,7 +58,7 @@ var SavingsPotentialExplore = React.createClass({
       },
       {
         key: 'Completed on',
-        value: completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
+        value: processingEndOn ? <FormattedTime value={processingEndOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
       }]
     },
     {
@@ -78,21 +83,20 @@ var SavingsPotentialExplore = React.createClass({
 
     const stats = [];
 
-    if (completed) {
+    if (completed && Array.isArray(clusters)) {
       details.push({
         id: 3,
         display: 'stat',
         title: 'Savings Potential',
-        highlight: potential,
+        highlight: <span><span>{`${potential} \u33A5`}</span><h4>{numberOfConsumers ? `${numberOfConsumers} consumers` : null}</h4></span>,
         info: [],
         footer: null,
       });
       
       clusters.forEach((cluster, i) => {
-
         stats.push({
           id: i + 4,
-          title: cluster.name,
+          title: cluster.clusterName,
           display: 'chart',
           maximizable: true,
           viewportWidth,
@@ -102,29 +106,30 @@ var SavingsPotentialExplore = React.createClass({
           },
           theme,
           yAxis: {
-            formatter: y => y.toString() + '%',
+            formatter: y => Math.round(y / 1000),
           },
           xAxis: {
-            data: cluster.groups.map(x => x.name)
+            data: cluster.segments.map(x => x.name)
           },
           grid: {
-            x: Math.max(Math.max(...cluster.groups.map(group => group.name.length))*6.5, 45) + 'px',
+            x: Math.max(Math.max(...cluster.segments.map(group => group.name.length))*6.5, 45) + 'px',
           },
           series: [
             {
               name: cluster.name,
               color: (name, data, dataIndex) => theme.color.find((x, i, arr) => i  === dataIndex % arr.length),
               label: {
-                formatter: y => y.toString() + '%',
+                formatter: y => `${Math.round(y / 1000)} \u33A5`,
               },
               fill: 0.8,
-              data: cluster.groups.map(x => Math.round(Math.random()*50))
+              data: cluster.segments.map(x => Math.round(x.potential))
             }
           ]
         });
       
       });
       
+      /*
       stats.push({
         id: 25,
         display: 'map',
@@ -136,7 +141,8 @@ var SavingsPotentialExplore = React.createClass({
         map: {},
         data: metersLocations && metersLocations.features ? 
           metersLocations.features.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0], Math.abs(Math.random()-0.8)]) : []
-      });
+          });
+        */
     }
 
     return (
@@ -158,14 +164,29 @@ var SavingsPotentialExplore = React.createClass({
               >
               { _t('Savings.Explore.delete') }
             </bs.Button>
+            {
+              status !== 'PENDING' && status !== 'RUNNING' && status !== 'COMPLETED' ? 
+                <bs.Button
+                  bsStyle='warning'
+                  style={{ float: 'right', marginRight: 25 }}
+                  onClick={() => refreshSavingsScenario(scenarioId)}
+                  >
+                  { _t('Savings.List.refresh') }
+                </bs.Button>
+                :
+                  <span />
+           }
+          </bs.Col>
+          <bs.Col md={3} style={{ float: 'left' }}>
+            <h5>Status: { status }</h5>
           </bs.Col>
         </bs.Row>
         <hr/>
+
         <WidgetRow
           widgets={details}
         />
       </bs.Panel>
-
       { 
         completed ?
           <div>

@@ -2,7 +2,7 @@ var React = require('react');
 var bs = require('react-bootstrap');
 var CheckboxGroup = require('react-checkbox-group');
 var DisplayParams = require('../../DisplayParams');
-var { getFriendlyParams } = require('../../../helpers/wizard');
+var { getFriendlyParams, getPopulationValue, getAllPopulationGroups } = require('../../../helpers/wizard');
 
 var WhoItem = React.createClass({
   getInitialState: function() {
@@ -21,22 +21,9 @@ var WhoItem = React.createClass({
       this.setState({ selectedGroups: [] });
     }
   },
-  getValue: function(selected, label) {
-    if (selected === 'all') { 
-      return { selected: 'all', type: 'UTILITY', utility: this.props.utility, label }
-    }
-    return { type: 'GROUP', group: selected, label };
-  },
-  getAllGroups: function() {
-    if (!this.props.clusters) return [];
-    return this.props.clusters
-    .map(cluster => cluster.groups
-         .map(group => ({ ...group, value: this.getValue(group.key, `${cluster.name}: ${group.name}`) })))
-    .reduce((p, c) => [...p, ...c], []);
-  },
   valueToGroups: function(value) {
     return Array.isArray(value) ? 
-      this.getAllGroups().filter(group => value.find(g => g.group === group.key) ? true : false)
+      getAllPopulationGroups(this.props.clusters, this.props.utility).filter(group => value.find(g => g.group === group.key) ? true : false)
         :
           [];
   },
@@ -50,7 +37,7 @@ var WhoItem = React.createClass({
 
     if (!clusters) return null;
 
-    const allGroups = this.getAllGroups();
+    const allGroups = getAllPopulationGroups(this.props.clusters, this.props.utility);
     
     const displayParams = clusters.map(cluster => {
       const selectedClusterGroups = selectedGroups.filter(group => group.clusterKey === cluster.key);
@@ -65,7 +52,7 @@ var WhoItem = React.createClass({
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
             { !noAll ? 
-              <bs.Button bsSize='large' bsStyle={value.selected === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => { setValue(this.getValue('all', allLabel)); }}>{allLabel}</bs.Button>
+              <bs.Button bsSize='large' bsStyle={value.selected === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => { setValue(getPopulationValue('all', allLabel, this.props.utility)); }}>{allLabel}</bs.Button>
               : 
                 <div />
             }

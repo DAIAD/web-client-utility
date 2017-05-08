@@ -323,32 +323,30 @@ function Row (props) {
 function Cell (props) {
   const { row, field } = props;
 
-  const content = wrapWithLink(getCell(field, row), field.link, row);
-
   const style = getPropertyValue(field.style, field, row);
   const className = getPropertyValue(field.className, field, row);
 
+  const content = wrapWithLink(getCell(field, row, className), field.link, row);
+
   return (
-    <td
-      style={style} 
-      className={className}>
-        {content}
+    <td style={style}>
+      {content}
     </td>
   );
 }
 
 //helper functions
-function getCell (field, row) {
+function getCell (field, row, className) {
 
   const value = row[field.name];
 
   //only action, alterable boolean allowed to have falsy value
   if (field.type !== 'action' && field.type !== 'alterable-boolean' && !value) {
-    return <span />;
+    return <div />;
   }
 
   if (!field.type) {
-    return <span>{value}</span>;
+    return <div className={className}>{value}</div>;
   }
   else if (field.type === 'action') {
     
@@ -367,12 +365,12 @@ function getCell (field, row) {
           style={style}
           onClick={clickHandler}
           >
-          { image ? <img src={image} /> : <span /> }
+          { image ? <img src={image} /> : <div /> }
         </i>
       );
     }
     else {
-      return <span />;
+      return <div />;
     }
   }
   else if (field.type === 'datetime') {

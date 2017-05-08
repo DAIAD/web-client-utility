@@ -395,7 +395,7 @@
         "description": "Select a precomputed savings scenario"
       },
       "savings": {
-        "title": "Goal",
+        "title": "Scenario percent",
         "description": "Set global savings percentage",
         "help": "0-100 of max"
       },
@@ -407,37 +407,37 @@
         "title": "Distribution",
         "description": " ",
         "options": {
-          "equally": {
-            "label": "Equally",
-            "value": "Equally"
+          "equal": {
+            "label": "Equal",
+            "value": "Equal"
           },
-          "fairly": {
-            "label": "Fairly",
-            "value": "Fairly"
+          "fair": {
+            "label": "Fair",
+            "value": "Fair"
           }
         }
       },
-      "who": {
+      "population": {
         "title": "Who",
         "description": "Select all population or narrow savings potential calculation to selected groups",
         "modal": "Segmentation filtering"
       },
-      "where": {
+      "spatial": {
         "title": "Where",
         "description": "Select all areas or narrow savings potential calculation to selected areas",
         "modal": "Location filtering"
       },
-      "excludeWho": {
+      "excludePopulation": {
         "title": "Exclude groups",
         "description": " ",
         "modal": "Segmentation exclusions"
       },
-      "excludeWhere": {
+      "excludeSpatial": {
         "title": "Exclude areas",
         "description": " ",
         "modal": "Location exclusions"
       },
-      "when": {
+      "time": {
         "title": "Data",
         "description": "Data reference range",
         "options": {
@@ -450,7 +450,7 @@
         "to": "To",
         "help": "Specify the time range you are interested in"
       },
-      "name": {
+      "title": {
         "title": "Name",
         "description": "Select descriptive name",
         "help": "Enter name..."
@@ -480,14 +480,16 @@
   "Savings": {
     "List": {
       "title": "Available scenarios",
-      "empty": "No data",
+      "empty": "No scenarios",
       "name": "Name",
-      "potential": "Savings Potential",
-      "user": "User",
+      "potential": "Savings Potential (\u33A5)",
+      "owner": "User",
       "paramsShort": "Parameters",
       "createdOn": "Created",
       "completedOn": "Calculated",
+      "status": "Status",
       "explore": "Explore",
+      "refresh": "Rerun",
       "delete": "Delete"
     },
     "Explore": {
@@ -503,15 +505,18 @@
   "Budgets": {
     "List": {
       "title": "Available budgets",
+      "empty": "No budgets",
       "search": "Search...",
       "name": "Name",
       "active": "Active",
+      "consumers": "Consumers",
       "paramsShort": "Parameters",
-      "user": "User",
+      "owner": "User",
       "createdOn": "Created",
-      "completedOn": "Calculated",
+      "updatedOn": "Updated",
       "activatedOn": "Activated",
       "explore": "Explore",
+      "refresh": "Update now",
       "delete": "Delete"
 
     },

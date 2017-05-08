@@ -5,8 +5,8 @@ var { FormattedMessage } = require('react-intl');
 function DistributionItem (props) {
   const { value, setValue, intl } = props;
   const distributionItems = [
-    {selected: 'equally', type: 'EQUALLY', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.equally.value' })},
-    {selected: 'fairly', type: 'FAIRLY', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.fairly.value' })}
+    {selected: 'equal', type: 'EQUAL', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.equal.value' })},
+    {selected: 'fair', type: 'FAIR', label: intl.formatMessage({ id: 'Wizard.items.distribution.options.fair.value' })}
   ];
   return (
     <bs.Col md={5}>

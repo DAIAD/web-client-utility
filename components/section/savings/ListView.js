@@ -1,23 +1,56 @@
 var React = require('react');
 var bs = require('react-bootstrap');
+const _ = require('lodash');
 
 var { savingsSchema } = require('../../../schemas/savings');
 
 var Table = require('../../Table');
 
+const PAGING_SERVER_SIDE = 'server';
+
+function sortIdToSortBy (id) {
+  switch (id) {
+    case 'name':
+      return 'NAME';
+    case 'status':
+      return 'STATUS';
+    case 'createdOn':
+      return 'CREATED_ON';
+    default:
+      return '';
+  }
+}
 
 function SavingsPotentialList (props) {
-  const { actions, removeScenario, searchFilter , scenarios, intl } = props;
+  const { actions, removeScenario, query, intl } = props;
   const { removeSavingsScenario, confirmRemoveScenario, setSearchFilter, goToAddView } = actions;
 
+  const { name: searchFilter } = query;
   const _t = x => intl.formatMessage({ id: x });
 
-  const savingsScenarios = (searchFilter ? scenarios.filter(s => matches(s.name, searchFilter) || matches(s.user, searchFilter)) : (Array.isArray(scenarios) ? scenarios : []))
-  .map(scenario => ({ ...scenario, paramsShort: scenario.paramsShort.map(x => <span><span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>) }));
+  const scenarios = props.scenarios
+  .map(scenario => ({
+    ...scenario,
+    potential: scenario.potential,
+    paramsShort: scenario.paramsShort
+    .map(x => (
+      <span>
+        <span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> 
+        (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) 
+        &nbsp;
+      </span>
+    )),
+  }));
 
   const tableSorter = {
-    defaultSort: 'completedOn',
-    defaultOrder: 'desc'
+    defaultSort: 'createdOn',
+    defaultOrder: 'desc',
+    onSortChange: (sortId, sortOrder) => { 
+      props.actions.setQueryAndFetch({ 
+        sortBy: sortIdToSortBy(sortId), 
+        sortAscending: sortOrder === 'asc', 
+      }); 
+    },
   };
   return (
     <bs.Panel header={<h3>{_t('Savings.List.title')}</h3>}>
@@ -26,7 +59,12 @@ function SavingsPotentialList (props) {
         <bs.Input 
           type='text'
           placeholder='Search...'
-          onChange={(e) => setSearchFilter(e.target.value)}
+          onChange={(e) => { 
+            props.actions.setQuery({ name: e.target.value });
+            _.debounce(() => { 
+              props.actions.setQueryAndFetch({ pageIndex: 0 }); 
+            }, 300)();
+            }}
           value={searchFilter}
          />
        </bs.Col>
@@ -41,8 +79,15 @@ function SavingsPotentialList (props) {
         <hr/>
         <Table  
           sortable
-          data={savingsScenarios} 
+          data={scenarios} 
           fields={savingsSchema(actions)}
+          pager={{ 
+            count: query.total,
+            index: query.pageIndex,
+            size: query.pageSize,
+            onPageIndexChange: index => props.actions.setQueryAndFetch({ pageIndex: index }), 
+            mode: PAGING_SERVER_SIDE,
+          }}
           sorter={tableSorter}
           style={{ header: { whiteSpace: 'nowrap' }}}
           template={{empty : (<span>{ _t('Savings.List.empty') }</span>)}}

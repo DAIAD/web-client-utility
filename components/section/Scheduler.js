@@ -94,21 +94,19 @@ var Scheduler = React.createClass({
       icon: function(field, row) {
         return 'clock-o';
       },
-      style: {
-        color: function(field, row) {
-          if(!row.schedule) {
-            return '#000000';
-          }
-          switch(row.schedule.type) {
-            case 'CRON': case 'PERIOD':
-              if(row.enabled) {
-                return '#000000';
-              } else {
-                return '#9E9E9E';
-              }
-            default:
+      color: function(field, row) {
+        if(!row.schedule) {
+          return '#000000';
+        }
+        switch(row.schedule.type) {
+          case 'CRON': case 'PERIOD':
+            if(row.enabled) {
               return '#000000';
-          }
+            } else {
+              return '#9E9E9E';
+            }
+          default:
+            return '#000000';
         }
       },
       handler: (function(field, row) {
@@ -145,13 +143,11 @@ var Scheduler = React.createClass({
         }
         return 'play';
       },
-      style: {
-        color: function(field, row) {
-          if(row.running) {
-            return '#51A351';
-          }
-          return '#000000';
+      color: function(field, row) {
+        if(row.running) {
+          return '#51A351';
         }
+        return '#000000';
       },
       handler: (function(field, row) {
         if(!row.running) {
