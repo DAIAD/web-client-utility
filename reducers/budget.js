@@ -14,7 +14,6 @@ const initialState = {
     name: null,
   },
   explore: {
-    clusters: [],
     query: {
       cluster: 'none',
       group: 'all',
@@ -25,7 +24,8 @@ const initialState = {
       text: null,
       loading: false
     },
-    data: {
+    clusters: [],
+    users: {
       total: null,
       accounts: null,
       features: null,
@@ -61,7 +61,6 @@ var budget = function (state=initialState, action) {
       return Object.assign({}, state, {
         active: action.budgets,
       });
-
 
     case types.BUDGET_SET_SAVINGS_SCENARIOS: 
       return Object.assign({}, state, {
@@ -119,10 +118,10 @@ var budget = function (state=initialState, action) {
             ...state.explore.query,
             loading: false
           },
-          data: {
-            accounts: action.data.accounts,
-            features: action.data.features,
-            total: action.data.total
+          users: {
+            accounts: action.data && action.data.accounts,
+            features: action.data && action.data.features,
+            total: action.data && action.data.total,
           },
           errors: action.errors
         }
