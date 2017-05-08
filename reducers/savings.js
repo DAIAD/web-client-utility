@@ -12,6 +12,7 @@ const initialState = {
     name: null,
   },
   scenarios: [], 
+  active: {},
 };
 
 var savings = function (state=initialState, action) {
@@ -27,6 +28,15 @@ var savings = function (state=initialState, action) {
       return {
         ...state,
         scenarios: action.scenarios,
+      };
+
+    case types.SAVINGS_SET_ACTIVE_DATA:
+      return {
+        ...state,
+        active: {
+          ...state.active,
+          ...action.data,
+        },
       };
 
     case types.SAVINGS_SET_AREAS:

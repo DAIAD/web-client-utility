@@ -5,15 +5,15 @@ var { FormattedTime } = require('react-intl');
 
 var WidgetRow = require('../../WidgetRow');
 var theme = require('../../chart/themes/blue-palette');
-console.log('theme:', theme);
+
 var SavingsPotentialExplore = React.createClass({ 
   componentWillMount: function() {
-    if (!this.props.metersLocations || !this.props.metersLocations.features) {
-      this.props.actions.getMetersLocations();
-    }
+    const { id } = this.props.params;
+    this.props.actions.exploreAllClusterScenarios(id);
   },
   render: function() {
-    const { scenarios, clusters, actions, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
+    const { scenarios, actions, active, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
+    const { clusters } = active;
     const { goToListView, confirmRemoveScenario } = actions;
     const _t = x => intl.formatMessage({ id: x });
     
@@ -78,12 +78,12 @@ var SavingsPotentialExplore = React.createClass({
 
     const stats = [];
 
-    if (completed) {
+    if (completed && Array.isArray(clusters)) {
       details.push({
         id: 3,
         display: 'stat',
         title: 'Savings Potential',
-        highlight: potential,
+        highlight: `${potential} \u33A5`,
         info: [],
         footer: null,
       });
@@ -91,7 +91,7 @@ var SavingsPotentialExplore = React.createClass({
       clusters.forEach((cluster, i) => {
         stats.push({
           id: i + 4,
-          title: cluster.name,
+          title: cluster.clusterName,
           display: 'chart',
           maximizable: true,
           viewportWidth,
@@ -101,29 +101,30 @@ var SavingsPotentialExplore = React.createClass({
           },
           theme,
           yAxis: {
-            formatter: y => y.toString() + '%',
+            formatter: y => Math.round(y / 1000),
           },
           xAxis: {
-            data: cluster.groups.map(x => x.name)
+            data: cluster.segments.map(x => x.name)
           },
           grid: {
-            x: Math.max(Math.max(...cluster.groups.map(group => group.name.length))*6.5, 45) + 'px',
+            x: Math.max(Math.max(...cluster.segments.map(group => group.name.length))*6.5, 45) + 'px',
           },
           series: [
             {
               name: cluster.name,
               color: (name, data, dataIndex) => theme.color.find((x, i, arr) => i  === dataIndex % arr.length),
               label: {
-                formatter: y => y.toString() + '%',
+                formatter: y => `${Math.round(y / 1000)} \u33A5`,
               },
               fill: 0.8,
-              data: cluster.groups.map(x => Math.round(Math.random()*50))
+              data: cluster.segments.map(x => Math.round(x.potential))
             }
           ]
         });
       
       });
       
+      /*
       stats.push({
         id: 25,
         display: 'map',
@@ -135,7 +136,8 @@ var SavingsPotentialExplore = React.createClass({
         map: {},
         data: metersLocations && metersLocations.features ? 
           metersLocations.features.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0], Math.abs(Math.random()-0.8)]) : []
-      });
+          });
+        */
     }
 
     return (

@@ -31,6 +31,7 @@ function SavingsPotentialList (props) {
   const scenarios = props.scenarios
   .map(scenario => ({
     ...scenario,
+    potential: scenario.potential,
     paramsShort: scenario.paramsShort
     .map(x => (
       <span>
@@ -40,10 +41,7 @@ function SavingsPotentialList (props) {
       </span>
     )),
   }));
-  /*
-  const savingsScenarios = scenarios
-  .map(scenario => ({ ...scenario, paramsShort: scenario.paramsShort.map(x => <span><span style={{ whiteSpace: 'nowrap' }}>{x.key}</span> (<b style={{ whiteSpace: 'nowrap' }}>{x.value}</b>) &nbsp;</span>) }));
-  */
+
   const tableSorter = {
     defaultSort: 'createdOn',
     defaultOrder: 'desc',

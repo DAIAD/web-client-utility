@@ -75,8 +75,7 @@ var SavingsPotentialAdd = React.createClass({
       <hr/>
         <Wizard
           onComplete={(values) => { 
-            addSavingsScenario(values)
-            .then(() => querySavingsScenarios()); 
+            addSavingsScenario(values);
             goToListView(); 
           }}
           validateLive

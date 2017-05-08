@@ -9,6 +9,7 @@ var types = mirrorToPath({
   SAVINGS_SET_QUERY: null,
   SAVINGS_SET_SCENARIOS: null,
   SAVINGS_SET_AREAS: null,
+  SAVINGS_SET_ACTIVE_DATA: null,
 
 });
 

@@ -20,10 +20,8 @@ const SavingsPotential = React.createClass({
   },
   render: function() {
     const { routes, children, actions, scenarios, scenarioToRemove: scenarioToRemoveKey } = this.props;
-    const { goToListView, confirmRemoveScenario, querySavingsScenarios } = actions;
+    const { goToListView, removeSavingsScenario, confirmRemoveScenario, querySavingsScenarios } = actions;
     const scenarioToRemove = scenarios.find(scenario => scenario.key === scenarioToRemoveKey);
-    const removeSavingsScenario = key => actions.removeSavingsScenario(key)
-    .then(() => querySavingsScenarios());
 
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
@@ -96,12 +94,10 @@ function mapStateToProps(state, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : {
-      ...bindActionCreators({ ...Actions, getTimeline, getMetersLocations }, dispatch), 
-      goToAddView: () => dispatch(push('/savings/add')),
-      goToExploreView: (id) => dispatch(push(`/savings/${id}`)),
-      goToListView: () => dispatch(push('/savings')),
-    }
+    ...bindActionCreators({ ...Actions, getTimeline, getMetersLocations }, dispatch), 
+    goToAddView: () => dispatch(push('/savings/add')),
+    goToExploreView: (id) => dispatch(push(`/savings/${id}`)),
+    goToListView: () => dispatch(push('/savings')),
   };
 }
 
@@ -109,7 +105,19 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   const areas = Array.isArray(stateProps.areas) && stateProps.areas.length > 0 && stateProps.areas[0] || [];
   return {
     ...stateProps,
-    ...dispatchProps,
+    actions: {
+      ...dispatchProps,
+      addSavingsScenario: data => dispatchProps.addSavingsScenario(data)
+      .then((response) => {
+        if (response.key) {
+          return dispatchProps.refreshSavingsScenario(response.key);
+        }
+        return Promise.resolve(response);
+      })
+      .then(() => dispatchProps.querySavingsScenarios()),
+      removeSavingsScenario: key => dispatchProps.removeSavingsScenario(key)
+      .then(() => dispatchProps.querySavingsScenarios()),
+    },
     ...ownProps,
     areas,
     user: stateProps.profile ? {value: stateProps.profile.username, label: stateProps.profile.firstname + ' ' + stateProps.profile.lastname} : null,
@@ -120,6 +128,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     }))
     .map(scenario => ({
       ...scenario, 
+      potential: Math.round(scenario.potential / 100) / 10,
       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'), 
       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
     })),

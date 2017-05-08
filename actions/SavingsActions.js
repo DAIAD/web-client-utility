@@ -39,6 +39,13 @@ const setAreas = function (areas) {
   };
 };
 
+const setActiveData = function (data) {
+  return {
+    type: types.SAVINGS_SET_ACTIVE_DATA,
+    data,
+  };
+};
+
 const addSavingsScenario = function (values) {
   return function(dispatch, getState) {
     if (!values.title || !values.title.name) {
@@ -50,10 +57,9 @@ const addSavingsScenario = function (values) {
     const spatial = Array.isArray(values.spatial) ? values.spatial.map(area => ({ type: 'AREA', areas: [area.area] })) : null;
     
     const parameters = {
-      population,
+      population: population.map(p => ({ key: p.key, type: p.type })),
       spatial,
       time: {
-        ...values.time,
         start: values.time && values.time.start,
         end: values.time && values.time.end,
       },
@@ -63,13 +69,33 @@ const addSavingsScenario = function (values) {
       title,
       parameters,
     };
-    
+
     return savingsAPI.create(options)
     .then((response) => {
+      if (!response.success && Array.isArray(response.errors) && response.errors.length > 0) {
+        throw new Error(response.errors[0].code);
+      }
       return response;
     })
     .catch((error) => {
       console.error('caught error in create savings scenario');
+      throw error;
+    });
+  }
+};
+
+const refreshSavingsScenario = function (scenarioKey) {
+  return function(dispatch, getState) {
+    const options = {
+      scenarioKey,
+    };
+    
+    return savingsAPI.refresh(options)
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in refresh savings scenario');
       throw error;
     });
   }
@@ -90,6 +116,32 @@ const removeSavingsScenario = function (scenarioKey) {
       throw error;
     });
   }
+};
+
+const exploreSavingsScenario = function (scenarioKey, clusterKey) {
+  return function(dispatch, getState) {
+    const options = {
+      scenarioKey,
+      clusterKey,
+    };
+
+    return savingsAPI.explore(options)
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in explore savings scenario');
+      throw error;
+    });
+  }
+};
+
+const exploreAllClusterScenarios = function (scenarioKey) {
+  return function (dispatch, getState) {
+    const { clusters = [] } = getState().config.utility;
+    return Promise.all(clusters.map(cluster => dispatch(exploreSavingsScenario(scenarioKey, cluster.key))))
+    .then(clusters => dispatch(setActiveData({ clusters: clusters.filter(c => c.errors.length === 0) })));
+  };
 };
 
 const fetchSavings = function (query) {
@@ -143,6 +195,7 @@ const setQueryAndFetch = function(query) {
 
 module.exports = {
   addSavingsScenario,
+  refreshSavingsScenario,
   removeSavingsScenario,
   confirmRemoveScenario,
   setSearchFilter,
@@ -151,4 +204,5 @@ module.exports = {
   setQuery,
   setQueryAndFetch,
   fetchAllAreas,
+  exploreAllClusterScenarios,
 };
