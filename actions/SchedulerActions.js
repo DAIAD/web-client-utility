@@ -14,15 +14,27 @@ var jobRequestInitialize = function() {
   };
 };
 
-var jobRequestComplete = function(success, errors, total, items, index, size) {
+var jobRequestSuccess = function(response) {
   return {
     type : types.JOB_RESPONSE,
-    success : success,
+    success : true,
+    errors : response.errors,
+    total : response.total,
+    items : response.jobs,
+    index : response.index,
+    size : response.size
+  };
+};
+
+var jobRequestFailure = function(errors) {
+  return {
+    type : types.JOB_RESPONSE,
+    success : false,
     errors : errors,
-    total : total,
-    items : items,
-    index : index,
-    size : size
+    total : 0,
+    items : [],
+    index : 0,
+    size : 0
   };
 };
 
@@ -39,15 +51,27 @@ var executionRequestInitialize = function() {
   };
 };
 
-var executionRequestComplete = function(success, errors, total, items, index, size) {
+var executionRequestSuccess = function(response) {
   return {
     type : types.EXECUTION_RESPONSE,
-    success : success,
+    success : true,
+    errors : response.errors,
+    total : response.total,
+    items : response.executions,
+    index : response.index,
+    size : response.size
+  };
+};
+
+var executionRequestFailure = function(errors) {
+  return {
+    type : types.EXECUTION_RESPONSE,
+    success : false,
     errors : errors,
-    total : total,
-    items : items,
-    index : index,
-    size : size
+    total : 0,
+    items : [],
+    index : 0,
+    size : 0
   };
 };
 
@@ -113,30 +137,44 @@ var launchJobComplete = function(success, errors) {
   };
 };
 
+var _getExecutions = function(dispatch, getState) {
+  dispatch(executionRequestInitialize());
+
+  return schedulerAPI.getExecutions(getState().scheduler.query.execution).then(
+      function(response) {
+        dispatch(executionRequestSuccess(response));
+      }, function(errors) {
+        dispatch(executionRequestFailure(errors));
+      });
+};
+
+var _getJobs = function(dispatch, getState) {
+  dispatch(jobRequestInitialize());
+
+  return schedulerAPI.getJobs().then(function(response) {
+    dispatch(jobRequestSuccess(response));
+
+    return _getExecutions(dispatch, getState);
+  }, function(errors) {
+    dispatch(jobRequestFailure(errors));
+  });
+};
+
 var SchedulerActions = {
 
   launchJob : function(jobId) {
     return function(dispatch, getState) {
       dispatch(launchJobInitialize());
 
-      return schedulerAPI.launchJob(jobId).then(
-          function(response) {
-            dispatch(launchJobComplete(response.success, response.errors));
+      return schedulerAPI.launchJob(jobId).then(function(response) {
+        dispatch(launchJobComplete(response.success, response.errors));
 
-            if (response.success) {
-              dispatch(jobRequestInitialize());
-
-              return schedulerAPI.getJobs().then(
-                  function(response) {
-                    dispatch(jobRequestComplete(response.success, response.errors, response.total, response.jobs,
-                        response.index, response.size));
-                  }, function(error) {
-                    dispatch(jobRequestComplete(false, error));
-                  });
-            }
-          }, function(error) {
-            dispatch(launchJobComplete(false, error));
-          });
+        if (response.success) {
+          return _getJobs(dispatch, getState);
+        }
+      }, function(error) {
+        dispatch(launchJobComplete(false, error));
+      });
     };
   },
 
@@ -144,24 +182,15 @@ var SchedulerActions = {
     return function(dispatch, getState) {
       dispatch(disableJobInitialize());
 
-      return schedulerAPI.disableJob(jobId).then(
-          function(response) {
-            dispatch(disableJobComplete(response.success, response.errors));
+      return schedulerAPI.disableJob(jobId).then(function(response) {
+        dispatch(disableJobComplete(response.success, response.errors));
 
-            if (response.success) {
-              dispatch(jobRequestInitialize());
-
-              return schedulerAPI.getJobs().then(
-                  function(response) {
-                    dispatch(jobRequestComplete(response.success, response.errors, response.total, response.jobs,
-                        response.index, response.size));
-                  }, function(error) {
-                    dispatch(jobRequestComplete(false, error));
-                  });
-            }
-          }, function(error) {
-            dispatch(disableJobComplete(false, error));
-          });
+        if (response.success) {
+          return _getJobs(dispatch, getState);
+        }
+      }, function(error) {
+        dispatch(disableJobComplete(false, error));
+      });
     };
   },
 
@@ -169,24 +198,15 @@ var SchedulerActions = {
     return function(dispatch, getState) {
       dispatch(enableJobInitialize());
 
-      return schedulerAPI.enableJob(jobId).then(
-          function(response) {
-            dispatch(enableJobComplete(response.success, response.errors));
+      return schedulerAPI.enableJob(jobId).then(function(response) {
+        dispatch(enableJobComplete(response.success, response.errors));
 
-            if (response.success) {
-              dispatch(jobRequestInitialize());
-
-              return schedulerAPI.getJobs().then(
-                  function(response) {
-                    dispatch(jobRequestComplete(response.success, response.errors, response.total, response.jobs,
-                        response.index, response.size));
-                  }, function(error) {
-                    dispatch(jobRequestComplete(false, error));
-                  });
-            }
-          }, function(error) {
-            dispatch(enableJobComplete(false, error));
-          });
+        if (response.success) {
+          return _getJobs(dispatch, getState);
+        }
+      }, function(error) {
+        dispatch(enableJobComplete(false, error));
+      });
     };
   },
 
@@ -196,15 +216,7 @@ var SchedulerActions = {
 
   getJobs : function() {
     return function(dispatch, getState) {
-      dispatch(jobRequestInitialize());
-
-      return schedulerAPI.getJobs().then(
-          function(response) {
-            dispatch(jobRequestComplete(response.success, response.errors, response.total, response.jobs,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(jobRequestComplete(false, error));
-          });
+      return _getJobs(dispatch, getState);
     };
   },
 
@@ -212,13 +224,7 @@ var SchedulerActions = {
     return function(dispatch, getState) {
       dispatch(executionChangeIndex(index));
 
-      return schedulerAPI.getExecutions(getState().scheduler.query.execution).then(
-          function(response) {
-            dispatch(executionRequestComplete(response.success, response.errors, response.total, response.executions,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(executionRequestComplete(false, error));
-          });
+      return _getExecutions(dispatch, getState);
     };
   },
 
@@ -226,13 +232,7 @@ var SchedulerActions = {
     return function(dispatch, getState) {
       dispatch(executionRequestInitialize());
 
-      return schedulerAPI.getExecutions(getState().scheduler.query.execution).then(
-          function(response) {
-            dispatch(executionRequestComplete(response.success, response.errors, response.total, response.executions,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(executionRequestComplete(false, error));
-          });
+      return _getExecutions(dispatch, getState);
     };
   },
 
@@ -242,13 +242,7 @@ var SchedulerActions = {
 
       dispatch(executionRequestInitialize());
 
-      return schedulerAPI.getExecutions(getState().scheduler.query.execution).then(
-          function(response) {
-            dispatch(executionRequestComplete(response.success, response.errors, response.total, response.executions,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(executionRequestComplete(false, error));
-          });
+      return _getExecutions(dispatch, getState);
     };
   },
 
@@ -258,13 +252,7 @@ var SchedulerActions = {
 
       dispatch(executionRequestInitialize());
 
-      return schedulerAPI.getExecutions(getState().scheduler.query.execution).then(
-          function(response) {
-            dispatch(executionRequestComplete(response.success, response.errors, response.total, response.executions,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(executionRequestComplete(false, error));
-          });
+      return _getExecutions(dispatch, getState);
     };
   },
 
@@ -274,13 +262,7 @@ var SchedulerActions = {
 
       dispatch(executionRequestInitialize());
 
-      return schedulerAPI.getExecutions(getState().scheduler.query.execution).then(
-          function(response) {
-            dispatch(executionRequestComplete(response.success, response.errors, response.total, response.executions,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(executionRequestComplete(false, error));
-          });
+      return _getExecutions(dispatch, getState);
     };
   }
 

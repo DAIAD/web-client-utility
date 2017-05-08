@@ -7,7 +7,7 @@ var ActionTypes = require('../action-types');
 var initialState = {
   source: 'meter',
   field: 'volume',
-  referenceTime: moment('2016-03-09T00:00:00Z').valueOf(), //moment().valueOf(), // roughly when page was loaded
+  referenceTime:  new moment().subtract(1, 'months').date(1), //moment('2016-03-09T00:00:00Z').valueOf(), //moment().valueOf(), // roughly when page was loaded
   requested: null,
 };
 

@@ -169,7 +169,7 @@ var Overview = React.createClass({
     if(this.props.admin.user.meters) {
       titleText = this.props.admin.user.name + ' - Last 30 days';
     } else if(this.props.admin.user.devices) {
-      titleText = this.props.admin.user.name + ' - Last 100 sessions';
+      titleText = this.props.admin.user.name + ' - Last 20 showers (most recent first)';
     }
     const chartTitle = (
       <span>
@@ -380,15 +380,15 @@ var Overview = React.createClass({
     model.table = {
         fields: [{
           name: 'id',
-          title: 'id',
+          title: 'Section.Trials.Overview.Table1.Id',
           hidden: true
         }, {
           name: 'key',
-          title: 'key',
+          title: 'Section.Trials.Overview.Table1.Key',
           hidden: true
         }, {
           name: 'username',
-          title: 'Username',
+          title: 'Section.Trials.Overview.Table1.UserName',
           link: function(row) {
             if(row.key) {
               return '/user/{key}';
@@ -397,25 +397,24 @@ var Overview = React.createClass({
           }
         }, {
           name: 'accountRegisteredOn',
-          title: 'Registered On',
+          title: 'Section.Trials.Overview.Table1.RegisteredOn',
           type: 'datetime'
         }, {
           name: 'numberOfAmphiroDevices',
-          title: '# of Amphiro'
+          title: 'Section.Trials.Overview.Table1.NumberOfAmphiro'
         }, {
           name: 'leastAmphiroRegistration',
-          title: 'Amphiro registered on',
+          title: 'Section.Trials.Overview.Table1.AmphiroRegisteredOn',
           type: 'datetime'
         }, {
           name: 'lastLoginSuccess',
-          title: 'Last login on',
+          title: 'Section.Trials.Overview.Table1.LastLogin',
           type: 'datetime'
         }, {
           name: 'meter',
           type:'action',
           image: '/assets/images/utility/meter.svg',
           handler: function(field, row) {
-            console.log('handling meter', this.props);
             if((row.key) && (row.numberOfMeters > 0)) {
               self.props.actions.getMeters(row.key, row.username);
             }
@@ -428,7 +427,6 @@ var Overview = React.createClass({
           type:'action',
           image: '/assets/images/utility/amphiro.svg',
           handler: function(field, row) {
-
             if((row.key) && (row.numberOfAmphiroDevices > 0)) {
               self.props.actions.getSessions(row.key, row.username);
             }
@@ -440,7 +438,9 @@ var Overview = React.createClass({
           name: 'export',
           type:'action',
           icon: 'cloud-download fa-2x',
-          color: '#2D3580',
+          style: {
+            color: '#2D3580'
+          },
           handler: function(field, row) {
             if((row.key) && ((row.numberOfAmphiroDevices > 0) || (row.numberOfMeters > 0))) {
               self.props.actions.exportUserData(row.key, row.username);
@@ -702,7 +702,7 @@ var Overview = React.createClass({
 });
 
 Overview.icon = 'table';
-Overview.title = 'Section.Trials.Overview';
+Overview.title = 'Section.Trials.Overview.Title';
 
 function mapStateToProps(state) {
   return {

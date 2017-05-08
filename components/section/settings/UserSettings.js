@@ -41,7 +41,7 @@ var UserSettings = React.createClass({
 
             <form id="form-profile" style={{minWidth: 100}}>
               
-              <div className="form-group">
+              <div className="form-group" style={{'display': 'none'}}>
                 <label className="control-label col-md-3" style={{ paddingLeft: 0 }}>
                   <span><FormattedMessage id="UserSettings.Locale"/></span>
                 </label>

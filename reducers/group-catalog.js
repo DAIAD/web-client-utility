@@ -151,8 +151,10 @@ var dataReducer = function(state, action) {
         action.groups.forEach( g => {
           if(g.type == 'SEGMENT') {
             g.text = g.cluster + ': ' + g.name;
+            g.typeLabel = 'GROUP';
           } else {
             g.text = g.name;
+            g.typeLabel = g.type;
           }
         });
         

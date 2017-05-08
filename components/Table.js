@@ -352,9 +352,9 @@ function getCell (field, row) {
   }
   else if (field.type === 'action') {
     
-    const visible = getPropertyValue(field.visible, field, row) || true;
+    const visible = getPropertyValue(field.visible, field, row);
 
-    if (visible) {
+    if ((visible == null) || (visible)) {
       const icon = getPropertyValue(field.icon, field, row);
       const image = getPropertyValue(field.image, field, row);
       const className = icon ? `fa fa-${icon} fa-fw` : getPropertyValue(field.className, field, row);

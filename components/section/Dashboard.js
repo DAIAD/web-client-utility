@@ -8,7 +8,6 @@ var Counter = require('../Counter');
 var Chart = require('../reports-measurements/chart');
 var {configPropType} = require('../../prop-types');
 var moment = require('moment');
-
 var FilterTag = require('../chart/dimension/FilterTag');
 var Timeline = require('../Timeline');
 var {FormattedTime} = require('react-intl');
@@ -134,7 +133,7 @@ var Dashboard = React.createClass({
   },
 
   toggleSize : function() {
-    console.log(this);
+    //console.log(this);
   },
 
   _unpin : function(fav, e) {
@@ -229,6 +228,7 @@ var Dashboard = React.createClass({
       var chart = (
         <Chart 
           {...defaults.chartProps}
+          width={this.chartEl && this.chartEl.clientWidth || '100%'}
           draw={pChart.draw} 
           field={'volume'}
           level={pinnedCharts[i].level}
@@ -243,7 +243,7 @@ var Dashboard = React.createClass({
       ); 
 
       var chartPanel = (
-      <Bootstrap.Panel header={chartTitle} style={{width: 600}}>
+      <Bootstrap.Panel header={chartTitle}>
         <Bootstrap.ListGroup fill>
           <Bootstrap.ListGroupItem className="report-chart-wrapper">
           {chart}
@@ -377,7 +377,7 @@ var Dashboard = React.createClass({
             center={[38.36, -0.479]}
             zoom={13}
             width='100%'
-            height={600}
+            height={400}
             >
             <TileLayer />
             <InfoControl position='topright'> 
@@ -452,7 +452,7 @@ var Dashboard = React.createClass({
       );      
 
       var mapPanel = (
-        <Bootstrap.Panel header={mapTitle} style={{width: 900}}>
+        <Bootstrap.Panel header={mapTitle}>
           {map}
         </Bootstrap.Panel>
       );
@@ -527,6 +527,7 @@ var Dashboard = React.createClass({
       var chart = (
         <Chart 
           {...defaults.chartProps}
+          width={this.chartEl && this.chartEl.clientWidth || '100%'}
           draw={pChart.draw} 
           field={'volume'}
           level={'week'}
@@ -539,7 +540,7 @@ var Dashboard = React.createClass({
       ); 
 
       var chartPanel = (
-      <Bootstrap.Panel header={chartTitle} style={{width: 600}}>
+      <Bootstrap.Panel header={chartTitle}>
         <Bootstrap.ListGroup fill>
           <Bootstrap.ListGroupItem className="report-chart-wrapper">
           {chart}
@@ -641,7 +642,11 @@ var Dashboard = React.createClass({
     var lCharts = chartComponents ?
       chartComponents.map( 
         chart => (
-          <div key={chart.key} className='draggable'>
+          <div 
+            key={chart.key} 
+            ref={(el) => { this.chartEl = el; }}
+            className='draggable'
+          >
             {chart.panel}
           </div>
         )
@@ -665,7 +670,7 @@ var Dashboard = React.createClass({
         )
       ) : null;
 
-    var components = lCharts.concat(lMaps, lForecasts);
+     var components = [...lCharts, ...lMaps, ...lForecasts];
     if(components.length !== this.props.savedLayout.length) {
       return (<div>Loading...</div>);
     }
@@ -715,15 +720,21 @@ function mapStateToProps(state) {
     savedLayout: state.dashboard.savedLayout,
     favourites: state.dashboard.favourites,
     isLoading : state.dashboard.isLoading,
-    metersLocations: state.map.metersLocations
+    metersLocations: state.map.metersLocations,
+    width: state.viewport.width
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-actions : bindActionCreators(Object.assign({}, { 
-  getFeatures, getCounters, fetchFavouriteQueries, getProfileLayout, saveLayout, unpin, getMetersLocations, getTimeline, getChart }) , dispatch)
+    actions : bindActionCreators(Object.assign({}, { getFeatures, getCounters, fetchFavouriteQueries,  
+                                                     getProfileLayout, saveLayout, unpin, getMetersLocations }) , dispatch)
+                                                     //actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters, getChart, getMetersLocations }) , dispatch)
   };
 }
 
 module.exports = connect(mapStateToProps, mapDispatchToProps)(Dashboard);
+
+
+
+

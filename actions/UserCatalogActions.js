@@ -58,6 +58,12 @@ var changeIndex = function(index) {
   };
 };
 
+var toggleFavorite = function() {
+  return {
+    type : types.USER_CATALOG_FILTER_FAVORITE
+  };
+};
+
 var clearFilter = function() {
   return {
     type : types.USER_CATALOG_FILTER_CLEAR
@@ -90,6 +96,17 @@ var _userChartResponse = function(success, errors, data, userKey, t=null) {
   };
 };
 
+var _getAccounts = function(dispatch, getState) {
+  dispatch(getAccountsInit());
+
+  return userAPI.getAccounts(getState().userCatalog.query).then(
+    function(response) {
+      dispatch(getAccountsComplete(response.success, response.errors, response.total, response.accounts, response.index, response.size));
+    }, function(error) {
+      dispatch(getAccountsComplete(false, error));
+    });
+};
+
 var UserCatalogActionCreators = {
 
   changeIndex : function(index) {
@@ -108,16 +125,8 @@ var UserCatalogActionCreators = {
 
   getAccounts : function() {
     return function(dispatch, getState) {
-      dispatch(getAccountsInit());
-
-      return userAPI.getAccounts(getState().userCatalog.query).then(
-          function(response) {
-            dispatch(getAccountsComplete(response.success, response.errors, response.total, response.accounts,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(getAccountsComplete(false, error));
-          });
-    };
+      return _getAccounts(dispatch, getState);
+    }
   },
 
   filterSerial : function(serial) {
@@ -134,24 +143,23 @@ var UserCatalogActionCreators = {
     };
   },
 
+  toggleFilterFavorite : function() {
+    return function(dispatch, getState) {
+      dispatch(toggleFavorite());
+
+      return _getAccounts(dispatch, getState);
+    }
+  },
+
   clearFilter : function() {
     return function(dispatch, getState) {
       dispatch(clearFilter());
 
-      dispatch(getAccountsInit());
-
-      return userAPI.getAccounts(getState().userCatalog.query).then(
-          function(response) {
-            dispatch(getAccountsComplete(response.success, response.errors, response.total, response.accounts,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(getAccountsComplete(false, error));
-          });
+      return _getAccounts(dispatch, getState);
     };
   },
 
   getUserChart : function(id, name, timezone) {
-  
     return function(dispatch, getState) {
 
       var promises =[];
@@ -175,6 +183,9 @@ var UserCatalogActionCreators = {
             var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
             var res1 = (resultSets || []).map(rs => {            
               var g = new population.User(id, rs.label);
+
+              //sort points on timestamp in order to handle pre-aggregated data.
+              rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
 
               var timespan1;
               if(rs.points.length !== 0){
@@ -287,6 +298,9 @@ var UserCatalogActionCreators = {
           userKey : userKey,
           favorite : false
         });
+        if(getState().userCatalog.query.favorite) {
+          return _getAccounts(dispatch, getState);
+        }
       }, function(error) {
         dispatch({
           type : types.USER_CATALOG_REMOVE_FAVORITE_RESPONSE,

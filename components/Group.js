@@ -21,7 +21,7 @@ var Group = React.createClass({
   },
 
   componentWillUnmount : function() {
-    this.props.resetGroup();
+    this.props.resetComponent();
   },
 
   compareGroupMembers : function (a, b){
@@ -32,9 +32,9 @@ var Group = React.createClass({
   membersObjectToArray: function(membersObject){
     var membersArray = [];
 
-    for (var id in membersObject) {
-      if (membersObject.hasOwnProperty(id)) {
-        membersArray.push(membersObject[id]);
+    for (var key in membersObject) {
+      if (membersObject.hasOwnProperty(key)) {
+        membersArray.push(membersObject[key]);
       }
     }
 
@@ -52,12 +52,20 @@ var Group = React.createClass({
     var rows = this.membersObjectToArray(Object.assign({}, this.props.currentMembers)).sort(this.compareGroupMembers);
 
     var currentMemberFields = GroupTablesSchema.Members.fields.map(function(field){
-        if(field.hasOwnProperty('name') && field.name === 'bookmark'){
-          const handler = function (){
-            self.props.showFavouriteAccountForm(this.props.row.id);
+        if(field.hasOwnProperty('name') && field.name === 'favourite'){
+          const handler = function (field, row){
+            if(row.favourite) {
+              self.props.removeFavorite(row.key);
+            } else {
+              self.props.addFavorite(row.key);
+            }
           };
-          return Object.assign({}, field, {handler});
+          const icon = function (field, row) {
+            return (row.favourite ? 'star' : 'star-o');
+          };
+          return Object.assign({}, field, {handler, icon});
         }
+
         return field;
       });
       
@@ -167,12 +175,10 @@ function mapDispatchToProps(dispatch) {
   return {
     showGroup: bindActionCreators(GroupActions.showGroup, dispatch),
 
-    showFavouriteGroupForm : bindActionCreators(GroupActions.showFavouriteGroupForm, dispatch),
-    hideFavouriteGroupForm : bindActionCreators(GroupActions.hideFavouriteGroupForm, dispatch),
-    resetGroup : bindActionCreators(GroupActions.resetDemograhpics, dispatch),
+    resetComponent : bindActionCreators(GroupActions.resetComponent, dispatch),
 
-    showFavouriteAccountForm : bindActionCreators(GroupActions.showFavouriteAccountForm, dispatch),
-    hideFavouriteAccountForm : bindActionCreators(GroupActions.hideFavouriteAccountForm, dispatch),
+    addFavorite : bindActionCreators(GroupActions.addFavorite, dispatch),
+    removeFavorite : bindActionCreators(GroupActions.removeFavorite, dispatch)
   };
 }
 

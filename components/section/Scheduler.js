@@ -18,9 +18,6 @@ var Scheduler = React.createClass({
     if(this.props.scheduler.data.jobs.items == null) {
       this.props.actions.getJobs();
     }
-    if(this.props.scheduler.data.executions.items ==null) {
-      this.props.actions.getExecutions();
-    }
   },
 
   onExecutionPageIndexChange: function(index) {
@@ -69,27 +66,27 @@ var Scheduler = React.createClass({
 
     var jobTableFields = [{
       name: 'id',
-      title: 'Id',
+      title: 'Section.Scheduler.Table1.Id',
       hidden: true
     }, {
       name: 'category',
-      title: 'Category'
+      title: 'Section.Scheduler.Table1.Category'
     }, {
       name: 'container',
-      title: 'Framwork'
+      title: 'Section.Scheduler.Table1.Framwork'
     }, {
       name: 'name',
-      title: 'Name'
+      title: 'Section.Scheduler.Table1.Name'
     }, {
       name: 'description',
-      title: 'Description'
+      title: 'Section.Scheduler.Table1.Description'
     }, {
       name: 'lastExecution',
-      title: 'Last Execution',
+      title: 'Section.Scheduler.Table1.LastExecution',
       type: 'datetime'
     }, {
       name: 'nextExecution',
-      title: 'Next Execution',
+      title: 'Section.Scheduler.Table1.NextExecution',
       type: 'datetime'
     }, {
       name: 'enable',
@@ -97,19 +94,21 @@ var Scheduler = React.createClass({
       icon: function(field, row) {
         return 'clock-o';
       },
-      color: function(field, row) {
-        if(!row.schedule) {
-          return '#000000';
-        }
-        switch(row.schedule.type) {
-          case 'CRON': case 'PERIOD':
-            if(row.enabled) {
-              return '#000000';
-            } else {
-              return '#9E9E9E';
-            }
-          default:
+      style: {
+        color: function(field, row) {
+          if(!row.schedule) {
             return '#000000';
+          }
+          switch(row.schedule.type) {
+            case 'CRON': case 'PERIOD':
+              if(row.enabled) {
+                return '#000000';
+              } else {
+                return '#9E9E9E';
+              }
+            default:
+              return '#000000';
+          }
         }
       },
       handler: (function(field, row) {
@@ -146,11 +145,13 @@ var Scheduler = React.createClass({
         }
         return 'play';
       },
-      color: function(field, row) {
-        if(row.running) {
-          return '#51A351';
+      style: {
+        color: function(field, row) {
+          if(row.running) {
+            return '#51A351';
+          }
+          return '#000000';
         }
-        return '#000000';
       },
       handler: (function(field, row) {
         if(!row.running) {
@@ -162,41 +163,38 @@ var Scheduler = React.createClass({
     const jobTableData = jobs.items || [];
 
     const jobTablePager = {
-      //index: jobs.index || 0,
-        //size: jobs.size || 10,
-        // count:jobs.total || 0,
+        index: jobs.index || 0,
+        size: 10,
+        count: jobs.total || 0,
         onPageIndexChange: this.onJobPageIndexChange,
-        //    mode: Table.PAGING_CLIENT_SIDE
+        mode: Table.PAGING_CLIENT_SIDE
     }
 
     var executions = this.props.scheduler.data.executions;
 
     var executionTableFields = [{
         name: 'jobId',
-        title: 'jobId',
         hidden: true
       }, {
         name: 'instanceId',
-        title: 'instanceId',
         hidden: true
       }, {
         name: 'executionId',
-        title: 'executionId',
         hidden: true
       }, {
         name: 'jobName',
-        title: 'Name'
+        title: 'Section.Scheduler.Table2.Name'
       }, {
         name: 'startedOn',
-        title: 'Started On',
+        title: 'Section.Scheduler.Table2.StartedOn',
         type: 'datetime'
       }, {
         name: 'completedOn',
-        title: 'Completed On',
+        title: 'Section.Scheduler.Table2.CompletedOn',
         type: 'datetime'
       }, {
         name: 'statusCode',
-        title: 'Status Code',
+        title: 'Section.Scheduler.Table2.StatusCode',
         style: {
           align: 'center',
           width: 120,
@@ -215,7 +213,7 @@ var Scheduler = React.createClass({
         }
       }, {
         name: 'exitCode',
-        title: 'Exit Code',
+        title: 'Section.Scheduler.Table2.ExitCode',
         style: {
           align: 'center',
           width: 120,
@@ -307,6 +305,7 @@ var Scheduler = React.createClass({
                     }}
                     fields={jobTableFields}
                     data={jobTableData}
+                    pager={jobTablePager}
                     template={{empty : jobDataNotFound}}
                   />
                 </Bootstrap.ListGroupItem>
@@ -347,9 +346,6 @@ var Scheduler = React.createClass({
                     </div>
                     <div className='col-md-4' style={{float: 'right'}}>
                       {resetButton}
-                      <div style={{float: 'right'}}>
-                        <Bootstrap.Button bsStyle='primary' onClick={this.refreshExecutions}>Refresh</Bootstrap.Button>
-                      </div>
                     </div>
                   </div>
                 </Bootstrap.ListGroupItem>
@@ -371,7 +367,7 @@ var Scheduler = React.createClass({
 });
 
 Scheduler.icon = 'clock-o';
-Scheduler.title = 'Section.Scheduler';
+Scheduler.title = 'Section.Scheduler.Title';
 
 function mapStateToProps(state) {
   return {

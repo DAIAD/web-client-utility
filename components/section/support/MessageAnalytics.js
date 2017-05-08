@@ -55,21 +55,20 @@ var MessageAnalytics = React.createClass({
   render: function() {
     var self = this;
     if(this.props.showReceivers && !this.props.isLoading){
-
       var receiversFields = {
         fields: [{
           name: 'accountId',
-          title: 'id',
+          title: 'Section.Support.Messages.Table1.Id',
           hidden: true
         }, {
           name: 'lastName',
-          title: 'Last Name'
+          title: 'Section.Support.Messages.Table1.LastName'
         }, {
           name: 'username',
-          title: 'Username'
+          title: 'Section.Support.Messages.Table1.UserName'
         }, {
           name: 'acknowledgedOn',
-          title: 'Acknowledged On',
+          title: 'Section.Support.Messages.Table1.AcknowledgedOn',
           type: 'datetime'
         }],
         rows: this.props.receivers,
@@ -179,10 +178,11 @@ var MessageAnalytics = React.createClass({
 
     var intervalEditor = (
       <div className='col-md-3'>
-        <DateRangePicker  startDate={this.props.interval[0]}
-                  endDate={this.props.interval[1]}
-                  ranges={this.props.ranges}
-                  onEvent={_onIntervalEditorChange.bind(this)}>
+        <DateRangePicker startDate={this.props.interval[0]}
+                         endDate={this.props.interval[1]}
+                         ranges={this.props.ranges}
+                         onEvent={_onIntervalEditorChange.bind(this)}
+                         locale={this.props.dateRangePickerLocale}>
           <div className='clearfix Select-control' style={{ cursor: 'pointer', padding: '5px 10px', width: '100%'}}>
             <span>{intervalLabel}</span>
           </div>
@@ -256,16 +256,16 @@ var MessageAnalytics = React.createClass({
     var messageFields = {
       fields: [{
         name: 'id',
-        title: 'ID'
+        title: 'Section.Support.Messages.Table2.Id'
       }, {
           name: 'title',
-          title: 'Message'
+          title: 'Section.Support.Messages.Table2.Message'
       }, {
         name: 'type',
-        title: 'Type'
+        title: 'Section.Support.Messages.Table2.Type'
       }, {
         name: 'receiversCount',
-        title: 'Total Receivers'
+        title: 'Section.Support.Messages.Table2.TotalReceivers'
       }, {
           name: 'details',
           type:'action',
@@ -333,7 +333,8 @@ function mapStateToProps(state) {
       selectedMessage: state.messages.selectedMessage,
       interval: state.messages.interval,
       editor: state.messages.editor,
-      timezone: state.messages.timezone
+      timezone: state.messages.timezone,
+      dateRangePickerLocale: state.i18n.data[state.i18n.locale].messages['Library.DateRangePicker.$locale']
   };
 }
 
@@ -347,6 +348,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 MessageAnalytics.icon = 'commenting';
-MessageAnalytics.title = 'Section.ManageAlerts.Messages';
+MessageAnalytics.title = 'Section.Support.Messages.Title';
 
 module.exports = connect(mapStateToProps, mapDispatchToProps)(MessageAnalytics);

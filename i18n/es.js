@@ -37,18 +37,110 @@
   },
   "Section": {
       "Dashboard": "Dashboard",
-      "Analytics-Group":"Analytics",
+      "Map": "Map",
+      "Analytics-Group": "Analytics",
       "Analytics": {
-        "Fav": "Favorites",
+        "Fav": {
+          "Title": "Favorites",
+          "Table1": {
+            "Id": "Id",
+            "Label": "Label",
+            "Tags": "Tags",
+            "Date": "Date"
+          }
+        },
         "BasicReports": "Reports",
-        "ReportPanel": "Charts"
+        "ReportPanel": "Charts",
+        "Maps": "Maps"
       },
       "Forecasting": "Forecasting",
       "ModeManagement": "Mode Management",
-      "Users": "Users",
-      "Groups": "Groups",
-      "Messages": "Messages",
+      "Users": {
+        "Title": "Users",
+        "Table1": {
+          "User": "User",
+          "Name": "Name",
+          "SWM": "SWM",
+          "RegisteredOn": "Registered On"
+        }
+      },
+      "Groups": {
+        "Title": "Groups",
+        "Table1": {
+          "Id": "Id",
+          "Type": "Type",
+          "Name": "Name",
+          "NumberOfMembers": "# of members",
+          "UpdatedOn": "Updated On"
+        }
+      },
+      "Engagement": {
+        "Title": "Engagement",
+        "Messages": {
+          "Title": "Messages",
+          "Table1": {
+            "Id": "Id",
+            "Title": "Title",
+            "Description": "Description",
+            "Created": "Created",
+            "Modified": "Modified",
+            "Active": "Active"
+          },
+          "Button": {
+            "Save": "Save Static Tip",
+            "Cancel": "Cancel"
+          }
+        },
+        "Announcements": {
+          "Title": "Announcements",
+          "Table1": {
+            "Id": "Id",
+            "Title": "Title",
+            "Content": "Content",
+            "DispatchedOn": "Dispatched On",
+            "Details": "Details",
+            "Delete": "Delete"
+          },
+          "Table2": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username",
+            "All": "All"
+          },
+          "Table3": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username"
+          },
+          "Table4": {
+            "Id": "Id",
+            "LastName": "Last Name",
+            "UserName": "Username"
+          },
+          "Button": {
+            "Broadcast": "Broadcast",
+            "Cancel": "Cancel"
+          }
+        }
+      },
       "Settings": "Settings",
+      "Trials": {
+        "Overview": {
+          "Title": "Overview",
+          "Table1": {
+            "Id": "Id",
+            "Key": "Key",
+            "UserName": "Username",
+            "RegisteredOn": "Registered On",
+            "NumberOfAmphiro": "# of Amphiro",
+            "AmphiroRegisteredOn": "Amphiro registered on",
+            "LastLogin": "Last login on"
+          }
+        },
+        "Group": "Trial Management",
+        "PilotReports": "Pilot Reports",
+        "System": "System Reports"
+      },
       "Reports": {
         "Group": "Trial Management",
         "Overview": "Overview",
@@ -59,14 +151,77 @@
       "Messages" : {
         "Tips" : "Manage Alerts"
       },
-      "Scheduler": "Job Management",
+      "Scheduler": {
+        "Title": "Job Management",
+        "Table1": {
+          "Id": "Id",
+          "Category": "Category",
+          "Framwork": "Framwork",
+          "Name": "Name",
+          "Description": "Description",
+          "LastExecution": "Last Execution",
+          "NextExecution": "Next Execution"
+        },
+        "Table2": {
+          "Name": "Name",
+          "StartedOn": "Started On",
+          "CompletedOn": "Completed On",
+          "StatusCode": "Status Code",
+          "ExitCode": "Exit Code"
+        }
+      },
       "Consumers": "Consumers",
       "Support" : {
         "Group": "Support",
-        "Logging": "Logs",
+        "Logging": {
+          "Title": "Logs",
+          "Table1": {
+            "Id" : "Id",
+            "Level" : "Level",
+            "Category" : "Category",
+            "Code": "Code",
+            "CreatedOn": "Created On",
+            "Message": "Message",
+            "Source": "Source",
+            "Account": "Account"
+          }
+        },
         "Data": "Data Management",
         "Development": "Development",
-        "DataExport": "Data Export"
+        "DataExport": {
+          "Title": "Data Export",
+          "Table1": {
+            "Key": "Key",
+            "Utility": "Utility",
+            "Name": "Name",
+            "Description": "Description",
+            "Size": "Size",
+            "CreatedOn": "Created On"
+          },
+          "Table2": {
+            "Key": "Key",
+            "Utility": "Utility",
+            "Name": "Name",
+            "Description": "Description",
+            "Size": "Size",
+            "CreatedOn": "Created On"
+          }
+        },
+        "Messages": {
+          "Title": "Messages",
+          "Table1": {
+            "Id": "Id",
+            "LastName": "LastName",
+            "UserName": "UserName",
+            "AcknowledgedOn": "Acknowledged On"
+          },
+          "Table2": {
+            "Id": "Id",
+            "Message": "Message",
+            "Type": "Type",
+            "TotalReceivers": "Total Receivers"
+          }
+        }
       },
       "Savings": "Savings Potential",
       "Budgets": "Budgets"
@@ -93,12 +248,15 @@
     "Submit" : "Update"
   },
   "Group" : {
-    "FavouriteGroupInfo" : "Favourite Group Info",
+    "Table1": {
+      "Name" : "Name",
+      "Email" : "Email",
+      "RegisteredOn" : "Registered On"
+    },
     "Name" : "Name",
-    "Description" : "Description",
-    "CreatedOn" : "CreatedOn",
-    "Size" : "Size",
+    "CreatedOn" : "Created On",
     "Country" : "Country",
+    "Size" : "Size",
     "Members" : "Members"
   },
   "Table" : {
@@ -420,5 +578,43 @@
   "Gender" : {
     "FEMALE": "Female",
     "MALE": "Male"
+  },
+  "Library": {
+    "DateRangePicker": {
+      "$locale": {
+        "format": "DD/MM/YYYY",
+        "separator": " - ",
+        "applyLabel": "Apply",
+        "cancelLabel": "Cancel",
+        "fromLabel": "From",
+        "toLabel": "To",
+        "customRangeLabel": "Custom",
+        "weekLabel": "W",
+        "daysOfWeek": [
+            "Su",
+            "Mo",
+            "Tu",
+            "We",
+            "Th",
+            "Fr",
+            "Sa"
+        ],
+        "monthNames": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ],
+        "firstDay": 1
+      }
+    }
   }
 }

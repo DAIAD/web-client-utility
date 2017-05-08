@@ -101,9 +101,11 @@ var _getOsView = function(os) {
 var _showChart = function(type, key, e) {
   switch(type) {
     case 'METER':
+      this.setState({groupChartButtonsHidden:false});
       this.props.getMeters(this.props.user.id);
     break;
     case 'AMPHIRO':
+      this.setState({groupChartButtonsHidden:true});
       this.props.getSessions(this.props.user.id, key);
     break;
   }
@@ -132,7 +134,8 @@ var User = React.createClass({
   
   getInitialState: function() {
     return {
-      draw : false
+      draw : false,
+      groupChartButtonsHidden : false
     };
   },
   
@@ -532,7 +535,7 @@ var User = React.createClass({
         <span>
           <span>
             <i className='fa fa-bar-chart fa-fw'></i>
-            <span style={{ paddingLeft: 4 }}>{device.name} - Last 20 sessions (most recent first) </span>
+            <span style={{ paddingLeft: 4 }}>{device.name} - Last 20 showers (most recent first) </span>
           </span>
         </span>
       );
@@ -675,7 +678,7 @@ var User = React.createClass({
                             </tr>
                             <tr>
                               <td>Gender</td>
-                              <td><FormattedMessage id={'Gender.' + this.props.user.gender} /></td>
+                              <td>{this.props.user.gender ? <FormattedMessage id={'Gender.' + this.props.user.gender} /> : ''}</td>
                             </tr>
                             <tr>
                               <td>Registered on</td>
@@ -787,7 +790,6 @@ function mapDispatchToProps(dispatch) {
     getMeters : bindActionCreators(UserActions.getMeters, dispatch),
     getGroupChart : bindActionCreators(UserActions.getGroupChart, dispatch),
     clearGroupSeries : bindActionCreators(UserActions.clearGroupSeries, dispatch),
-    getGroupSeries : bindActionCreators(UserActions.getGroupSeries, dispatch),
     exportData : bindActionCreators(UserActions.exportData, dispatch),
     addFavorite : bindActionCreators(UserActions.addFavorite, dispatch),
     removeFavorite : bindActionCreators(UserActions.removeFavorite, dispatch),

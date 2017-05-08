@@ -92,24 +92,24 @@ var ManageAlerts = React.createClass({
 
      var fieldsData = [{
           name: 'index',
-          title: 'ID'
+          title: 'Section.Engagement.Messages.Table1.Id'
         }, {
           name: 'title',
-          title: 'Title'
+          title: 'Section.Engagement.Messages.Table1.Title'
         }, {
           name: 'description',
-          title: 'Description'
+          title: 'Section.Engagement.Messages.Table1.Description'
         }, {
           name: 'createdOn',
-          title: 'Created',
+          title: 'Section.Engagement.Messages.Table1.Created',
           type: 'datetime'
         }, {
           name: 'modifiedOn',
-          title: 'Modified',
+          title: 'Section.Engagement.Messages.Table1.Modified',
           type: 'datetime'
         },{
           name: 'active',
-          title: 'Active',
+          title: 'Section.Engagement.Messages.Table1.Active',
           type: 'boolean',
           icon: 'check-square',
         }, {
@@ -202,13 +202,24 @@ var ManageAlerts = React.createClass({
         < /div>
       );
 
+      var tipFormTitle = (
+        < span >
+          < i className = 'fa fa-pencil fa-fw' > < /i>
+          < span style = {{ paddingLeft: 4 }} > Edit < /span>
+            < span style = {{float: 'left', marginTop: - 3, marginLeft: 5 }} >
+          < /span>
+        < /span>
+      );
+
       var tipForm = (
-        <div>
+        <div className = "row">
+        <Bootstrap.Panel header = {tipFormTitle} >
           <Bootstrap.Row>
-            <Bootstrap.Col xs={6}>
+            <Bootstrap.Col xs={12}>
               <label>Title</label>
               <textarea name="Title"
-                rows="2" cols="120"
+                rows="2"
+                style={{"resize": "none", "width": "100%"}}
                 ref="title"
                 index={this.props.currentTip ? this.props.currentTip.index : null}
                 defaultValue={this.props.currentTip ? this.props.currentTip.title : ""}
@@ -216,10 +227,11 @@ var ManageAlerts = React.createClass({
             </Bootstrap.Col>
           </Bootstrap.Row>
            <Bootstrap.Row>
-            <Bootstrap.Col xs={6}>
+            <Bootstrap.Col xs={12}>
               <label>Description</label>
               <textarea name="Description"
-                rows="8" cols="120"
+                style={{"resize": "none", "width": "100%"}}
+                rows="8"
                 ref="description"
                 defaultValue={this.props.currentTip ? this.props.currentTip.description : ""}
               />
@@ -235,7 +247,7 @@ var ManageAlerts = React.createClass({
                     style={{height: 33}}
                     onClick={this.props.saveCurrentTip}
                     disabled={this.props.saveTipDisabled} >
-                  <FormattedMessage id='Save Static Tip' />
+                  <FormattedMessage id='Section.Engagement.Messages.Button.Save' />
                 </button>
                 <button id='cancel'
                   label = 'Cancel'
@@ -243,11 +255,12 @@ var ManageAlerts = React.createClass({
                   className = 'btn btn-primary'
                     style={{ height: 33, marginLeft : 10}}
                     onClick={this.props.actions.cancelAddTip}>
-                  <FormattedMessage id='Cancel' />
+                  <FormattedMessage id='Section.Engagement.Messages.Button.Cancel' />
                 </button>
               </div>
             </Bootstrap.Col>
           </Bootstrap.Row>
+        </Bootstrap.Panel>
         </div>
         );
 
@@ -408,5 +421,5 @@ function mapDispatchToProps(dispatch) {
 }
 
 ManageAlerts.icon = 'commenting-o';
-ManageAlerts.title = 'Section.ManageAlerts.Messages';
+ManageAlerts.title = 'Section.Engagement.Messages.Title';
 module.exports = connect(mapStateToProps, mapDispatchToProps)(ManageAlerts);

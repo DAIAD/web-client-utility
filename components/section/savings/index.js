@@ -9,7 +9,6 @@ var { injectIntl } = require('react-intl');
 var Actions = require('../../../actions/SavingsActions');
 var { getTimeline, getMetersLocations, querySavingsScenarios } = require('../../../actions/MapActions');
 
-var Modal = require('../../Modal');
 var util = require('../../../helpers/wizard');
 
 

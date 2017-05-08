@@ -6,7 +6,9 @@ function flattenMessages(nestedMessages, prefix = '') {
         var value = nestedMessages[key];
         var prefixedKey = prefix ? `${prefix}.${key}` : key;
 
-        if (typeof value === 'string') {
+        if((key.startsWith('$')) && (typeof value === 'object')) {
+          messages[prefixedKey] = value;
+        } else if (typeof value === 'string') {
             messages[prefixedKey] = value;
         } else {
             Object.assign(messages, flattenMessages(value, prefixedKey));

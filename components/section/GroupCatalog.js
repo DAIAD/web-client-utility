@@ -60,15 +60,17 @@ var GroupCatalog  = React.createClass({
   render: function() {
     const tableFields = [{
       name: 'id',
-      title: 'Id',
       hidden: true
     }, {
       name: 'type',
-      title: 'Type',
+      hidden: true
+    },{
+      name: 'typeLabel',
+      title: 'Section.Groups.Table1.Type',
       width: 100
     }, {
       name: 'text',
-      title: 'Name',
+      title: 'Section.Groups.Table1.Name',
       link: function(row) {
         if(row.key) {
           return '/group/{key}/';
@@ -77,16 +79,20 @@ var GroupCatalog  = React.createClass({
       }
     }, {
       name: 'size',
-      title: '# of members'
+      title: 'Section.Groups.Table1.NumberOfMembers'
     }, {
       name: 'createdOn',
-      title: 'Updated On',
+      title: 'Section.Groups.Table1.UpdatedOn',
       type: 'datetime'
     }, {
       name : 'favorite',
       type : 'action',
       icon : function(field, row) {
-        return (row.favorite ? 'star' : 'star-o');
+        if(row.type === 'SET'){
+          return (row.favorite ? 'star' : 'star-o');
+        } else {
+          return null;
+        }
       },
       handler : (function(field, row) {
         if(row.favorite) {
@@ -107,16 +113,16 @@ var GroupCatalog  = React.createClass({
 
         var population;
         if(row.type === 'SEGMENT'){
-          var clusterKey = self.props.config.utility.clusters.filter((cluster) => cluster.name == row.cluster);
+          var clusterKey = this.props.config.utility.clusters.filter((cluster) => cluster.name == row.cluster);
           population = [{group: row.key, label:"CLUSTER:" + clusterKey[0].key + ":" + row.key, type:"GROUP"}];
           this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone);      
-          self.setState({draw:true});
+          this.setState({draw:true});
           
         } else if(row.type === 'SET'){
         
           population = [{group: row.key, label:"GROUP:" + row.key + '/' + row.name, type:"GROUP"}];
           this.props.actions.getGroupChart(population, utility.key, utility.name, utility.timezone); 
-          self.setState({draw:true});
+          this.setState({draw:true});
         }
       }).bind(this)
     }, {
@@ -174,7 +180,7 @@ var GroupCatalog  = React.createClass({
                     value={this.props.groupCatalog.query.type || 'UNDEFINED'}
                     options={[
                       { value: 'UNDEFINED', label: '-' },
-                      { value: 'SEGMENT', label: 'Segment' },
+                      { value: 'SEGMENT', label: 'Group' },
                       { value: 'SET', label: 'Set' }
                     ]}
                     onChange={_filterByType.bind(this)}
@@ -332,7 +338,7 @@ var GroupCatalog  = React.createClass({
 });
 
 GroupCatalog.icon = 'group';
-GroupCatalog.title = 'Section.Groups';
+GroupCatalog.title = 'Section.Groups.Title';
 
 function mapStateToProps(state) {
   return {

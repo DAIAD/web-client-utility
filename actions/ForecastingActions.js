@@ -83,12 +83,12 @@ var _buildUserQuery = function(id, name, timezone, from, to) {
  * Actions
  */
 
-var _setInterval = function(interval) {
-  return {
-    type : types.FORECASTING_SET_INTERVAL,
-    interval : interval
-  }; 
-};
+//var _setInterval = function(interval) {
+//  return {
+//    type : types.FORECASTING_SET_INTERVAL,
+//    interval : interval
+//  }; 
+//};
 
 var _groupChartRequest = function(query) {
   return {
@@ -170,7 +170,19 @@ var ForecastingActions = {
       group : group
     };
   },
-
+  
+  setInterval : function(interval) {
+    //return function(dispatch, getState) {
+      //if(!_.isEqual(interval, getState().forecasting.interval)){
+        return {
+          type : types.FORECASTING_SET_INTERVAL,
+          interval : interval
+        };
+        //dispatch(_setInterval(interval));
+      //}   
+    //}
+  },
+  
   getUtilityChart : function(group, key, name, timezone) {
     //Build two queries, one for real data and one for forecast data.
     return function(dispatch, getState) {
@@ -207,16 +219,19 @@ var ForecastingActions = {
             }
             var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
             var res1 = (resultSets || []).map(rs => {
-            var [g, rr] = population.fromString(rs.label);
+              var [g, rr] = population.fromString(rs.label);
 
+              //sort points on timestamp in order to handle pre-aggregated data.
+              rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
+              
               var timespan1;  
               if(rs.points.length !== 0){
+                //Recalculate xAxis timespan based on returned data. (scale)
                 timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
               } else {
                 timespan1 = [actualData.queries[0].time.start, actualData.queries[0].time.end];
               }              
 
-               //Recalculate xAxis timespan based on returned data. (scale)
                // Shape a normal timeseries result for requested metrics
                // Todo support other metrics (as client-side "average")
                var res2 = actualData.queries[0].metrics.map(metric => ({
@@ -274,6 +289,8 @@ var ForecastingActions = {
             var res1 = (resultSets || []).map(rs => {            
               var g = new population.User(id, rs.label);
 
+              //sort points on timestamp in order to handle pre-aggregated data.
+              rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
               
               var timespan1;
               if(rs.points.length !== 0){
@@ -331,14 +348,6 @@ var ForecastingActions = {
       type : types.FORECASTING_GROUP_CATALOG_FILTER_TYPE,
       groupType : type
     };
-  },
-  
-  setInterval : function(interval) {
-    return function(dispatch, getState) {
-      if(!_.isEqual(interval, getState().forecasting.interval)){
-        dispatch(_setInterval(interval));
-      }   
-    }
   },
   
   addFavourite: function(favourite) {

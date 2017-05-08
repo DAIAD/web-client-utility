@@ -406,13 +406,13 @@ var Favourites = React.createClass({
        hidden: true
     }, {
        name: 'title',
-       title: 'Label'
+       title: 'Section.Analytics.Fav.Table1.Label'
     }, {
        name: 'tags',
-       title: 'Tags'
+       title: 'Section.Analytics.Fav.Table1.Tags'
     }, {
        name: 'createdOn',
-       title: 'Date',
+       title: 'Section.Analytics.Fav.Table1.Date',
        type: 'datetime'
     }, {
        name: 'view',
@@ -486,7 +486,7 @@ var Favourites = React.createClass({
      );
 
     if(this.props.showDeleteMessage){
-      var warning = 'Delete Announcement?';
+      var warning = 'Delete Favourite?';
          var actions = [{
               action: this.props.actions.closeWarning,
               name: "Cancel"
@@ -577,6 +577,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 Favourites.icon = 'bar-chart';
-Favourites.title = 'Section.Analytics.Fav';
+Favourites.title = 'Section.Analytics.Fav.Title';
 
 module.exports = connect(mapStateToProps, mapDispatchToProps)(Favourites);

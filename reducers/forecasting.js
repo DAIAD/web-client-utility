@@ -82,8 +82,11 @@ var _filterRows = function(rows, type, name) {
         return false;
       }
     }
-    if(type) {
-      return (r.type == type);
+    if(type && type !== 'SET') {
+      return (r.cluster == type);
+    }
+    if(type && type === 'SET'){
+     return (r.type == type);
     }
     return true;
   });

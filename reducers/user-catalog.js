@@ -28,7 +28,8 @@ var _createInitialeState = function() {
       size : 10,
       text : null,
       serial : null,
-      geometry : null
+      geometry : null,
+      favorite: false
     },
     data : _createInitialeDataState(),
     interval : [
@@ -239,7 +240,6 @@ var userCatalog = function(state, action) {
       });
 
     case types.USER_CATALOG_FILTER_TEXT:
-
       return Object.assign({}, state, {
         query : Object.assign({}, state.query, {
           text : action.text || '',
@@ -248,7 +248,6 @@ var userCatalog = function(state, action) {
       });
 
     case types.USER_CATALOG_FILTER_SERIAL:
-
       return Object.assign({}, state, {
         query : Object.assign({}, state.query, {
           serial : action.serial || '',
@@ -256,8 +255,15 @@ var userCatalog = function(state, action) {
         })
       });
 
-    case types.USER_CATALOG_SET_SEARCH_GEOMETRY:
+    case types.USER_CATALOG_FILTER_FAVORITE:
+      return Object.assign({}, state, {
+        query : Object.assign({}, state.query, {
+          favorite: !state.query.favorite,
+          index : 0
+        })
+      });
 
+    case types.USER_CATALOG_SET_SEARCH_GEOMETRY:
       return Object.assign({}, state, {
         query : Object.assign({}, state.query, {
           geometry : action.geometry || null,
@@ -266,11 +272,11 @@ var userCatalog = function(state, action) {
       });
 
     case types.USER_CATALOG_FILTER_CLEAR:
-
       return Object.assign({}, state, {
         query : Object.assign({}, state.query, {
           text : null,
-          serial : null
+          serial : null,
+          favorite: false
         })
       });
 

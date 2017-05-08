@@ -80,7 +80,7 @@ var Chart = React.createClass({
     
     var {xaxisData, series} = this.props.overlapping ? this._overlapData() : this._consolidateData();
     xaxisData || (xaxisData = []);
-    
+
     series = (series || []).map(s => ({
       name: this._getNameForSeries(s),
       fill: defaults.fill,
@@ -333,7 +333,7 @@ var Chart = React.createClass({
       // Use utility's friendly name
       label = 'Utility' + timeLabel; //config.utility.name;
     } else if (target instanceof population.ClusterGroup) {
-      var cluster
+      var cluster;
       // Use group's friendly name
       if(typeof config === "undefined"){
         cluster = this.props.context.utility.clusters.find(c => (c.key == target.clusterKey));        

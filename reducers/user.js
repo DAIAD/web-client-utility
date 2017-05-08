@@ -249,6 +249,7 @@ var user = function(state, action) {
     case types.AMPHIRO_REQUEST:
       return Object.assign({}, state, {
         isLoading : true,
+        finished: false,
         data : {
           meters : null,
           devices : null,
@@ -260,6 +261,7 @@ var user = function(state, action) {
     case types.AMPHIRO_RESPONSE:
       return Object.assign({}, state, {
         isLoading : false,
+        finished : action.timestamp,
         data : {
           meters : null,
           devices : action.devices,

@@ -60,7 +60,7 @@ var NavigationTree = React.createClass({
       scheduler = (
         <li>
           <Link to='/scheduler'>
-            <i className='fa fa-clock-o fa-fw'></i>{' ' + _t({ id: 'Section.Scheduler'})}
+            <i className='fa fa-clock-o fa-fw'></i>{' ' + _t({ id: 'Section.Scheduler.Title'})}
           </Link>
         </li>
       );
@@ -69,7 +69,7 @@ var NavigationTree = React.createClass({
         <li>
           <Link to='/support/logging'>
             <span  style={{paddingLeft: 18}}>
-              <i className='fa fa-history fa-fw'></i>{' ' + _t({ id: 'Section.Support.Logging'})}
+              <i className='fa fa-history fa-fw'></i>{' ' + _t({ id: 'Section.Support.Logging.Title'})}
             </span>
           </Link>
         </li>
@@ -117,7 +117,7 @@ var NavigationTree = React.createClass({
                   <li>
                     <Link to='/analytics/fav'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-diamond fa-fw'></i>{' ' + _t({ id: 'Section.Analytics.Fav'})}
+                        <i className='fa fa-diamond fa-fw'></i>{' ' + _t({ id: 'Section.Analytics.Fav.Title'})}
                       </span>
                     </Link>
                   </li>
@@ -140,14 +140,14 @@ var NavigationTree = React.createClass({
                   <li>
                     <Link to='/users'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-user fa-fw'></i>{' ' + _t({ id: 'Section.Users'})}
+                        <i className='fa fa-user fa-fw'></i>{' ' + _t({ id: 'Section.Users.Title'})}
                       </span>
                     </Link>
                   </li>
                   <li>
                     <Link to='/groups'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-group fa-fw'></i>{' ' + _t({ id: 'Section.Groups'})}
+                        <i className='fa fa-group fa-fw'></i>{' ' + _t({ id: 'Section.Groups.Title'})}
                       </span>
                     </Link>
                   </li>
@@ -158,7 +158,7 @@ var NavigationTree = React.createClass({
             <li>
               <a href='#' onClick={() => this._toggleExpand('alerts')}>
                 <i className='fa fa-commenting-o fa-fw'></i>
-                {' ' + _t({ id: 'Section.ManageAlerts.Engagement'}) + ' '}
+                {' ' + _t({ id: 'Section.Engagement.Title'}) + ' '}
                 { this.state.alerts ? (<i className='fa fa-caret-up fa-fw'></i>) : (<i className='fa fa-caret-down fa-fw'></i>)}
               </a>
               <Collapsible open={this.state.expand.alerts}>
@@ -166,14 +166,14 @@ var NavigationTree = React.createClass({
                   <li>
                     <Link to='/manage-alerts'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-list-ol fa-fw'></i>{' ' + _t({ id: 'Section.ManageAlerts.Messages'})}
+                        <i className='fa fa-list-ol fa-fw'></i>{' ' + _t({ id: 'Section.Engagement.Messages.Title'})}
                       </span>
                     </Link>
                   </li>
                   <li>
                     <Link to='/announcements'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-wechat fa-fw'></i>{' ' + _t({ id: 'Section.ManageAlerts.Announcements'})}
+                        <i className='fa fa-wechat fa-fw'></i>{' ' + _t({ id: 'Section.Engagement.Announcements.Title'})}
                       </span>
                     </Link>
                   </li>
@@ -205,7 +205,7 @@ var NavigationTree = React.createClass({
                   <li>
                     <Link to='/trials/overview'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-table fa-fw'></i>{' ' + _t({id: 'Section.Trials.Overview'})}
+                        <i className='fa fa-table fa-fw'></i>{' ' + _t({id: 'Section.Trials.Overview.Title'})}
                       </span>
                     </Link>
                   </li>
@@ -245,14 +245,14 @@ var NavigationTree = React.createClass({
                   <li>
                     <Link to='/support/export'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-cloud-download fa-fw'></i>{' ' + _t({ id: 'Section.Support.DataExport'})}
+                        <i className='fa fa-cloud-download fa-fw'></i>{' ' + _t({ id: 'Section.Support.DataExport.Title'})}
                       </span>
                     </Link>
                   </li>
                   <li>
                     <Link to='/support/messages'>
                       <span  style={{paddingLeft: 18}}>
-                        <i className='fa fa-commenting fa-fw'></i>{' ' + _t({ id: 'Section.ManageAlerts.Messages'})}
+                        <i className='fa fa-commenting fa-fw'></i>{' ' + _t({ id: 'Section.Support.Messages.Title'})}
                       </span>
                     </Link>
                   </li>
