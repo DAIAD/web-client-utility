@@ -41,7 +41,7 @@ var SavingsPotentialExplore = React.createClass({
       );
     } 
   
-    const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential } = scenario; 
+    const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential, numberOfConsumers } = scenario; 
     const completed = processingEndOn != null;
     const details = [{
       id: 1,
@@ -88,7 +88,7 @@ var SavingsPotentialExplore = React.createClass({
         id: 3,
         display: 'stat',
         title: 'Savings Potential',
-        highlight: `${potential} \u33A5`,
+        highlight: <span><span>{`${potential} \u33A5`}</span><h4>{numberOfConsumers ? `${numberOfConsumers} consumers` : null}</h4></span>,
         info: [],
         footer: null,
       });
