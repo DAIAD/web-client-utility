@@ -3,7 +3,7 @@ const budgetAPI = require('../api/budget');
 var userAPI = require('../api/user');
 var { fetchCompleted } = require('./SavingsActions');
 
-var { extractFeatures, nameToId } = require('../helpers/common');
+var { extractFeatures, throwServerError } = require('../helpers/common');
 
 const setQuery = function(query) {
   return {
@@ -142,10 +142,13 @@ const addBudget = function (values) {
     }
     return budgetAPI.create(options)
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
-      console.error('caught error in create budget');
+      console.error('caught error in create budget', error);
       throw error;
     });
   }
@@ -158,10 +161,13 @@ const removeBudget = function (budgetKey) {
     };
     return budgetAPI.remove(options)
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
-      console.error('caught error in remove budget');
+      console.error('caught error in remove budget', error);
       throw error;
     });
   };
@@ -174,10 +180,13 @@ const fetchBudget = function(budgetKey) {
     };
     return budgetAPI.find(options)
     .then((response) => {
-      return response.scenario;
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
+      return response.budget;
     })
     .catch((error) => {
-      console.error('caught error in fetch budget');
+      console.error('caught error in fetch budget', error);
       throw error;
     });
   }
@@ -187,6 +196,9 @@ const queryBudgets = function (query) {
   return function (dispatch, getState) {
     return budgetAPI.query({ query })
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
@@ -234,10 +246,13 @@ const setActiveBudget = function(budgetKey) {
     };
     return budgetAPI.activate(options)
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
-      console.error('caught error in activate budget');
+      console.error('caught error in activate budget', error);
       throw error;
     });
   }

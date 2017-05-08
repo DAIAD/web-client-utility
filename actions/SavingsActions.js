@@ -2,7 +2,7 @@ var types = require('../constants/SavingsActionTypes');
 
 var { getAreaGroups, getAreas } = require('./MapActions');
 var savingsAPI = require('../api/savings');
-var { nameToId, mapObject } = require('../helpers/common');
+var { nameToId, mapObject, throwServerError } = require('../helpers/common');
 
 const confirmRemoveScenario = function(id) {
   return {
@@ -76,13 +76,13 @@ const addSavingsScenario = function (values) {
 
     return savingsAPI.create(options)
     .then((response) => {
-      if (!response.success && Array.isArray(response.errors) && response.errors.length > 0) {
-        throw new Error(response.errors[0].code);
+      if (!response || !response.success) {
+        throwServerError(response);
       }
       return response;
     })
     .catch((error) => {
-      console.error('caught error in create savings scenario');
+      console.error('caught error in create savings scenario', error);
       throw error;
     });
   }
@@ -96,10 +96,13 @@ const refreshSavingsScenario = function (scenarioKey) {
     
     return savingsAPI.refresh(options)
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
-      console.error('caught error in refresh savings scenario');
+      console.error('caught error in refresh savings scenario', error);
       throw error;
     });
   }
@@ -113,10 +116,13 @@ const removeSavingsScenario = function (scenarioKey) {
     
     return savingsAPI.remove(options)
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
-      console.error('caught error in remove savings scenario');
+      console.error('caught error in remove savings scenario', error);
       throw error;
     });
   }
@@ -131,11 +137,14 @@ const exploreSavingsScenario = function (scenarioKey, clusterKey) {
 
     return savingsAPI.explore(options)
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
-      console.error('caught error in explore savings scenario');
-      throw error;
+      console.error('caught error in explore savings scenario', error);
+      return null;
     });
   }
 };
@@ -153,6 +162,9 @@ const fetchSavings = function (query) {
   return function (dispatch, getState) {
     return savingsAPI.query({ query })
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
