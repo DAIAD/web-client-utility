@@ -1,6 +1,7 @@
 const develop = (process.env.NODE_ENV !== 'production');
 
 var React = require('react');
+var PropTypes = require('prop-types');
 var {Link} = require('react-router');
 
 var Collapsible = require('./Collapsible');
@@ -12,6 +13,8 @@ var NavigationTree = React.createClass({
   },
 
   propTypes : {
+    roles: PropTypes.array,
+    height: PropTypes.number
   },
 
   getDefaultProps: function() {
@@ -76,8 +79,10 @@ var NavigationTree = React.createClass({
       );
     }
 
+    let height = this.props.height - 51;
+
     return (
-      <div className='navbar-default navbar-static-side' role='navigation'>
+      <div className='navbar-default navbar-static-side' role='navigation' ref={(el) => { this._element = el; }} style={{height: height}}>
         <div className='sidebar-collapse'>
           <ul className='nav' id='side-menu'>
             <li>
