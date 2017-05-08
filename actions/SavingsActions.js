@@ -39,18 +39,22 @@ const setAreas = function (areas) {
   };
 };
 
-const setActiveData = function (data) {
+const setExploreScenario = function (scenario) {
   return {
-    type: types.SAVINGS_SET_ACTIVE_DATA,
+    type: types.SAVINGS_SET_EXPLORE_SCENARIO,
+    scenario,
+  };
+};
+
+const setExploreData = function (data) {
+  return {
+    type: types.SAVINGS_SET_EXPLORE_DATA,
     data,
   };
 };
 
 const addSavingsScenario = function (values) {
   return function(dispatch, getState) {
-    if (!values.title || !values.title.name) {
-      throw 'Oops, no name provided to add budget scenario';
-    }
     const title = values.title.name;
     
     const population = Array.isArray(values.population) ? values.population : [values.population];
@@ -140,7 +144,8 @@ const exploreAllClusterScenarios = function (scenarioKey) {
   return function (dispatch, getState) {
     const { clusters = [] } = getState().config.utility;
     return Promise.all(clusters.map(cluster => dispatch(exploreSavingsScenario(scenarioKey, cluster.key))))
-    .then(clusters => dispatch(setActiveData({ clusters: clusters.filter(c => c.errors.length === 0) })));
+    .then(clusters => clusters.filter(c => c != null))
+    .then(clusters => dispatch(setExploreData({ clusters })));
   };
 };
 
@@ -152,6 +157,30 @@ const fetchSavings = function (query) {
     })
     .catch((error) => {
       console.error('caught error in query savings scenarios', error);
+    });
+  };
+};
+
+const findSavingsScenario = function (scenarioKey) {
+  return function (dispatch, getState) {
+    return savingsAPI.find({ scenarioKey })
+    .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
+      return response.scenario;
+    })
+    .catch((error) => {
+      console.error('caught error in find savings scenario', error);
+    });
+  };
+};
+
+const fetchSavingsScenario = function (scenarioKey) {
+  return function (dispatch, getState) {
+    return dispatch(findSavingsScenario(scenarioKey))
+    .then((scenario) => {
+      dispatch(setExploreScenario(scenario));
     });
   };
 };
@@ -204,5 +233,6 @@ module.exports = {
   setQuery,
   setQueryAndFetch,
   fetchAllAreas,
+  fetchSavingsScenario,
   exploreAllClusterScenarios,
 };

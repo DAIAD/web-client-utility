@@ -12,7 +12,7 @@ const initialState = {
     name: null,
   },
   scenarios: [], 
-  active: {},
+  explore: {},
 };
 
 var savings = function (state=initialState, action) {
@@ -30,11 +30,12 @@ var savings = function (state=initialState, action) {
         scenarios: action.scenarios,
       };
 
-    case types.SAVINGS_SET_ACTIVE_DATA:
+    case types.SAVINGS_SET_EXPLORE_DATA:
+      if (typeof action.data !== 'object') return state;
       return {
         ...state,
-        active: {
-          ...state.active,
+        explore: {
+          ...state.explore,
           ...action.data,
         },
       };
