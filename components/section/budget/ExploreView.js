@@ -349,7 +349,6 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   const budget = budgets.find(budget => budget.key === ownProps.params.id);
   const details = [], stats = [];
   
-  console.log('budget:', budget);
   if (budget) {
     const { activatedOn, initialized, numberOfConsumers, createdOn, updatedOn, params, paramsShort, owner, expectation = {}, actual = {}, overlap = null, consumptionBefore, consumptionAfter } = budget;
     const expectedPercent = Math.round(budget.expectedPercent * 100) / 100;
