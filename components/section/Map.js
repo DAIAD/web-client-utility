@@ -217,14 +217,13 @@ var AnalyticsMap = React.createClass({
 
     var intervalEditor = (
       <div className='col-md-3'>
-        <DateRangePicker
-          startDate={this.props.defaultFavouriteValues.interval ?
-                      moment(this.props.favourite.queries[0].time.start) : this.props.interval[0]}
-          endDate={this.props.defaultFavouriteValues.interval ?
-                      moment(this.props.favourite.queries[0].time.end) : this.props.interval[1]}
-          ranges={this.props.ranges}
-          onEvent={_onIntervalEditorChange.bind(this)}
-        >
+        <DateRangePicker startDate={this.props.defaultFavouriteValues.interval ?
+                                    moment(this.props.favourite.queries[0].time.start) : this.props.interval[0]}
+                         endDate={this.props.defaultFavouriteValues.interval ?
+                         moment(this.props.favourite.queries[0].time.end) : this.props.interval[1]}
+                         ranges={this.props.ranges}
+                         locale={this.props.dateRangePickerLocale}
+                         onEvent={_onIntervalEditorChange.bind(this)}>
           <div className='clearfix Select-control' style={{ cursor: 'pointer', padding: '5px 10px', width: '100%'}}>
             <span>{intervalLabel}</span>
           </div>
@@ -596,7 +595,8 @@ function mapStateToProps(state) {
       metersLocations: state.map.metersLocations,
       groups:state.map.groups,
       group:state.map.group,
-      populationType:state.map.populationType
+      populationType:state.map.populationType,
+      dateRangePickerLocale: state.i18n.data[state.i18n.locale].messages['Library.DateRangePicker.$locale']
   };
 }
 

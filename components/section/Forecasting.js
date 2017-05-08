@@ -236,38 +236,37 @@ var Forecasting = React.createClass({
           clearable={false}
           searchable={false} className='form-group'/>
         <span className='help-block'>Filter group type</span>
-    </div>
-  );
+      </div>
+    );
+ 
+    var groupSelect = (
+      <div>
+        <Select name='group'
+                value={this.props.forecasting.group ?
+                       {name:this.props.forecasting.group.name,label:this.props.forecasting.group.label} :
+                       {name:'UNDEFINED', label:<i>Everyone</i>}}
+                options={typeOptions}
+                onChange={_groupSelect.bind(this)}
+                clearable={false}
+                searchable={false} className='form-group'/>
+        <span className='help-block'>Select group</span>
+      </div>
+    );
 
-  var groupSelect = (
-    <div>
-      <Select name='group'
-        value={this.props.forecasting.group ? 
-            {name:this.props.forecasting.group.name,label:this.props.forecasting.group.label} : 
-                {name:'UNDEFINED', label:<i>Everyone</i>}}
-        options={typeOptions}
-        onChange={_groupSelect.bind(this)}
-        clearable={false}
-        searchable={false} className='form-group'/>
-      <span className='help-block'>Select group</span>
-    </div>
-  );
-    
     var intervalEditor = (
       <div>
-        <DateRangePicker
-          startDate={this.props.forecasting.interval[0]}
-          endDate={this.props.forecasting.interval[1]}
-          ranges={this.props.forecasting.ranges}
-          onEvent={this._onIntervalChange}
-        >
+        <DateRangePicker startDate={this.props.forecasting.interval[0]}
+                       endDate={this.props.forecasting.interval[1]}
+                       ranges={this.props.forecasting.ranges}
+                       onEvent={this._onIntervalChange}
+                       locale={this.props.dateRangePickerLocale}>
           <div className='clearfix Select-control' style={{ cursor: 'pointer', padding: '5px 10px', width: '100%'}}>
             <span>{intervalLabel}</span>
           </div>
-          </DateRangePicker>
-         <div style={{padding: '10px'}}>
+        </DateRangePicker>
+        <div style={{padding: '10px'}}>
           <span className='help-block'>Select time interval</span>
-         </div>
+        </div>
       </div>
     );
    
@@ -342,7 +341,8 @@ function mapStateToProps(state) {
       forecasting: state.forecasting,
       profile: state.session.profile,
       routing: state.routing,
-      config: state.config
+      config: state.config,
+      dateRangePickerLocale: state.i18n.data[state.i18n.locale].messages['Library.DateRangePicker.$locale']
   };
 }
 

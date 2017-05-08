@@ -34,7 +34,7 @@ var initialState = {
 
   period: {
     start: '2016-03-01T00:00:00Z',
-    duration: 4, // months
+    duration: 12, // months
   },
 };
 

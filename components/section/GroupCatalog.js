@@ -63,10 +63,12 @@ var GroupCatalog  = React.createClass({
   render: function() {
     const tableFields = [{
       name: 'id',
-      title: 'Section.Groups.Table1.Id',
       hidden: true
     }, {
       name: 'type',
+      hidden: true
+    },{
+      name: 'typeLabel',
       title: 'Section.Groups.Table1.Type',
       width: 100
     }, {
