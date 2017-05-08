@@ -58,12 +58,11 @@ const validateSavingsScenario = ({key:value}) => {
 };
 
 const validateName = function ({name:value}) { 
-  const existing = this.props.budgets.map(budget => nameToId(budget.name));
+  const existing = this.props.budgets.map(budget => budget.name);
 
   if (!value) {
     throw 'noName';
-  }
-  else if (existing.includes(nameToId(value))) {
+  } else if (existing.includes(value)) {
     throw 'nameExists';
   }
 };

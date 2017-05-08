@@ -41,15 +41,12 @@ const validateWhen = (value) => {
 };
 
 const validateName = function (value) { 
-  //const existing = this.props.scenarios.map(scenario => nameToId(scenario.name));
+  const existing = this.props.scenarios.map(scenario => scenario.name);
   if (!value.name) {
     throw 'noName';
-  }
-  /*
-  else if (existing.includes(nameToId(value.name))) {
+  } else if (existing.includes(value.name)) {
     throw 'nameExists';
-    }
-    */
+  }
 };
 
 var SavingsPotentialAdd = React.createClass({
