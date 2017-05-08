@@ -12,15 +12,14 @@ var SavingsPotentialExplore = React.createClass({
     this.props.actions.exploreAllClusterScenarios(id);
   },
   render: function() {
-    const { scenarios, actions, active, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
-    const { clusters } = active;
+    const { scenarios, actions, explore, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
+    const { clusters } = explore;
     const { goToListView, confirmRemoveScenario } = actions;
     const _t = x => intl.formatMessage({ id: x });
     
     const { id } = params;
     const scenario = scenarios.find(scenario => scenario.key === id);
 
-    if (!clusters) return null;
     if (scenario == null) {
       return (
         <bs.Panel header={<h3>404</h3>}>
