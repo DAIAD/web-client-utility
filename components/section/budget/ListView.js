@@ -40,13 +40,15 @@ function BudgetsList (props) {
           />
        </bs.Col>
         <bs.Col sm={8} md={7} style={{textAlign: 'right'}}>
+       { props.hide ? 
          <bs.Button 
            bsStyle='primary' 
            style={{ marginRight: 20 }}
            onClick={() => { goToActiveView(); }}
            ><i className='fa fa-eye'></i> Monitor active
          </bs.Button>
-
+        : <span />
+        }
          <bs.Button 
            bsStyle='success' 
            onClick={() => { goToAddView(); }}
