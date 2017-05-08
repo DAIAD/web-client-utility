@@ -273,9 +273,30 @@ const resetActiveBudget = function(budgetKey) {
     })
     .catch((error) => {
       console.error('caught error in deactivate budget', error);
-      throw error;
+      return null;
     });
   }
+};
+
+const scheduleBudget = function (budgetKey, year, month) {
+  return function (dispatch, getState) {
+    const options = {
+      budgetKey,
+      year,
+      month,
+    };
+    return budgetAPI.schedule(options)
+    .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in schedule budget', error);
+      return null;
+    });
+  };
 };
 
 const exploreBudgetCluster = function (budgetKey, clusterKey) {
@@ -341,7 +362,11 @@ const exploreBudgetAllUsers = function (budgetKey, query) {
     }))
       .then(allUserData => ({ 
         total: userData.total,
-        accounts: allUserData,
+        accounts: allUserData.map(u => ({
+          ...u,
+          savings: Array.isArray(u.months) && u.months.length > 0 && Math.round(u.months[0].percent * 100) / 100,
+          budget: Array.isArray(u.months) && u.months.length > 0 && Math.round(u.months[0].consumptionAfter - u.months[0].consumptionBefore),
+        })),
       }));
     })
   };
@@ -390,4 +415,5 @@ module.exports = {
   requestExploreData,
   setExploreQuery,
   resetExploreQuery,
+  scheduleBudget,
 };

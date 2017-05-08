@@ -2,6 +2,7 @@ var React = require('react');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var bs = require('react-bootstrap');
+var moment = require('moment');
 var { Link } = require('react-router');
 var { push } = require('react-router-redux');
 var util = require('../../../helpers/wizard');
@@ -103,6 +104,7 @@ function mapDispatchToProps(dispatch) {
 function mergeProps(stateProps, dispatchProps, ownProps) {
   const areas = Array.isArray(stateProps.areas) && stateProps.areas.length > 0 && stateProps.areas[0] || [];
   const savings = stateProps.savings;
+  const lastMonth = moment().subtract(1, 'month');
   return {
     ...ownProps,
     actions: {
@@ -115,7 +117,8 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       .then(() => dispatchProps.fetchBudgets()),
       resetActiveBudget: key => dispatchProps.resetActiveBudget(key)
       .then(() => dispatchProps.fetchBudgets()),
-
+      scheduleBudget: (budget, year, month) => dispatchProps.scheduleBudget(budget, lastMonth.year(), lastMonth.month() + 1)
+      .then(() => setTimeout(dispatchProps.fetchBudgets, 2000)),
     },
     ...stateProps,
     areas,
