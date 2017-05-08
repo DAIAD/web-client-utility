@@ -112,10 +112,10 @@ const addBudget = function (values) {
     const title = values.title.name;
     const utility = getState().config.utility.key;
     
-    const population = Array.isArray(values.population) ? values.population : [{ type: 'UTILITY', key: utility }];
+    const population = Array.isArray(values.population) ? values.population.map(p => ({ key: p.key, type: p.type })) : [{ type: 'UTILITY', key: utility }];
     const spatial = Array.isArray(values.spatial) ? values.spatial.map(area => ({ type: 'AREA', areas: [area.area] })) : null;
 
-    const excludePopulation = Array.isArray(values.excludePopulation) ? values.excludePopulation : null;
+    const excludePopulation = Array.isArray(values.excludePopulation) ? values.excludePopulation.map(p => ({ key: p.key, type : p.type })) : null;
 
     const excludeSpatial = Array.isArray(values.excludeSpatial) ? values.excludeSpatial.map(area => ({ type: 'AREA', areas: [area.area] })) : null;
     
@@ -149,7 +149,7 @@ const addBudget = function (values) {
     })
     .catch((error) => {
       console.error('caught error in create budget', error);
-      throw error;
+      return null;
     });
   }
 };
@@ -168,7 +168,7 @@ const removeBudget = function (budgetKey) {
     })
     .catch((error) => {
       console.error('caught error in remove budget', error);
-      throw error;
+      return null;
     });
   };
 };
@@ -187,7 +187,7 @@ const fetchBudget = function(budgetKey) {
     })
     .catch((error) => {
       console.error('caught error in fetch budget', error);
-      throw error;
+      return null;
     });
   }
 };
@@ -203,6 +203,7 @@ const queryBudgets = function (query) {
     })
     .catch((error) => {
       console.error('caught error in query budgets', error);
+      return null;
     });
   };
 };
@@ -253,7 +254,7 @@ const setActiveBudget = function(budgetKey) {
     })
     .catch((error) => {
       console.error('caught error in activate budget', error);
-      throw error;
+      return null;
     });
   }
 };
@@ -322,7 +323,7 @@ const exploreBudgetUser = function (budgetKey, consumerKey) {
     })
     .catch((error) => {
       console.error('caught error in explore budget consumer', error);
-      throw error;
+      return {};
     });
   }
 };

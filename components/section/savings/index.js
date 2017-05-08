@@ -107,12 +107,6 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     actions: {
       ...dispatchProps,
       addSavingsScenario: data => dispatchProps.addSavingsScenario(data)
-      .then((response) => {
-        if (response.key) {
-          return dispatchProps.refreshSavingsScenario(response.key);
-        }
-        return Promise.resolve(response);
-      })
       .then(() => dispatchProps.querySavingsScenarios()),
       removeSavingsScenario: key => dispatchProps.removeSavingsScenario(key)
       .then(() => dispatchProps.querySavingsScenarios()),

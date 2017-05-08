@@ -83,7 +83,7 @@ const addSavingsScenario = function (values) {
     })
     .catch((error) => {
       console.error('caught error in create savings scenario', error);
-      throw error;
+      return null;
     });
   }
 };
@@ -103,7 +103,7 @@ const refreshSavingsScenario = function (scenarioKey) {
     })
     .catch((error) => {
       console.error('caught error in refresh savings scenario', error);
-      throw error;
+      return null;
     });
   }
 };
@@ -123,7 +123,7 @@ const removeSavingsScenario = function (scenarioKey) {
     })
     .catch((error) => {
       console.error('caught error in remove savings scenario', error);
-      throw error;
+      return null;
     });
   }
 };
@@ -143,13 +143,13 @@ const exploreSavingsScenario = function (scenarioKey, clusterKey) {
       return response;
     })
     .catch((error) => {
-      console.error('caught error in explore savings scenario', error);
+      console.error('caught error in explore savings scenario', scenarioKey, clusterKey, error);
       return null;
     });
   }
 };
 
-const exploreAllClusterScenarios = function (scenarioKey) {
+const exploreScenariosAllClusters = function (scenarioKey) {
   return function (dispatch, getState) {
     const { clusters = [] } = getState().config.utility;
     return Promise.all(clusters.map(cluster => dispatch(exploreSavingsScenario(scenarioKey, cluster.key))))
@@ -169,6 +169,7 @@ const fetchSavings = function (query) {
     })
     .catch((error) => {
       console.error('caught error in query savings scenarios', error);
+      return null;
     });
   };
 };
@@ -184,6 +185,7 @@ const findSavingsScenario = function (scenarioKey) {
     })
     .catch((error) => {
       console.error('caught error in find savings scenario', error);
+      return null;
     });
   };
 };
@@ -246,5 +248,5 @@ module.exports = {
   setQueryAndFetch,
   fetchAllAreas,
   fetchSavingsScenario,
-  exploreAllClusterScenarios,
+  exploreScenariosAllClusters,
 };

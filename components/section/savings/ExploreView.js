@@ -9,12 +9,12 @@ var theme = require('../../chart/themes/blue-palette');
 var SavingsPotentialExplore = React.createClass({ 
   componentWillMount: function() {
     if (this.props.clusters) {
-      this.props.actions.exploreAllClusterScenarios(this.props.params.id);
+      this.props.actions.exploreScenariosAllClusters(this.props.params.id);
     }
   },
   componentWillReceiveProps: function (nextProps) {
     if (nextProps.clusters && !this.props.clusters) {
-      this.props.actions.exploreAllClusterScenarios(this.props.params.id);
+      this.props.actions.exploreScenariosAllClusters(this.props.params.id);
     }
   },
   render: function() {
