@@ -31,11 +31,13 @@ const savingsSchema = actions => [{
     title: 'Savings.List.paramsShort',
     sortable: false,
   },
+  /*
   {
     name: 'owner',
     title: 'Savings.List.owner',
     sortable: false,
-  },
+    },
+    */
   {
     name: 'createdOn',
     title: 'Savings.List.createdOn',
@@ -62,6 +64,26 @@ const savingsSchema = actions => [{
     },
     handler : (function(field, row) {
       actions.goToExploreView(row.key);
+    }),
+  },
+  {
+    name : 'refresh',
+    title: 'Savings.List.refresh',
+    type : 'action',
+    icon : function(field, row) {
+      if (row.status === 'PENDING' || row.status === 'RUNNING') return 'cogs';
+      else if (row.status === 'COMPLETED') return 'check';
+      return 'refresh';
+    },
+    style: {
+      textAlign: 'center',
+      fontSize: '1.3em'
+    },
+    handler : (function(field, row) {
+      if (row.status !== 'PENDING' && row.status !== 'RUNNING' && row.status !== 'COMPLETED') {
+        actions.refreshSavingsScenario(row.key);
+      }
+      return null;
     }),
   },
   {

@@ -489,6 +489,7 @@
       "completedOn": "Calculated",
       "status": "Status",
       "explore": "Explore",
+      "refresh": "Rerun",
       "delete": "Delete"
     },
     "Explore": {

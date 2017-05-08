@@ -20,7 +20,7 @@ var SavingsPotentialExplore = React.createClass({
   render: function() {
     const { scenarios, actions, explore, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
     const { clusters } = explore;
-    const { goToListView, confirmRemoveScenario } = actions;
+    const { goToListView, confirmRemoveScenario, refreshSavingsScenario } = actions;
     const _t = x => intl.formatMessage({ id: x });
     
     const { id } = params;
@@ -41,7 +41,7 @@ var SavingsPotentialExplore = React.createClass({
       );
     } 
   
-    const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential, numberOfConsumers } = scenario; 
+    const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential, numberOfConsumers, status } = scenario; 
     const completed = processingEndOn != null;
     const details = [{
       id: 1,
@@ -164,14 +164,29 @@ var SavingsPotentialExplore = React.createClass({
               >
               { _t('Savings.Explore.delete') }
             </bs.Button>
+            {
+              status !== 'PENDING' && status !== 'RUNNING' && status !== 'COMPLETED' ? 
+                <bs.Button
+                  bsStyle='warning'
+                  style={{ float: 'right', marginRight: 25 }}
+                  onClick={() => refreshSavingsScenario(scenarioId)}
+                  >
+                  { _t('Savings.List.refresh') }
+                </bs.Button>
+                :
+                  <span />
+           }
+          </bs.Col>
+          <bs.Col md={3} style={{ float: 'left' }}>
+            <h5>Status: { status }</h5>
           </bs.Col>
         </bs.Row>
         <hr/>
+
         <WidgetRow
           widgets={details}
         />
       </bs.Panel>
-
       { 
         completed ?
           <div>
