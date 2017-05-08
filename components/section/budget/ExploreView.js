@@ -161,6 +161,18 @@ var BudgetExplore = React.createClass({
       <div>
         <bs.Panel header={<h3>{name + _t('Budgets.Explore.overview')}</h3>}>
         <bs.Row>
+          <bs.Col md={1}>
+            { completed ? 
+              <bs.Button
+                onClick={() => { scheduleBudget(budgetKey) }}
+              >
+                { _t('Budgets.List.refresh') }
+              </bs.Button>
+              :
+              <span />
+            }
+          </bs.Col>
+
           <bs.Col md={9} style={{ float: 'right' }}>
             <bs.Button 
               bsStyle='success' 
@@ -182,7 +194,7 @@ var BudgetExplore = React.createClass({
                 <div />
             }
             {
-              completed && !active ? 
+              !active ? 
                 <bs.Button 
                   bsStyle='primary' 
                   style={{float: 'right', marginRight: 25}}
@@ -204,23 +216,16 @@ var BudgetExplore = React.createClass({
                   :
                   <div />
             }
-            <bs.Button
-              style={{ float: 'right', marginRight: 25 }}
-              onClick={() => { scheduleBudget(budgetKey) }}
-            >
-              { _t('Budgets.List.refresh') }
-            </bs.Button>
-
             </bs.Col>
           </bs.Row>
           <hr/>
           { 
           active ? 
             <bs.Row>
-              <bs.Col md={4} style={{ float: 'left', textAlign: 'left' }}>
+              <bs.Col md={2} style={{ float: 'left', textAlign: 'left' }}>
                 <h4>Budget is active</h4>
               </bs.Col>
-              <bs.Col md={4} style={{ float: 'right', textAlign: 'right', marginBottom: 10 }}>
+              <bs.Col md={3} style={{ float: 'right', textAlign: 'right', marginBottom: 10 }}>
                 <h5>Updated: {updatedOn ? <FormattedTime value={updatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</h5>
                 <h5>Next update: {nextUpdateOn ? <FormattedTime value={nextUpdateOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'}</h5>
               </bs.Col>
