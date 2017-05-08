@@ -18,7 +18,15 @@ function getFriendlyParams (dict, intl, details='long') {
     value: Array.isArray(dict[key]) && dict[key].length > 0 ? 
       (
         details === 'short' ? 
-          (dict[key][0].type === 'UTILITY' ? _t('Buttons.All') : _t('Wizard.common.multiple'))
+          (() => {
+            if (dict[key].length === 1) {
+              if (dict[key][0].type === 'UTILITY') {
+                return _t('Buttons.All');
+              }
+              return dict[key][0].label;
+            }
+            return _t('Wizard.common.multiple');
+          })()
           :
             dict[key].map(x => x.label)
       )

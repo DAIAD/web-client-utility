@@ -4,7 +4,8 @@ var Table = require('../../Table');
 var { budgetSchema } = require('../../../schemas/budget'); 
 
 function BudgetsList (props) {
-  const { groups, clusters, segments, areas, actions, budgetToRemove, searchFilter, intl } = props;
+  const { groups, clusters, segments, areas, actions, budgetToRemove, query, intl } = props;
+  const { name } = query;
   const { setQueryAndFetch, removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView, goToActiveView } = actions;
   const budgetFields = budgetSchema(actions);
   const budgetSorter = {
@@ -35,7 +36,7 @@ function BudgetsList (props) {
             type='text'
             placeholder={_t('Budgets.List.search')}
             onChange={(e) => setQueryAndFetch({ name: e.target.value })}
-            value={searchFilter}
+            value={name}
           />
        </bs.Col>
         <bs.Col sm={8} md={7} style={{textAlign: 'right'}}>

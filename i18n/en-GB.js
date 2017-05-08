@@ -263,12 +263,12 @@
         "description": " ",
         "options": {
           "equal": {
-            "label": "Equally",
-            "value": "Equally"
+            "label": "Equal",
+            "value": "Equal"
           },
           "fair": {
-            "label": "Fairly",
-            "value": "Fairly"
+            "label": "Fair",
+            "value": "Fair"
           }
         }
       },
@@ -337,7 +337,7 @@
       "title": "Available scenarios",
       "empty": "No scenarios",
       "name": "Name",
-      "potential": "Savings Potential",
+      "potential": "Savings Potential (\u33A5)",
       "owner": "User",
       "paramsShort": "Parameters",
       "createdOn": "Created",

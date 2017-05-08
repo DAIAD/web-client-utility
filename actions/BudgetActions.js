@@ -19,6 +19,13 @@ const setBudgets = function (budgets) {
   };
 };
 
+const setActiveBudgets = function (budgets) {
+  return {
+    type: types.BUDGET_SET_ACTIVE_BUDGETS,
+    budgets,
+  };
+};
+
 const setSavingsScenarios = function(scenarios) {
   return {
     type: types.BUDGET_SET_SAVINGS_SCENARIOS,
@@ -54,7 +61,6 @@ const setSearchFilter = function(searchFilter) {
   };
 }
 
-/*
 const setExploreQuery = function(query) {
   return {
     type: types.BUDGET_EXPLORE_SET_QUERY,
@@ -63,53 +69,16 @@ const setExploreQuery = function(query) {
 }
 
 const resetExploreQuery = function() {
-  return setQuery({
-    cluster: 'none',
-    group: 'all',
+  return setExploreQuery({
+    //cluster: 'none',
+    //group: 'all',
     geometry: null,
     index: 0,
     size: 10,
-    serial: null,
-    text: null,
+    serial: '',
+    text: '',
   });
 };
-
-const setQueryCluster = function(cluster) {
-  return setQuery({ cluster });
-}
-
-const setQueryGroup = function(group) {
-  return setQuery({ group });
-}
-
-const resetQueryCluster = function() {
-  return setQuery({ cluster: 'none' });
-}
-
-const resetQueryGroup = function() {
-  return setQuery({ group: 'all' });
-}
-
-const setQueryGeometry = function(geometry) {
-  return setQuery({ geometry });
-}
-
-const setQueryIndex = function(index) {
-  return setQuery({ index });
-}
-
-const setQuerySize = function(size) {
-  return setQuery({ size });
-}
-
-const setQuerySerial = function(serial) {
-  return setQuery({ serial });
-}
-
-const setQueryText = function(text) {
-  return setQuery({ text });
-}
-*/
 
 const requestData = function() {
   return {
@@ -117,13 +86,19 @@ const requestData = function() {
   };
 }
 
-const setData = function(data, errors) {
+const setUserData = function(data, errors) {
   return {
-    type: types.BUDGET_EXPLORE_SET_DATA,
+    type: types.BUDGET_EXPLORE_SET_USER_DATA,
     data,
     errors
   };
 }
+const setClusterData = function(data) {
+  return {
+    type: types.BUDGET_EXPLORE_SET_CLUSTER_DATA,
+    data,
+  };
+};
 
 const fetchCompletedSavingsScenarios = function () {
   return function (dispatch, getState) {
@@ -134,10 +109,6 @@ const fetchCompletedSavingsScenarios = function () {
 
 const addBudget = function (values) {
   return function(dispatch, getState) {
-
-    if (!values.title || !values.title.name) {
-      throw 'Oops, no name provided to add budget scenario';
-    }
     const title = values.title.name;
     const utility = getState().config.utility.key;
     
@@ -168,7 +139,7 @@ const addBudget = function (values) {
     const options = {
       title,
       parameters,
-    };
+    }
     return budgetAPI.create(options)
     .then((response) => {
       return response;
@@ -212,7 +183,7 @@ const fetchBudget = function(budgetKey) {
   }
 };
 
-const fetchBudgets = function (query) {
+const queryBudgets = function (query) {
   return function (dispatch, getState) {
     return budgetAPI.query({ query })
     .then((response) => {
@@ -224,9 +195,9 @@ const fetchBudgets = function (query) {
   };
 };
 
-const queryBudgets = function() {
+const fetchBudgets = function() {
   return function (dispatch, getState) {
-    return dispatch(fetchBudgets(getState().budget.query))
+    return dispatch(queryBudgets(getState().budget.query))
     .then((res) => { 
       dispatch(setQuery({ total: res.total }));
       return res.budgets || [];
@@ -235,10 +206,23 @@ const queryBudgets = function() {
   };
 };
 
+const fetchActiveBudgets = function () {
+  return function (dispatch, getState) {
+    return dispatch(queryBudgets({
+      pageIndex: 0,
+      pageSize: 20,
+      //active: true,
+    }))
+    .then((res) => {
+      dispatch(setActiveBudgets(res.budgets.filter(b => b.active) || []));
+    });
+  };
+};
+
 const setQueryAndFetch = function(query) {
   return function (dispatch, getState) {
     dispatch(setQuery(query));
-    return dispatch(queryBudgets());
+    return dispatch(fetchBudgets());
   };
 };
 
@@ -266,73 +250,128 @@ const resetActiveBudget = function(budgetKey) {
     };
     return budgetAPI.deactivate(options)
     .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
       return response;
     })
     .catch((error) => {
-      console.error('caught error in deactivate budget');
+      console.error('caught error in deactivate budget', error);
       throw error;
     });
   }
 };
 
-const requestExploreData = function() {
+const exploreBudgetCluster = function (budgetKey, clusterKey) {
+  return function(dispatch, getState) {
+    const options = {
+      budgetKey,
+      clusterKey,
+    };
+    
+    return budgetAPI.exploreCluster(options)
+    .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in explore budget cluster', error);
+      return null;
+      //throw error;
+    });
+  }
+};
+
+const exploreBudgetAllClusters = function (budgetKey) {
+  return function (dispatch, getState) {
+    const { clusters = [] } = getState().config.utility;
+    return Promise.all(clusters.map(cluster => dispatch(exploreBudgetCluster(budgetKey, cluster.key))));
+  };
+};
+
+const exploreBudgetUser = function (budgetKey, consumerKey) {
+  return function(dispatch, getState) {
+    const options = {
+      budgetKey,
+      consumerKey,
+    };
+    
+    return budgetAPI.exploreConsumer(options)
+    .then((response) => {
+      if (!response || !response.success) {
+        throwServerError(response);
+      }
+      return response;
+    })
+    .catch((error) => {
+      console.error('caught error in explore budget consumer', error);
+      throw error;
+    });
+  }
+};
+
+const exploreBudgetAllUsers = function (budgetKey, query) {
+  return function (dispatch, getState) {
+    return userAPI.getAccounts(query)
+    .then((userData) => {
+    return Promise.all(userData.accounts.map((account) => {
+      return dispatch(exploreBudgetUser(budgetKey, account.id) )
+      .then(data => ({
+        ...account,
+        ...data,
+      }));
+    }))
+      .then(allUserData => ({ 
+        total: userData.total,
+        accounts: allUserData,
+      }));
+    })
+  };
+};
+
+const requestExploreData = function(budgetKey) {
   return function(dispatch, getState) {
     dispatch(requestData());
     const { query } = getState().budget.explore;
 
-    return userAPI.getAccounts(query).then(response => {
-      if (Array.isArray(response.errors) && response.errors.length > 0) {
-        dispatch(setData(response, response.errors));
-      }
-      //TODO: for now set a random number as budget for current budget
-      const accounts = response.accounts.map(account => ({ 
-        ...account, 
-        budget: Math.round(Math.random()*100), 
-        savings: Math.round(Math.random()*10) * (Math.random() < 0.5 ? -1 : 1) 
-      }));
+    return Promise.all([
+      dispatch(exploreBudgetAllUsers(budgetKey, query)),
+      dispatch(exploreBudgetAllClusters(budgetKey)),
+    ])
+    .then(([userData, clusterData]) => {
+      dispatch(setClusterData(clusterData.filter(c => c != null)));
 
-      dispatch(setData({ 
-        total: response.total, 
-        accounts,
-        features: extractFeatures(accounts)
-      }, null));
+     dispatch(setUserData({
+      total: userData.total,
+      accounts: userData.accounts,
+      features: extractFeatures(userData.accounts),
+    }, null));
     },
-    error => {
-      console.error('error:', error);
-      dispatch(setData(null, error));
+    (error) => {
+      console.error('caught error in request explore data', error);
+      dispatch(setUserData({}, error));
     });
   };
 }
 
 module.exports = {
   fetchCompletedSavingsScenarios,
-  queryBudgets,
+  fetchBudgets,
+  fetchActiveBudgets,
   fetchBudget,
-  //add
   addBudget,
   removeBudget,
-  //common
   confirmRemoveBudgetScenario,
-  //explore
   resetActiveBudget,
   setActiveBudget,
   confirmSetBudget,
   confirmResetBudget,
   setSearchFilter,
-  /*
-  setQueryIndex,
-  setQuerySize,
-  setQueryGroup,
-  setQueryCluster,
-  resetQueryGroup,
-  resetQueryCluster,
-  setQueryGeometry,
-  setQuerySerial,
-  setQueryText,
-  setQuery,
-  resetQuery,
-  */
   setQuery,
   setQueryAndFetch,
   requestExploreData,
+  setExploreQuery,
+  resetExploreQuery,
 };

@@ -17,7 +17,8 @@ var { getTimeline, getMetersLocations } = require('../../../actions/MapActions')
 var Budgets = React.createClass({ 
   componentWillMount: function () {
     this.props.actions.fetchAllAreas();
-    this.props.actions.queryBudgets();
+    this.props.actions.fetchCompletedSavingsScenarios(); 
+    this.props.actions.fetchBudgets();
   },
   render: function() {
     const { routes, children, budgetToRemove, actions, clusters, groups, areas, budgets, intl } = this.props;
@@ -81,11 +82,11 @@ function mapStateToProps(state, ownProps) {
     routing: state.routing,
     clusters: state.config.utility.clusters,
     savings: state.budget.savings,
+    query: state.budget.query,
     areas: state.savings.areas,
     budgets: state.budget.budgets, 
+    active: state.budget.active,
     budgetToRemoveIdx: state.budget.budgetToRemove,
-    //list
-    searchFilter: state.budget.searchFilter,
   };
 }
 
@@ -101,18 +102,19 @@ function mapDispatchToProps(dispatch) {
 
 function mergeProps(stateProps, dispatchProps, ownProps) {
   const areas = Array.isArray(stateProps.areas) && stateProps.areas.length > 0 && stateProps.areas[0] || [];
+  const savings = stateProps.savings;
   return {
     ...ownProps,
     actions: {
       ...dispatchProps,
       addBudget: data => dispatchProps.addBudget(data)
-      .then(() => dispatchProps.queryBudgets()),
+      .then(() => dispatchProps.fetchBudgets()),
       removeBudget: key => dispatchProps.removeBudget(key)
-      .then(() => dispatchProps.queryBudgets()),
+      .then(() => dispatchProps.fetchBudgets()),
       setActiveBudget: key => dispatchProps.setActiveBudget(key)
-      .then(() => dispatchProps.queryBudgets()),
+      .then(() => dispatchProps.fetchBudgets()),
       resetActiveBudget: key => dispatchProps.resetActiveBudget(key)
-      .then(() => dispatchProps.queryBudgets()),
+      .then(() => dispatchProps.fetchBudgets()),
 
     },
     ...stateProps,
@@ -120,21 +122,13 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     budgets: stateProps.budgets
     .map(scenario => ({
       ...scenario,
-      parameters: util.getParamsWithLabels(util.flattenBudgetParams(scenario.parameters), { ...stateProps, areas, intl: ownProps.intl }),
+      parameters: util.getParamsWithLabels(util.flattenBudgetParams(scenario.parameters), { ...stateProps, areas, savings, intl: ownProps.intl }),
     }))
     .map(scenario => ({
       ...scenario, 
       paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
       params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
     })),
-    /*
-    budgets: stateProps.budgets.map(scenario => ({
-      ...scenario, 
-      active: scenario.activatedOn != null,
-      params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long'),
-      paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
-      })),
-      */
     budgetToRemove: stateProps.budgets.find(scenario => scenario.key === stateProps.budgetToRemoveIdx),
 
   };

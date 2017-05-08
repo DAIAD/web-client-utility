@@ -17,88 +17,19 @@ var maximizable = require('../../Maximizable');
 
 function BudgetDetails (props) {
   const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
-  const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry, resetQuery } = actions;
-  const { cluster: selectedCluster, group: selectedGroup, geometry: selectedGeometry, serial: selectedSerial, text: selectedText, loading } = query;
-  const { key, name, potential, user, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
+  const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry, setExploreQuery, resetExploreQuery } = actions;
+  const { key, name, potential, owner, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
   const goal = parameters.goal;
   const completed = budget.completedOn != null;
 
   const _t = x => intl.formatMessage({ id: x });
 
   const dataNotFound = (
-      <span>{ loading ? _t('Budgets.Explore.loading') : _t('Budgets.Explore.empty') }</span>
+      <span>{ query.loading ? _t('Budgets.Explore.loading') : _t('Budgets.Explore.empty') }</span>
   );
-
-  const activeCluster = clusters.find(cluster => cluster.key === selectedCluster);
-  var clusterOptions = [{
-    label: 'None',
-    value: 'none'
-  },
-  ...clusters.map(cluster => ({ ...cluster, label: cluster.name, value: cluster.key }))
-  ];
-  
-  var groupOptions = selectedCluster === 'none' ? [{
-    label: 'Everyone',
-    value: 'all'
-  }] 
-  : 
-    [{
-    label: 'All',
-    value: 'all'
-  },
-  ...activeCluster.groups.map(group => ({ ...group, label: activeCluster.name + ': ' + group.name, value: group.key }))
-  ];
-
   return (
     <div>
-      <form onSubmit={e => { e.preventDefault(); requestExploreData(); }}>
-      <bs.Row>
-        <bs.Col md={1}>
-          <label>Group:</label>
-        </bs.Col>
-
-        <bs.Col md={4}>
-          <div className='form-group'>
-          <Select className='select-cluster'
-            value={selectedCluster}
-            onChange={(val) => { 
-              if (val == null) { 
-                resetQueryCluster();
-                resetQueryGroup();
-              }
-              else {  
-                setQueryCluster(val.value); 
-              }
-            }}
-            options={clusterOptions}
-          />
-        </div>
-
-        <span className="help-block text-muted">Target a group (or cluster of groups) of consumers.</span>
-        </bs.Col>
-
-        <bs.Col md={4}>
-          <div className='form-group'>
-          <Select className='select-cluster-group'
-            value={selectedGroup}
-            onChange={(val) => { 
-              if (val == null) { 
-                resetQueryGroup();
-              }
-              else {
-                setQueryGroup(val.value);
-              }
-            }}
-            options={groupOptions}
-           />
-        </div>
-        </bs.Col>
-        <bs.Col md={3}>
-          <bs.Button  style={{ marginRight: 20 }} bsStyle='primary' type="submit">Refresh</bs.Button>
-          <bs.Button bsStyle='default' onClick={() => { resetQuery(); requestExploreData();}}>{_t('Budgets.Explore.resetForm')}</bs.Button>
-        </bs.Col>
-    </bs.Row>
-
+      <form onSubmit={e => { e.preventDefault(); requestExploreData(key); }}>
       <bs.Row>
         <bs.Col md={1}>
           <label>Search:</label>
@@ -109,8 +40,8 @@ function BudgetDetails (props) {
             id='accountFilter' 
             name='accountFilter' 
             placeholder='Account or Name...'
-            onChange={e => setQueryText(e.target.value)}
-            value={selectedText || ''} 
+            onChange={e => setExploreQuery({ text: e.target.value })}
+            value={query.text} 
           />
           <span className='help-block'>Filter by name or account</span>
         </bs.Col>
@@ -121,11 +52,17 @@ function BudgetDetails (props) {
             id='serialFilter' 
             name='serialFilter' 
             placeholder='SWM serial number ...'
-            onChange={e => setQuerySerial(e.target.value)}
-            value={selectedSerial || ''} 
+            onChange={e => setExploreQuery({ serial: e.target.value })}
+            value={query.serial} 
           />
           <span className='help-block'>Filter meter serial number</span>
         </bs.Col>
+        
+        <bs.Col md={3}>
+          <bs.Button  style={{ marginRight: 20 }} bsStyle='primary' type="submit">Refresh</bs.Button>
+          <bs.Button bsStyle='default' onClick={() => { resetExploreQuery(); requestExploreData(key);}}>{_t('Budgets.Explore.resetForm')}</bs.Button>
+        </bs.Col>
+
       </bs.Row>
      
     <br />
@@ -138,10 +75,10 @@ function BudgetDetails (props) {
       <TileLayer />
         <DrawControl
           controlled
-          data={selectedGeometry}
+          data={query.geometry}
           onFeatureChange={features => { 
-            setQueryGeometry(features && features.features && Array.isArray(features.features) && features.features.length > 0 ? features.features[0].geometry : null);
-            requestExploreData();
+            setExploreQuery({ geometry: features && features.features && Array.isArray(features.features) && features.features.length > 0 ? features.features[0].geometry : null });
+            requestExploreData(key);
           }}
         />
     
@@ -154,22 +91,22 @@ function BudgetDetails (props) {
 
     <br />
     <Table  
-        fields={tableFields}
-        data={data.accounts}
-        pager={tablePager} 
-        template={{empty : dataNotFound}}
-        style={{
-          table: tableStyle,
-        }} 
-      />
-      {
-        loading ? 
-          <div>
-            <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
-            <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
-          </div>
-          :
-            <div />
+      fields={tableFields}
+      data={data.accounts}
+      pager={tablePager} 
+      template={{empty : dataNotFound}}
+      style={{
+        table: tableStyle,
+      }} 
+    />
+    {
+      query.loading ? 
+        <div>
+          <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
+          <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
+        </div>
+        :
+          <div />
       }
       <br />
 
@@ -180,17 +117,23 @@ function BudgetDetails (props) {
 
 var BudgetExplore = React.createClass({ 
   componentWillMount: function() {
-    //this.props.actions.requestExploreData();
+    if (this.props.clusters) {
+      this.props.actions.requestExploreData(this.props.params.id);
+    }
+  },
+  componentWillReceiveProps: function (nextProps) {
+    if (nextProps.clusters && !this.props.clusters) {
+      this.props.actions.requestExploreData(this.props.params.id);
+    }
   },
   componentWillUnmount: function() {
-    //this.props.actions.resetQuery();
+    this.props.actions.resetExploreQuery();
   },
   render: function() {
-    const { budgets, groups, clusters, segments, areas, actions, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreData, explorePager, exploreQuery, intl, details, stats } = this.props;
-    const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario, resetQuery } = actions;
+    const { budgets, groups, exploreClusters: clusters, segments, areas, actions, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreUsers, explorePager, exploreQuery, intl, details, stats } = this.props;
+    const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario, setExploreQuery, resetExploreQuery } = actions;
     
     const { id } = this.props.params;
-    //TODO: here normally the budget will be fetched from API in componentWillMount
     const budget = budgets.find(budget => budget.key === id);
     
     const _t = x => intl.formatMessage({ id: x });
@@ -210,13 +153,12 @@ var BudgetExplore = React.createClass({
       );
     } 
     
-    const { key:budgetKey, name, potential, user, createdOn, completedOn, activatedOn, updatedOn, nextUpdateOn, parameters, params, active } = budget;
+    const { key:budgetKey, name, potential, owner, createdOn, completedOn, activatedOn, updatedOn, nextUpdateOn, parameters, params, active, initialized } = budget;
     const goal = parameters.goal;
-    const completed = updatedOn != null;
-
+    const completed = initialized;
     return (
       <div>
-        <bs.Panel header={<h3>{budget.name + _t('Budgets.Explore.overview')}</h3>}>
+        <bs.Panel header={<h3>{name + _t('Budgets.Explore.overview')}</h3>}>
         <bs.Row>
           <bs.Col md={9} style={{ float: 'right' }}>
             <bs.Button 
@@ -309,7 +251,7 @@ var BudgetExplore = React.createClass({
               />
             </bs.Panel>
             
-            <bs.Panel header={<h3>{budget.name + _t('Budgets.Explore.details')}</h3>}>
+            <bs.Panel header={<h3>{name + _t('Budgets.Explore.details')}</h3>}>
               <BudgetDetails
                 clusters={clusters}
                 groups={groups}
@@ -318,7 +260,7 @@ var BudgetExplore = React.createClass({
                 actions={actions}
                 metersLocations={metersLocations}
                 tableFields={exploreFields}
-                data={exploreData}
+                data={exploreUsers}
                 tablePager={explorePager}
                 intl={intl}
               />
@@ -387,8 +329,11 @@ function mapStateToProps(state) {
     budgetToSet: state.budget.budgetToSet,
     budgetToReset: state.budget.budgetToReset,
     metersLocations: state.map.metersLocations,
+    clusters: state.config.utility.clusters,
     exploreQuery: state.budget.explore.query,
-    exploreData: state.budget.explore.data,
+    exploreUsers: state.budget.explore.users,
+    exploreBudget: state.budget.explore.budget,
+    exploreClusters: state.budget.explore.clusters,
   };
 }
 
@@ -399,19 +344,20 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   const explorePager = {
     index: stateProps.exploreQuery.index || 0,
     size: stateProps.exploreQuery.size || 10,
-    count: stateProps.exploreData.total || 0,
-    onPageIndexChange: index => { ownProps.actions.setQueryIndex(index); ownProps.actions.requestExploreData(); },
+    count: stateProps.exploreUsers.total || 0,
+    onPageIndexChange: index => { ownProps.actions.setExploreQuery({ index }); ownProps.actions.requestExploreData(ownProps.params.id); },
     mode: Table.PAGING_SERVER_SIDE
   };
 
-  const { metersLocations, viewportWidth, viewportHeight } = stateProps;
-  const { budgets, clusters=[] } = ownProps;
+  const { metersLocations, viewportWidth, viewportHeight, clusters } = stateProps;
+  const { budgets } = ownProps;
   const budget = budgets.find(budget => budget.key === ownProps.params.id);
   const details = [], stats = [];
   
   if (budget) {
-    const { activatedOn, createdOn, completedOn, params, paramsShort, user, updatedOn, expectation, actual, overlap, consumers } = budget;
-    const completed = updatedOn != null;
+    const { activatedOn, initialized, numberOfConsumers, createdOn, completedOn, params, paramsShort, owner, updatedOn, expectation = {}, actual = {}, overlap = {}, consumers } = budget;
+    const completed = initialized;
+      //updatedOn != null;
     const active = activatedOn != null;
     
     //const goal = parameters.goal;
@@ -497,10 +443,9 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       }
 
       clusters.forEach((cluster, i) => {
-
         stats.push({
           id: i,
-          title: cluster.name,
+          title: cluster.clusterName,
           display: 'chart',
           maximizable: true,
           viewportWidth,
@@ -513,25 +458,27 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
             formatter: y => y.toString() + '%',
           },
           xAxis: {
-            data: cluster.groups.map(x => x.name)
+            data: cluster.segments.map(x => x.name)
           },
           grid: {
-            x: Math.max(Math.max(...cluster.groups.map(group => group.name.length))*6.5, 45) + 'px',
+            x: Math.max(Math.max(...cluster.segments.map(group => group.name.length))*6.5, 45) + 'px',
           },
           series: [
             {
-              name: cluster.name,
+              name: cluster.clusterName,
               color: (name, data, dataIndex) => theme.color.find((x, i, arr) => i  === dataIndex % arr.length),
               label: {
                 formatter: y => y.toString() + '%',
               },
               fill: 0.8,
-              data: cluster.groups.map(x => Math.round(Math.random()*10))
+              data: cluster.segments.map(x => Math.round(x.percent))
             }
           ]
         });
       });
 
+
+      /*
         stats.push({
           id: 100,
           title: 'Map',
@@ -545,8 +492,9 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
             metersLocations.features.map(feature => [feature.geometry.coordinates[1], feature.geometry.coordinates[0], Math.abs(Math.random()-0.8)]) : []
         });
         
+        */
         //completed
-    }
+        }
 
     //all
     details.push({
@@ -560,7 +508,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
         highlight: null,
         info: [{
           key: 'Created by',
-          value: user
+          value: owner,
         },
         {
           key: 'Created on',

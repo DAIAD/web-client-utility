@@ -2,18 +2,19 @@ var types = require('../constants/BudgetActionTypes');
 
 const initialState = {
   budgetToRemove: null,
-  searchFilter: null,
   budgetToSet: null,
   budgetToReset: null,
   savings: [],
+  active: [],
+  budgets: [],
   query: {
     pageIndex: 0,
     sortBy: 'CREATED_ON',
     sortAscending: false,
     name: null,
   },
-  budgets: [],
   explore: {
+    clusters: [],
     query: {
       cluster: 'none',
       group: 'all',
@@ -36,12 +37,6 @@ const initialState = {
 var budget = function (state=initialState, action) {
 
   switch (action.type) {
-    
-    case types.BUDGET_SET_BUDGETS: 
-      return Object.assign({}, state, {
-        budgets: action.budgets,
-      });
-
     case types.BUDGET_CONFIRM_REMOVE_SCENARIO: 
       return Object.assign({}, state, {
        budgetToRemove: action.id 
@@ -56,35 +51,23 @@ var budget = function (state=initialState, action) {
       return Object.assign({}, state, {
        budgetToReset: action.id 
       }); 
+    
+    case types.BUDGET_SET_BUDGETS: 
+      return Object.assign({}, state, {
+        budgets: action.budgets,
+      });
+
+    case types.BUDGET_SET_ACTIVE_BUDGETS: 
+      return Object.assign({}, state, {
+        active: action.budgets,
+      });
+
 
     case types.BUDGET_SET_SAVINGS_SCENARIOS: 
       return Object.assign({}, state, {
         savings: action.scenarios,
       });
 
-    case types.BUDGET_ADD_SCENARIO: { 
-      const newScenarios = [...state.scenarios, {...action.options}];
-      return Object.assign({}, state, {scenarios: newScenarios});
-    }
-
-    case types.BUDGET_REMOVE_SCENARIO: {
-      const newScenarios = state.scenarios.filter(scenario => scenario.id !== action.id);
-      return Object.assign({}, state, {scenarios: newScenarios});
-    }
-
-    case types.BUDGET_SET_ACTIVE: {
-      const budgets = [...state.scenarios].map(budget => budget.id === action.id ? ({...budget, activatedOn:action.date}) : budget);
-      return Object.assign({}, state, {
-        scenarios: budgets
-      });
-    }
-
-    case types.BUDGET_SET_INACTIVE: {
-      const budgets = [...state.scenarios].map(budget => budget.id === action.id ? ({...budget, activatedOn: null}) : budget);
-      return Object.assign({}, state, {
-        scenarios: budgets
-      });
-    }
     case types.BUDGET_SET_QUERY: 
       return {
         ...state,
@@ -93,11 +76,6 @@ var budget = function (state=initialState, action) {
           ...action.query,
         },
       };
-
-   case types.BUDGET_SET_SEARCH_FILTER: 
-      return Object.assign({}, state, {
-        searchFilter: action.searchFilter
-      });
 
     case types.BUDGET_EXPLORE_SET_QUERY:
       return {
@@ -123,7 +101,16 @@ var budget = function (state=initialState, action) {
         }
       };
 
-    case types.BUDGET_EXPLORE_SET_DATA:
+    case types.BUDGET_EXPLORE_SET_CLUSTER_DATA:
+      return {
+        ...state,
+        explore: {
+          ...state.explore,
+          clusters: action.data,
+        },
+      };
+
+    case types.BUDGET_EXPLORE_SET_USER_DATA:
       return {
         ...state,
         explore: {
