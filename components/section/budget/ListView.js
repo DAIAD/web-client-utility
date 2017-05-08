@@ -9,7 +9,7 @@ function BudgetsList (props) {
   const { setQueryAndFetch, removeBudgetScenario, confirmRemoveBudgetScenario, setSearchFilter, goToAddView, goToActiveView } = actions;
   const budgetFields = budgetSchema(actions);
   const budgetSorter = {
-    defaultSort: 'completedOn',
+    defaultSort: 'createdOn',
     defaultOrder: 'desc'
   };
   const budgets = props.budgets

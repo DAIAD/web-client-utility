@@ -509,12 +509,14 @@
       "search": "Search...",
       "name": "Name",
       "active": "Active",
+      "consumers": "Consumers",
       "paramsShort": "Parameters",
       "owner": "User",
       "createdOn": "Created",
-      "completedOn": "Calculated",
+      "updatedOn": "Updated",
       "activatedOn": "Activated",
       "explore": "Explore",
+      "refresh": "Recompute",
       "delete": "Delete"
 
     },

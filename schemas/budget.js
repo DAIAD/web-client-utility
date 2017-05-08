@@ -36,17 +36,23 @@ const budgetSchema = actions => [{
     title: 'Budgets.List.paramsShort'
   },
   {
+    name: 'numberOfConsumers',
+    title: 'Budgets.List.consumers',
+  },
+  /*
+  {
     name: 'owner',
     title: 'Budgets.List.owner'
-  },
+    },
+    */
   {
     name: 'createdOn',
     title: 'Budgets.List.createdOn',
     type: 'datetime',
   }, 
   {
-    name: 'completedOn',
-    title: 'Budgets.List.completedOn',
+    name: 'updatedOn',
+    title: 'Budgets.List.updatedOn',
     type: 'datetime',
   }, 
   {
@@ -87,7 +93,8 @@ const exploreBudgetSchema = actions => [
     name: 'key',
     title: 'Key',
     hidden: true
-  }, {
+  }, 
+  {
     name: 'email',
     title: 'User',
     link: function(row) {
@@ -96,24 +103,28 @@ const exploreBudgetSchema = actions => [
       }
       return null;
     }
-  }, {
+  }, 
+  {
     name: 'fullname',
     title: 'Name'
-  }, {
+  }, 
+  {
     name: 'serial',
     title: 'SWM'
-  }, {
+  }, 
+  {
     name: 'registrationDateMils',
     title: 'Registered On',
     type: 'datetime'
-  }, {
+  }, 
+  {
+    name: 'budget',
+    title: 'Consumption diff (lt)'
+  },
+  {
     name: 'savings',
     title: 'Savings (%)',
   },
-  {
-    name: 'budget',
-    title: 'Budget (lt)'
-  }
 ];
 
 module.exports = {

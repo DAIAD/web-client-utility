@@ -2,6 +2,7 @@ var React = require('react');
 var { connect } = require('react-redux');
 var bs = require('react-bootstrap');
 var echarts = require('react-echarts');
+var moment = require('moment');
 var { FormattedTime, FormattedDate } = require('react-intl');
 
 var Select = require('react-select');
@@ -18,9 +19,9 @@ var maximizable = require('../../Maximizable');
 function BudgetDetails (props) {
   const { budget, clusters, groups, actions, metersLocations, tableFields, data, tablePager, tableStyle, query, intl } = props;
   const { confirmSetBudget, confirmResetBudget, goToActiveView, setQueryCluster, setQueryGroup, setQuerySerial, setQueryText, resetQueryCluster, resetQueryGroup, requestExploreData, setQueryGeometry, setExploreQuery, resetExploreQuery } = actions;
-  const { key, name, potential, owner, createdOn, completedOn, activatedOn, parameters, paramsLong, params, active } = budget;
+  const { key, name, potential, owner, createdOn, updatedOn, activatedOn, parameters, paramsLong, params, active } = budget;
   const goal = parameters.goal;
-  const completed = budget.completedOn != null;
+  const completed = budget.updatedOn != null;
 
   const _t = x => intl.formatMessage({ id: x });
 
@@ -131,7 +132,7 @@ var BudgetExplore = React.createClass({
   },
   render: function() {
     const { budgets, groups, exploreClusters: clusters, segments, areas, actions, budgetToSet, budgetToReset, metersLocations, exploreFields, exploreUsers, explorePager, exploreQuery, intl, details, stats } = this.props;
-    const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario, setExploreQuery, resetExploreQuery } = actions;
+    const { goToListView, goToActiveView, confirmSetBudget, confirmResetBudget, setActiveBudget, resetActiveBudget, confirmRemoveBudgetScenario, setExploreQuery, resetExploreQuery, scheduleBudget } = actions;
     
     const { id } = this.props.params;
     const budget = budgets.find(budget => budget.key === id);
@@ -153,7 +154,7 @@ var BudgetExplore = React.createClass({
       );
     } 
     
-    const { key:budgetKey, name, potential, owner, createdOn, completedOn, activatedOn, updatedOn, nextUpdateOn, parameters, params, active, initialized } = budget;
+    const { key:budgetKey, name, potential, owner, createdOn, activatedOn, updatedOn, nextUpdateOn, parameters, params, active, initialized } = budget;
     const goal = parameters.goal;
     const completed = initialized;
     return (
@@ -169,7 +170,7 @@ var BudgetExplore = React.createClass({
               <i className='fa fa-chevron-left' /> Back to all
             </bs.Button>
             { 
-              !active ? 
+              active !== false ? 
                 <bs.Button
                   bsStyle='danger'
                   style={{ float: 'right', marginRight: 25 }}
@@ -181,7 +182,7 @@ var BudgetExplore = React.createClass({
                 <div />
             }
             {
-              !active && completed ? 
+              completed && !active ? 
                 <bs.Button 
                   bsStyle='primary' 
                   style={{float: 'right', marginRight: 25}}
@@ -192,7 +193,7 @@ var BudgetExplore = React.createClass({
                 : <div />
             }
             {
-                active && completed ?
+                active ?
                   <bs.Button 
                     bsStyle='warning' 
                     style={{float: 'right', marginRight: 25}}
@@ -203,19 +204,13 @@ var BudgetExplore = React.createClass({
                   :
                   <div />
             }
-            {
-              this.props.lala ? 
-                  <bs.Button 
-                    bsStyle='primary' 
-                    style={{float: 'right', marginRight: 25}}
-                    onClick={() => { goToActiveView(); }}
-                  >
-                    { _t('Budgets.Explore.monitorActive') }
-                  </bs.Button>
+            <bs.Button
+              style={{ float: 'right', marginRight: 25 }}
+              onClick={() => { scheduleBudget(budgetKey) }}
+            >
+              { _t('Budgets.List.refresh') }
+            </bs.Button>
 
-                :
-                  <div />
-              }
             </bs.Col>
           </bs.Row>
           <hr/>
@@ -349,37 +344,42 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     mode: Table.PAGING_SERVER_SIDE
   };
 
-  const { metersLocations, viewportWidth, viewportHeight, clusters } = stateProps;
+  const { metersLocations, viewportWidth, viewportHeight, exploreClusters: clusters } = stateProps;
   const { budgets } = ownProps;
   const budget = budgets.find(budget => budget.key === ownProps.params.id);
   const details = [], stats = [];
   
+  console.log('budget:', budget);
   if (budget) {
-    const { activatedOn, initialized, numberOfConsumers, createdOn, completedOn, params, paramsShort, owner, updatedOn, expectation = {}, actual = {}, overlap = {}, consumers } = budget;
+    const { activatedOn, initialized, numberOfConsumers, createdOn, updatedOn, params, paramsShort, owner, expectation = {}, actual = {}, overlap = null, consumptionBefore, consumptionAfter } = budget;
+    const expectedPercent = Math.round(budget.expectedPercent * 100) / 100;
+    const savingsPercent = Math.round(budget.savingsPercent * 100) / 100;
     const completed = initialized;
-      //updatedOn != null;
     const active = activatedOn != null;
     
-    //const goal = parameters.goal;
-    const lastYear = 2015;
-    const activeFor = 5.5;
+    const activeHours = Math.round(moment().diff(activatedOn, 'hours', true) * 10) / 10;
+    const activeDays = Math.floor(moment().diff(activatedOn, 'days', true));
+    const activeMonths = Math.floor(moment().diff(activatedOn, 'months', true));
+    const activeFor = (() => {
+      if (activeMonths > 0) return `${activeMonths} months`;
+      else if (activeDays > 0) return `${activeDays} days`;
+      return `${activeHours} hours`;
+    })();
 
     if (completed) { 
       details.push({
           id: 1,
           display: 'stat', 
           title: 'Budget goal',
-          highlight: `${expectation.savings}%`, 
-          info: [{
-            value: <span><b>{`${expectation.budget} M liters`}</b> {`${expectation.budget < 0 ? 'less' : 'more'} than ${lastYear}`}</span>
-          },
+          highlight: `${expectedPercent}%`, 
+          info: [
+          //{
+          //  value: <span><b>{`Max ${expectation.max}% | Min ${expectation.min}%`}</b></span>
+          //},
           {
-            value: <span><b>{`Max ${expectation.max}% | Min ${expectation.min}%`}</b></span>
-          },
-          {
-            value: <span><b>{`${consumers} Consumers`}</b></span>
+            value: <span><b>{`${numberOfConsumers} Consumers`}</b></span>
           }],
-          footer: <span>{ activatedOn ? <span>Set: <FormattedDate value={activatedOn} day='numeric' month='numeric' year='numeric' /></span> : 'Inactive'}</span>,
+          footer: <span>{ activatedOn ? <span>Set: <FormattedTime value={activatedOn} day='numeric' month='numeric' year='numeric' hour='numeric' minute='numeric' /></span> : 'Inactive'}</span>,
 
       });
 
@@ -388,17 +388,18 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
           id: 20,
           display: 'stat',
           title: 'Savings',
-          highlight: actual.savings ?  `${actual.savings}%` : '-',
-          info: [{
-            value: <span><b>{`${actual.budget || '-'} M liters`}</b> {`${actual.budget ? (actual.budget < 0 ? 'less' : 'more') : '-'} than ${lastYear}`}</span>
+          highlight: savingsPercent ?  `${savingsPercent}%` : '-',
+          info: [
+          {
+            value: <span><b>{`${consumptionBefore} lt`}</b> before</span>
           },
           {
-            value: <span><b>{`Max ${actual.max || '-'}% | Min ${actual.min || '-'}%`}</b></span>
+            value: <span><b>{`${consumptionAfter} lt`}</b> after</span>
           },
           {
-            value: <span><b>{`Active for ${activeFor} months`}</b></span>
+            value: <span><b>{`Active for ${activeFor}`}</b></span>
           }],
-          footer: updatedOn ? <span>Updated: <FormattedDate value={updatedOn} day='numeric' month='numeric' year='numeric' /></span> : <span>Not estimated yet</span>,
+          footer: updatedOn ? <span>Updated: <FormattedTime value={updatedOn} day='numeric' month='numeric' year='numeric' hour='numeric' minute='numeric' /></span> : <span>Not estimated yet</span>,
          
         })
 
@@ -407,7 +408,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
             id: 21,
             display: 'stat',
             title: 'Consumers',
-            highlight: `${overlap.savings}%`,
+            highlight: overlap && overlap.savings && `${overlap.savings}%` || '-',
             info: [{
               value: <span><b>{`${overlap.original - overlap.current} consumers changed to other budgets`}</b></span>
             },
@@ -418,7 +419,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
               value: <b>Current: {overlap.current}</b>,
             },
             ],
-            footer: updatedOn ? <span>Updated: <FormattedDate value={updatedOn} day='numeric' month='numeric' year='numeric' /></span> : <span>Not estimated yet</span>,
+          footer: updatedOn ? <span>Updated: <FormattedTime value={updatedOn} day='numeric' month='numeric' year='numeric' hour='numeric' minute='numeric' /></span> : <span>Not estimated yet</span>,
           
           })
         }
@@ -429,7 +430,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
             title: 'Consumers',
             highlight: 'No change',
             info: null,
-            footer: updatedOn ? <span>Updated: <FormattedDate value={updatedOn} day='numeric' month='numeric' year='numeric' /></span> : <span>Not estimated yet</span>,
+            footer: null,
             style: {
               color: '#666',
               textAlign: 'center',
@@ -515,13 +516,14 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
           value: createdOn ? <FormattedTime value={createdOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
         },
         {
-          key: 'Completed on',
-          value: completedOn ? <FormattedTime value={completedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
-        },
-        {
           key: 'Activated on',
           value: activatedOn ? <FormattedTime value={activatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-'
-        }],
+        },
+        {
+          key: 'Updated on',
+          value: updatedOn ? <FormattedTime value={updatedOn} minute='numeric' hour='numeric' day='numeric' month='numeric' year='numeric' /> : '-',
+        },
+        ],
         footer: <span>&nbsp;</span>,
     });
 
