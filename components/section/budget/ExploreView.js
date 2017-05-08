@@ -370,7 +370,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
           id: 1,
           display: 'stat', 
           title: 'Budget goal',
-          highlight: `${expectedPercent}%`, 
+          highlight: `${expectedPercent * 100}%`, 
           info: [
           //{
           //  value: <span><b>{`Max ${expectation.max}% | Min ${expectation.min}%`}</b></span>
@@ -387,7 +387,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
           id: 20,
           display: 'stat',
           title: 'Savings',
-          highlight: savingsPercent ?  `${savingsPercent}%` : '-',
+          highlight: savingsPercent ?  `${savingsPercent * 100}%` : '-',
           info: [
           {
             value: <span><b>{`${consumptionBefore} lt`}</b> before</span>

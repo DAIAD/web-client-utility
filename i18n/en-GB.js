@@ -516,7 +516,7 @@
       "updatedOn": "Updated",
       "activatedOn": "Activated",
       "explore": "Explore",
-      "refresh": "Recompute",
+      "refresh": "Update now",
       "delete": "Delete"
 
     },
