@@ -1,14 +1,14 @@
 const savingsSchema = actions => [{
-    name: 'id',
-    title: 'Id',
+    name: 'key',
+    title: 'Key',
     hidden: true
   }, 
   {
     name: 'name',
     title: 'Savings.List.name',
     link: function(row) {
-      if(row.id) {
-        return '/savings/{id}/';
+      if(row.key) {
+        return '/savings/{key}/';
       }
       return null;
     },
@@ -23,26 +23,36 @@ const savingsSchema = actions => [{
       fontWeight: 'bold',
       fontSize: '1.1em',
       textAlign: 'center'
-    }
+    },
+    sortable: false,
   },  
   {
     name: 'paramsShort',
     title: 'Savings.List.paramsShort',
+    sortable: false,
   },
+  /*
   {
-    name: 'user',
-    title: 'Savings.List.user',
-  },
+    name: 'owner',
+    title: 'Savings.List.owner',
+    sortable: false,
+    },
+    */
   {
     name: 'createdOn',
     title: 'Savings.List.createdOn',
     type: 'datetime',
   }, 
   {
-    name: 'completedOn',
+    name: 'processingEndOn',
     title: 'Savings.List.completedOn',
     type: 'datetime',
+    sortable: false,
   }, 
+  {
+    name: 'status',
+    title: 'Savings.List.status',
+  },
   {
     name : 'explore',
     title: 'Savings.List.explore',
@@ -53,7 +63,27 @@ const savingsSchema = actions => [{
       fontSize: '1.3em'
     },
     handler : (function(field, row) {
-      actions.goToExploreView(row.id);
+      actions.goToExploreView(row.key);
+    }),
+  },
+  {
+    name : 'refresh',
+    title: 'Savings.List.refresh',
+    type : 'action',
+    icon : function(field, row) {
+      if (row.status === 'PENDING' || row.status === 'RUNNING') return 'cogs';
+      else if (row.status === 'COMPLETED') return 'check';
+      return 'refresh';
+    },
+    style: {
+      textAlign: 'center',
+      fontSize: '1.3em'
+    },
+    handler : (function(field, row) {
+      if (row.status !== 'PENDING' && row.status !== 'RUNNING' && row.status !== 'COMPLETED') {
+        actions.refreshSavingsScenario(row.key);
+      }
+      return null;
     }),
   },
   {
@@ -66,7 +96,7 @@ const savingsSchema = actions => [{
       fontSize: '1.0em'
     },
     handler : (function(field, row) {
-      actions.confirmRemoveScenario(row.id);
+      actions.confirmRemoveScenario(row.key);
     }),
     visible : true 
   }

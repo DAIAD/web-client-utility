@@ -364,7 +364,29 @@ var MapActions = {
          dispatch(metersLocationsResponse(false, error));
        });
     };
-  }
+  },
+  getAreaGroups: function() {
+    return function(dispatch, getState) {
+      return mapAPI.getGroups()
+      .then((response) => {
+        return response.groups;
+      })
+      .catch((error) => {
+        console.error('caught error', error);
+      });
+    };
+  },
+  getAreas: function(groupKey) {
+    return function(dispatch, getState) {
+      return mapAPI.getAreas({ groupKey })
+      .then((response) => {
+        return response.areas;
+      })
+      .catch((error) => {
+        console.error('caught error', error);
+      });
+    };
+  },
 };
 
 module.exports = MapActions;

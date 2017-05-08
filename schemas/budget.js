@@ -1,15 +1,15 @@
 
 const budgetSchema = actions => [{
-    name: 'id',
-    title: 'Id',
+    name: 'key',
+    title: 'Key',
     hidden: true
   }, 
   {
     name: 'name',
     title: 'Budgets.List.name',
     link: function(row) {
-      if(row.id) {
-        return '/budgets/{id}/';
+      if(row.key) {
+        return '/budgets/{key}/';
       }
       return null;
     },
@@ -36,17 +36,23 @@ const budgetSchema = actions => [{
     title: 'Budgets.List.paramsShort'
   },
   {
-    name: 'user',
-    title: 'Budgets.List.user'
+    name: 'numberOfConsumers',
+    title: 'Budgets.List.consumers',
   },
+  /*
+  {
+    name: 'owner',
+    title: 'Budgets.List.owner'
+    },
+    */
   {
     name: 'createdOn',
     title: 'Budgets.List.createdOn',
     type: 'datetime',
   }, 
   {
-    name: 'completedOn',
-    title: 'Budgets.List.completedOn',
+    name: 'updatedOn',
+    title: 'Budgets.List.updatedOn',
     type: 'datetime',
   }, 
   {
@@ -64,7 +70,7 @@ const budgetSchema = actions => [{
       fontSize: '1.3em'
     },
     handler : (function(field, row) {
-      actions.goToExploreView(row.id);
+      actions.goToExploreView(row.key);
     }),
     visible : (function(field, row) {
       return true;
@@ -76,7 +82,7 @@ const budgetSchema = actions => [{
     type : 'action',
     icon : 'remove',
     handler : (function(field, row) {
-      actions.confirmRemoveBudgetScenario(row.id);
+      actions.confirmRemoveBudgetScenario(row.key);
     }),
     visible : true 
   }
@@ -84,36 +90,41 @@ const budgetSchema = actions => [{
 
 const exploreBudgetSchema = actions => [
   {
-    name: 'id',
-    title: 'Id',
+    name: 'key',
+    title: 'Key',
     hidden: true
-  }, {
+  }, 
+  {
     name: 'email',
     title: 'User',
     link: function(row) {
-      if(row.id) {
-        return '/user/{id}/';
+      if(row.key) {
+        return '/user/{key}/';
       }
       return null;
     }
-  }, {
+  }, 
+  {
     name: 'fullname',
     title: 'Name'
-  }, {
+  }, 
+  {
     name: 'serial',
     title: 'SWM'
-  }, {
+  }, 
+  {
     name: 'registrationDateMils',
     title: 'Registered On',
     type: 'datetime'
-  }, {
+  }, 
+  {
+    name: 'budget',
+    title: 'Consumption diff (lt)'
+  },
+  {
     name: 'savings',
     title: 'Savings (%)',
   },
-  {
-    name: 'budget',
-    title: 'Budget (lt)'
-  }
 ];
 
 module.exports = {

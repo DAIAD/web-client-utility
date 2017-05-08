@@ -13,13 +13,13 @@ var WhenItem = React.createClass({
     };
   },
   getLastYear: function() {
-    return [moment().subtract(1, 'year').startOf('year').valueOf(), moment().subtract(1, 'year').endOf('year').valueOf()];
+    return [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')];
   },
   getValue: function(selected, timespan, label) {
     if (!Array.isArray(timespan) || timespan.length < 2 || timespan.length > 3) {
       throw 'timespan must be array of two timestamps';
     }
-    return { selected, type: 'ABSOLUTE', startDate: timespan[0], endDate: timespan[1], label };
+    return { selected, type: 'ABSOLUTE', start: timespan[0].valueOf(), end: timespan[1].valueOf(), label };
   },
   render: function() {
     const { value, setValue, intl } = this.props;
@@ -28,7 +28,7 @@ var WhenItem = React.createClass({
 
     const _t = x => intl.formatMessage({ id: x });
 
-    const lastLabel = _t('Wizard.items.when.options.last.value');
+    const lastLabel = _t('Wizard.items.time.options.last.value');
     const chooseLabel = _t('Wizard.common.choose');
 
     return (
@@ -44,9 +44,9 @@ var WhenItem = React.createClass({
           {
             value.selected === 'custom' ?
               <div>
-              <span style={{ fontSize: 16, fontWeight: 500, color: '#666' }}>{_t('Wizard.items.when.modal')}: </span>
+              <span style={{ fontSize: 16, fontWeight: 500, color: '#666' }}>{_t('Wizard.items.time.modal')}: </span>
               <b>
-                <FormattedDate value={timespan[0]} /> <span>&nbsp;-&nbsp;</span> <FormattedDate value={timespan[1]} />
+                <FormattedDate value={timespan[0]} month="numeric" year="numeric" /> <span>&nbsp;-&nbsp;</span> <FormattedDate value={timespan[1]} month="numeric" year="numeric" />
               </b>
             </div>
               :
@@ -63,7 +63,7 @@ var WhenItem = React.createClass({
           onHide={() => this.setState({showModal: false})}
           > 
           <bs.Modal.Header closeButton>
-            <h4>{_t('Wizard.items.when.modal')}</h4>
+            <h4>{_t('Wizard.items.time.modal')}</h4>
           </bs.Modal.Header>
           <bs.Modal.Body>          
             {
@@ -71,32 +71,31 @@ var WhenItem = React.createClass({
                 var { timespan } = this.state;
                 const [t0, t1] = timespan;
 
-                const datetimeProps = {
-                  closeOnSelect: true,
-                  dateFormat: 'ddd D MMM[,] YYYY',
-                  timeFormat: null, 
-                  inputProps: {size: 10}, 
-                };
-
                 return (
                   <div className="form-group">
                     <div>
-                      <label style={{ width: '100%' }}><span>{_t('Wizard.items.when.from')}:</span>
-                        <DatetimeInput {...datetimeProps} 
+                      <label style={{ width: '100%' }}><span>{_t('Wizard.items.time.from')}:</span>
+                        <DatetimeInput  
                           value={t0} 
                           className='date-input'
+                          dateFormat="MM/YYYY"
+                          closeOnSelect
+                          isValidDate={curr => curr.valueOf() <= t1}
                           onChange={(val) => (this.setState({ timespan: [val, t1] }))} 
                         />
                       </label>
                       <br />
-                      <label style={{ width: '100%' }}><span style={{ marginRight: 20 }}>{_t('Wizard.items.when.to')}:</span>
-                      <DatetimeInput {...datetimeProps} 
+                      <label style={{ width: '100%' }}><span style={{ marginRight: 20 }}>{_t('Wizard.items.time.to')}:</span>
+                      <DatetimeInput 
                         value={t1}
                         className='date-input'
+                        dateFormat="MM/YYYY"
+                        closeOnSelect
+                        isValidDate={curr => curr.valueOf() >= t0 && curr.valueOf() < moment().subtract(1, 'month').valueOf()}
                         onChange={(val) => (this.setState({ timespan: [t0, val] }))} 
                         />
                       </label>
-                      <p className="help text-muted">{_t('Wizard.items.when.help')}</p>
+                      <p className="help text-muted">{_t('Wizard.items.time.help')}</p>
                     </div>
                   </div>
                   );
@@ -104,7 +103,20 @@ var WhenItem = React.createClass({
             }
           </bs.Modal.Body>
           <bs.Modal.Footer>
-            <bs.Button onClick={() => { setValue( this.getValue('custom', this.state.timespan,`${moment(this.state.timespan[0]).format('DD/MM/YYYY')}-${moment(this.state.timespan[1]).format('DD/MM/YYYY')}`) );   this.setState({showModal: false})} }>OK</bs.Button>
+            <bs.Button onClick={() => { 
+              setValue(this.getValue('custom', 
+                                    [
+                                      moment(this.state.timespan[0]).startOf('month').valueOf(), 
+                                      moment(this.state.timespan[1]).endOf('month').valueOf()
+                                    ],
+                                    `${moment(this.state.timespan[0]).format('MM/YYYY')}` + 
+                                    '-' +
+                                      `${moment(this.state.timespan[1]).format('MM/YYYY')}`
+                                    ));   
+             this.setState({showModal: false})} }
+           >
+            OK
+          </bs.Button>
             <bs.Button onClick={() => this.setState({showModal: false})}>{_t('Buttons.Cancel')}</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal> 

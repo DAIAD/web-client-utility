@@ -1,6 +1,18 @@
 const nameToId = str => 
   str.replace(/\s+/g, '-').toLowerCase();
 
+const getFeature = (area) => {
+  return {
+    'type' : 'Feature',
+    'geometry' : area.geometry,
+    'properties' : {
+      'label' : area.title,
+      'clusterKey': area.groupKey,
+      'value': area.key,
+    }
+  };
+};
+
 const extractFeatures = accounts => {
   var geojson = {
     type : 'FeatureCollection',
@@ -39,7 +51,18 @@ const extractFeatures = accounts => {
   return geojson;
 };
 
+const throwServerError = response => {
+  if (response.status === 401 || response.status === 403) {
+    throw new Error('unauthorized');
+  } else if (response && response.errors && response.errors.length > 0) {
+    throw new Error(response.errors[0].code);
+  }
+  throw new Error('unknownError');
+};
+
 module.exports = {
   nameToId,
-  extractFeatures
+  extractFeatures,
+  getFeature,
+  throwServerError,
 };
