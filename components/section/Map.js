@@ -11,12 +11,31 @@ var Timeline = require('../Timeline');
 var GroupSearchTextBox = require('../GroupSearchTextBox');
 var {FormattedTime} = require('react-intl');
 var moment = require('moment');
+var _ = require('lodash');
 
 var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
 
 var { getTimeline, getFeatures, getChart, setEditor, setEditorValue,
       setTimezone, addFavourite, updateFavourite, setEditorValuesBatch, 
       getMetersLocations, getGroups, filterByType, setGroup } = require('../../actions/MapActions');
+
+var _filterRows = function(rows, type, name) {
+  var filteredRows = rows.filter( r => {
+    if(name) {
+      if(r.text.indexOf(name) === -1) {
+        return false;
+      }
+    }
+    if(type && type !== 'SET') {
+      return (r.cluster == type);
+    }
+    if(type && type === 'SET'){
+     return (r.type == type);
+    }
+    return true;
+  });
+  return filteredRows;
+};
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -64,6 +83,7 @@ var onPopulationEditorChange = function(e) {
       type: 'UTILITY'
     };
   }
+  this.props.actions.setGroup(e);
   this.props.actions.setEditorValue('population', e);
 };
 
@@ -80,6 +100,7 @@ var _onFeatureChange = function(features) {
 };
 
 var _filterByType = function(e) {
+  this.props.defaultFavouriteValues.population = false;
   var profile = this.props.profile;
   this.props.actions.filterByType(e.value === 'UNDEFINED' ? null : e.value);
 
@@ -95,11 +116,29 @@ var _filterByType = function(e) {
 };
 
 var _groupSelect = function(e) {
-  //this.props.actions.setGroup(e);
-  //this.setState({isFavourite:false});
+  if(this.props.defaultFavouriteValues.population){
+  
+    if(e.group.type === 'SET'){
+      this.props.actions.filterByType('SET');
+    } else {
+      this.props.actions.filterByType(e.group.cluster === 'UNDEFINED' ? 'UNDEFINED' : e.group.cluster);
+    }
+    
+    
+    
+    if(e.group.cluster === 'UNDEFINED'){
+      var utility = this.props.profile.utility;
+      var population = {
+        utility: utility.key,
+        label: utility.name,
+        type: 'UTILITY'
+      };
+      this.props.actions.getTimeline(e.group);
+    }    
+  }
 
+  this.props.defaultFavouriteValues.population = false;
   this.props.actions.setGroup(e);
-  //this.props.actions.setEditorValue('population', e);
 };
 
 var AnalyticsMap = React.createClass({
@@ -232,32 +271,81 @@ var AnalyticsMap = React.createClass({
       </div>
     );
 
-//    var populationEditor = (
-//      <div className='col-md-3'>
-//        <GroupSearchTextBox
-//          value={this.props.defaultFavouriteValues.population ? this.props.favourite.queries[0].population : this.props.population}
-//          name='groupname'
-//          onChange={onPopulationEditorChange.bind(this)}/>
-//        <span className='help-block'>Select a consumer group</span>
-//      </div>
-//    );
-
     var typeOptions = [];
-    
-    if(this.props.groups && this.props.populationType){
-      typeOptions = this.props.groups.filtered.map((group) => {
-        return {
-          name: group.name,
-          label: group.type == 'SEGMENT' ? group.cluster + ' ' + group.name : group.name,
-          group: group
-        };
-      });
+    var customGroup;
+    if(this.props.defaultFavouriteValues.population){
+      var favPop = this.props.favourite.queries[0].population[0];
+
+      if(favPop.type === 'GROUP'){
+        var typeOptions = [];
+        
+        //customGroup = this.props.groups.groups.find(g => g.key === favPop.group && );
+        //customGroup = _.find(this.props.groups.groups, g.key);
+        var customGroupArray = _.filter(this.props.groups.groups, function(g) {
+          return g.key == favPop.group && g.type == 'SET';
+        });
+        
+        customGroup = customGroupArray[0];
+        if(customGroup){
+
+          var allCustomGroups = this.props.groups.groups.filter(g => g.type === 'SET');
+          typeOptions = allCustomGroups.map((group) => {
+            return {
+              name: group.name,
+              label: group.name,
+              group: group
+            };
+          });            
+        } else {
+          var cluster = favPop.label;
+          var clusterName = cluster.substring(0, cluster.indexOf(":"));
+          var filtered = _filterRows(this.props.groups.groups || [], clusterName, null);
+
+          typeOptions = filtered.map((group) => {
+            return {
+              name: group.name,
+              label: group.type == 'SEGMENT' ? group.cluster + ': ' + group.name : group.name,
+              group: group
+            };
+          });        
+        }
+      }
+    } else {
+      if(this.props.groups && this.props.populationType){
+        typeOptions = this.props.groups.filtered.map((group) => {
+          return {
+            name: group.name,
+            label: group.type == 'SEGMENT' ? group.cluster + ': ' + group.name : group.name,
+            group: group
+          };
+        });
+      }
     }
 
+    var groupTypeValue;
+    if(this.props.defaultFavouriteValues.population){
+      if(customGroup){
+        groupTypeValue = 'SET';
+      } else {
+        if(this.props.populationType){
+          groupTypeValue = this.props.populationType;
+        } else {
+        groupTypeValue = 'UNDEFINED';
+        }
+      }
+    } else {
+      if(this.props.populationType){
+        groupTypeValue = this.props.populationType;
+      } else {
+        groupTypeValue = 'UNDEFINED';
+      }    
+    }
+    
     var groupTypeSelect = (
       <div>
         <Select name='groupType'
-          value={this.props.populationType ? this.props.populationType : 'UNDEFINED'}
+          value={groupTypeValue}
+          
           options={[
             { value: 'UNDEFINED', label: this.props.profile.utility.name},
             { value: 'Income', label: 'Income' },
@@ -273,13 +361,26 @@ var AnalyticsMap = React.createClass({
         <span className='help-block'>Filter group type</span>
     </div>
   );
- 
+
+  var groupValue;
+  if(this.props.defaultFavouriteValues.population){
+    if(favPop.type === 'UTILITY'){
+      groupValue = {name: favPop.label, label: <i>Everyone</i>};
+    } else {
+      groupValue = {name: favPop.label, label: favPop.label};
+    }
+  } else {
+    if(this.props.group){
+      groupValue = {name:this.props.group.name,label:this.props.group.label};
+    } else {
+      groupValue = {name:'UNDEFINED', label:<i>Everyone</i>};
+    }
+  }
+  
   var groupSelect = (
     <div>
       <Select name='group'
-        value={this.props.group ? 
-            {name:this.props.group.name,label:this.props.group.label} : 
-                {name:'UNDEFINED', label:<i>Everyone</i>}}
+        value={groupValue}
         options={typeOptions}
         onChange={_groupSelect.bind(this)}
         clearable={false}

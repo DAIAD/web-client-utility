@@ -146,7 +146,7 @@ var metersLocationsRequest = function () {
   return {
     type: types.MAP_METERS_LOCATIONS_REQUEST
   };
-}
+};
 
 var metersLocationsResponse = function(success, errors, data) {
   return {
@@ -155,7 +155,7 @@ var metersLocationsResponse = function(success, errors, data) {
     errors,
     data
   };
-}
+};
 
 var getGroupsInit = function() {
   return {
@@ -233,7 +233,6 @@ var MapActions = {
             type: 'UTILITY'
           };
         }
-
         source = 'METER';
         interval = [moment().subtract(14, 'day'), moment()];
         if( (!getState().map.features) || (getState().map.features.length === 0) ){
@@ -246,16 +245,14 @@ var MapActions = {
         dispatch(_setEditorValue('source', source));
         dispatch(_setEditorValue('spatial', geometry));
 
-      }
-      else if(getState().favourites.selectedFavourite){
+      } else if(getState().favourites.selectedFavourite){
+
         var selectedFav = getState().favourites.selectedFavourite.queries[0];
-        population = {
-          utility: selectedFav.population[0].utility,
-          label: selectedFav.population[0].label,
-          type: selectedFav.population[0].type
-        };
+
+        population = selectedFav.population[0];
+
         interval = [moment(selectedFav.time.start), moment(selectedFav.time.end)];
-        
+
         source = selectedFav.source;
 
         if(selectedFav.spatial && selectedFav.spatial > 1){
@@ -267,9 +264,11 @@ var MapActions = {
 
         var groupPop = {group:population};
         //filterBytype
+        var clusterName = population.label.substring(0, population.label.indexOf(":"));
+
+        dispatch(MapActions.filterByType(population.type === 'UTILITY' ? null : clusterName));
         dispatch(MapActions.setGroup(groupPop));
-        
-        //dispatch(_setEditorValue('population', population));
+        dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
         dispatch(_setEditorValue('spatial', geometry));
         dispatch(_setEditorValue('source', source));
