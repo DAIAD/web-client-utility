@@ -125,10 +125,10 @@ function StatWidget (props) {
   const { highlight, info, limit, show, style={} } = props;
   return (
     <div style={{ height: 120, ...style}}>
-      <div style={{float: 'left', width: highlight ? (Array.isArray(info) && info.length > 0 ? '33%' : '100%') : '0%'}}>
+      <div style={{float: 'left', width: highlight ? (Array.isArray(info) && info.length > 0 ? '40%' : '100%') : '0%'}}>
         <h1 style={{ marginTop: 0, fontSize: '2.5em' }}>{highlight}</h1>
       </div>
-      <div style={{float: 'left', width: Array.isArray(info) && info.length > 0 ? (highlight  ? '63%' : '100%') : '0%'}}>
+      <div style={{float: 'right', width: Array.isArray(info) && info.length > 0 ? (highlight  ? '55%' : '100%') : '0%'}}>
         { 
           Array.isArray(info) ?
           <DisplayParams 
