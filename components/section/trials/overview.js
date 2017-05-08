@@ -452,10 +452,11 @@ var Overview = React.createClass({
         }],
         rows: rows.filter(row => row.key && row.username),
         pager: {
-        //  index: 0,
-        //  size: 10,
-          //onPageIndexChange: this.onPageIndexChange,
-          //count:rows.length
+          index: 0,
+          size: 10,
+          onPageIndexChange: this.onPageIndexChange,
+          count:rows.length,
+          mode: Table.PAGING_CLIENT_SIDE
          }
     };
 
