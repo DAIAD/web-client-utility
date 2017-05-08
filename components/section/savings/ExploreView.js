@@ -8,8 +8,14 @@ var theme = require('../../chart/themes/blue-palette');
 
 var SavingsPotentialExplore = React.createClass({ 
   componentWillMount: function() {
-    const { id } = this.props.params;
-    this.props.actions.exploreAllClusterScenarios(id);
+    if (this.props.clusters) {
+      this.props.actions.exploreAllClusterScenarios(this.props.params.id);
+    }
+  },
+  componentWillReceiveProps: function (nextProps) {
+    if (nextProps.clusters && !this.props.clusters) {
+      this.props.actions.exploreAllClusterScenarios(this.props.params.id);
+    }
   },
   render: function() {
     const { scenarios, actions, explore, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
