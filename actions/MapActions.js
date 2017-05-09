@@ -419,8 +419,7 @@ var MapActions = {
       dispatch(_setGroup(group));
       dispatch(MapActions.setEditorValue('population', group.group));
     };
-  }  
-
+  },
   getAreaGroups: function() {
     return function(dispatch, getState) {
       return mapAPI.getGroups()

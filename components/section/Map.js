@@ -19,6 +19,17 @@ var { getTimeline, getFeatures, getChart, setEditor, setEditorValue,
       setTimezone, addFavourite, updateFavourite, setEditorValuesBatch, 
       getMetersLocations, getGroups, filterByType, setGroup } = require('../../actions/MapActions');
 
+var getTags = function(props){
+  var tags = 'Map - ' +
+      (props.defaultFavouriteValues.source ? props.favourite.queries[0].source : props.source) +
+        ' - '+ props.interval[0].format("DD/MM/YYYY") +
+          ' to ' + props.interval[1].format("DD/MM/YYYY") +
+            (props.population ? ' - ' + props.population.label : '') +
+              (props.geometry ? ' - Custom' : '');  
+    
+  return tags;
+};
+
 var _filterRows = function(rows, type, name) {
   var filteredRows = rows.filter( r => {
     if(name) {
@@ -123,9 +134,7 @@ var _groupSelect = function(e) {
     } else {
       this.props.actions.filterByType(e.group.cluster === 'UNDEFINED' ? 'UNDEFINED' : e.group.cluster);
     }
-    
-    
-    
+
     if(e.group.cluster === 'UNDEFINED'){
       var utility = this.props.profile.utility;
       var population = {
@@ -148,44 +157,51 @@ var AnalyticsMap = React.createClass({
   },
 
   componentWillMount : function() {
-    if(this.props.map.groups == null) {
-      this.props.actions.getGroups();
-    }
-    var isDefault;
-    if(this.props.favourite && this.props.favourite.type == 'MAP'){
-      isDefault = false;
-      this.props.defaultFavouriteValues.interval = true;
-      this.props.defaultFavouriteValues.source = true;
-      this.props.defaultFavouriteValues.population = true;
-      this.props.defaultFavouriteValues.spatial = true;
-
-      this.props.actions.setEditorValuesBatch(isDefault);
-    }
-    else{
-      isDefault = true;
-      this.props.defaultFavouriteValues.interval = false;
-      this.props.defaultFavouriteValues.source = false;
-      this.props.defaultFavouriteValues.population = false;
-      this.props.defaultFavouriteValues.spatial = false;
-
-      this.props.actions.setEditorValuesBatch(isDefault);
-    }
-
+  
     if (!this.props.metersLocations) {
       this.props.actions.getMetersLocations();
     }
 
     var utility = this.props.profile.utility;
 
-    this.props.actions.setTimezone(utility.timezone);
+    this.props.actions.setTimezone(utility.timezone);  
+  
+  
+    if(this.props.map.groups == null) {
+      this.props.actions.getGroups().then(response => {
+        
+        var isDefault;
+        if(this.props.favourite && this.props.favourite.type == 'MAP'){
+          isDefault = false;
+          this.props.defaultFavouriteValues.interval = true;
+          this.props.defaultFavouriteValues.source = true;
+          this.props.defaultFavouriteValues.population = true;
+          this.props.defaultFavouriteValues.spatial = true;
 
-    if(!this.props.map.timeline) {
-      var population = {
-          utility: utility.key,
-          label: utility.name,
-          type: 'UTILITY'
-      };
-      this.props.actions.getTimeline(population);
+          this.props.actions.setEditorValuesBatch(isDefault);    
+      
+          if(!this.props.map.timeline) {
+            this.props.actions.getTimeline(this.props.favourite.queries[0].population[0]);
+          }            
+        } else{
+          isDefault = true;
+          this.props.defaultFavouriteValues.interval = false;
+          this.props.defaultFavouriteValues.source = false;
+          this.props.defaultFavouriteValues.population = false;
+          this.props.defaultFavouriteValues.spatial = false;
+
+          this.props.actions.setEditorValuesBatch(isDefault);
+      
+          if(!this.props.map.timeline) {
+            var population = {
+              utility: utility.key,
+              label: utility.name,
+              type: 'UTILITY'
+            };
+            this.props.actions.getTimeline(population);
+          }            
+        }
+      });
     }
   },
 
@@ -194,12 +210,7 @@ var AnalyticsMap = React.createClass({
 
   clickedAddFavourite : function() {
 
-    var tags = 'Map - ' +
-      (this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source) +
-        ' - '+ this.props.interval[0].format("DD/MM/YYYY") +
-          ' to ' + this.props.interval[1].format("DD/MM/YYYY") +
-            (this.props.population ? ' - ' + this.props.population.label : '') +
-              (this.props.geometry ? ' - Custom' : '');
+    var tags = getTags(this.props);
 
     var namedQuery = {};
     namedQuery.queries = [this.props.map.query.query]; //set as array to align with chart multiple queries
@@ -221,6 +232,14 @@ var AnalyticsMap = React.createClass({
   },
 
   render: function() {
+    if(!this.props.groups){
+      return (
+        <div>
+          <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
+          <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
+        </div>
+      );    
+    }
     var favouriteIcon;
     if(this.props.favourite && this.props.favourite.type == 'CHART'){
       favouriteIcon = 'star-o';
@@ -231,13 +250,7 @@ var AnalyticsMap = React.createClass({
       favouriteIcon = 'star';
     }
 
-    var tags = 'Map - ' +
-      (this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source) +
-        ' - '+ this.props.interval[0].format("DD/MM/YYYY") +
-          ' to ' + this.props.interval[1].format("DD/MM/YYYY") +
-            (this.props.population ? ' - ' + this.props.population.label : '') +
-              (this.props.geometry ? ' - Custom' : '');
-
+    var tags = getTags(this.props);
     var _t = this.context.intl.formatMessage;
 
     // Filter configuration
@@ -278,9 +291,6 @@ var AnalyticsMap = React.createClass({
 
       if(favPop.type === 'GROUP'){
         var typeOptions = [];
-        
-        //customGroup = this.props.groups.groups.find(g => g.key === favPop.group && );
-        //customGroup = _.find(this.props.groups.groups, g.key);
         var customGroupArray = _.filter(this.props.groups.groups, function(g) {
           return g.key == favPop.group && g.type == 'SET';
         });
@@ -481,16 +491,6 @@ var AnalyticsMap = React.createClass({
           );
         break;
     }
-    
-//    var mapTitle = (
-//      <div className="header-wrapper">
-//        <h3>{title}</h3>
-//        <toolbars.ButtonToolbar className="header-toolbar"
-//          groups={toolbarSpec}
-//          onSelect={this._handleToolbarEvent}
-//         />
-//      </div>
-//    );
    
     // Map configuration
     var mapTitle = (
