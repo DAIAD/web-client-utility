@@ -19,7 +19,11 @@ var types = mirrorToPath({
   MAP_ADD_FAVOURITE_RESPONSE : null,
 
   MAP_METERS_LOCATIONS_REQUEST: null,
-  MAP_METERS_LOCATIONS_RESPONSE: null 
+  MAP_METERS_LOCATIONS_RESPONSE: null,
+  MAP_GROUPS_REQUEST: null,
+  MAP_GROUPS_RESPONSE : null,
+  MAP_FILTER_GROUP_BY_TYPE : null,
+  MAP_SET_GROUP : null
 });
 
 module.exports = types;

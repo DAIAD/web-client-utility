@@ -5,6 +5,13 @@ var adminAPI = require('../api/admin');
 var moment = require('moment');
 var population = require('../model/population');
 var _ = require('lodash');
+var defaultChartTitle = "Last 30 Days Average Consumption";
+var defaultMapTitle = "Last 30 Days Consumption";
+
+var defaultLayout = [
+      {"i":defaultChartTitle,"x":0,"y":1,"w":8,"h":1},
+      {"i":defaultMapTitle,"x":0,"y":0,"w":10,"h":1}
+];
 
 var _buildGroupQuery = function(population, timezone, from, to) {
   return {
@@ -78,6 +85,31 @@ var addFavouriteResponse = function (success, errors) {
   };
 };
 
+var _getLayoutRequest = function() {
+  return {
+    type : types.FAVOURITES_GET_LAYOUT_REQUEST
+  };
+};
+
+var _getLayoutResponse = function(success, errors, layout) {
+  if(layout){
+    var configuration = JSON.parse(layout);
+    return {
+      type : types.FAVOURITES_GET_LAYOUT_RESPONSE,
+      success : success,
+      errors : errors,
+      savedLayout : configuration.layout
+    };
+  } else { //return default layout in first login
+    return {
+      type : types.FAVOURITES_GET_LAYOUT_RESPONSE,
+      success : success,
+      errors : errors,
+      savedLayout : defaultLayout
+    };    
+  }
+};
+
 var pinRequest = function () {
   return {
     type: types.FAVOURITES_PIN_REQUEST
@@ -90,6 +122,34 @@ var pinResponse = function (success, errors) {
     success: success,
     errors: errors
   };
+};
+
+var unpinRequest = function () {
+  return {
+    type: types.FAVOURITES_UNPIN_REQUEST
+  };
+};
+
+var unpinResponse = function (success, errors) {
+  return {
+    type: types.FAVOURITES_UNPIN_RESPONSE,
+    success: success,
+    errors: errors
+  };
+};
+
+var alignLayout = function(layout) {
+  if(layout){
+    return {
+      type : types.FAVOURITES_GET_LAYOUT_RESPONSE,
+      savedLayout : layout
+    };
+  } else { //return default layout in first login
+    return {
+      type : types.FAVOURITES_GET_LAYOUT_RESPONSE,
+      savedLayout : defaultLayout
+    };    
+  }
 };
 
 var deleteFavouriteResponse = function (success, errors) {
@@ -319,11 +379,8 @@ var FavouritesActions = {
     return function(dispatch, getState) {
       var population, source, geometry, interval, timezone;
 
-        population = {
-          utility: favourite.queries[0].population[0].utility,
-          label: favourite.queries[0].population[0].label,
-          type: favourite.queries[0].population[0].type
-        };
+        population = favourite.queries[0].population[0];
+        
         interval = [moment(favourite.queries[0].time.start),
                     moment(favourite.queries[0].time.end)];
         source = favourite.queries[0].source;
@@ -356,7 +413,7 @@ var FavouritesActions = {
         dispatch(_getTimelineComplete(response.success, response.errors, data));
 
         dispatch(_getFeatures(0, null, null));
-      }, function(error) {
+        }, function(error) {
         dispatch(_getTimelineComplete(false, error, null));
 
         dispatch(_getFeatures(0, null, null));
@@ -557,6 +614,28 @@ var FavouritesActions = {
       type : types.FAVOURITES_RESET_MAP_STATE
     };
   },
+
+  getProfileLayout : function() {
+    return function(dispatch, getState) {
+      dispatch(_getLayoutRequest());
+      
+      return adminAPI.getLayout().then(function(response) {
+        dispatch(_getLayoutResponse(response.success, response.errors, response.profile.configuration));
+        
+        if(!response.profile.configuration){ //save default layout at first login
+
+          var layoutRequest = {"configuration" : JSON.stringify({"layout": defaultLayout})};
+          return adminAPI.saveLayout(layoutRequest).then(function(response) {
+            dispatch(_saveLayoutResponse(response.success, response.errors));
+          }, function(error) {
+            dispatch(_saveLayoutResponse(false, error));
+          });        
+        }
+      }, function(error) {
+        dispatch(_getLayoutResponse(false, error));
+      });
+    };
+  },
   
   pinToDashboard : function(query) {
     return function(dispatch, getState) {
@@ -575,14 +654,13 @@ var FavouritesActions = {
 
             var layoutComponent;
             if(query.namedQuery.type === 'CHART' || query.namedQuery.type === 'FORECAST'){
-              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 8, h: 1}; //try 5 columns for chart
+              layoutComponent = {"i": query.namedQuery.title, "x": 0, "y": maxY+1, "w": 8, h: 1}; 
             } else if(query.namedQuery.type === 'MAP' ) {
-              layoutComponent = {i: query.namedQuery.title, x: 0, y: maxY+1, w: 10, h: 1}; //try 8 columns for map
+              layoutComponent = {"i": query.namedQuery.title, "x": 0, "y": maxY+1, "w": 10, h: 1}; 
             }
             lay.push(layoutComponent);
             dispatch(_saveLayoutRequest());
             var layoutRequest = {"configuration" : JSON.stringify({"layout": lay})};
-
             return adminAPI.saveLayout(layoutRequest).then(function(response) {
               dispatch(_saveLayoutResponse(response.success, response.errors));
             }, function(error) {
@@ -602,8 +680,54 @@ var FavouritesActions = {
             dispatch(pinResponse(false, error));
         });
     };
-  }  
-};
+  },
+  
+  unpin : function(query) {
+    return function(dispatch, getState) {
+      dispatch(unpinRequest());
 
+      return adminAPI.getLayout().then(function(response) {
+
+        var configuration = JSON.parse(response.profile.configuration);
+        var lay2 = configuration.layout;
+
+        var lay = lay2.filter(function( component ) {
+          return component.i !== query.namedQuery.title;
+        });
+
+        var layoutRequest = {"configuration" : JSON.stringify({"layout": lay})};
+
+        dispatch(_saveLayoutRequest());
+      
+        return adminAPI.saveLayout(layoutRequest).then(function(response) {
+          dispatch(_saveLayoutResponse(response.success, response.errors));
+
+          if(response.success){
+            dispatch(alignLayout(lay)); //aligning new savedLayout        
+        
+            return favouritesAPI.unpinFavourite(query).then(function (response) {
+              dispatch(unpinResponse(response.success, response.errors));
+              dispatch(requestedFavouriteQueries());
+              
+              return favouritesAPI.fetchFavouriteQueries().then(function (response) {
+                dispatch(receivedFavouriteQueries(response.success, response.errors, response.queries));  
+        
+                }, function (error) {
+                  dispatch(receivedFavouriteQueries(false, error, null));
+                });
+            }, function (error) {
+                dispatch(unpinResponse(false, error));
+            });
+          }//if success
+        }, function(error) {
+          dispatch(_saveLayoutResponse(false, error));
+        }); 
+
+      }, function(error) {
+        dispatch(getLayoutResponse(false, error));
+      });
+    };
+  },  
+};
 
 module.exports = FavouritesActions;

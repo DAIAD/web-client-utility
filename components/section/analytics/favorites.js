@@ -19,7 +19,8 @@ var { setTimezone, fetchFavouriteQueries, openFavourite,
       closeFavourite, setActiveFavourite,
       addCopy, deleteFavourite, openWarning,
       closeWarning, resetMapState, getFavouriteMap,
-      getFavouriteChart, getFavouriteForecast, getFeatures, pinToDashboard } = require('../../../actions/FavouritesActions');
+      getFavouriteChart, getFavouriteForecast, getFeatures, 
+      getProfileLayout, pinToDashboard, unpin } = require('../../../actions/FavouritesActions');
       
 var { getMetersLocations } = require('../../../actions/MapActions');
 
@@ -66,6 +67,7 @@ var Favourites = React.createClass({
   componentWillMount : function() {
     this.props.actions.resetMapState();
     this.props.actions.fetchFavouriteQueries();
+    this.props.actions.getProfileLayout();
     // ??
     //this.setState({points : createPoints()});
   
@@ -162,6 +164,13 @@ var Favourites = React.createClass({
     this.props.actions.pinToDashboard(request);
   },
   
+  unpin : function(fav, e) {
+    var request =  {
+      'namedQuery' : fav
+    };
+    this.props.actions.unpin(request);
+  },
+  
   onLinkClick () {
     //todo - consider keeping or discarding favourite
   },
@@ -195,6 +204,8 @@ var Favourites = React.createClass({
 
 
    if(this.props.selectedFavourite){
+     const timelineMin = this.props.map.timeline && this.props.map.timeline.min || 0;
+     const timelineMax = this.props.map.timeline && this.props.map.timeline.max || 0;
      switch(this.props.selectedFavourite.type) {
        case 'MAP':
            title = 'Map: ' + this.props.selectedFavourite.title;
@@ -213,13 +224,19 @@ var Favourites = React.createClass({
                       <Choropleth
                         name='Areas'
                         data={this.props.map.features}
-                        legend='bottomright'
+                        legend={timelineMax === 0 ? null : 'bottomright'}
                         valueProperty='value'
                         scale={['white', 'red']}
-                        limits={[ this.props.map.timeline ? this.props.map.timeline.min : 0, this.props.map.timeline ? this.props.map.timeline.max : 1000 ]}
+                        limits={[timelineMin, timelineMax]}
                         steps={6}
                         mode='e'
-                        infoContent={feature => feature ? <div><h5>{feature.properties.label}</h5><span>{feature.properties.value}</span></div> : <div><h5>Hover over an area...</h5></div>}
+                        infoContent={feature => feature && feature.properties ? 
+                          <div>
+                            <h5>{feature.properties.label}</h5>
+                            <span>{feature.properties.value}</span>
+                          </div> 
+                            : <div><h5>Hover over an area...</h5></div>
+                        }
                         highlightStyle={{ weight: 4 }}
                         style={{
                           fillColor: "#ffff00",
@@ -406,15 +423,32 @@ var Favourites = React.createClass({
        hidden: true
     }, {
        name: 'title',
-       title: 'Section.Analytics.Fav.Table1.Label'
+       title: 'Label'
     }, {
        name: 'tags',
-       title: 'Section.Analytics.Fav.Table1.Tags'
+       title: 'Tags'
     }, {
        name: 'createdOn',
-       title: 'Section.Analytics.Fav.Table1.Date',
+       title: 'Date',
        type: 'datetime'
-    }, {
+    }, 
+    {
+       name: 'pin',
+       title: 'Pinned',
+       type:'action',
+       icon: function(field, row) {
+         return (row.pinned === false ? 'square-o' : 'check-square-o');
+       },
+       hidden: false,
+       handler: function(field, row) {
+         if(row.pinned){
+           self.unpin(row);
+         } else {
+           self.pinToDashboard(row);
+         }
+       }
+    },    
+  {
        name: 'view',
        type:'action',
        icon: 'eye',
@@ -446,17 +480,6 @@ var Favourites = React.createClass({
        handler: function() {
        }
        }, */
-    {
-       name: 'pin',
-       type:'action',
-       icon: function(field, row) {
-         return (row.pinned === false ? 'map-pin' : null);
-       },
-       hidden: false,
-       handler: function(field, row) {
-         self.pinToDashboard(row);
-       }
-    },
     {
        name: 'remove',
        type:'action',
@@ -562,7 +585,8 @@ function mapStateToProps(state) {
     draw: state.favourites.draw,
     finished: state.favourites.finished,
     data: state.favourites.data,
-    metersLocations: state.map.metersLocations
+    metersLocations: state.map.metersLocations,
+    savedLayout: state.favourites.savedLayout
   };
 }
 
@@ -572,7 +596,8 @@ function mapDispatchToProps(dispatch) {
                                                      openFavourite, closeFavourite, setActiveFavourite,
                                                      addCopy, deleteFavourite, openWarning, closeWarning,
                                                      resetMapState, getFavouriteMap, getFavouriteChart,
-                                                     getFavouriteForecast, getFeatures, pinToDashboard, getMetersLocations }) , dispatch)
+                                                     getFavouriteForecast, getFeatures, getProfileLayout,
+                                                     pinToDashboard, unpin, getMetersLocations }) , dispatch)
   };
 }
 

@@ -39,14 +39,17 @@ var actions = {
     timespan: defaults.timespan,
     population: defaults.population,
   }),
-  initMultipleQueries : function(field, level, reportName, key, multipleQueries) {
+  initMultipleQueries : function(field, level, reportName, key, multipleQueries, source) {
+    if(source === 'AMPHIRO'){
+      source = 'device';
+    }
     return{
       type: ActionTypes.reports.measurements.INIT_MULTIPLE,
       field,
       level,
       reportName,
       key,
-      source: 'meter',      
+      source: source ? source : 'meter',      
       multipleQueries: multipleQueries
     };
   },

@@ -11,12 +11,42 @@ var Timeline = require('../Timeline');
 var GroupSearchTextBox = require('../GroupSearchTextBox');
 var {FormattedTime} = require('react-intl');
 var moment = require('moment');
+var _ = require('lodash');
 
 var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
 
-var { getTimeline, getFeatures, getChart,
-      setEditor, setEditorValue,
-      setTimezone, addFavourite, updateFavourite, setEditorValuesBatch, getMetersLocations } = require('../../actions/MapActions');
+var { getTimeline, getFeatures, getChart, setEditor, setEditorValue,
+      setTimezone, addFavourite, updateFavourite, setEditorValuesBatch, 
+      getMetersLocations, getGroups, filterByType, setGroup } = require('../../actions/MapActions');
+
+var getTags = function(props){
+  var tags = 'Map - ' +
+      (props.defaultFavouriteValues.source ? props.favourite.queries[0].source : props.source) +
+        ' - '+ props.interval[0].format("DD/MM/YYYY") +
+          ' to ' + props.interval[1].format("DD/MM/YYYY") +
+            (props.population ? ' - ' + props.population.label : '') +
+              (props.geometry ? ' - Custom' : '');  
+    
+  return tags;
+};
+
+var _filterRows = function(rows, type, name) {
+  var filteredRows = rows.filter( r => {
+    if(name) {
+      if(r.text.indexOf(name) === -1) {
+        return false;
+      }
+    }
+    if(type && type !== 'SET') {
+      return (r.cluster == type);
+    }
+    if(type && type === 'SET'){
+     return (r.type == type);
+    }
+    return true;
+  });
+  return filteredRows;
+};
 
 var _getTimelineValues = function(timeline) {
   if(timeline) {
@@ -64,6 +94,7 @@ var onPopulationEditorChange = function(e) {
       type: 'UTILITY'
     };
   }
+  this.props.actions.setGroup(e);
   this.props.actions.setEditorValue('population', e);
 };
 
@@ -79,6 +110,46 @@ var _onFeatureChange = function(features) {
   }
 };
 
+var _filterByType = function(e) {
+  this.props.defaultFavouriteValues.population = false;
+  var profile = this.props.profile;
+  this.props.actions.filterByType(e.value === 'UNDEFINED' ? null : e.value);
+
+  if(e.value === 'UNDEFINED'){
+    var utility = this.props.profile.utility;
+    var population = {
+      utility: utility.key,
+      label: utility.name,
+      type: 'UTILITY'
+    };
+    this.props.actions.getTimeline(population);
+  }
+};
+
+var _groupSelect = function(e) {
+  if(this.props.defaultFavouriteValues.population){
+  
+    if(e.group.type === 'SET'){
+      this.props.actions.filterByType('SET');
+    } else {
+      this.props.actions.filterByType(e.group.cluster === 'UNDEFINED' ? 'UNDEFINED' : e.group.cluster);
+    }
+
+    if(e.group.cluster === 'UNDEFINED'){
+      var utility = this.props.profile.utility;
+      var population = {
+        utility: utility.key,
+        label: utility.name,
+        type: 'UTILITY'
+      };
+      this.props.actions.getTimeline(e.group);
+    }    
+  }
+
+  this.props.defaultFavouriteValues.population = false;
+  this.props.actions.setGroup(e);
+};
+
 var AnalyticsMap = React.createClass({
 
   contextTypes: {
@@ -86,41 +157,51 @@ var AnalyticsMap = React.createClass({
   },
 
   componentWillMount : function() {
-    var isDefault;
-    if(this.props.favourite && this.props.favourite.type == 'MAP'){
-      isDefault = false;
-      this.props.defaultFavouriteValues.interval = true;
-      this.props.defaultFavouriteValues.source = true;
-      this.props.defaultFavouriteValues.population = true;
-      this.props.defaultFavouriteValues.spatial = true;
-
-      this.props.actions.setEditorValuesBatch(isDefault);
-    }
-    else{
-      isDefault = true;
-      this.props.defaultFavouriteValues.interval = false;
-      this.props.defaultFavouriteValues.source = false;
-      this.props.defaultFavouriteValues.population = false;
-      this.props.defaultFavouriteValues.spatial = false;
-
-      this.props.actions.setEditorValuesBatch(isDefault);
-    }
-
+  
     if (!this.props.metersLocations) {
       this.props.actions.getMetersLocations();
     }
 
     var utility = this.props.profile.utility;
 
-    this.props.actions.setTimezone(utility.timezone);
+    this.props.actions.setTimezone(utility.timezone);  
+  
+  
+    if(this.props.map.groups == null) {
+      this.props.actions.getGroups().then(response => {
+        
+        var isDefault;
+        if(this.props.favourite && this.props.favourite.type == 'MAP'){
+          isDefault = false;
+          this.props.defaultFavouriteValues.interval = true;
+          this.props.defaultFavouriteValues.source = true;
+          this.props.defaultFavouriteValues.population = true;
+          this.props.defaultFavouriteValues.spatial = true;
 
-    if(!this.props.map.timeline) {
-      var population = {
-          utility: utility.key,
-          label: utility.name,
-          type: 'UTILITY'
-      };
-      this.props.actions.getTimeline(population);
+          this.props.actions.setEditorValuesBatch(isDefault);    
+      
+          if(!this.props.map.timeline) {
+            this.props.actions.getTimeline(this.props.favourite.queries[0].population[0]);
+          }            
+        } else{
+          isDefault = true;
+          this.props.defaultFavouriteValues.interval = false;
+          this.props.defaultFavouriteValues.source = false;
+          this.props.defaultFavouriteValues.population = false;
+          this.props.defaultFavouriteValues.spatial = false;
+
+          this.props.actions.setEditorValuesBatch(isDefault);
+      
+          if(!this.props.map.timeline) {
+            var population = {
+              utility: utility.key,
+              label: utility.name,
+              type: 'UTILITY'
+            };
+            this.props.actions.getTimeline(population);
+          }            
+        }
+      });
     }
   },
 
@@ -129,12 +210,7 @@ var AnalyticsMap = React.createClass({
 
   clickedAddFavourite : function() {
 
-    var tags = 'Map - ' +
-      (this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source) +
-        ' - '+ this.props.interval[0].format("DD/MM/YYYY") +
-          ' to ' + this.props.interval[1].format("DD/MM/YYYY") +
-            (this.props.population ? ' - ' + this.props.population.label : '') +
-              (this.props.geometry ? ' - Custom' : '');
+    var tags = getTags(this.props);
 
     var namedQuery = {};
     namedQuery.queries = [this.props.map.query.query]; //set as array to align with chart multiple queries
@@ -156,6 +232,14 @@ var AnalyticsMap = React.createClass({
   },
 
   render: function() {
+    if(!this.props.groups){
+      return (
+        <div>
+          <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
+          <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
+        </div>
+      );    
+    }
     var favouriteIcon;
     if(this.props.favourite && this.props.favourite.type == 'CHART'){
       favouriteIcon = 'star-o';
@@ -166,13 +250,7 @@ var AnalyticsMap = React.createClass({
       favouriteIcon = 'star';
     }
 
-    var tags = 'Map - ' +
-      (this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source) +
-        ' - '+ this.props.interval[0].format("DD/MM/YYYY") +
-          ' to ' + this.props.interval[1].format("DD/MM/YYYY") +
-            (this.props.population ? ' - ' + this.props.population.label : '') +
-              (this.props.geometry ? ' - Custom' : '');
-
+    var tags = getTags(this.props);
     var _t = this.context.intl.formatMessage;
 
     // Filter configuration
@@ -206,16 +284,121 @@ var AnalyticsMap = React.createClass({
       </div>
     );
 
-    var populationEditor = (
-      <div className='col-md-3'>
-        <GroupSearchTextBox
-          value={this.props.defaultFavouriteValues.population ? this.props.favourite.queries[0].population : this.props.population}
-          name='groupname'
-          onChange={onPopulationEditorChange.bind(this)}/>
-        <span className='help-block'>Select a consumer group</span>
-      </div>
-    );
+    var typeOptions = [];
+    var customGroup;
+    if(this.props.defaultFavouriteValues.population){
+      var favPop = this.props.favourite.queries[0].population[0];
 
+      if(favPop.type === 'GROUP'){
+        var typeOptions = [];
+        var customGroupArray = _.filter(this.props.groups.groups, function(g) {
+          return g.key == favPop.group && g.type == 'SET';
+        });
+        
+        customGroup = customGroupArray[0];
+        if(customGroup){
+
+          var allCustomGroups = this.props.groups.groups.filter(g => g.type === 'SET');
+          typeOptions = allCustomGroups.map((group) => {
+            return {
+              name: group.name,
+              label: group.name,
+              group: group
+            };
+          });            
+        } else {
+          var cluster = favPop.label;
+          var clusterName = cluster.substring(0, cluster.indexOf(":"));
+          var filtered = _filterRows(this.props.groups.groups || [], clusterName, null);
+
+          typeOptions = filtered.map((group) => {
+            return {
+              name: group.name,
+              label: group.type == 'SEGMENT' ? group.cluster + ': ' + group.name : group.name,
+              group: group
+            };
+          });        
+        }
+      }
+    } else {
+      if(this.props.groups && this.props.populationType){
+        typeOptions = this.props.groups.filtered.map((group) => {
+          return {
+            name: group.name,
+            label: group.type == 'SEGMENT' ? group.cluster + ': ' + group.name : group.name,
+            group: group
+          };
+        });
+      }
+    }
+
+    var groupTypeValue;
+    if(this.props.defaultFavouriteValues.population){
+      if(customGroup){
+        groupTypeValue = 'SET';
+      } else {
+        if(this.props.populationType){
+          groupTypeValue = this.props.populationType;
+        } else {
+        groupTypeValue = 'UNDEFINED';
+        }
+      }
+    } else {
+      if(this.props.populationType){
+        groupTypeValue = this.props.populationType;
+      } else {
+        groupTypeValue = 'UNDEFINED';
+      }    
+    }
+    
+    var groupTypeSelect = (
+      <div>
+        <Select name='groupType'
+          value={groupTypeValue}
+          
+          options={[
+            { value: 'UNDEFINED', label: this.props.profile.utility.name},
+            { value: 'Income', label: 'Income' },
+            { value: 'Apartment Size', label: 'Apartment Size' },
+            { value: 'Household Members', label: 'Household Members' },
+            { value: 'Age', label: 'Age' },
+            { value: 'Consumption Class', label: 'Consumption Class' },
+            { value: 'SET', label: <i>Custom Group</i> }
+          ]}
+          onChange={_filterByType.bind(this)}
+          clearable={false}
+          searchable={false} className='form-group'/>
+        <span className='help-block'>Filter group type</span>
+    </div>
+  );
+
+  var groupValue;
+  if(this.props.defaultFavouriteValues.population){
+    if(favPop.type === 'UTILITY'){
+      groupValue = {name: favPop.label, label: <i>Everyone</i>};
+    } else {
+      groupValue = {name: favPop.label, label: favPop.label};
+    }
+  } else {
+    if(this.props.group){
+      groupValue = {name:this.props.group.name,label:this.props.group.label};
+    } else {
+      groupValue = {name:'UNDEFINED', label:<i>Everyone</i>};
+    }
+  }
+  
+  var groupSelect = (
+    <div>
+      <Select name='group'
+        value={groupValue}
+        options={typeOptions}
+        onChange={_groupSelect.bind(this)}
+        clearable={false}
+        searchable={false} className='form-group'/>
+      <span className='help-block'>Select group</span>
+    </div>
+  );
+ 
     var addFavouriteText;
     if(this.props.favourite){
       addFavouriteText = 'Buttons.UpdateFavourite';
@@ -278,7 +461,12 @@ var AnalyticsMap = React.createClass({
         filter = (
           <Bootstrap.ListGroupItem>
             <div className="row">
-              {populationEditor}
+                  <div className='col-md-3'>
+                    {groupTypeSelect}
+                  </div>
+                  <div className='col-md-3' >
+                    {groupSelect}
+                  </div>
             </div>
           </Bootstrap.ListGroupItem>
         );
@@ -303,16 +491,6 @@ var AnalyticsMap = React.createClass({
           );
         break;
     }
-    
-//    var mapTitle = (
-//      <div className="header-wrapper">
-//        <h3>{title}</h3>
-//        <toolbars.ButtonToolbar className="header-toolbar"
-//          groups={toolbarSpec}
-//          onSelect={this._handleToolbarEvent}
-//         />
-//      </div>
-//    );
    
     // Map configuration
     var mapTitle = (
@@ -320,11 +498,6 @@ var AnalyticsMap = React.createClass({
       <div className="header-wrapper">
         <i className='fa fa-map fa-fw'></i>
         <span style={{ paddingLeft: 4 }}>Map</span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 0, display : (this.props.editor ? 'block' : 'none' ) }}>
-          <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, null)}>
-            <i className='fa fa-rotate-left fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
         <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
           <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'source')}>
             <i className='fa fa-database fa-fw'></i>
@@ -394,9 +567,9 @@ var AnalyticsMap = React.createClass({
     mapFilterTags.push(
       <FilterTag key='source' text={ this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source} icon='database' />
     );
-    
+
     const timelineMin = this.props.map.timeline && this.props.map.timeline.min || 0;
-    const timelineMax = this.props.map.timeline && this.props.map.timeline.max || 1000;
+    const timelineMax = this.props.map.timeline && this.props.map.timeline.max || 0;
     map = (
       <Bootstrap.ListGroup fill>
         {filter}
@@ -409,7 +582,7 @@ var AnalyticsMap = React.createClass({
           >
             <LayersControl position='topright'> 
               <TileLayer />
-              
+
               <DrawControl
                 onFeatureChange={_onFeatureChange.bind(this)}
               />
@@ -418,7 +591,7 @@ var AnalyticsMap = React.createClass({
                 <Choropleth
                   name='Areas'
                   data={this.props.map.features}
-                  legend='bottomright'
+                  legend={timelineMax === 0 ? null : 'bottomright'}
                   valueProperty='value'
                   scale={['white', 'red']}
                   limits={[timelineMin, timelineMax]}
@@ -521,6 +694,9 @@ function mapStateToProps(state) {
       filtersChanged: state.map.filterChanged,
       defaultFavouriteValues : state.map.defaultFavouriteValues,
       metersLocations: state.map.metersLocations,
+      groups:state.map.groups,
+      group:state.map.group,
+      populationType:state.map.populationType,
       dateRangePickerLocale: state.i18n.data[state.i18n.locale].messages['Library.DateRangePicker.$locale']
   };
 }
@@ -529,7 +705,8 @@ function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getChart,
                                                      setEditor, setEditorValue, setTimezone,
-                                                     addFavourite, updateFavourite, setEditorValuesBatch, getMetersLocations}) , dispatch)
+                                                     addFavourite, updateFavourite, setEditorValuesBatch, 
+                                                     getMetersLocations, getGroups, filterByType, setGroup}) , dispatch)
   };
 }
 

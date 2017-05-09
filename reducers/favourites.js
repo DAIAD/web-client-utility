@@ -279,7 +279,15 @@ var favourites = function (state, action) {
     case types.FAVOURITES_PIN_RESPONSE:
       return Object.assign({}, state, {
         isLoading : false
-      });          
+      });
+    case types.FAVOURITES_UNPIN_REQUEST:
+      return Object.assign({}, state, {
+        isLoading: true
+      });
+    case types.FAVOURITES_UNPIN_RESPONSE:
+      return Object.assign({}, state, {
+        isLoading: false
+      });        
     case types.FAVOURITES_CONFIRM_DELETE_QUERY:
       return Object.assign({}, state, {
         isLoading : true
@@ -288,6 +296,15 @@ var favourites = function (state, action) {
       return Object.assign({}, state, {
         showDeleteMessage : false
       });
+    case types.FAVOURITES_GET_LAYOUT_REQUEST:
+      return Object.assign({}, state, {
+        isLoading : true
+      });
+    case types.FAVOURITES_GET_LAYOUT_RESPONSE:
+      return Object.assign({}, state, {
+        isLoading : false,
+        savedLayout : action.savedLayout
+      });        
     default:
       return state || initialState;
   }

@@ -1,5 +1,6 @@
 var queryAPI = require('../api/query');
 var mapAPI = require('../api/map');
+var groupAPI = require('../api/group');
 var favouritesAPI = require('../api/favourites');
 var moment = require('moment');
 var types = require('../constants/MapActionTypes');
@@ -134,11 +135,18 @@ var _setEditorValue = function(editor, value) {
   };
 };
 
+var _setGroup = function(group) {
+  return {
+    type : types.MAP_SET_GROUP,
+    group : group
+  };
+};
+
 var metersLocationsRequest = function () {
   return {
     type: types.MAP_METERS_LOCATIONS_REQUEST
   };
-}
+};
 
 var metersLocationsResponse = function(success, errors, data) {
   return {
@@ -147,7 +155,25 @@ var metersLocationsResponse = function(success, errors, data) {
     errors,
     data
   };
-}
+};
+
+var getGroupsInit = function() {
+  return {
+    type : types.MAP_GROUPS_REQUEST
+  };
+};
+
+var getGroupsComplete = function(success, errors, total, groups, index, size) {
+  return {
+    type : types.MAP_GROUPS_RESPONSE,
+    success : success,
+    errors : errors,
+    total : total,
+    groups : groups,
+    index : index,
+    size : size
+  };
+};
 
 var MapActions = {
   setEditor : function(key) {
@@ -207,7 +233,6 @@ var MapActions = {
             type: 'UTILITY'
           };
         }
-
         source = 'METER';
         interval = [moment().subtract(14, 'day'), moment()];
         if( (!getState().map.features) || (getState().map.features.length === 0) ){
@@ -220,16 +245,14 @@ var MapActions = {
         dispatch(_setEditorValue('source', source));
         dispatch(_setEditorValue('spatial', geometry));
 
-      }
-      else if(getState().favourites.selectedFavourite){
+      } else if(getState().favourites.selectedFavourite){
+
         var selectedFav = getState().favourites.selectedFavourite.queries[0];
-        population = {
-          utility: selectedFav.population[0].utility,
-          label: selectedFav.population[0].label,
-          type: selectedFav.population[0].type
-        };
+
+        population = selectedFav.population[0];
+
         interval = [moment(selectedFav.time.start), moment(selectedFav.time.end)];
-        
+
         source = selectedFav.source;
 
         if(selectedFav.spatial && selectedFav.spatial > 1){
@@ -238,6 +261,13 @@ var MapActions = {
 
           geometry = null;
         }
+
+        var groupPop = {group:population};
+        //filterBytype
+        var clusterName = population.label.substring(0, population.label.indexOf(":"));
+
+        dispatch(MapActions.filterByType(population.type === 'UTILITY' ? null : clusterName));
+        dispatch(MapActions.setGroup(groupPop));
         dispatch(_setEditorValue('population', population));
         dispatch(_setEditorValue('interval', interval));
         dispatch(_setEditorValue('spatial', geometry));
@@ -365,6 +395,31 @@ var MapActions = {
        });
     };
   },
+
+  getGroups : function() {
+    return function(dispatch, getState) {
+      dispatch(getGroupsInit());
+      return groupAPI.getGroups(getState().userCatalog.query).then(function(response) 
+        {
+          dispatch(getGroupsComplete(response.success, response.errors, response.total, 
+              response.groups, response.index, response.size));
+        }, function(error) {
+          dispatch(getGroupsComplete(false, error));
+      });
+    };
+  },
+  filterByType : function(type) {
+    return {
+      type : types.MAP_FILTER_GROUP_BY_TYPE,
+      groupType : type
+    };
+  },
+  setGroup : function(group) {
+    return function(dispatch, getState) {
+      dispatch(_setGroup(group));
+      dispatch(MapActions.setEditorValue('population', group.group));
+    };
+  },
   getAreaGroups: function() {
     return function(dispatch, getState) {
       return mapAPI.getGroups()
@@ -387,6 +442,7 @@ var MapActions = {
       });
     };
   },
+
 };
 
 module.exports = MapActions;

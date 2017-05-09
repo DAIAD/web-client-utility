@@ -172,15 +172,11 @@ var ForecastingActions = {
   },
   
   setInterval : function(interval) {
-    //return function(dispatch, getState) {
-      //if(!_.isEqual(interval, getState().forecasting.interval)){
-        return {
-          type : types.FORECASTING_SET_INTERVAL,
-          interval : interval
-        };
-        //dispatch(_setInterval(interval));
-      //}   
-    //}
+    return {
+      type : types.FORECASTING_SET_INTERVAL,
+      interval : interval
+    };
+
   },
   
   getUtilityChart : function(group, key, name, timezone) {
@@ -331,15 +327,13 @@ var ForecastingActions = {
   getGroups : function() {
     return function(dispatch, getState) {
       dispatch(getGroupsInit());
-
-      return groupAPI.getGroups(getState().userCatalog.query).then(
-          function(response) {
-
-            dispatch(getGroupsComplete(response.success, response.errors, response.total, response.groups,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(getGroupsComplete(false, error));
-          });
+      return groupAPI.getGroups(getState().userCatalog.query).then(function(response) 
+        {
+          dispatch(getGroupsComplete(response.success, response.errors, response.total, 
+              response.groups, response.index, response.size));
+        }, function(error) {
+          dispatch(getGroupsComplete(false, error));
+      });
     };
   },
   

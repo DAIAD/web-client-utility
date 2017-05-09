@@ -17,7 +17,10 @@ var _handleKeyPress = function(e) {
 };
 
 var _setChartMetric = function(e) {
-  this.props.actions.setChartMetric(e.value);
+  var utility = this.props.profile.utility;
+  this.props.actions.setChartMetric(e.value, utility.name, utility.timezone);
+  var utility = this.props.profile.utility;
+  var population;
 };
 
 var _clearChart = function(e) {

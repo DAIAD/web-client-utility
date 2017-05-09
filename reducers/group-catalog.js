@@ -250,8 +250,8 @@ var reducer = function(state, action) {
     case types.GROUP_CATALOG_CHART_RESPONSE:  
       var groupCharts = state.charts;
       if (action.success) {
-
-        groupCharts[action.groupKey] = {groupSeries: action.dataChart};    
+        groupCharts[action.groupKey] = Object.assign(groupCharts[action.groupKey], 
+            {groupSeries: action.dataChart});
 
         return Object.assign({}, state, {
           isLoading : false,
@@ -305,8 +305,7 @@ var reducer = function(state, action) {
       
     case types.GROUP_CATALOG_SET_METRIC:
       return Object.assign({}, state, {
-        metric: action.metric || 'AVERAGE',
-        charts : {}
+        metric: action.metric || 'AVERAGE'
       });
 
     default:
