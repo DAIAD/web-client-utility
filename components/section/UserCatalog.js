@@ -90,7 +90,7 @@ var UserCatalog = React.createClass({
   },
 
   onPageIndexChange: function(index) {
-    console.log('on page index change user catalog with', index);
+    //console.log('on page index change user catalog with', index);
     this.props.actions.changeIndex(index);
   },
 
