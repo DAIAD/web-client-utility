@@ -422,7 +422,7 @@ var ReportPanel = React.createClass({
       this.props.initMultipleQueries(
            this.props.favouriteChart.field, this.props.favouriteChart.level, 
              this.props.favouriteChart.reportName, 
-                 shapeFavouriteQueries(this.props.favouriteChart.queries, this.context.config));
+                 shapeFavouriteQueries(this.props.favouriteChart.queries, this.context.config), this.props.favouriteChart.queries[0].source);
     }
   },
   componentDidMount: function () {
@@ -435,7 +435,7 @@ var ReportPanel = React.createClass({
 
     if(!(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART')) {
       var defaultQuery = getDefaultQuery(this);
-      this.props.initMultipleQueries(field, level, reportName, [defaultQuery]);
+      this.props.initMultipleQueries(field, level, reportName, [defaultQuery], null);
       
     } 
       this.props.refreshMultipleData(field, level, reportName).then(() => (this.setState({draw: true})));
@@ -464,18 +464,18 @@ var ReportPanel = React.createClass({
 
       if(this.props.multipleQueries.length > 0 ){
         nextProps.initMultipleQueries(
-          nextProps.field, nextProps.level, nextProps.reportName, this.props.multipleQueries
+          nextProps.field, nextProps.level, nextProps.reportName, this.props.multipleQueries, null
         );      
       } else {
         if(this.props.favouriteQuery){
           nextProps.initMultipleQueries(
               this.props.favouriteQuery.field, this.props.favouriteQuery.level, 
                   this.props.favouriteQuery.reportName, 
-                      shapeFavouriteQueries(this.props.favouriteQuery.queries, this.context.config)
+                      shapeFavouriteQueries(this.props.favouriteQuery.queries, this.context.config), this.props.favouriteQuery.queries[0].source
           );          
         } else {
           nextProps.initMultipleQueries(
-            nextProps.field, nextProps.level, nextProps.reportName, [getDefaultQuery]
+            nextProps.field, nextProps.level, nextProps.reportName, [getDefaultQuery], null
           );  
         }
       }
@@ -789,6 +789,7 @@ var ReportPanel = React.createClass({
   },
   
   _setSource: function (source) {
+    //this.props.defaultFavouriteValues.source = false;
     this.props.setQuerySource(source.value);
 
     this.setState({dirty: true});
@@ -1034,8 +1035,10 @@ var ReportPanel = React.createClass({
         break;
       case 'source':
         {
-          var {source} = this.props;
-
+          var {source} = this.props.defaultFavouriteValues.source ? this.props.favouriteChart.queries[0].source : this.props;
+          if(source === 'AMPHIRO'){
+            source = 'device';
+          }
           fragment1 = (
             <div className="form-group">
               <label className="col-sm-2 control-label">Source:</label>
@@ -1369,7 +1372,7 @@ var ReportPanel = React.createClass({
     if (nextValue != null)
       this.setState({disabledButtons: nextValue});
   },
-
+  
   _clickedAddFavourite: function() {
   
     var {config} = this.context;
@@ -1831,7 +1834,7 @@ var ReportForm = React.createClass({
     return false;
   },
 
-  _refresh: function () {
+  _refresh: function () {  
     this.props.refreshMultipleData();
     this.setState({dirty: false});
     return false;
@@ -1981,8 +1984,8 @@ ReportPanel = ReactRedux.connect(
       initializeReport: (field, level, reportName, defaults) => (
         dispatch(initialize(field, level, reportName, REPORT_KEY, defaults))
       ),
-      initMultipleQueries: (field, level, reportName, defaults, multipleQueries) => (
-        dispatch(initMultipleQueries(field, level, reportName, REPORT_MULTIPLE_KEY, defaults, multipleQueries))
+      initMultipleQueries: (field, level, reportName, defaults, multipleQueries, source) => (
+        dispatch(initMultipleQueries(field, level, reportName, REPORT_MULTIPLE_KEY, defaults, multipleQueries, source))
       ),
       changeMultipleQueries: (multipleQueries) => (
         dispatch(changeMultipleQueries(multipleQueries))
