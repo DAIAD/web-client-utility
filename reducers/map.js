@@ -105,8 +105,8 @@ var _extractTimeline = function(meters, areas) {
     }
   }
 
-  timeline.min = min;
-  timeline.max = max;
+  timeline.min = Math.round(min);
+  timeline.max = Math.round(max);
 
   timeline.getAreas = function() {
     return areas;
