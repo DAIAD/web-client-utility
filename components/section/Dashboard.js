@@ -295,16 +295,7 @@ var Dashboard = React.createClass({
             <i className='fa fa-remove fa-fw'></i>
           </Bootstrap.Button>
       );
-//maximize button     
-//        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-//          <Bootstrap.Button 
-//            bsStyle='default' 
-//            className='btn-circle'
-//            onClick={this.toggleSize}
-//            >
-//            <i className='fa fa-arrows-alt fa-fw'></i>
-//          </Bootstrap.Button>      
-//        </span>    
+  
       var mapTitle = (
       <span>
         <i className='fa fa-map fa-fw'></i>
@@ -315,8 +306,6 @@ var Dashboard = React.createClass({
 
       </span>
       );
-
-      //todo - put fav interval
 
       var intervalLabel ='';
       if(props.interval) {
@@ -340,41 +329,28 @@ var Dashboard = React.createClass({
       mapFilterTags.push(
         <FilterTag key='source' text='Meter' icon='database' />
       );
-
-      /*
-      var map = (
-      <Bootstrap.ListGroup fill>
-        <Bootstrap.ListGroupItem>
-          <LeafletMap 
-            style={{ width: '100%', height: 400}}
-            elementClassName='mixin'
-            prefix='map'
-            center={[38.36, -0.479]}
-            zoom={13}
-            mode={LeafletMap.MODE_CHOROPLETH}
-            choropleth= {{
-              colors : ['#2166ac', '#67a9cf', '#d1e5f0', '#fddbc7', '#ef8a62', '#b2182b'],
-                min : pMap ? (pMap.timeline ? pMap.timeline.min : 0) : 0,
-                max : pMap ? (pMap.timeline ? pMap.timeline.max : 0) : 0,
-                data : pMap ? (pMap.features ? pMap.features : null) : null
-            }}
-            overlays={[{ url : '/assets/data/meters.geojson', popupContent : 'serial'}]}
-          />
-        </Bootstrap.ListGroupItem>
-        <Bootstrap.ListGroupItem>
-          <Timeline   
-            onChange={_onChangeTimeline.bind(this, pMap.title, pMap.id)}
-            labels={pMap ? _getTimelineLabels(pMap.timeline) : []}
-            values={pMap ? _getTimelineValues(pMap.timeline) : []}
-            defaultIndex={pMap ? pMap.index : 0}
-            speed={1000}
-            animate={false}>
-          </Timeline>
-        </Bootstrap.ListGroupItem>
-        */
+     
      var link = (
        <Link className='pull-right' to='analytics/map' style={{ paddingLeft : 7, paddingTop: 12 }}>View Map Analytics</Link>
-     );  
+     );
+    
+     const timelineMin = pMap && pMap.timeline && pMap.timeline.min || 0;
+     const timelineMax = pMap && pMap.timeline && pMap.timeline.max || 0;
+     
+     var timelineLabels =_getTimelineLabels(pMap.timeline);
+     var timelineValues =_getTimelineValues(pMap.timeline);
+
+     var timeline = timelineLabels.length>0? (
+       <Timeline   
+         onChange={_onChangeTimeline.bind(this, pMap.title, pMap.id)}
+         labels={pMap ? timelineLabels : []}
+         values={pMap ? timelineValues : []}
+         defaultIndex={pMap ? pMap.index : 0}
+         speed={1000}
+         animate={false}
+       />
+     ) : null;
+    
      var map = (
       <Bootstrap.ListGroup fill>
         <Bootstrap.ListGroupItem>
@@ -389,13 +365,10 @@ var Dashboard = React.createClass({
               <Choropleth
                 name='Areas'
                 data={pMap ? pMap.features : null}
-                legend='bottomright'
+                legend={timelineMax === 0 ? null : 'bottomright'}
                 valueProperty='value'
                 scale={['white', 'red']}
-                limits={[ 
-                  pMap && pMap.timeline && pMap.timeline.min || 0, 
-                  pMap && pMap.timeline && pMap.timeline.max || 0
-                ]}
+                limits={[timelineMin, timelineMax]}
                 steps={6}
                 mode='e'
                 infoContent={feature => feature ? 
@@ -435,37 +408,30 @@ var Dashboard = React.createClass({
               }}
             />
           </Map>
-    </Bootstrap.ListGroupItem>
-    <Bootstrap.ListGroupItem>
-          <Timeline   
-            onChange={_onChangeTimeline.bind(this, pMap.title, pMap.id)}
-            labels={pMap ? _getTimelineLabels(pMap.timeline) : []}
-            values={pMap ? _getTimelineValues(pMap.timeline) : []}
-            defaultIndex={pMap ? pMap.index : 0}
-            speed={1000}
-            animate={false}
-          />
+        </Bootstrap.ListGroupItem>
+        <Bootstrap.ListGroupItem>
+          {timeline}
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem className='clearfix'>
           <div className='pull-left'>
             {mapFilterTags}
           </div>
           <span style={{ paddingLeft : 7}}> </span>
-         {link}
+            {link}
         </Bootstrap.ListGroupItem>   
       </Bootstrap.ListGroup>
-      );      
+    );      
 
-      var mapPanel = (
-        <Bootstrap.Panel header={mapTitle}>
-          {map}
-        </Bootstrap.Panel>
-      );
+    var mapPanel = (
+      <Bootstrap.Panel header={mapTitle}>
+        {map}
+      </Bootstrap.Panel>
+    );
 
-      var mPanelWithKey = {panel:mapPanel, key:pinnedMaps[i].title};
+    var mPanelWithKey = {panel:mapPanel, key:pinnedMaps[i].title};
       mPanels.push(mPanelWithKey);
     }
-
+    
     return mPanels;
   },
   
