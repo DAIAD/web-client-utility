@@ -147,8 +147,7 @@ var GroupCatalogActionCreators = {
     
     return function(dispatch, getState) {
       var promises =[];
-
-      var interval = getState().forecasting.interval;
+      var interval = getState().groupCatalog.interval;
       var metric = getState().groupCatalog.metric;
 
       var targetGroup = getState().groupCatalog.data.groups.find(g => (g.key == group[0].group));
