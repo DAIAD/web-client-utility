@@ -148,8 +148,9 @@ var GroupCatalog  = React.createClass({
     const tablePager = {
       index: 0,
       size: 10,
-      //count: this.props.groupCatalog.data.filtered.length || 0,
-      //onPageIndexChange: this.onPageIndexChange,
+      count: this.props.groupCatalog.data.filtered.length || 0,
+      onPageIndexChange: this.onPageIndexChange,
+      mode: Table.PAGING_CLIENT_SIDE
     };
     const tableSorter = {
       defaultSort: 'size',
