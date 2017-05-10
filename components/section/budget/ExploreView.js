@@ -356,8 +356,8 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
   
   if (budget) {
     const { activatedOn, initialized, numberOfConsumers, createdOn, updatedOn, params, paramsShort, owner, expectation = {}, actual = {}, overlap = null, consumptionBefore, consumptionAfter } = budget;
-    const expectedPercent = Math.round(budget.expectedPercent * 100) / 100;
-    const savingsPercent = Math.round(budget.savingsPercent * 100) / 100;
+    const expectedPercent = Math.round(budget.expectedPercent * 10000) / 100;
+    const savingsPercent = Math.round(budget.savingsPercent * 10000) / 100;
     const completed = initialized;
     const active = activatedOn != null;
     
@@ -375,7 +375,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
           id: 1,
           display: 'stat', 
           title: 'Budget goal',
-          highlight: `${expectedPercent * 100}%`, 
+          highlight: `${expectedPercent}%`, 
           info: [
           //{
           //  value: <span><b>{`Max ${expectation.max}% | Min ${expectation.min}%`}</b></span>
@@ -392,7 +392,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
           id: 20,
           display: 'stat',
           title: 'Savings',
-          highlight: savingsPercent ?  `${savingsPercent * 100}%` : '-',
+          highlight: savingsPercent ?  `${savingsPercent}%` : '-',
           info: [
           {
             value: <span><b>{`${consumptionBefore} lt`}</b> before</span>
