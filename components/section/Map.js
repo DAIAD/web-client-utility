@@ -290,7 +290,7 @@ var AnalyticsMap = React.createClass({
       var favPop = this.props.favourite.queries[0].population[0];
 
       if(favPop.type === 'GROUP'){
-        var typeOptions = [];
+        typeOptions = [];
         var customGroupArray = _.filter(this.props.groups.groups, function(g) {
           return g.key == favPop.group && g.type == 'SET';
         });
