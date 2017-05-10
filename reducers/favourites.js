@@ -261,6 +261,7 @@ var favourites = function (state, action) {
       });  
     case types.FAVOURITES_DELETE_QUERY_REQUEST:
       return Object.assign({}, state, {
+        isLoading : true,
         showDeleteMessage : true,
         favouriteToBeDeleted: action.favouriteToBeDeleted
       }); 
@@ -294,6 +295,7 @@ var favourites = function (state, action) {
       });  
     case types.FAVOURITES_CANCEL_DELETE_QUERY:
       return Object.assign({}, state, {
+        isLoading : false,
         showDeleteMessage : false
       });
     case types.FAVOURITES_GET_LAYOUT_REQUEST:

@@ -21,6 +21,7 @@ var _createChartInitialState = function() {
 var _createInitialState = function() {
   return {
     isLoading : false,
+    unPinningInProgress : false,
     interval : [
         moment().subtract(14, 'day'), moment()
     ],
@@ -334,7 +335,8 @@ var dashboard = function(state, action) {
       });
     case types.GET_LAYOUT_REQUEST:
       return Object.assign({}, state, {
-        isLoading : true
+        isLoading : true,
+        savedLayout : null
       });
     case types.GET_LAYOUT_RESPONSE:
       return Object.assign({}, state, {

@@ -1036,8 +1036,10 @@ var ReportPanel = React.createClass({
       case 'source':
         {
           var {source} = this.props.defaultFavouriteValues.source ? this.props.favouriteChart.queries[0].source : this.props;
-          if(source === 'AMPHIRO'){
+          if(source.toUpperCase() === 'AMPHIRO' || source.toUpperCase() === 'DEVICE'){
             source = 'device';
+          } else if(source.toUpperCase() === 'METER'){
+            source = 'meter'
           }
           fragment1 = (
             <div className="form-group">
@@ -1451,7 +1453,10 @@ var ReportPanel = React.createClass({
     
     if(this.props.favouriteChart && this.props.favouriteChart.type == 'CHART'){
       namedQuery.id = this.props.favouriteChart.id;
-      this.props.updateFavourite(request);
+
+      var previousTitle = this.props.favouriteChart.title;
+      this.props.updateFavourite(request, previousTitle);
+      
     } else{
       this.props.addFavourite(request);
     }
@@ -2020,8 +2025,8 @@ ReportPanel = ReactRedux.connect(
       addFavourite: (query) => (
         dispatch(addFavourite(query))
       ),
-      updateFavourite: (query) => (
-        dispatch(updateFavourite(query))
+      updateFavourite: (query, previousTitle) => (
+        dispatch(updateFavourite(query, previousTitle))
       )
     };
   },

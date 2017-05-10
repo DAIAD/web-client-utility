@@ -23,7 +23,8 @@ var types = mirrorToPath({
   MAP_GROUPS_REQUEST: null,
   MAP_GROUPS_RESPONSE : null,
   MAP_FILTER_GROUP_BY_TYPE : null,
-  MAP_SET_GROUP : null
+  MAP_SET_GROUP : null,
+  MAP_SAVE_LAYOUT_RESPONSE : null
 });
 
 module.exports = types;

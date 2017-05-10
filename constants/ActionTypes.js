@@ -107,7 +107,8 @@ var types = mirrorToPath({
       ADD_SERIES: null,
       REMOVE_SERIES: null,
       ADD_FAVOURITE_REQUEST: null,
-      ADD_FAVOURITE_RESPONSE: null
+      ADD_FAVOURITE_RESPONSE: null,
+      CHARTS_SAVE_LAYOUT_RESPONSE: null
     },
 
     // Reports on system utilization
