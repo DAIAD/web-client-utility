@@ -341,7 +341,7 @@ function getCell (field, row, className) {
   const value = row[field.name];
 
   //only action, alterable boolean allowed to have falsy value
-  if (field.type !== 'action' && field.type !== 'alterable-boolean' && !value) {
+  if (field.type !== 'action' && field.type !== 'alterable-boolean' && value == null) {
     return <div />;
   }
 
