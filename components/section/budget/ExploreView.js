@@ -448,6 +448,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
       }
 
       clusters.forEach((cluster, i) => {
+        const clusterData = cluster.segments.map(x => Math.round(x.percent < 0 ? 0 : x.percent));
         stats.push({
           id: i,
           title: cluster.clusterName,
@@ -475,8 +476,8 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
               label: {
                 formatter: y => y.toString() + '%',
               },
-              fill: 0.8,
-              data: cluster.segments.map(x => Math.round(x.percent < 0 ? 0 : x.percent))
+              fill: 0.8, 
+              data: cluster.clusterName === 'Consumption Class' ? clusterData.reverse() : clusterData, 
             }
           ]
         });

@@ -40,6 +40,7 @@ var SavingsPotentialExplore = React.createClass({
         </bs.Panel>
       );
     } 
+    console.log('clusters:', clusters);
   
     const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential, numberOfConsumers, status } = scenario; 
     const completed = processingEndOn != null;
@@ -94,6 +95,7 @@ var SavingsPotentialExplore = React.createClass({
       });
       
       clusters.forEach((cluster, i) => {
+        const clusterData = cluster.segments.map(x => Math.round(x.potential));
         stats.push({
           id: i + 4,
           title: cluster.clusterName,
@@ -122,7 +124,7 @@ var SavingsPotentialExplore = React.createClass({
                 formatter: y => `${Math.round(y / 1000)} \u33A5`,
               },
               fill: 0.8,
-              data: cluster.segments.map(x => Math.round(x.potential))
+              data: cluster.clusterName === 'Consumption Class' ? clusterData.reverse() : clusterData, 
             }
           ]
         });

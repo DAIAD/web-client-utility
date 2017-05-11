@@ -119,7 +119,7 @@ const exploreBudgetSchema = actions => [
   }, 
   {
     name: 'budget',
-    title: 'Consumption diff (lt)'
+    title: 'Difference (\u33A5)'
   },
   {
     name: 'savings',
