@@ -15,7 +15,7 @@ const sortGroups = (a, b) => {
   else if (a.name > b.name) {
     return 1;
   }
-  else if (a.name < b.value) {
+  else if (a.name < b.name) {
     return -1;
   }
   return 0;
