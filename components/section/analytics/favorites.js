@@ -65,10 +65,16 @@ var Favourites = React.createClass({
   },
   
   componentWillMount : function() {
+
     this.props.actions.resetMapState();
+    
+    //todo - close type Map after fixing issue with Leaflet unmounting
+    if(this.props.selectedFavourite && this.props.selectedFavourite.type === 'CHART'){
+      this.props.actions.closeFavourite();
+    }
+    
     this.props.actions.fetchFavouriteQueries();
     this.props.actions.getProfileLayout();
-    // ??
     //this.setState({points : createPoints()});
   
     if (!this.props.metersLocations) {
@@ -81,12 +87,6 @@ var Favourites = React.createClass({
     var utility = this.props.profile.utility;
     this.props.actions.setTimezone(utility.timezone);
    },
-  componentWillUnmount : function() {
-    //TODO - in case we want the 'Map' section to display the default view of the map,
-    //even when there is an active favourite open in the favourite's section, we should de-activate the favourite
-    //when unmounting, based on the cause of the unmount.
-    //Keep the favourite active only after the clickedEditFavourite action.
-  },
 
   clickedOpenFavourite(favourite) {
     var profile = this.props.profile;
@@ -176,6 +176,15 @@ var Favourites = React.createClass({
   },
   
   render: function() {
+    if(this.props.isLoading){
+      return (
+        <div>
+          <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
+          <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
+        </div>
+      );    
+    }  
+
     var icon = 'list';
     var self = this;
 

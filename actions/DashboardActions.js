@@ -609,8 +609,6 @@ var DashboardActions = {
     return function(dispatch, getState) {
 
       dispatch(unpinRequest());
-      //todo - figure out a way not to refetch favourites, 
-      //but to remove from local layout and sync layout with components
 
       var lay = getState().dashboard.savedLayout.filter(function( component ) {
         return component.i !== query.namedQuery.title;

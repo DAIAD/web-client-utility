@@ -224,7 +224,8 @@ var AnalyticsMap = React.createClass({
 
     if(this.props.favourite){
       namedQuery.id = this.props.favourite.id;
-      this.props.actions.updateFavourite(request);
+      var previousTitle = this.props.favourite.title;
+      this.props.actions.updateFavourite(request, previousTitle);
     }
     else{
       this.props.actions.addFavourite(request);
