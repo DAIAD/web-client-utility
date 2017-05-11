@@ -12,7 +12,7 @@ function SetSavingsPercentageItem (props) {
           min='0'
           max='100'
           step='0.01'
-          value={parseFloat(value.savings).toFixed(2)} 
+          value={value.savings} 
           bsSize='large'
           style={{ float: 'left', width: '60%', height: '100%', fontSize: '2.8em' }} 
           onChange={(e) => setValue({savings: parseFloat(e.target.value), label: '-' + e.target.value + '%'})}

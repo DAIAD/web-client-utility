@@ -123,13 +123,13 @@ var BudgetsAdd = React.createClass ({
           />
           <SetSavingsPercentage
             id='savings'
-            initialValue={{savings: 0}}
+            initialValue={{savings: parseFloat(0).toFixed(2)}}
             validate={validateSavingsPercentage}
             next={value => 'title'} 
           />
           <SetGoal
             id='goal'
-            initialValue={{goal: 0}}
+            initialValue={{goal: parseFloat(0).toFixed(2)}}
             validate={validateGoal}
           />
           <SelectDistribution
