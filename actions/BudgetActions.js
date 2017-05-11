@@ -365,10 +365,10 @@ const exploreBudgetAllUsers = function (budgetKey, query) {
         const reducedBefore = Array.isArray(u.months) && u.months.reduce((p, c) => p + c.consumptionBefore, 0) || null;
         const reducedAfter = Array.isArray(u.months) && u.months.reduce((p, c) => p + c.consumptionAfter, 0) || null;
         const budget = Math.round(100 * (reducedBefore - reducedAfter) / 1000) / 100 || null;
-        const savings = Math.round(100 * (reducedBefore - reducedAfter) / reducedBefore) || null;
+        const savings = reducedBefore && Math.round(100 * (reducedBefore - reducedAfter) / reducedBefore) || null;
         return {
           ...u,
-          savings,
+          savings: savings < 0 ? 0 : savings,
           budget: budget < 0 ? 0 : budget,
         };
       }),
