@@ -3,7 +3,7 @@ const budgetAPI = require('../api/budget');
 var userAPI = require('../api/user');
 var { fetchCompleted } = require('./SavingsActions');
 
-var { extractFeatures, throwServerError } = require('../helpers/common');
+var { extractFeatures, throwServerError, sortSegments } = require('../helpers/common');
 
 const setQuery = function(query) {
   return {
@@ -323,7 +323,8 @@ const exploreBudgetCluster = function (budgetKey, clusterKey) {
 const exploreBudgetAllClusters = function (budgetKey) {
   return function (dispatch, getState) {
     const { clusters = [] } = getState().config.utility;
-    return Promise.all(clusters.map(cluster => dispatch(exploreBudgetCluster(budgetKey, cluster.key))));
+    return Promise.all(clusters.map(cluster => dispatch(exploreBudgetCluster(budgetKey, cluster.key))))
+    .then(clusters => clusters.map(cluster => ({ ...cluster, segments: cluster.segments.sort(sortSegments) })));
   };
 };
 

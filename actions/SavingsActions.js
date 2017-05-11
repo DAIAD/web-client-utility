@@ -2,7 +2,7 @@ var types = require('../constants/SavingsActionTypes');
 
 var { getAreaGroups, getAreas } = require('./MapActions');
 var savingsAPI = require('../api/savings');
-var { nameToId, mapObject, throwServerError } = require('../helpers/common');
+var { nameToId, mapObject, throwServerError, sortSegments } = require('../helpers/common');
 
 const confirmRemoveScenario = function(id) {
   return {
@@ -154,6 +154,7 @@ const exploreScenariosAllClusters = function (scenarioKey) {
     const { clusters = [] } = getState().config.utility;
     return Promise.all(clusters.map(cluster => dispatch(exploreSavingsScenario(scenarioKey, cluster.key))))
     .then(clusters => clusters.filter(c => c != null))
+    .then(clusters => clusters.map(cluster => ({ ...cluster, segments: cluster.segments.sort(sortSegments) })))
     .then(clusters => dispatch(setExploreData({ clusters })));
   };
 };

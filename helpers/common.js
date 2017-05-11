@@ -60,9 +60,26 @@ const throwServerError = response => {
   throw new Error('unknownError');
 };
 
+const sortSegments = (a, b) => { 
+  if (b.name.startsWith('<') || a.name.startsWith('>')) { 
+    return 1;
+  }
+  else if (b.name.startsWith('>') || a.name.startsWith('<')) {
+    return -1;
+  }
+  else if (a.name > b.name) {
+    return 1;
+  }
+  else if (a.name < b.name) {
+    return -1;
+  }
+  return 0;
+};
+
 module.exports = {
   nameToId,
   extractFeatures,
   getFeature,
   throwServerError,
+  sortSegments,
 };

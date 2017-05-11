@@ -5,21 +5,6 @@ var sprintf = require('sprintf');
 var ActionTypes = require('../action-types');
 var {getGroups} = require('../api/admin');
 
-const sortGroups = (a, b) => { 
-  if (b.name.startsWith('<') || a.name.startsWith('>')) { 
-    return 1;
-  }
-  else if (b.name.startsWith('>') || a.name.startsWith('<')) {
-    return -1;
-  }
-  else if (a.name > b.name) {
-    return 1;
-  }
-  else if (a.name < b.name) {
-    return -1;
-  }
-  return 0;
-};
 
 var actions = {
 
@@ -69,8 +54,7 @@ var actions = {
               key: g.key,
               name: g.name,
               size: g.size,
-            }))
-            .sort(sortGroups),
+            })),
           })),
         };
 
