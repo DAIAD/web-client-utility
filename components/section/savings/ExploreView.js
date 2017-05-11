@@ -118,7 +118,7 @@ var SavingsPotentialExplore = React.createClass({
           },
           series: [
             {
-              name: cluster.name,
+              name: cluster.clusterName,
               color: (name, data, dataIndex) => theme.color.find((x, i, arr) => i  === dataIndex % arr.length),
               label: {
                 formatter: y => `${Math.round(y / 1000)} \u33A5`,
