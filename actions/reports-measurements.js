@@ -8,6 +8,7 @@ var population = require('../model/population');
 var {toUtcTime} = require('../helpers/timestamps');
 var {queryMeasurements} = require('../service/query');
 var favouritesAPI = require('../api/favourites');
+var adminAPI = require('../api/admin');
 
 var addFavouriteRequest = function () {
   return {
@@ -23,11 +24,15 @@ var addFavouriteResponse = function (success, errors) {
   };
 };
 
-// Define actions
+var _saveLayoutResponse = function(success, errors) {
+  return {
+    type : ActionTypes.reports.measurements.CHARTS_SAVE_LAYOUT_RESPONSE,
+    success : success,
+    errors : errors
+  };
+};
 
 var actions = {
-
-  // Plain actions
 
   initialize: (field, level, reportName, key, defaults={}) => ({
     type: ActionTypes.reports.measurements.INITIALIZE,
@@ -166,11 +171,38 @@ var actions = {
       });
     };
   },
-  updateFavourite : function(favourite) {
+  updateFavourite : function(favourite, previousTitle) {
     return function(dispatch, getState) {
       dispatch(addFavouriteRequest());
       return favouritesAPI.updateFavourite(favourite).then(function (response) {
         dispatch(addFavouriteResponse(response.success, response.errors));
+
+        if(response.success && (previousTitle !== favourite.namedQuery.title)){
+        //favourite title changed. Must update dashboard layout:
+
+          return adminAPI.getLayout().then(function(response) {
+            if(response.success){
+
+              var lays = JSON.parse(response.profile.configuration);
+              lays.layout.forEach(function(component) {
+                if(component.i === previousTitle){
+                  component.i = favourite.namedQuery.title;
+                }
+              });
+
+              var layoutRequest = {"configuration" : JSON.stringify({"layout": lays.layout})};
+              return adminAPI.saveLayout(layoutRequest).then(function(response) {
+                if(response.errors.length>0){
+                  console.error(response.errors);          
+                }
+              }, function(error) {
+                dispatch(_saveLayoutResponse(false, error));
+              });      
+            }
+          }, function(error) {
+            dispatch(_saveLayoutResponse(false, error));
+          }); 
+        }
       }, function (error) {
         dispatch(addFavouriteResponse(false, error));
       });

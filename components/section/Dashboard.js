@@ -148,8 +148,8 @@ var Dashboard = React.createClass({
     var props = this.props;
     var defaults= {
       chartProps: {
-        width: '100%',
-        height: 300,
+        width: 450,
+        height: 450,
       }
     };
 
@@ -440,8 +440,8 @@ var Dashboard = React.createClass({
     var props = this.props;
     var defaults= {
       chartProps: {
-        width: '100%',
-        height: 300,
+        width: 450,
+        height: 450,
       }
     };
 
@@ -536,7 +536,14 @@ var Dashboard = React.createClass({
   },
 
   render: function() {
-
+    if(this.props.isLoading){
+      return (
+        <div>
+          <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
+          <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
+        </div>
+      );    
+    }
     if(!this.props.savedLayout){
       return (<div> Loading... </div>)
     }
@@ -584,8 +591,19 @@ var Dashboard = React.createClass({
     );
 
     var onLayoutChange = function(e) {
-      //console.log('onLayoutChange');
-      //console.log(e);
+
+      if(!this.props.isLoading && this.props.savedLayout){
+        //compare previous with current layouts and prevent from saving
+        if(JSON.stringify(e) !== JSON.stringify(this.props.savedLayout)){
+          var stillLoading = e.find(l => l.w === 1);
+          if(stillLoading){ //onLayout is getting triggered when rendering the components. do nothing
+            return;
+          }
+          var layoutString = JSON.stringify({"layout": e});
+          var layoutRequest = {"configuration" : layoutString};
+          this.props.actions.saveLayout(layoutRequest);
+        }   
+      }
     };
 
     var onBreakpointChange = function(e) {
@@ -599,13 +617,6 @@ var Dashboard = React.createClass({
     };
 
     var onDragStop = function(e) {
-      //compare previous with current layouts and prevent from saving
-      if(JSON.stringify(e) !== JSON.stringify(this.props.savedLayout)){
-
-        var layoutString = JSON.stringify({"layout": e});
-        var layoutRequest = {"configuration" : layoutString};
-        this.props.actions.saveLayout(layoutRequest);
-      }
     };
 
     var chartComponents = divCharts ? divCharts : [];
@@ -643,7 +654,7 @@ var Dashboard = React.createClass({
         )
       ) : null;
 
-     var components = [...lCharts, ...lMaps, ...lForecasts];
+    var components = [...lCharts, ...lMaps, ...lForecasts];
     if(components.length !== this.props.savedLayout.length) {
       return (<div>Loading...</div>);
     }
