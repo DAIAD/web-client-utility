@@ -476,7 +476,7 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
                 formatter: y => y.toString() + '%',
               },
               fill: 0.8,
-              data: cluster.segments.map(x => Math.round(x.percent))
+              data: cluster.segments.map(x => Math.round(x.percent < 0 ? 0 : x.percent))
             }
           ]
         });

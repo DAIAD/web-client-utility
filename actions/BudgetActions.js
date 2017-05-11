@@ -316,7 +316,6 @@ const exploreBudgetCluster = function (budgetKey, clusterKey) {
     .catch((error) => {
       console.error('caught error in explore budget cluster', error);
       return null;
-      //throw error;
     });
   }
 };
@@ -360,15 +359,21 @@ const exploreBudgetAllUsers = function (budgetKey, query) {
         ...data,
       }));
     }))
-      .then(allUserData => ({ 
-        total: userData.total,
-        accounts: allUserData.map(u => ({
+    .then(allUserData => ({
+      total: userData.total,
+      accounts: allUserData.map(u => {
+        const reducedBefore = Array.isArray(u.months) && u.months.reduce((p, c) => p + c.consumptionBefore, 0) || null;
+        const reducedAfter = Array.isArray(u.months) && u.months.reduce((p, c) => p + c.consumptionAfter, 0) || null;
+        const budget = Math.round(100 * (reducedBefore - reducedAfter) / 1000) / 100 || null;
+        const savings = Math.round(100 * (reducedBefore - reducedAfter) / reducedBefore) || null;
+        return {
           ...u,
-          savings: Array.isArray(u.months) && u.months.length > 0 && Math.round(u.months[0].percent * 100) / 100,
-          budget: Array.isArray(u.months) && u.months.length > 0 && Math.round(u.months[0].consumptionAfter - u.months[0].consumptionBefore),
-        })),
-      }));
-    })
+          savings,
+          budget: budget < 0 ? 0 : budget,
+        };
+      }),
+    }));
+  });
   };
 };
 
