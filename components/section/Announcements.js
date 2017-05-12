@@ -2,7 +2,7 @@ var React = require('react');
 var Bootstrap = require('react-bootstrap');
 var Table = require('../UserTable');
 var Modal = require('../Modal');
-var {FormattedMessage} = require('react-intl');
+var {FormattedMessage, FormattedTime} = require('react-intl');
 var DropDown = require('../DropDown');
 
 var { connect } = require('react-redux');
@@ -82,7 +82,7 @@ var Announcements = React.createClass({
              name: 'content',
              title: 'Section.Engagement.Announcements.Table1.Content'
           }, {
-             name: 'dispatchedOn',
+             name: 'createdOn',
              title: 'Section.Engagement.Announcements.Table1.DispatchedOn',
              type: 'datetime'
           }, {
@@ -386,8 +386,8 @@ var Announcements = React.createClass({
           title: 'id',
           hidden: true
         }, {
-          name: 'lastName',
-          title: 'Last Name'
+          name: 'fullName',
+          title: 'Name'
         }, {
           name: 'username',
           title: 'Username'
@@ -453,7 +453,15 @@ var Announcements = React.createClass({
           </Bootstrap.Col>
           <Bootstrap.Col xs={6}>
             <div style={{fontSize:16}}>
-            <label>{new Date(this.props.announcement.dispatchedOn).toUTCString()}</label>
+              <label>
+                <FormattedTime value={this.props.announcement.createdOn}
+                               day='numeric'
+                               month='numeric'
+                               year='numeric'
+                               hour='numeric'
+                               minute='numeric' 
+                  />
+              </label>
             </div>
           </Bootstrap.Col>
         </Bootstrap.Row>
