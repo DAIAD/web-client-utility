@@ -255,24 +255,22 @@ var MessageAnalytics = React.createClass({
 
     var messageFields = {
       fields: [{
-        name: 'id',
-        title: 'Section.Support.Messages.Table2.Id'
-      }, {
-          name: 'title',
-          title: 'Section.Support.Messages.Table2.Message'
+        name: 'category',
+        title: 'Section.Support.Messages.Table2.Category'
       }, {
         name: 'type',
         title: 'Section.Support.Messages.Table2.Type'
       }, {
-        name: 'receiversCount',
+        name: 'count',
         title: 'Section.Support.Messages.Table2.TotalReceivers'
       }, {
           name: 'details',
           type:'action',
           icon: 'group',
           handler: function() {
-            self.props.actions.setSelectedMessage(this.props.row);
-            self.clickedShowReceivers(this.props.row);
+            // TODO: Implement controller actions
+            //self.props.actions.setSelectedMessage(this.props.row);
+            //self.clickedShowReceivers(this.props.row);
           }
         }],
       rows: this.props.messages ? this.props.messages : [],

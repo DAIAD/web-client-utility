@@ -208,8 +208,7 @@
             "AcknowledgedOn": "Acknowledged On"
           },
           "Table2": {
-            "Id": "Id",
-            "Message": "Message",
+            "Category": "Category",
             "Type": "Type",
             "TotalReceivers": "Total Receivers"
           }

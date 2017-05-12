@@ -105,7 +105,13 @@ var MessageAnalyticsActions = {
       dispatch(requestedMessageStatistics());
       var query = buildQuery(getState(event).messages.population, getState(event).messages.timezone, getState(event).messages.interval);
       return alertsAPI.getMessageStatistics(query).then(function (response) {
-        var messages = response.alertStatistics.concat(response.recommendationStatistics);
+        var messages = response.alertStatistics.map(value => {
+          value.category = 'ALERT';
+          return value;
+        }).concat(response.recommendationStatistics.map(value => {
+          value.category = 'RECOMMENDATION';
+          return value;
+        }));
         dispatch(receivedMessageStatistics(response.success, response.errors, messages));
       }, function (error) {
         dispatch(receivedMessageStatistics(false, error, null));
@@ -119,7 +125,7 @@ var MessageAnalyticsActions = {
       var message = getState(event).messages.selectedMessage;
       var query = buildQuery(getState(event).messages.population, getState(event).messages.timezone, getState(event).messages.interval);
 
-      if(message.type == "ALERT"){
+      if(message.category == "ALERT"){
 
         return alertsAPI.getAlertReceivers(message.id, query).then(function (response) {
           dispatch(receivedReceivers(response.success, response.errors, response.receivers));
@@ -127,15 +133,13 @@ var MessageAnalyticsActions = {
           dispatch(receivedReceivers(false, error, null));
         });
       }
-      else if(message.type == "RECOMMENDATION_DYNAMIC"){
+      else if(message.category == "RECOMMENDATION"){
         return alertsAPI.getRecommendationReceivers(message.id, query).then(function (response) {
           dispatch(receivedReceivers(response.success, response.errors, response.receivers));
         }, function (error) {
           dispatch(receivedReceivers(false, error, null));
         });
       }
-
-
     };
   },
   setSelectedMessage:function (message) {
