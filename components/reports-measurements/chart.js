@@ -71,7 +71,7 @@ var Chart = React.createClass({
 
   render: function () {
     var {defaults} = this.constructor;
-    var {field, level, reportName} = this.props;
+    var {field, level, reportName, yAxis} = this.props;
     var {config} = this.context;
     var {unit, name: fieldName} = typeof config === "undefined" ? 
       this.props.context.reports.byType.measurements.fields[field] : config.reports.byType.measurements.fields[field];
@@ -129,6 +129,7 @@ var Chart = React.createClass({
             theme={theme}
             xAxis={xAxis}
             yAxis={{
+              ...yAxis,
               name: fieldName + (unit? (' (' + unit + ')') : ''),
               numTicks: 4,
               formatter: (y) => (numeral(y).format('0.0a')),

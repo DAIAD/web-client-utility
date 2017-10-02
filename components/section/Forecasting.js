@@ -172,6 +172,7 @@ var Forecasting = React.createClass({
               overlap={null}
               overlapping={false}
               forecast={this.props.forecasting.group ? this.props.forecasting.group : null}
+              yAxis={{min : 0}}
             />
           </Bootstrap.ListGroupItem>
         </Bootstrap.ListGroup>
@@ -192,6 +193,7 @@ var Forecasting = React.createClass({
               overlap={null}
               overlapping={false}   
               forecast={this.props.forecasting.user ? this.props.forecasting.user : null}
+              yAxis={{min : 0}}
             />
           </Bootstrap.ListGroupItem>
         </Bootstrap.ListGroup>
