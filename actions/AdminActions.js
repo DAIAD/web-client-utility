@@ -99,8 +99,35 @@ var addUserGetUtilitiesResponse = function(success, utilities, errors){
   };
 };
 
-
 var AdminActions = {
+  showChangePasswordModal: function(key, username) {
+    return{
+      type : types.ADMIN_CHANGE_PASSWORD_SHOW,
+      key,
+      username,
+    };
+  },
+
+  updateChangePasswordForm: function(data) {
+    return {
+      type: types.ADMIN_CHANGE_PASSWORD_SET_VALUE,
+      data,
+    }
+  },
+
+  setErrorChangePasswordForm: function(error) {
+    return {
+      type: types.ADMIN_CHANGE_PASSWORD_SET_ERROR,
+      error,
+    }
+  },
+
+  hideChangePasswordModal: function() {
+    return {
+      type : types.ADMIN_CHANGE_PASSWORD_HIDE,
+    };
+  },
+
   showAddUserForm: function() {
     return{
       type : types.ADMIN_ADD_USER_SHOW
@@ -254,7 +281,30 @@ var AdminActions = {
       type : types.ADMIN_FILTER_USER,
       filter : filter
     };
-  }
+  },
+
+  changePassword : function (username, password, captcha) {
+    return function (dispatch, getState) {
+      const data = {
+        username,
+        password,
+        captcha,
+      };
+  
+      return adminAPI.changePassword(data)
+      .then((response) => {
+        if (response && response.errors && response.errors.length > 0) {
+          throw new Error(response.errors[0].code);
+        }      
+        return response;
+      }) 
+      .catch((error) => {
+        console.error('Error caught on changePassword:', error);
+        throw error;
+      });
+    };
+  },
+
 };
 
 module.exports = AdminActions;

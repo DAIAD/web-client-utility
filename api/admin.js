@@ -62,7 +62,12 @@ var AdminAPI = {
   
   getLayout : function() {
     return api.json('/action/profile/load');
-  }    
+  },
+
+  changePassword : function (data) {
+    return api.json('/action/user/password/change', data, 'POST');
+  },
+  
 };
 
 module.exports = AdminAPI;

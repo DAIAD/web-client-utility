@@ -12,10 +12,13 @@ var MessageAlert = require('../../AlertDismissable');
 var errorsCodes = require('../../../constants/Errors');
 var successCodes = require('../../../constants/Successes');
 
+var ChangePasswordModal = require('../../ChangePasswordModal');
 
 var { getActivity, setFilter, getSessions, getMeters, resetUserData, exportUserData, showAddUserForm,
       hideAddUserForm, addUserSelectUtility, addUserSelectGenderMale, addUserSelectGenderFemale, addUserFillForm,
-      addUserValidationsErrorsOccurred, addUserShowMessageAlert, addUserHideErrorAlert, addUser, addUserGetUtilities } = require('../../../actions/AdminActions');
+      addUserValidationsErrorsOccurred, addUserShowMessageAlert, addUserHideErrorAlert, addUser, addUserGetUtilities,
+      changePassword, showChangePasswordModal, hideChangePasswordModal, updateChangePasswordForm, setErrorChangePasswordForm,
+    } = require('../../../actions/AdminActions');
 
 var Overview = React.createClass({
   contextTypes: {
@@ -414,6 +417,9 @@ var Overview = React.createClass({
           name: 'meter',
           type:'action',
           image: '/assets/images/utility/meter.svg',
+          style: {
+            width: '30px',
+          },
           handler: function(field, row) {
             if((row.key) && (row.numberOfMeters > 0)) {
               self.props.actions.getMeters(row.key, row.username);
@@ -426,6 +432,9 @@ var Overview = React.createClass({
           name: 'session',
           type:'action',
           image: '/assets/images/utility/amphiro.svg',
+          style: {
+            width: '30px',
+          },
           handler: function(field, row) {
             if((row.key) && (row.numberOfAmphiroDevices > 0)) {
               self.props.actions.getSessions(row.key, row.username);
@@ -439,7 +448,8 @@ var Overview = React.createClass({
           type:'action',
           icon: 'cloud-download fa-2x',
           style: {
-            color: '#2D3580'
+            color: '#2D3580',
+            width: '30px',
           },
           handler: function(field, row) {
             if((row.key) && ((row.numberOfAmphiroDevices > 0) || (row.numberOfMeters > 0))) {
@@ -448,6 +458,22 @@ var Overview = React.createClass({
           },
           visible: function(field, row) {
             return ((row.key) && ((row.numberOfAmphiroDevices > 0) || (row.numberOfMeters > 0)));
+          }
+        }, {
+          name: 'change-password',
+          type:'action',
+          icon: 'pencil fa-2x',
+          style: {
+            color: '#1B5E20',
+            width: '30px',
+          },
+          handler: function(field, row) {
+            if((row.key) && (row.accountRegisteredOn)) {
+              self.props.actions.showChangePasswordModal(row.key, row.username);
+            }
+          },
+          visible: function(field, row) {
+            return ((row.key) && (row.accountRegisteredOn));
           }
         }],
         rows: rows.filter(row => row.key && row.username),
@@ -698,6 +724,14 @@ var Overview = React.createClass({
     return (
       <div className="container-fluid">
         {visiblePart}
+        <ChangePasswordModal
+          {...this.props.admin.changePassword}
+          _t={_t}
+          changePassword={this.props.actions.changePassword}
+          hideChangePasswordModal={this.props.actions.hideChangePasswordModal}
+          updateChangePasswordForm={this.props.actions.updateChangePasswordForm}
+          setErrorChangePasswordForm={this.props.actions.setErrorChangePasswordForm}
+        />
       </div>);
     }
 });
@@ -708,7 +742,7 @@ Overview.title = 'Section.Trials.Overview.Title';
 function mapStateToProps(state) {
   return {
       admin: state.admin,
-      routing: state.routing
+      routing: state.routing,
   };
 }
 
@@ -716,7 +750,9 @@ function mapDispatchToProps(dispatch) {
   return {
     actions : bindActionCreators(Object.assign({}, { getActivity, setFilter, getSessions, getMeters, resetUserData,
       exportUserData, showAddUserForm, hideAddUserForm, addUserSelectUtility, addUserSelectGenderMale, addUserSelectGenderFemale,
-      addUserFillForm, addUserValidationsErrorsOccurred, addUserShowMessageAlert, addUserHideErrorAlert, addUser, addUserGetUtilities }) , dispatch)
+      addUserFillForm, addUserValidationsErrorsOccurred, addUserShowMessageAlert, addUserHideErrorAlert, addUser, addUserGetUtilities,
+      changePassword, showChangePasswordModal, hideChangePasswordModal, updateChangePasswordForm, setErrorChangePasswordForm,
+    }) , dispatch)
   };
 }
 

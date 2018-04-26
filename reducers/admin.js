@@ -26,7 +26,16 @@ var initialState = {
       success : null,
       errors: null
     }
-  }
+  },
+  changePassword: {
+    show: false,
+    key: null,
+    username:null,    
+    password: '',
+    confirmPassword: '',
+    captcha: null,
+    error: null,
+  },
 };
 
 var admin = function(state, action) {
@@ -111,7 +120,53 @@ var admin = function(state, action) {
           token : action.token
         }
       });
-      
+ 
+    case types.ADMIN_CHANGE_PASSWORD_SHOW:
+      return {
+        ...state,
+        changePassword: {
+          key: action.key,
+          username: action.username,
+          show: true,
+          password: '',
+          confirmPassword: '',
+          captcha: null,
+          error: null,
+        },
+      };
+
+    case types.ADMIN_CHANGE_PASSWORD_SET_VALUE:
+      return {
+        ...state,
+        changePassword: {
+          ...state.changePassword,
+          ...action.data,
+          error: null,
+        },
+      };
+
+    case types.ADMIN_CHANGE_PASSWORD_SET_ERROR:
+    return {
+      ...state,
+      changePassword: {
+        ...state.changePassword,
+        error: action.error,
+      },
+    };
+    case types.ADMIN_CHANGE_PASSWORD_HIDE:
+      return {
+        ...state,
+        changePassword: {
+          key: null,
+          username: null,
+          show: false,
+          password: '',
+          confirmPassword: '',
+          captcha: null,
+          error: null,
+        },
+      };
+
     case types.ADMIN_ADD_USER_SHOW:
       newAddUser = Object.assign({}, state.addUser, {show : true});
       return Object.assign({}, state, {
