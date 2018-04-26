@@ -1,10 +1,8 @@
-const METERS = '/assets/data/meters.geojson';
-    
 var api = require('./base');
 
 var MapsAPI = {
   getMetersLocations : function() {
-    return api.json(METERS);
+    return api.json('/action/spatial/meters', null, 'GET');
   },
   getGroups: function() {
     return api.json('/action/spatial/group', null, 'GET');
