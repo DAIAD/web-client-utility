@@ -143,6 +143,11 @@ var Dashboard = React.createClass({
     this.props.actions.unpin(request, this.props);
   },
 
+  _resolveMapCenter : function() {
+    const center = this.props.profile.utility.center;
+    return (center ? center.coordinates.reverse() : [38.36, -0.479]);
+  },
+
   createChartComponents : function (pinnedCharts) {
 
     var props = this.props;
@@ -225,6 +230,7 @@ var Dashboard = React.createClass({
          overlap = null;
          overlapping = false;
       }      
+
       var chart = (
         <Chart 
           {...defaults.chartProps}
@@ -350,12 +356,12 @@ var Dashboard = React.createClass({
          animate={false}
        />
      ) : null;
-    
+
      var map = (
       <Bootstrap.ListGroup fill>
         <Bootstrap.ListGroupItem>
           <Map
-            center={[38.36, -0.479]}
+            center={this._resolveMapCenter()}
             zoom={13}
             width='100%'
             height={400}
