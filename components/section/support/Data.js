@@ -1,5 +1,5 @@
 var React = require('react');
-var Select = require('react-select');
+var Select = require('react-select').default;
 var { connect } = require('react-redux');
 var $ = require('jquery');
 

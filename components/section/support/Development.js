@@ -1,5 +1,5 @@
 var React = require('react');
-var Select = require('react-select');
+var Select = require('react-select').default;
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
 var moment = require('moment');
@@ -164,7 +164,6 @@ var Development = React.createClass({
     var onChangeTimeline = function(value, label, index) {
       this.props.actions.getFeatures(this.props.query.timeline, value, 'Alicante');
     };
-    console.log('debug features:', this.props.debug.features);
 
     var map = (
       <Bootstrap.ListGroupItem>

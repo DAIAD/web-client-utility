@@ -8,7 +8,7 @@ var ReactRedux = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var DatetimeInput = require('react-datetime');
 var Select = require('react-controls/select-dropdown');
-var Select2 = require('react-select');
+var Select2 = require('react-select').default;
 var Switch = require('rc-switch');
 
 var toolbars = require('../toolbars');

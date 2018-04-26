@@ -2,7 +2,7 @@ var React = require('react');
 var Bootstrap = require('react-bootstrap');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-var Select = require('react-select');
+var Select = require('react-select').default;
 var Table = require('../../Table');
 
 var { getEvents, changeIndex, filterAccount, filterLevel, clearFilter } = require('../../../actions/LoggingActions');
@@ -45,7 +45,6 @@ var Logging = React.createClass({
   },
   
   render: function() {
-    console.log(this.props.logging);
     var tableFields = [{
         name: 'id',
         title: 'Section.Support.Logging.Table1.Id',

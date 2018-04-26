@@ -4,7 +4,7 @@ var { connect } = require('react-redux');
 var Bootstrap = require('react-bootstrap');
 var { Link } = require('react-router');
 
-var Select = require('react-select');
+var Select = require('react-select').default;
 var DateRangePicker = require('react-bootstrap-daterangepicker');
 var FilterTag = require('../chart/dimension/FilterTag');
 var Timeline = require('../Timeline');

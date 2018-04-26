@@ -1,5 +1,5 @@
 var React = require('react');
-var Select = require('react-select');
+var Select = require('react-select').default;
 var api = require('../api/base.js');
 
 var _onChange = function(e) {

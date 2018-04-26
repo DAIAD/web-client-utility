@@ -1,6 +1,6 @@
 var React = require('react');
 var bs = require('react-bootstrap');
-var Select = require('react-select');
+var Select = require('react-select').default;
 
 
 function SelectSavingsScenario (props) {

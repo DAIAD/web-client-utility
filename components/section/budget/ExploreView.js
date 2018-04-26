@@ -5,7 +5,7 @@ var echarts = require('react-echarts');
 var moment = require('moment');
 var { FormattedTime, FormattedDate } = require('react-intl');
 
-var Select = require('react-select');
+var Select = require('react-select').default;
 var Table = require('../../Table');
 var { Map, TileLayer, GeoJSON, DrawControl } = require('react-leaflet-wrapper');
 var WidgetRow = require('../../WidgetRow');
