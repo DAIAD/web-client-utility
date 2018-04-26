@@ -254,6 +254,29 @@ var _extractChartSeries = function(interval, data) {
   };
 };
 
+var _metersToFeatureCollection = function(meters) {
+  return {
+    type : 'FeatureCollection',
+    features : meters ? meters.map((m) => {
+      return {
+        'type' : 'Feature',
+        'geometry' : m.location,
+        'properties' : {
+          'key' : m.label,
+          'serial' : m.serial,
+          'registeredOn' : m.registeredOn,
+        }
+      };
+    }) : [],
+    crs : {
+      type : 'name',
+      properties : {
+        name : 'urn:ogc:def:crs:OGC:1.3:CRS84'
+      }
+    }
+  };
+}
+
 var mapReducer = function(state, action) {
   switch (action.type) {
     case types.MAP_TIMELINE_REQUEST:
@@ -569,7 +592,7 @@ var map = function(state, action) {
     case types.MAP_METERS_LOCATIONS_RESPONSE:
       if (action.errors) return state;
       return Object.assign({}, state, {
-        metersLocations: action.data
+        metersLocations: _metersToFeatureCollection(action.data.meters),
       });
 
     default:
