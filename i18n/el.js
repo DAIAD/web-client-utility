@@ -21,7 +21,20 @@
 			"username":"Διεύθυνση ηλ. ταχ.",
 			"password":"Κωδικός πρόσβασης"
 		}
-	},
+  },
+  "ChangePasswordForm": {
+    "title":"Reset password",
+    "password":"Password",
+    "password-confirm":"Confirm password",
+    "cancel":"Cancel",
+    "update":"Update",
+    "Errors": {
+      "noUsername": "No user selected",
+      "noPassword": "No password provided.",
+      "passwordMismatch": "Password mismatch. Please make sure you entered the same password twice",
+      "passwordTooShort": "The password is too short. At least 8 characters required"
+    }
+  },
   "PasswordResetForm": {
     "title": "Ενημέρωση Κωδικού",
     "placehoder": {
@@ -554,7 +567,9 @@
     },
     "PasswordErrorCode.INVALID_LENGTH": "Password length must be at least 8 characters long.",
     "PasswordErrorCode.VERIFICATION_FAILED": "The two password values do not match.",
-    "PasswordErrorCode.CAPTCHA_ERROR": "CAPTCHA value is required."
+    "PasswordErrorCode.CAPTCHA_ERROR": "CAPTCHA value is required.",
+    "PasswordErrorCode.WEAK_PASSWORD": "The password you provided is weak. At least 8 characters required",
+    "CaptchaErrorCode.CAPTCHA_VERIFICATION_ERROR": "Captcha verification failed. Please confirm you are a human being"
   }, 
   "Success": {
     "UserSuccess.USER_ADDED_WHITELIST" : "Ο χρήστης εγγράφηκε επιτυχώς στη user white list.",
@@ -574,6 +589,7 @@
     "Europe/Athens": "Αθήνα"
   },
   "Gender" : {
+    "UNDEFINED": "-",
     "FEMALE": "Female",
     "MALE": "Male"
   },
