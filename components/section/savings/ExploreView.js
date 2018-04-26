@@ -40,7 +40,6 @@ var SavingsPotentialExplore = React.createClass({
         </bs.Panel>
       );
     } 
-    console.log('clusters:', clusters);
   
     const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential, numberOfConsumers, status } = scenario; 
     const completed = processingEndOn != null;
