@@ -1,29 +1,27 @@
-
 var _ = require('lodash');
 var moment = require('moment');
 
 var React = require('react');
-var Bootstrap = require('react-bootstrap');
 var ReactRedux = require('react-redux');
-var Select = require('react-controls/select-dropdown');
+var Select = require('react-select').default;
 
 var PropTypes = React.PropTypes;
-var {configPropType} = require('../prop-types');
+var { configPropType } = require('../prop-types');
 
 var MeasurementsReportPanel = React.createClass({
   propTypes: {
     config: configPropType,
   },
 
-  childContextTypes: {config: configPropType},
+  childContextTypes: { config: configPropType },
 
-  getChildContext: function() {
-    return {config: this.props.config};
+  getChildContext: function () {
+    return { config: this.props.config };
   },
 
   render: function () {
     var pane = require('./reports-measurements/pane');
-    var {config} = this.props;
+    var { config } = this.props;
 
     var ready = (
       !_.isEmpty(config) && !_.isEmpty(config.reports) && !_.isEmpty(config.utility)
@@ -41,85 +39,6 @@ var MeasurementsReportPanel = React.createClass({
   },
 });
 
-var MeasurementsReportSection = React.createClass({
-  propTypes: {
-    config: configPropType,
-    field: PropTypes.string,
-    levels: PropTypes.arrayOf(PropTypes.string),
-  },
-
-  childContextTypes: {config: configPropType},
-
-  getChildContext: function() {
-    return {config: this.props.config};
-  },
-
-  getDefaultProps: function () {
-    return {
-      field: 'volume',
-      levels: ['day', 'week'],
-    };
-  },
-
-  getInitialState: function () {
-    return {
-      level: 'week',
-      reportName: 'avg-daily-avg',
-    };
-  },
-
-  render: function () {
-    var reportPane = require('./reports-measurements/pane');
-    var {config, field, levels} = this.props;
-    var {level, reportName} = this.state;
-
-    var ready = (
-      !_.isEmpty(config) && !_.isEmpty(config.reports) && !_.isEmpty(config.utility)
-    );
-    if (!ready) {
-      return (<div>Loading configuration...</div>);
-    }
-
-    var reportConfig = config.reports.byType.measurements;
-    var reportOptions = _.values(reportConfig.levels)
-      .filter(l => (levels.indexOf(l.name) >= 0))
-      .map(l => ({
-        group: l.description,
-        options: new Map(_.values(
-          _.mapValues(l.reports, (r, k) => ([[l.name, k].join('/'), r.title]))
-        ))
-      }));
-
-    var selectReport = (
-      <Select className="select-report"
-        value={[level, reportName].join('/')}
-        onChange={this._setReport}
-        options={reportOptions}
-       >
-      </Select>
-    );
-
-    var reportProps = {field, level, reportName};
-    return (
-      <section className="reports reports-measurements">
-        <h2>{reportConfig.fields[field].title}</h2>
-        <div className="legend">
-          <span>Choose report:</span>&nbsp;
-          {selectReport}
-        </div>
-        <reportPane.Form {...reportProps} inlineForm={false} />
-        <reportPane.Chart {...reportProps} />
-        <reportPane.Info {...reportProps} />
-      </section>
-    );
-  },
-
-  _setReport: function (name) {
-    var [level, reportName] = name.split('/');
-    this.setState({level, reportName});
-  },
-});
-
 var SystemReportsSection = React.createClass({
   propTypes: {
     config: configPropType,
@@ -127,14 +46,14 @@ var SystemReportsSection = React.createClass({
     reportName: PropTypes.string,
   },
 
-  childContextTypes: {config: configPropType},
+  childContextTypes: { config: configPropType },
 
-  getChildContext: function() {
-    return {config: this.props.config};
+  getChildContext: function () {
+    return { config: this.props.config };
   },
 
   render: function () {
-    var {config, level, reportName} = this.props;
+    var { config, level, reportName } = this.props;
     var _config = config.reports.byType.system;
 
     if (_.isEmpty(config)) {
@@ -176,15 +95,15 @@ var Overview = React.createClass({
     now: PropTypes.number,
   },
 
-  childContextTypes: {config: configPropType},
+  childContextTypes: { config: configPropType },
 
-  getChildContext: function() {
-    return {config: this.props.config};
+  getChildContext: function () {
+    return { config: this.props.config };
   },
 
   render: function () {
     var overview = require('./reports-measurements/overview');
-    var {config, now} = this.props;
+    var { config, now } = this.props;
 
     var ready = (
       !_.isEmpty(config) &&
@@ -215,16 +134,16 @@ var PilotReports = React.createClass({
     config: configPropType,
   },
 
-  childContextTypes: {config: configPropType},
+  childContextTypes: { config: configPropType },
 
-  getChildContext: function() {
-    return {config: this.props.config};
+  getChildContext: function () {
+    return { config: this.props.config };
   },
 
   render: function () {
     var reports = require('./reports-measurements/pilot-reports');
 
-    var {config} = this.props;
+    var { config } = this.props;
     var ready = (
       !_.isEmpty(config) &&
       !_.isEmpty(config.reports) && !_.isEmpty(config.utility) && !_.isEmpty(config.overview)
@@ -248,7 +167,7 @@ var PilotReports = React.createClass({
 //
 
 Overview = ReactRedux.connect(
-  (state) => ({now: state.overview.referenceTime})
+  (state) => ({ now: state.overview.referenceTime })
 )(Overview);
 
 //
@@ -256,7 +175,6 @@ Overview = ReactRedux.connect(
 //
 
 module.exports = {
-  MeasurementsReportSection,
   MeasurementsReportPanel,
   SystemReportsSection,
   Overview,

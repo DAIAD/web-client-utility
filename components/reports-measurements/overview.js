@@ -1,17 +1,16 @@
-
 var moment = require('moment');
 
 var React = require('react');
 var Bootstrap = require('react-bootstrap');
 var ReactRedux = require('react-redux');
-var Select = require('react-controls/select-dropdown');
+var Select = require('react-select').default;
 var DatetimeInput = require('react-datetime');
 
-var {Panel, PanelGroup, ListGroup, ListGroupItem, Button} = Bootstrap;
+var { Panel, PanelGroup, ListGroup, ListGroupItem, Button } = Bootstrap;
 var PropTypes = React.PropTypes;
 
-var {populationPropType, reportPropType, configPropType} = require('../../prop-types');
-var {ReportByDay, ReportByWeek, ReportByMonth, ReportByYear} = require('./common-reports');
+var { populationPropType, reportPropType, configPropType } = require('../../prop-types');
+var { ReportByDay, ReportByWeek, ReportByMonth, ReportByYear } = require('./common-reports');
 
 var commonPropTypes = {
   now: PropTypes.number.isRequired,
@@ -61,16 +60,16 @@ var OverviewPanel = React.createClass({
   },
 
   render: function () {
-    var {itemSpecs} = this.constructor;
-    var {now, field, source, uom, reports, reportKey, target} = this.props;
+    var { itemSpecs } = this.constructor;
+    var { now, field, source, uom, reports, reportKey, target } = this.props;
 
     var reportProps = {
       now,
       source,
       field,
       uom,
-      reportKey: !reportKey?
-        (target? target.toString().toLowerCase() : 'utility') : reportKey,
+      reportKey: !reportKey ?
+        (target ? target.toString().toLowerCase() : 'utility') : reportKey,
       target,
     };
 
@@ -128,10 +127,10 @@ var OverviewPanelGroup = React.createClass({
   },
 
   render: function () {
-    var {now, field, source, uom, reports, title} = this.props;
+    var { now, field, source, uom, reports, title } = this.props;
     var visible = (k) => (this.state.activeKey == k);
 
-    var commonProps = {source, field, uom, now};
+    var commonProps = { source, field, uom, now };
 
     var reportProps = {
       utility: {
@@ -197,7 +196,7 @@ var OverviewPanelGroup = React.createClass({
 
   _selectPanel: function (key) {
     if (this.state.activeKey != key)
-      this.setState({activeKey: key});
+      this.setState({ activeKey: key });
     return true;
   },
 });
@@ -210,13 +209,13 @@ var Form = React.createClass({
       datetimeProps: {
         dateFormat: 'D MMM[,] YYYY',
         timeFormat: null,
-        inputProps: {size: 10},
+        inputProps: { size: 10 },
       },
     },
 
-    _propsToState: function ({now, field, source}) {
+    _propsToState: function ({ now, field, source }) {
       // Reset state according to newly received props
-      return {now, field, source, submitted: false};
+      return { now, field, source, submitted: false };
     },
   },
 
@@ -238,11 +237,10 @@ var Form = React.createClass({
   },
 
   render: function () {
-    var {defaults} = this.constructor;
-    var {config} = this.context;
-    var {source, field, now, submitted} = this.state;
-
-    var {fields, sources} = config.reports.byType.measurements;
+    var { defaults } = this.constructor;
+    var { config } = this.context;
+    var { source, field, now, submitted } = this.state;
+    var { fields, sources } = config.reports.byType.measurements;
 
     var sourceOptions = new Map(
       _.values(
@@ -252,48 +250,51 @@ var Form = React.createClass({
     var fieldOptions = new Map(
       _.values(
         _.mapValues(
-          fields, (y, k) => ((y.sources.indexOf(source) < 0)? null : [k, y.name])
+          fields, (y, k) => ((y.sources.indexOf(source) < 0) ? null : [k, y.name])
         ))
-      .filter(y => y)
+        .filter(y => y)
     );
 
-    return(
+    return (
       <form className="form-inline report-form">
-
         <div className="form-group" title="Select source">
           <Select className="select-source"
             value={source}
-            onChange={(val) => (this.setState({source: val}), false)}
-            options={sourceOptions}
-           />
+            options={Array.from(sourceOptions.entries()).map(([k, v]) => ({ value: k, label: v }))}
+            searchable={false}
+            clearable={false}
+            onChange={(o) => (this.setState({ source: o.value }), false)}
+          />
         </div>
 
         <div className="form-group">
           <Select className="select-field"
             value={field}
-            onChange={(val) => (this.setState({field: val}), false)}
-            options={fieldOptions}
-           />
+            options={Array.from(fieldOptions.entries()).map(([k, v]) => ({ value: k, label: v }))}
+            searchable={false}
+            clearable={false}
+            onChange={(o) => (this.setState({ field: o.value }), false)}
+          />
         </div>
 
         <div className="form-group">
           <label>Use reference time:</label>
           <DatetimeInput {...defaults.datetimeProps}
             value={now}
-            onChange={(m) => (this.setState({now: m.valueOf()}), false)}
-           />
+            onChange={(m) => (this.setState({ now: m.valueOf() }), false)}
+          />
         </div>
 
         <div className="form-group submit-buttons">
           <Button className="submit-btn" bsStyle="default" title="Export to PDF"
             onClick={this._exportToPdf} disabled={true}
-           >
+          >
             <i className="fa fa-send-o"></i>&nbsp; Export
           </Button>
           <Button className="submit-btn" bsStyle="primary" title="Re-generate reports"
             onClick={this._submit} disabled={submitted}
-           >
-            <i className={"fa fa-refresh" + (submitted? ' fa-spin': '')}></i>&nbsp; Refresh
+          >
+            <i className={"fa fa-refresh" + (submitted ? ' fa-spin' : '')}></i>&nbsp; Refresh
           </Button>
         </div>
       </form>
@@ -320,7 +321,7 @@ var Form = React.createClass({
     }
 
     this.props.submit(this.state.source, this.state.field, t.valueOf());
-    this.setState({submitted: true});
+    this.setState({ submitted: true });
     return false;
   },
 });
@@ -330,11 +331,11 @@ var Form = React.createClass({
 //
 
 var actions = require('../../actions/overview.js');
-var {connect} = ReactRedux;
+var { connect } = ReactRedux;
 
 var mapStateToProps = function (state, ownProps) {
-  var {fields} = state.config.reports.byType.measurements;
-  var {field, referenceTime, source, requested} = state.overview;
+  var { fields } = state.config.reports.byType.measurements;
+  var { field, referenceTime, source, requested } = state.overview;
   return {
     source,
     field,

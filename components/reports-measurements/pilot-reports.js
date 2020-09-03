@@ -1,20 +1,19 @@
-
 var _ = require('lodash');
 var moment = require('moment');
 var sprintf = require('sprintf');
 
 var React = require('react');
 var Bootstrap = require('react-bootstrap');
-var {connect} = require('react-redux');
-var Select = require('react-controls/select-dropdown');
+var { connect } = require('react-redux');
+var Select = require('react-select').default;
 
-var {Panel, ListGroup, ListGroupItem, Button} = Bootstrap;
+var { Panel, ListGroup, ListGroupItem, Button } = Bootstrap;
 var PropTypes = React.PropTypes;
 
-var {generateTimestamps} = require('../../helpers/timestamps');
-var {product} = require('../../helpers/array-funcs');
+var { generateTimestamps } = require('../../helpers/timestamps');
+var { product } = require('../../helpers/array-funcs');
 var population = require('../../model/population');
-var {configPropType} = require('../../prop-types');
+var { configPropType } = require('../../prop-types');
 var Report = require('./sliding-report');
 
 var Form = React.createClass({
@@ -24,15 +23,15 @@ var Form = React.createClass({
   },
 
   statics: {
-    _computeNextState: function (props, {config}) {
-      var {period} = config.trials;
+    _computeNextState: function (props, { config }) {
+      var { period } = config.trials;
       var start = moment(period.start).utc();
       var end = moment(start).add(period.duration, 'month');
-      return {start, end, now: props.defaultNow || start};
+      return { start, end, now: props.defaultNow || start };
     },
   },
 
-  contextTypes: {config: configPropType},
+  contextTypes: { config: configPropType },
 
   getInitialState: function () {
     var computedState = this.constructor._computeNextState(this.props, this.context);
@@ -53,7 +52,7 @@ var Form = React.createClass({
   },
 
   render: function () {
-    var {now, start, end} = this.state;
+    var { now, start, end } = this.state;
 
     var monthOptions = new Map(
       Array.from(generateTimestamps(start, end, 'month'))
@@ -67,14 +66,17 @@ var Form = React.createClass({
         <div className="form-group">
           <label>Select month:</label>&nbsp;
           <Select className="select-month"
-            value={now.valueOf().toString()} options={monthOptions}
-            onChange={(t) => (this.setState({now: moment(Number(t))}))}
+            value={now.valueOf().toString()}
+            options={Array.from(monthOptions.entries()).map(([k, v]) => ({ value: k, label: v }))}
+            searchable={false}
+            clearable={false}
+            onChange={(o) => (this.setState({ now: moment(Number(o.value)) }))}
           />
         </div>
         <div className="form-group submit-buttons">
           <Button bsStyle="primary"
             onClick={() => (this.props.setReferenceTime(now.valueOf()))}
-           >
+          >
             <i className="fa fa-fw fa-refresh"></i>&nbsp;Refresh
           </Button>
         </div>
@@ -91,18 +93,18 @@ var ReportsPanel = React.createClass({
     now: PropTypes.number,
   },
 
-  contextTypes: {config: configPropType},
+  contextTypes: { config: configPropType },
 
   render: function () {
-    var {config} = this.context;
-    var {now} = this.props;
+    var { config } = this.context;
+    var { now } = this.props;
 
     if (now == null)
       return (<div>No reference time yet...</div>);
 
-    var {sources} = config.reports.byType.measurements;
-    var {reports, population: targetNames} = config.trials;
-    var {clusters} = config.utility;
+    var { sources } = config.reports.byType.measurements;
+    var { reports, population: targetNames } = config.trials;
+    var { clusters } = config.utility;
 
     var targets = targetNames.map(name => {
       if (name.startsWith('CLUSTER:')) {
@@ -191,4 +193,4 @@ ReportsPanel = connect(
 // Export
 //
 
-module.exports = {ReportsPanel, Form};
+module.exports = { ReportsPanel, Form };
