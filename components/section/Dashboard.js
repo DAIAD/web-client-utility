@@ -6,19 +6,19 @@ var { Link } = require('react-router');
 var Counter = require('../Counter');
 
 var Chart = require('../reports-measurements/chart');
-var {configPropType} = require('../../prop-types');
+var { configPropType } = require('../../prop-types');
 var moment = require('moment');
 var FilterTag = require('../chart/dimension/FilterTag');
 var Timeline = require('../Timeline');
-var {FormattedTime} = require('react-intl');
+var { FormattedTime } = require('react-intl');
 
-var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl } = require('react-leaflet-wrapper');
+var { Map, TileLayer, GeoJSON, Choropleth, InfoControl } = require('react-leaflet-wrapper');
 
 var WidthProvider = require('react-grid-layout').WidthProvider;
 var ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
 //var Maximizable = require('../Maximizable');
 
-var { getTimeline, getFeatures, getCounters, getProfileLayout, fetchFavouriteQueries, saveLayout, unpin, getChart } = require('../../actions/DashboardActions');
+var { getFeatures, getCounters, getProfileLayout, fetchFavouriteQueries, saveLayout, unpin } = require('../../actions/DashboardActions');
 var { getMetersLocations } = require('../../actions/MapActions');
 
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
@@ -27,131 +27,135 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 var defaultChartTitle = "Last 30 Days Average Consumption";
 var defaultMapTitle = "Last 30 Days Consumption";
 
-var getDefaultChart = function(props) {
+var getDefaultChart = function (props) {
   var defaultChart = {
     id: 100000,
-    title:defaultChartTitle,
-    type:"CHART",
-    tags:"Chart - Meter",
-    reportName:"avg",
-    level:"day",
-    field:"volume",
-    queries:[{
-      time:{
-        type:"ABSOLUTE",
-        granularity:"DAY",
-        start:moment().subtract(30, 'day').valueOf(),
-        end:moment().valueOf(),
-        durationTimeUnit:"HOUR"},
-      population:[{
-        type:"UTILITY",
-        label:"UTILITY:" + props.profile.utility.key,
-        ranking:null,
-        utility:props.profile.utility.key}],
-      source:"METER",
-      metrics:["AVERAGE"]
+    title: defaultChartTitle,
+    type: "CHART",
+    tags: "Chart - Meter",
+    reportName: "avg",
+    level: "day",
+    field: "volume",
+    queries: [{
+      time: {
+        type: "ABSOLUTE",
+        granularity: "DAY",
+        start: moment().subtract(30, 'day').valueOf(),
+        end: moment().valueOf(),
+        durationTimeUnit: "HOUR"
+      },
+      population: [{
+        type: "UTILITY",
+        label: "UTILITY:" + props.profile.utility.key,
+        ranking: null,
+        utility: props.profile.utility.key
+      }],
+      source: "METER",
+      metrics: ["AVERAGE"]
     }]
   };
   return defaultChart;
 }
 
-var getDefaultMap = function(props) {
+var getDefaultMap = function (props) {
   var defaultMap = {
     id: 100001,
-    title:defaultMapTitle,
-    type:"MAP",
-    tags:"Map - Meter",
-    queries:[{
-      time:{
-        type:"ABSOLUTE",
-        granularity:"DAY",
-        start:moment().subtract(350, 'day').valueOf(),
-        end:moment().valueOf(),
-        durationTimeUnit:"HOUR"},
-      population:[{
-        type:"UTILITY",
-        label:"Utility",
-        ranking:null,
-        utility:props.profile.utility.key}],
-      source:"METER",
-      metrics:["SUM"]
+    title: defaultMapTitle,
+    type: "MAP",
+    tags: "Map - Meter",
+    queries: [{
+      time: {
+        type: "ABSOLUTE",
+        granularity: "DAY",
+        start: moment().subtract(350, 'day').valueOf(),
+        end: moment().valueOf(),
+        durationTimeUnit: "HOUR"
+      },
+      population: [{
+        type: "UTILITY",
+        label: "Utility",
+        ranking: null,
+        utility: props.profile.utility.key
+      }],
+      source: "METER",
+      metrics: ["SUM"]
     }]
   };
   return defaultMap;
 }
 
-var _getTimelineValues = function(timeline) {
-  if(timeline) {
+var _getTimelineValues = function (timeline) {
+  if (timeline) {
     return timeline.getTimestamps();
   }
   return [];
 };
 
-var _getTimelineLabels = function(timeline) {
-  if(timeline) {
-    return timeline.getTimestamps().map(function(timestamp) {
+var _getTimelineLabels = function (timeline) {
+  if (timeline) {
+    return timeline.getTimestamps().map(function (timestamp) {
       return (
-        <FormattedTime  
+        <FormattedTime
           value={new Date(timestamp)}
           day='numeric'
           month='numeric'
-          year='numeric'/>
+          year='numeric' />
       );
     });
   }
   return [];
 };
 
-var _onChangeTimeline = function(title, id, value, label, index) {
+var _onChangeTimeline = function (title, id, value, label, index) {
   this.props.actions.getFeatures(index, value, null, id);
 };
 
 var Dashboard = React.createClass({
 
-  _disabledActionHandler: function(e) {
+  _disabledActionHandler: function (e) {
     e.stopPropagation();
     e.preventDefault();
   },
 
   contextTypes: {
     intl: React.PropTypes.object,
-    config: configPropType,     
+    config: configPropType,
   },
 
-  componentWillMount: function() {
-    this.props.actions.getProfileLayout();  
+  componentWillMount: function () {
+    this.props.actions.getProfileLayout();
     //fetch meter geojson data
     if (!this.props.metersLocations) {
       this.props.actions.getMetersLocations();
     }
-    
+
   },
-  componentDidMount : function() {
+  componentDidMount: function () {
 
     this.props.actions.fetchFavouriteQueries(this.props);
     this.props.actions.getCounters();
   },
 
-  toggleSize : function() {
+  toggleSize: function () {
     //console.log(this);
   },
 
-  _unpin : function(fav, e) {
-    var request =  {
-      'namedQuery' : fav
+  _unpin: function (fav, e) {
+    var request = {
+      'namedQuery': fav
     };
     this.props.actions.unpin(request, this.props);
   },
 
-  _resolveMapCenter : function() {
+  _resolveMapCenter: function () {
     const center = this.props.profile.utility.center;
     return (center ? center.coordinates.reverse() : [38.36, -0.479]);
   },
 
-  createChartComponents : function (pinnedCharts) {
+  createChartComponents: function (pinnedCharts) {
 
     var props = this.props;
-    var defaults= {
+    var defaults = {
       chartProps: {
         width: 450,
         height: 450,
@@ -160,52 +164,52 @@ var Dashboard = React.createClass({
 
     var chPanels = [];
     pinnedCharts.push(getDefaultChart(this.props));
-    
-    for(var i=0; i<pinnedCharts.length; i++){
-    
-      var pCharts = props.chart.length > 0 ? 
-          props.chart.filter(function(propChart) { return propChart.id === pinnedCharts[i].id; }) : [];
-          
+
+    for (var i = 0; i < pinnedCharts.length; i++) {
+
+      var pCharts = props.chart.length > 0 ?
+        props.chart.filter(function (propChart) { return propChart.id === pinnedCharts[i].id; }) : [];
+
       var pChart = pCharts[0];
 
-      if(!pChart){
+      if (!pChart) {
         return [];
-      }  
+      }
 
       var unpinButton = pChart.id === 100000 ? null : (
-        <Bootstrap.Button 
-            bsStyle='default'
-            className='btn-circle'
-            onClick={this._unpin.bind(this, pChart)}
-            type='button'
-            >
-            <i className='fa fa-remove fa-fw'></i>
-          </Bootstrap.Button>
+        <Bootstrap.Button
+          bsStyle='default'
+          className='btn-circle'
+          onClick={this._unpin.bind(this, pChart)}
+          type='button'
+        >
+          <i className='fa fa-remove fa-fw'></i>
+        </Bootstrap.Button>
       );
-//maximize button
-//        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-//          <Bootstrap.Button  
-//            bsStyle='default' 
-//            className='btn-circle'
-//            onClick={this.toggleSize}
-//            >
-//            <i className='fa fa-arrows-alt fa-fw'></i>
-//          </Bootstrap.Button>
-//        </span>     
+      //maximize button
+      //        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
+      //          <Bootstrap.Button  
+      //            bsStyle='default' 
+      //            className='btn-circle'
+      //            onClick={this.toggleSize}
+      //            >
+      //            <i className='fa fa-arrows-alt fa-fw'></i>
+      //          </Bootstrap.Button>
+      //        </span>     
       var chartTitle = (
-      <span>
-        <i key={pChart.title} className='fa fa-bar-chart fa-fw'></i>
-        <span style={{ paddingLeft: 4 }}>{pChart.title}</span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          {unpinButton}
-        </span>
+        <span>
+          <i key={pChart.title} className='fa fa-bar-chart fa-fw'></i>
+          <span style={{ paddingLeft: 4 }}>{pChart.title}</span>
+          <span style={{ float: 'right', marginTop: -3, marginLeft: 5 }}>
+            {unpinButton}
+          </span>
 
-      </span>
+        </span>
       );
 
       //todo - in case of overlaping query, define way of showing interval
-      var intervalLabel =' ... ';
-      if(pChart.data) {
+      var intervalLabel = ' ... ';
+      if (pChart.data) {
         var start = moment(pChart.data[0].timespan[0]).format('DD/MM/YYYY');
         var end = moment(pChart.data[0].timespan[1]).format('DD/MM/YYYY');
         intervalLabel = start + ' - ' + end;
@@ -214,7 +218,7 @@ var Dashboard = React.createClass({
         }
       }
 
-      var chartFilterTags =[];
+      var chartFilterTags = [];
       chartFilterTags.push(
         <FilterTag key='time' text={intervalLabel} icon='calendar' />
       );
@@ -223,19 +227,19 @@ var Dashboard = React.createClass({
       );
 
       var overlap, overlapping;
-      if(pinnedCharts[i].overlap){
-         overlap = {value:pinnedCharts[i].overlap, label: pinnedCharts[i].overlap};
-         overlapping = true;
+      if (pinnedCharts[i].overlap) {
+        overlap = { value: pinnedCharts[i].overlap, label: pinnedCharts[i].overlap };
+        overlapping = true;
       } else {
-         overlap = null;
-         overlapping = false;
-      }      
+        overlap = null;
+        overlapping = false;
+      }
 
       var chart = (
-        <Chart 
+        <Chart
           {...defaults.chartProps}
           width={this.chartEl && this.chartEl.clientWidth || '100%'}
-          draw={pChart.draw} 
+          draw={pChart.draw}
           field={'volume'}
           level={pinnedCharts[i].level}
           reportName={pinnedCharts[i].reportName}
@@ -246,75 +250,75 @@ var Dashboard = React.createClass({
           overlapping={overlapping}
           overlap={overlap}
         />
-      ); 
-     var link = (
-       <Link className='pull-right' to='/analytics/panel' style={{ paddingLeft : 7, paddingTop: 12 }}>View Chart Analytics</Link>
-     ); 
-      var chartPanel = (
-      <Bootstrap.Panel header={chartTitle}>
-        <Bootstrap.ListGroup fill>
-          <Bootstrap.ListGroupItem className="report-chart-wrapper">
-          {chart}
-          </Bootstrap.ListGroupItem>
-          <Bootstrap.ListGroupItem className='clearfix'>
-            <div className='pull-left'>
-              {chartFilterTags}
-            </div>
-            <span style={{ paddingLeft : 7}}> </span>
-           {link}
-          </Bootstrap.ListGroupItem>
-        </Bootstrap.ListGroup>
-      </Bootstrap.Panel>
       );
-      var cPanelWithKey = {panel:chartPanel, key:pChart.title};
+      var link = (
+        <Link className='pull-right' to='/analytics/panel' style={{ paddingLeft: 7, paddingTop: 12 }}>View Chart Analytics</Link>
+      );
+      var chartPanel = (
+        <Bootstrap.Panel header={chartTitle}>
+          <Bootstrap.ListGroup fill>
+            <Bootstrap.ListGroupItem className="report-chart-wrapper">
+              {chart}
+            </Bootstrap.ListGroupItem>
+            <Bootstrap.ListGroupItem className='clearfix'>
+              <div className='pull-left'>
+                {chartFilterTags}
+              </div>
+              <span style={{ paddingLeft: 7 }}> </span>
+              {link}
+            </Bootstrap.ListGroupItem>
+          </Bootstrap.ListGroup>
+        </Bootstrap.Panel>
+      );
+      var cPanelWithKey = { panel: chartPanel, key: pChart.title };
       chPanels.push(cPanelWithKey);
     }
 
     return chPanels;
   },
 
-  createMapComponents : function (pinnedMaps) {
+  createMapComponents: function (pinnedMaps) {
 
     var props = this.props;
     var mPanels = [];
     pinnedMaps.push(getDefaultMap(this.props));
-    for(var i=0; i<pinnedMaps.length; i++){
+    for (var i = 0; i < pinnedMaps.length; i++) {
 
       //todo - merge returned pMap with its corresponding pinned object 
       //to keep info about timespan and source for the tags
-      var pMaps = props.map.length > 0 ? 
-          props.map.filter(function(propMap) { return propMap.id === pinnedMaps[i].id; }) : [];
+      var pMaps = props.map.length > 0 ?
+        props.map.filter(function (propMap) { return propMap.id === pinnedMaps[i].id; }) : [];
 
       var pMap = pMaps[0];
 
-      if(!pMap){
+      if (!pMap) {
         return [];
       }
 
       var unpinButton = pMap.id === 100001 ? null : (
-        <Bootstrap.Button 
-            bsStyle='default'
-            className='btn-circle'
-            onClick={this._unpin.bind(this, pMap)}
-            type='button'
-            >
-            <i className='fa fa-remove fa-fw'></i>
-          </Bootstrap.Button>
+        <Bootstrap.Button
+          bsStyle='default'
+          className='btn-circle'
+          onClick={this._unpin.bind(this, pMap)}
+          type='button'
+        >
+          <i className='fa fa-remove fa-fw'></i>
+        </Bootstrap.Button>
       );
-  
+
       var mapTitle = (
-      <span>
-        <i className='fa fa-map fa-fw'></i>
-        <span style={{ paddingLeft: 4 }}>{pMap? pMap.title : 'Loading...'}</span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          {unpinButton}
-        </span>
+        <span>
+          <i className='fa fa-map fa-fw'></i>
+          <span style={{ paddingLeft: 4 }}>{pMap ? pMap.title : 'Loading...'}</span>
+          <span style={{ float: 'right', marginTop: -3, marginLeft: 5 }}>
+            {unpinButton}
+          </span>
 
-      </span>
+        </span>
       );
 
-      var intervalLabel ='';
-      if(props.interval) {
+      var intervalLabel = '';
+      if (props.interval) {
         var start = moment(pinnedMaps[i].queries[0].time.start).format('DD/MM/YYYY');
         var end = moment(pinnedMaps[i].queries[0].time.end).format('DD/MM/YYYY');
         intervalLabel = start + ' - ' + end;
@@ -335,116 +339,116 @@ var Dashboard = React.createClass({
       mapFilterTags.push(
         <FilterTag key='source' text='Meter' icon='database' />
       );
-     
-     var link = (
-       <Link className='pull-right' to='analytics/map' style={{ paddingLeft : 7, paddingTop: 12 }}>View Map Analytics</Link>
-     );
-    
-     const timelineMin = pMap && pMap.timeline && pMap.timeline.min || 0;
-     const timelineMax = pMap && pMap.timeline && pMap.timeline.max || 0;
-     
-     var timelineLabels =_getTimelineLabels(pMap.timeline);
-     var timelineValues =_getTimelineValues(pMap.timeline);
 
-     var timeline = timelineLabels.length>0? (
-       <Timeline   
-         onChange={_onChangeTimeline.bind(this, pMap.title, pMap.id)}
-         labels={pMap ? timelineLabels : []}
-         values={pMap ? timelineValues : []}
-         defaultIndex={pMap ? pMap.index : 0}
-         speed={1000}
-         animate={false}
-       />
-     ) : null;
+      var link = (
+        <Link className='pull-right' to='analytics/map' style={{ paddingLeft: 7, paddingTop: 12 }}>View Map Analytics</Link>
+      );
 
-     var map = (
-      <Bootstrap.ListGroup fill>
-        <Bootstrap.ListGroupItem>
-          <Map
-            center={this._resolveMapCenter()}
-            zoom={13}
-            width='100%'
-            height={400}
+      const timelineMin = pMap && pMap.timeline && pMap.timeline.min || 0;
+      const timelineMax = pMap && pMap.timeline && pMap.timeline.max || 0;
+
+      var timelineLabels = _getTimelineLabels(pMap.timeline);
+      var timelineValues = _getTimelineValues(pMap.timeline);
+
+      var timeline = timelineLabels.length > 0 ? (
+        <Timeline
+          onChange={_onChangeTimeline.bind(this, pMap.title, pMap.id)}
+          labels={pMap ? timelineLabels : []}
+          values={pMap ? timelineValues : []}
+          defaultIndex={pMap ? pMap.index : 0}
+          speed={1000}
+          animate={false}
+        />
+      ) : null;
+
+      var map = (
+        <Bootstrap.ListGroup fill>
+          <Bootstrap.ListGroupItem>
+            <Map
+              center={this._resolveMapCenter()}
+              zoom={13}
+              width='100%'
+              height={400}
             >
-            <TileLayer />
-            <InfoControl position='topright'> 
-              <Choropleth
-                name='Areas'
-                data={pMap ? pMap.features : null}
-                legend={timelineMax === 0 ? null : 'bottomright'}
-                valueProperty='value'
-                scale={['white', 'red']}
-                limits={[timelineMin, timelineMax]}
-                steps={6}
-                mode='e'
-                infoContent={feature => feature ? 
-                  <div>
-                    <h5>{feature.properties.label}</h5>
-                    <span>{feature.properties.value}</span>
-                  </div> 
+              <TileLayer />
+              <InfoControl position='topright'>
+                <Choropleth
+                  name='Areas'
+                  data={pMap ? pMap.features : null}
+                  legend={timelineMax === 0 ? null : 'bottomright'}
+                  valueProperty='value'
+                  scale={['white', 'red']}
+                  limits={[timelineMin, timelineMax]}
+                  steps={6}
+                  mode='e'
+                  infoContent={feature => feature ?
+                    <div>
+                      <h5>{feature.properties.label}</h5>
+                      <span>{feature.properties.value}</span>
+                    </div>
                     : <div><h5>Hover over an area...</h5></div>
                   }
-                highlightStyle={{ weight: 4 }}
+                  highlightStyle={{ weight: 4 }}
+                  style={{
+                    fillColor: "#ffff00",
+                    color: "#000",
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.5
+                  }}
+                />
+              </InfoControl>
+              <GeoJSON
+                name='Meters'
+                data={this.props.metersLocations}
+                popupContent={feature =>
+                  <div>
+                    <h5>Serial:</h5>
+                    <h5>{feature.properties.serial}</h5>
+                  </div>
+                }
+                circleMarkers
                 style={{
-                  fillColor: "#ffff00",
+                  radius: 8,
+                  fillColor: "#ff7800",
                   color: "#000",
-                  weight: 3,
+                  weight: 1,
                   opacity: 1,
-                  fillOpacity: 0.5
+                  fillOpacity: 0.8
                 }}
               />
-            </InfoControl>
-            <GeoJSON
-              name='Meters'
-              data={this.props.metersLocations}
-              popupContent={feature => 
-                <div>
-                  <h5>Serial:</h5>
-                  <h5>{feature.properties.serial}</h5>
-                </div>
-                }
-              circleMarkers
-              style={{
-                radius: 8,
-                fillColor: "#ff7800",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-              }}
-            />
-          </Map>
-        </Bootstrap.ListGroupItem>
-        <Bootstrap.ListGroupItem>
-          {timeline}
-        </Bootstrap.ListGroupItem>
-        <Bootstrap.ListGroupItem className='clearfix'>
-          <div className='pull-left'>
-            {mapFilterTags}
-          </div>
-          <span style={{ paddingLeft : 7}}> </span>
+            </Map>
+          </Bootstrap.ListGroupItem>
+          <Bootstrap.ListGroupItem>
+            {timeline}
+          </Bootstrap.ListGroupItem>
+          <Bootstrap.ListGroupItem className='clearfix'>
+            <div className='pull-left'>
+              {mapFilterTags}
+            </div>
+            <span style={{ paddingLeft: 7 }}> </span>
             {link}
-        </Bootstrap.ListGroupItem>   
-      </Bootstrap.ListGroup>
-    );      
+          </Bootstrap.ListGroupItem>
+        </Bootstrap.ListGroup>
+      );
 
-    var mapPanel = (
-      <Bootstrap.Panel header={mapTitle}>
-        {map}
-      </Bootstrap.Panel>
-    );
+      var mapPanel = (
+        <Bootstrap.Panel header={mapTitle}>
+          {map}
+        </Bootstrap.Panel>
+      );
 
-    var mPanelWithKey = {panel:mapPanel, key:pinnedMaps[i].title};
+      var mPanelWithKey = { panel: mapPanel, key: pinnedMaps[i].title };
       mPanels.push(mPanelWithKey);
     }
-    
+
     return mPanels;
   },
-  
-  createForecastComponents : function (pinnedForecasts) {
+
+  createForecastComponents: function (pinnedForecasts) {
 
     var props = this.props;
-    var defaults= {
+    var defaults = {
       chartProps: {
         width: 450,
         height: 450,
@@ -453,38 +457,38 @@ var Dashboard = React.createClass({
 
     var forPanels = [];
 
-    for(var i=0; i<pinnedForecasts.length; i++){
-      var pCharts = props.chart.length > 0 ? 
-          props.chart.filter(function(propChart) { return propChart.id === pinnedForecasts[i].id; }) : [];
-          
+    for (var i = 0; i < pinnedForecasts.length; i++) {
+      var pCharts = props.chart.length > 0 ?
+        props.chart.filter(function (propChart) { return propChart.id === pinnedForecasts[i].id; }) : [];
+
       var pChart = pCharts[0];
 
-      if(!pChart){
+      if (!pChart) {
         return [];
-      }  
+      }
 
       var unpinButton = pChart.id === 100000 ? null : (
-        <Bootstrap.Button 
-            bsStyle='default'
-            className='btn-circle'
-            onClick={this._unpin.bind(this, pChart)}
-            type='button'
-            >
-            <i className='fa fa-remove fa-fw'></i>
-          </Bootstrap.Button>
+        <Bootstrap.Button
+          bsStyle='default'
+          className='btn-circle'
+          onClick={this._unpin.bind(this, pChart)}
+          type='button'
+        >
+          <i className='fa fa-remove fa-fw'></i>
+        </Bootstrap.Button>
       );
       var chartTitle = (
-      <span>
-        <i key={pChart.title} className='fa fa-bar-chart fa-fw'></i>
-        <span style={{ paddingLeft: 4 }}>{pChart.title}</span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 5 }}>
-          {unpinButton}
+        <span>
+          <i key={pChart.title} className='fa fa-bar-chart fa-fw'></i>
+          <span style={{ paddingLeft: 4 }}>{pChart.title}</span>
+          <span style={{ float: 'right', marginTop: -3, marginLeft: 5 }}>
+            {unpinButton}
+          </span>
         </span>
-      </span>
       );
 
-      var intervalLabel =' ... ';
-      if(pChart.data) {
+      var intervalLabel = ' ... ';
+      if (pChart.data) {
         var start = moment(pChart.data[0].timespan[0]).format('DD/MM/YYYY');
         var end = moment(pChart.data[0].timespan[1]).format('DD/MM/YYYY');
         intervalLabel = start + ' - ' + end;
@@ -493,7 +497,7 @@ var Dashboard = React.createClass({
         }
       }
 
-      var chartFilterTags =[];
+      var chartFilterTags = [];
       chartFilterTags.push(
         <FilterTag key='time' text={intervalLabel} icon='calendar' />
       );
@@ -502,10 +506,10 @@ var Dashboard = React.createClass({
       );
 
       var chart = (
-        <Chart 
+        <Chart
           {...defaults.chartProps}
           width={this.chartEl && this.chartEl.clientWidth || '100%'}
-          draw={pChart.draw} 
+          draw={pChart.draw}
           field={'volume'}
           level={'week'}
           reportName={'avg-daily-avg'}
@@ -514,49 +518,49 @@ var Dashboard = React.createClass({
           context={props.config}
           scaleTimeAxis={false}
         />
-      ); 
-     var link = (
-       <Link className='pull-right' to='/forecasting' style={{ paddingLeft : 7, paddingTop: 12 }}>View Forecast</Link>
-     ); 
-      var chartPanel = (
-      <Bootstrap.Panel header={chartTitle}>
-        <Bootstrap.ListGroup fill>
-          <Bootstrap.ListGroupItem className="report-chart-wrapper">
-          {chart}
-          </Bootstrap.ListGroupItem>
-          <Bootstrap.ListGroupItem className='clearfix'>
-            <div className='pull-left'>
-              {chartFilterTags}
-            </div>
-            <span style={{ paddingLeft : 7}}> </span>
-           {link}
-          </Bootstrap.ListGroupItem>
-        </Bootstrap.ListGroup>
-      </Bootstrap.Panel>
       );
-      var cPanelWithKey = {panel:chartPanel, key:pChart.title};
+      var link = (
+        <Link className='pull-right' to='/forecasting' style={{ paddingLeft: 7, paddingTop: 12 }}>View Forecast</Link>
+      );
+      var chartPanel = (
+        <Bootstrap.Panel header={chartTitle}>
+          <Bootstrap.ListGroup fill>
+            <Bootstrap.ListGroupItem className="report-chart-wrapper">
+              {chart}
+            </Bootstrap.ListGroupItem>
+            <Bootstrap.ListGroupItem className='clearfix'>
+              <div className='pull-left'>
+                {chartFilterTags}
+              </div>
+              <span style={{ paddingLeft: 7 }}> </span>
+              {link}
+            </Bootstrap.ListGroupItem>
+          </Bootstrap.ListGroup>
+        </Bootstrap.Panel>
+      );
+      var cPanelWithKey = { panel: chartPanel, key: pChart.title };
       forPanels.push(cPanelWithKey);
     }
 
     return forPanels;
   },
 
-  render: function() {
-    if(this.props.isLoading){
+  render: function () {
+    if (this.props.isLoading) {
       return (
         <div>
           <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
           <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
         </div>
-      );    
+      );
     }
-    if(!this.props.savedLayout){
+    if (!this.props.savedLayout) {
       return (<div> Loading... </div>)
     }
 
     var pinnedComponents, pinnedCharts, pinnedMaps, pinnedForecasts, divCharts, divMaps, divForecasts;
 
-    if(this.props.favourites){
+    if (this.props.favourites) {
       pinnedComponents = this.props.favourites.filter(fav => fav.pinned === true);
 
       pinnedCharts = pinnedComponents.filter(fav => fav.type === "CHART");
@@ -583,7 +587,7 @@ var Dashboard = React.createClass({
           <div style={{ marginBottom: 20 }}>
             <Counter text={'Counter.Meters'}
               value={((counters) && (counters.meter)) ? counters.meter.value : null}
-              variance={((counters) && (counters.meter)) ? counters.meter.difference : null} color='#1abc9c' link='/users'/>
+              variance={((counters) && (counters.meter)) ? counters.meter.difference : null} color='#1abc9c' link='/users' />
           </div>
         </div>
         <div className='col-md-4'>
@@ -596,33 +600,33 @@ var Dashboard = React.createClass({
       </div>
     );
 
-    var onLayoutChange = function(e) {
+    var onLayoutChange = function (e) {
 
-      if(!this.props.isLoading && this.props.savedLayout){
+      if (!this.props.isLoading && this.props.savedLayout) {
         //compare previous with current layouts and prevent from saving
-        if(JSON.stringify(e) !== JSON.stringify(this.props.savedLayout)){
+        if (JSON.stringify(e) !== JSON.stringify(this.props.savedLayout)) {
           var stillLoading = e.find(l => l.w === 1);
-          if(stillLoading){ //onLayout is getting triggered when rendering the components. do nothing
+          if (stillLoading) { //onLayout is getting triggered when rendering the components. do nothing
             return;
           }
-          var layoutString = JSON.stringify({"layout": e});
-          var layoutRequest = {"configuration" : layoutString};
+          var layoutString = JSON.stringify({ "layout": e });
+          var layoutRequest = { "configuration": layoutString };
           this.props.actions.saveLayout(layoutRequest);
-        }   
+        }
       }
     };
 
-    var onBreakpointChange = function(e) {
+    var onBreakpointChange = function (e) {
       //console.log('onBreakpointChange');
       //console.log(e);
     };
 
-    var onResizeStop = function(e) {
+    var onResizeStop = function (e) {
       //console.log('onResizeStop');
       //console.log(e);
     };
 
-    var onDragStop = function(e) {
+    var onDragStop = function (e) {
     };
 
     var chartComponents = divCharts ? divCharts : [];
@@ -630,10 +634,10 @@ var Dashboard = React.createClass({
     var forecastComponents = divForecasts ? divForecasts : [];
 
     var lCharts = chartComponents ?
-      chartComponents.map( 
+      chartComponents.map(
         chart => (
-          <div 
-            key={chart.key} 
+          <div
+            key={chart.key}
             ref={(el) => { this.chartEl = el; }}
             className='draggable'
           >
@@ -641,18 +645,18 @@ var Dashboard = React.createClass({
           </div>
         )
       ) : null;
-            
+
     var lMaps = mapComponents ?
-      mapComponents.map( 
+      mapComponents.map(
         map => (
           <div key={map.key} className='draggable'>
             {map.panel}
           </div>
         )
       ) : null;
-            
+
     var lForecasts = forecastComponents ?
-      forecastComponents.map( 
+      forecastComponents.map(
         forecast => (
           <div key={forecast.key} className='draggable'>
             {forecast.panel}
@@ -661,7 +665,7 @@ var Dashboard = React.createClass({
       ) : null;
 
     var components = [...lCharts, ...lMaps, ...lForecasts];
-    if(components.length !== this.props.savedLayout.length) {
+    if (components.length !== this.props.savedLayout.length) {
       return (<div>Loading...</div>);
     }
 
@@ -669,7 +673,7 @@ var Dashboard = React.createClass({
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         {counterComponents}
         <div className='row' >
-          <ResponsiveReactGridLayout  
+          <ResponsiveReactGridLayout
             className="clearfix"
             rowHeight={600}
             onLayoutChange={onLayoutChange.bind(this)}
@@ -678,14 +682,14 @@ var Dashboard = React.createClass({
             onDragStop={onDragStop.bind(this)}
             layouts={{ lg: this.props.savedLayout, md: this.props.savedLayout, sm: this.props.savedLayout }}
             breakpoints={{ lg: 2160, md: 1080, sm: 720, xs: 480, xxs: 200 }}  //lg: 1080, md: 650, sm: 200
-            cols={{lg: 24, md: 20, sm: 16, xs: 12, xxs: 8}}  //lg: 16, md: 12, sm: 8, xs: 6, xxs: 4
+            cols={{ lg: 24, md: 20, sm: 16, xs: 12, xxs: 8 }}  //lg: 16, md: 12, sm: 8, xs: 6, xxs: 4
             autoSize={true}
             verticalCompact={true}
             isResizable={false}
             measureBeforeMount
             draggableHandle='.panel-heading'
-            draggable 
-            >
+            draggable
+          >
             {components}
           </ResponsiveReactGridLayout>
         </div>
@@ -709,7 +713,7 @@ function mapStateToProps(state) {
     config: state.config,
     savedLayout: state.dashboard.savedLayout,
     favourites: state.dashboard.favourites,
-    isLoading : state.dashboard.isLoading,
+    isLoading: state.dashboard.isLoading,
     metersLocations: state.map.metersLocations,
     width: state.viewport.width
   };
@@ -717,9 +721,11 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { getFeatures, getCounters, fetchFavouriteQueries,  
-                                                     getProfileLayout, saveLayout, unpin, getMetersLocations }) , dispatch)
-                                                     //actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters, getChart, getMetersLocations }) , dispatch)
+    actions: bindActionCreators(Object.assign({}, {
+      getFeatures, getCounters, fetchFavouriteQueries,
+      getProfileLayout, saveLayout, unpin, getMetersLocations
+    }), dispatch)
+    //actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getCounters, getChart, getMetersLocations }) , dispatch)
   };
 }
 

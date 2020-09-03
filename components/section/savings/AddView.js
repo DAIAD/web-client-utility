@@ -1,23 +1,19 @@
 var React = require('react');
 var bs = require('react-bootstrap');
-var Modal = require('../../Modal');
 var Wizard = require('../../wizard/Wizard');
 var { SetName, SelectWho, SelectWhere, SelectWhen } = require('../../wizard/items/');
-var util = require('../../../helpers/wizard');
-var { nameToId, getFeature } = require('../../../helpers/common');
-
-const initialEmpty = {};
+var { getFeature } = require('../../../helpers/common');
 
 const validateWho = (value) => {
-  if ((!Array.isArray(value) && value.selected !== 'all') || 
-      (Array.isArray(value) && value.length === 0)) {
+  if ((!Array.isArray(value) && value.selected !== 'all') ||
+    (Array.isArray(value) && value.length === 0)) {
     throw 'noWho';
   }
 };
 
 const validateWhere = value => {
-  if ((!Array.isArray(value) && value.selected !== 'all') || 
-     (Array.isArray(value) && value.length == 0)) {
+  if ((!Array.isArray(value) && value.selected !== 'all') ||
+    (Array.isArray(value) && value.length == 0)) {
     throw 'noWhere';
   }
 };
@@ -32,7 +28,7 @@ const validateWhen = (value) => {
   else if (isNaN(Date.parse(new Date(value.end)))) {
     throw 'toInvalid';
   }
-  else if (value.start > value.end)  {
+  else if (value.start > value.end) {
     throw 'fromAfterTo';
   }
   else if (value.end > new Date().valueOf()) {
@@ -40,7 +36,7 @@ const validateWhen = (value) => {
   }
 };
 
-const validateName = function (value) { 
+const validateName = function (value) {
   const existing = this.props.scenarios.map(scenario => scenario.name);
   if (!value.name) {
     throw 'noName';
@@ -50,34 +46,34 @@ const validateName = function (value) {
 };
 
 var SavingsPotentialAdd = React.createClass({
-  render: function() {
-    const { utility, groups, clusters, actions, validationError, intl } = this.props;
-    const { setValidationError, addSavingsScenario, goToListView, querySavingsScenarios } = actions;
+  render: function () {
+    const { utility, clusters, actions, intl } = this.props;
+    const { addSavingsScenario, goToListView } = actions;
     const _t = x => intl.formatMessage({ id: x });
 
-    const areas =  this.props.areas.map(area => ({
+    const areas = this.props.areas.map(area => ({
       key: area.key,
       value: area.key,
       label: area.title,
       feature: getFeature(area),
-    })); 
+    }));
 
     return (
       <bs.Panel header={<h3>{_t('Savings.Add.title')}</h3>}>
         <bs.Row>
-        <bs.Col md={12} style={{textAlign: 'right'}}>
-          <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
-        </bs.Col>
-      </bs.Row>
-      <hr/>
+          <bs.Col md={12} style={{ textAlign: 'right' }}>
+            <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
+          </bs.Col>
+        </bs.Row>
+        <hr />
         <Wizard
-          onComplete={(values) => { 
+          onComplete={(values) => {
             addSavingsScenario(values);
-            goToListView(); 
+            goToListView();
           }}
           validateLive
           childrenProps={{ intl }}
-          > 
+        >
           <SelectWho
             id='population'
             title='Who'

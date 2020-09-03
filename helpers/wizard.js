@@ -1,5 +1,3 @@
-const moment = require('moment');
-
 /**
  * Transforms an object to array of objects with key, value strings for representation
  * @param {Object} dict - Contains any number of key, value pairs 
@@ -11,13 +9,13 @@ const moment = require('moment');
  *                                      or an Array of multiple Objects with value, label Strings
  * @return {Array} The transformed array containing a series of objects with key, value Strings
  */
-function getFriendlyParams (dict, intl, details='long') {
+function getFriendlyParams(dict, intl, details = 'long') {
   const _t = x => intl.formatMessage({ id: x });
-  return Object.keys(dict).map(key => ({ 
-    key: _t(`Wizard.items.${key}.title`), 
-    value: Array.isArray(dict[key]) && dict[key].length > 0 ? 
+  return Object.keys(dict).map(key => ({
+    key: _t(`Wizard.items.${key}.title`),
+    value: Array.isArray(dict[key]) && dict[key].length > 0 ?
       (
-        details === 'short' ? 
+        details === 'short' ?
           (() => {
             if (dict[key].length === 1) {
               if (dict[key][0].type === 'UTILITY') {
@@ -28,40 +26,40 @@ function getFriendlyParams (dict, intl, details='long') {
             return _t('Wizard.common.multiple');
           })()
           :
-            dict[key].map(x => x.label)
+          dict[key].map(x => x.label)
       )
       :
-        typeof dict[key] === 'object' ? (dict[key].label || '-') : (dict[key] || '-')
+      typeof dict[key] === 'object' ? (dict[key].label || '-') : (dict[key] || '-')
   }));
 }
 
-function getPopulationValue (selected, label, utility) {
-  if (selected === 'all') { 
+function getPopulationValue(selected, label, utility) {
+  if (selected === 'all') {
     return { selected: 'all', type: 'UTILITY', key: utility, label };
   }
   return { type: 'GROUP', key: selected, label };
 }
 
-function getAllPopulationGroups (clusters, utility) {
+function getAllPopulationGroups(clusters, utility) {
   if (!clusters) return [];
   return clusters
-  .map(cluster => cluster.groups
-       .map(group => ({ ...group, value: getPopulationValue(group.key, `${cluster.name}: ${group.name}`, utility) })))
-  .reduce((p, c) => [...p, ...c], []);
+    .map(cluster => cluster.groups
+      .map(group => ({ ...group, value: getPopulationValue(group.key, `${cluster.name}: ${group.name}`, utility) })))
+    .reduce((p, c) => [...p, ...c], []);
 }
 
-function getSpatialValue (selected, label) {
-  if (selected === 'all') { 
+function getSpatialValue(selected, label) {
+  if (selected === 'all') {
     return { selected: 'all', label };
   }
   return { area: selected, label };
 }
 
-function getAllSpatialGroups (areas) {
+function getAllSpatialGroups(areas) {
   return areas.map(group => ({ ...group, value: getSpatialValue(group.key, group.label) }));
 }
 
-function getLabelByParam (paramKey, param, props) {
+function getLabelByParam(paramKey, param, props) {
   switch (paramKey) {
     case 'population':
     case 'excludePopulation':
@@ -71,7 +69,7 @@ function getLabelByParam (paramKey, param, props) {
         return props.intl.formatMessage({ id: 'Buttons.All' });
       } else {
         const group = getAllPopulationGroups(props.clusters, props.utility)
-        .find(g => g.key === param.key);
+          .find(g => g.key === param.key);
         const cluster = props.clusters && props.clusters.find(c => c.key === (group && group.clusterKey));
         return `${cluster && cluster.name ? cluster.name + ': ' : ''}${group && group.name}`;
       }
@@ -84,17 +82,17 @@ function getLabelByParam (paramKey, param, props) {
       } else {
         const key = Array.isArray(param.areas) && param.areas.length > 0 && param.areas[0];
         const area = getAllSpatialGroups(props.areas)
-        .find(g => g.key === key);
+          .find(g => g.key === key);
         return area && area.title;
       }
     case 'time':
-      return props.intl.formatDate(param.start, { 
+      return props.intl.formatDate(param.start, {
         month: 'numeric', year: 'numeric',
-      }) + 
-      '-' +
-      props.intl.formatDate(param.end, { 
-        month: 'numeric', year: 'numeric',
-      });
+      }) +
+        '-' +
+        props.intl.formatDate(param.end, {
+          month: 'numeric', year: 'numeric',
+        });
     case 'distribution':
       return props.intl.formatMessage({ id: `Wizard.items.distribution.options.${param.toLowerCase()}.label` });
     case 'goal':
@@ -110,7 +108,7 @@ function getLabelByParam (paramKey, param, props) {
   }
 }
 
-function getParamsWithLabels (paramsObj, props) {
+function getParamsWithLabels(paramsObj, props) {
   return Object.keys(paramsObj).reduce((p, paramKey) => {
     const param = paramsObj[paramKey];
     const obj = { ...p };
@@ -125,7 +123,7 @@ function getParamsWithLabels (paramsObj, props) {
   }, {});
 }
 
-function flattenBudgetParams (paramsObj) {
+function flattenBudgetParams(paramsObj) {
   if (paramsObj.scenario == null) {
     return {
       population: paramsObj && paramsObj.include && paramsObj.include.population,
@@ -134,14 +132,14 @@ function flattenBudgetParams (paramsObj) {
       excludeSpatial: paramsObj && paramsObj.exclude && paramsObj.exclude.spatial,
       goal: paramsObj && paramsObj.goal,
       distribution: paramsObj && paramsObj.distribution,
-    }; 
+    };
   }
   return {
     population: paramsObj && paramsObj.include && paramsObj.include.population,
     spatial: paramsObj && paramsObj.include && paramsObj.include.spatial,
     scenario: paramsObj && paramsObj.scenario && paramsObj.scenario.key,
     savings: paramsObj && paramsObj.scenario && paramsObj.scenario.percent,
-  }; 
+  };
 }
 
 module.exports = {

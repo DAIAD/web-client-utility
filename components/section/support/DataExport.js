@@ -177,13 +177,6 @@ var DataExport = React.createClass({
       <span>No files found.</span>
     );
 
-    var header = (
-      <span>
-        <i className='fa fa-file-archive-o fa-fw'></i>
-        <span style={{ paddingLeft: 4 }}>Files</span>
-      </span>
-    );
-
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>

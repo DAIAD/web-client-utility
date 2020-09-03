@@ -1,43 +1,42 @@
 var React = require('react');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-var bs = require('react-bootstrap');
 
 var { push } = require('react-router-redux');
 var { injectIntl } = require('react-intl');
 
 var Actions = require('../../../actions/SavingsActions');
-var { getTimeline, getMetersLocations, querySavingsScenarios } = require('../../../actions/MapActions');
+var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
 var Modal = require('../../Modal');
 var util = require('../../../helpers/wizard');
 
 
 const SavingsPotential = React.createClass({
-  componentWillMount: function() {
-    this.props.actions.querySavingsScenarios(); 
+  componentWillMount: function () {
+    this.props.actions.querySavingsScenarios();
     this.props.actions.fetchAllAreas();
   },
-  render: function() {
-    const { routes, children, actions, scenarios, scenarioToRemove: scenarioToRemoveKey } = this.props;
-    const { goToListView, removeSavingsScenario, confirmRemoveScenario, querySavingsScenarios } = actions;
+  render: function () {
+    const { children, actions, scenarios, scenarioToRemove: scenarioToRemoveKey } = this.props;
+    const { goToListView, removeSavingsScenario, confirmRemoveScenario } = actions;
     const scenarioToRemove = scenarios.find(scenario => scenario.key === scenarioToRemoveKey);
 
     return (
       <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>
-          <div className='col-md-12 col-sm-12' style={{marginTop: 10}}>
+          <div className='col-md-12 col-sm-12' style={{ marginTop: 10 }}>
             {
               React.cloneElement(children, this.props)
             }
           </div>
-    
+
           <RemoveConfirmation
             goToListView={goToListView}
             scenario={scenarioToRemove}
             removeSavingsScenario={removeSavingsScenario}
             confirmRemoveScenario={confirmRemoveScenario}
           />
-        </div> 
+        </div>
       </div>
     );
   },
@@ -45,11 +44,11 @@ const SavingsPotential = React.createClass({
 
 //components used in more than one savings sub-sections
 
-function RemoveConfirmation (props) {
+function RemoveConfirmation(props) {
   const { scenario, confirmRemoveScenario, removeSavingsScenario, goToListView } = props;
   const reset = () => confirmRemoveScenario(null);
   if (scenario == null) {
-    return <div/>;
+    return <div />;
   }
   const { key, name } = scenario;
   return (
@@ -66,10 +65,10 @@ function RemoveConfirmation (props) {
         },
         {
           name: 'Delete',
-          action: () => { 
+          action: () => {
             removeSavingsScenario(key);
-            confirmRemoveScenario(null); 
-            goToListView(); 
+            confirmRemoveScenario(null);
+            goToListView();
           },
           style: 'danger',
         },
@@ -93,7 +92,7 @@ function mapStateToProps(state, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    ...bindActionCreators({ ...Actions, getTimeline, getMetersLocations }, dispatch), 
+    ...bindActionCreators({ ...Actions, getTimeline, getMetersLocations }, dispatch),
     goToAddView: () => dispatch(push('/savings/add')),
     goToExploreView: (id) => dispatch(push(`/savings/${id}`)),
     goToListView: () => dispatch(push('/savings')),
@@ -107,27 +106,27 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     actions: {
       ...dispatchProps,
       addSavingsScenario: data => dispatchProps.addSavingsScenario(data)
-      .then(() => dispatchProps.querySavingsScenarios()),
+        .then(() => dispatchProps.querySavingsScenarios()),
       removeSavingsScenario: key => dispatchProps.removeSavingsScenario(key)
-      .then(() => dispatchProps.querySavingsScenarios()),
+        .then(() => dispatchProps.querySavingsScenarios()),
       refreshSavingsScenario: key => dispatchProps.refreshSavingsScenario(key)
-      .then(() => dispatchProps.querySavingsScenarios())
-      .then(() => setTimeout(dispatchProps.querySavingsScenarios, 2000)),
+        .then(() => dispatchProps.querySavingsScenarios())
+        .then(() => setTimeout(dispatchProps.querySavingsScenarios, 2000)),
     },
     ...ownProps,
     areas,
-    user: stateProps.profile ? {value: stateProps.profile.username, label: stateProps.profile.firstname + ' ' + stateProps.profile.lastname} : null,
+    user: stateProps.profile ? { value: stateProps.profile.username, label: stateProps.profile.firstname + ' ' + stateProps.profile.lastname } : null,
     scenarios: stateProps.scenarios
-    .map(scenario => ({
-      ...scenario,
-      parameters: util.getParamsWithLabels(scenario.parameters, { ...stateProps, areas, intl: ownProps.intl }),
-    }))
-    .map(scenario => ({
-      ...scenario, 
-      potential: Math.round(scenario.potential / 100) / 10,
-      paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'), 
-      params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
-    })),
+      .map(scenario => ({
+        ...scenario,
+        parameters: util.getParamsWithLabels(scenario.parameters, { ...stateProps, areas, intl: ownProps.intl }),
+      }))
+      .map(scenario => ({
+        ...scenario,
+        potential: Math.round(scenario.potential / 100) / 10,
+        paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
+        params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
+      })),
   };
 }
 

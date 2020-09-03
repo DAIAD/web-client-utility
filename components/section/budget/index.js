@@ -1,39 +1,34 @@
 var React = require('react');
 var { bindActionCreators } = require('redux');
 var { connect } = require('react-redux');
-var bs = require('react-bootstrap');
 var moment = require('moment');
-var { Link } = require('react-router');
 var { push } = require('react-router-redux');
 var util = require('../../../helpers/wizard');
-var { injectIntl, FormattedDate } = require('react-intl');
+var { injectIntl } = require('react-intl');
 
 var Modal = require('../../Modal');
-var Table = require('../../Table');
 var Actions = require('../../../actions/BudgetActions');
 var { fetchAllAreas } = require('../../../actions/SavingsActions');
-var { getTimeline, getMetersLocations } = require('../../../actions/MapActions');
 
-
-var Budgets = React.createClass({ 
+var Budgets = React.createClass({
   componentWillMount: function () {
     this.props.actions.fetchAllAreas();
-    this.props.actions.fetchCompletedSavingsScenarios(); 
+    this.props.actions.fetchCompletedSavingsScenarios();
     this.props.actions.fetchBudgets();
   },
-  render: function() {
-    const { routes, children, budgetToRemove, actions, clusters, groups, areas, budgets, intl } = this.props;
+  render: function () {
+    const { children, budgetToRemove, actions } = this.props;
     const { removeBudget, confirmRemoveBudgetScenario, goToListView } = actions;
 
     return (
-			<div className='container-fluid' style={{ paddingTop: 10 }}>
+      <div className='container-fluid' style={{ paddingTop: 10 }}>
         <div className='row'>
-          <div className='col-md-12' style={{marginTop: 10}}>
+          <div className='col-md-12' style={{ marginTop: 10 }}>
             {
               React.cloneElement(children, this.props)
             }
           </div>
-          
+
           <RemoveConfirmation
             goToListView={goToListView}
             scenario={budgetToRemove}
@@ -47,11 +42,11 @@ var Budgets = React.createClass({
 });
 
 //common components for more than one budget sub-sections
-function RemoveConfirmation (props) {
+function RemoveConfirmation(props) {
   const { scenario, confirmRemoveScenario, removeScenario, goToListView } = props;
   const reset = () => confirmRemoveScenario(null);
   if (scenario == null) {
-    return <div/>;
+    return <div />;
   }
   const { key, name } = scenario;
   return (
@@ -85,7 +80,7 @@ function mapStateToProps(state, ownProps) {
     savings: state.budget.savings,
     query: state.budget.query,
     areas: state.savings.areas,
-    budgets: state.budget.budgets, 
+    budgets: state.budget.budgets,
     active: state.budget.active,
     budgetToRemoveIdx: state.budget.budgetToRemove,
   };
@@ -93,11 +88,11 @@ function mapStateToProps(state, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    ...bindActionCreators({...Actions, fetchAllAreas }, dispatch), 
+    ...bindActionCreators({ ...Actions, fetchAllAreas }, dispatch),
     goToAddView: () => dispatch(push('/budgets/add')),
     goToExploreView: (key) => dispatch(push(`/budgets/${key}`)),
     goToListView: () => dispatch(push('/budgets')),
-    goToActiveView: () => dispatch(push('/budgets/active'))   
+    goToActiveView: () => dispatch(push('/budgets/active'))
   };
 }
 
@@ -110,28 +105,28 @@ function mergeProps(stateProps, dispatchProps, ownProps) {
     actions: {
       ...dispatchProps,
       addBudget: data => dispatchProps.addBudget(data)
-      .then(() => dispatchProps.fetchBudgets()),
+        .then(() => dispatchProps.fetchBudgets()),
       removeBudget: key => dispatchProps.removeBudget(key)
-      .then(() => dispatchProps.fetchBudgets()),
+        .then(() => dispatchProps.fetchBudgets()),
       setActiveBudget: key => dispatchProps.setActiveBudget(key)
-      .then(() => dispatchProps.fetchBudgets()),
+        .then(() => dispatchProps.fetchBudgets()),
       resetActiveBudget: key => dispatchProps.resetActiveBudget(key)
-      .then(() => dispatchProps.fetchBudgets()),
+        .then(() => dispatchProps.fetchBudgets()),
       scheduleBudget: (budget, year, month) => dispatchProps.scheduleBudget(budget, lastMonth.year(), lastMonth.month() + 1)
-      .then(() => setTimeout(dispatchProps.fetchBudgets, 2000)),
+        .then(() => setTimeout(dispatchProps.fetchBudgets, 2000)),
     },
     ...stateProps,
     areas,
     budgets: stateProps.budgets
-    .map(scenario => ({
-      ...scenario,
-      parameters: util.getParamsWithLabels(util.flattenBudgetParams(scenario.parameters), { ...stateProps, areas, savings, intl: ownProps.intl }),
-    }))
-    .map(scenario => ({
-      ...scenario, 
-      paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
-      params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
-    })),
+      .map(scenario => ({
+        ...scenario,
+        parameters: util.getParamsWithLabels(util.flattenBudgetParams(scenario.parameters), { ...stateProps, areas, savings, intl: ownProps.intl }),
+      }))
+      .map(scenario => ({
+        ...scenario,
+        paramsShort: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'short'),
+        params: util.getFriendlyParams(scenario.parameters, ownProps.intl, 'long')
+      })),
     budgetToRemove: stateProps.budgets.find(scenario => scenario.key === stateProps.budgetToRemoveIdx),
 
   };

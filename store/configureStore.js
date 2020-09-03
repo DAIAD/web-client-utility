@@ -1,9 +1,9 @@
 const develop = (process.env.NODE_ENV !== 'production');
 
-var {createStore, applyMiddleware} = require('redux');
+var { createStore, applyMiddleware } = require('redux');
 var thunkMiddleware = require('redux-thunk');
 var ReduxLogger = require('redux-logger');
-var {routerMiddleware}  = require('react-router-redux');
+var { routerMiddleware } = require('react-router-redux');
 
 var rootReducer = require('../reducers/index');
 var history = require('../routing/history');

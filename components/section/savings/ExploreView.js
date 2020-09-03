@@ -1,13 +1,12 @@
 var React = require('react');
 var bs = require('react-bootstrap');
-var echarts = require('react-echarts');
 var { FormattedTime } = require('react-intl');
 
 var WidgetRow = require('../../WidgetRow');
 var theme = require('../../chart/themes/blue-palette');
 
-var SavingsPotentialExplore = React.createClass({ 
-  componentWillMount: function() {
+var SavingsPotentialExplore = React.createClass({
+  componentWillMount: function () {
     if (this.props.clusters) {
       this.props.actions.exploreScenariosAllClusters(this.props.params.id);
     }
@@ -17,12 +16,12 @@ var SavingsPotentialExplore = React.createClass({
       this.props.actions.exploreScenariosAllClusters(this.props.params.id);
     }
   },
-  render: function() {
-    const { scenarios, actions, explore, metersLocations, params, viewportWidth, viewportHeight, intl } = this.props;
+  render: function () {
+    const { scenarios, actions, explore, params, viewportWidth, viewportHeight, intl } = this.props;
     const { clusters } = explore;
     const { goToListView, confirmRemoveScenario, refreshSavingsScenario } = actions;
     const _t = x => intl.formatMessage({ id: x });
-    
+
     const { id } = params;
     const scenario = scenarios.find(scenario => scenario.key === id);
 
@@ -33,15 +32,15 @@ var SavingsPotentialExplore = React.createClass({
             <bs.Col md={6}>
               <h4>{_t('Savings.Explore.notFound')}</h4>
             </bs.Col>
-            <bs.Col md={6} style={{textAlign: 'right'}}>
+            <bs.Col md={6} style={{ textAlign: 'right' }}>
               <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
             </bs.Col>
-          </bs.Row> 
+          </bs.Row>
         </bs.Panel>
       );
-    } 
-  
-    const { key: scenarioId, name, createdOn, processingEndOn, owner, params:parameters, paramsShort, potential, numberOfConsumers, status } = scenario; 
+    }
+
+    const { key: scenarioId, name, createdOn, processingEndOn, owner, params: parameters, paramsShort, potential, numberOfConsumers, status } = scenario;
     const completed = processingEndOn != null;
     const details = [{
       id: 1,
@@ -92,7 +91,7 @@ var SavingsPotentialExplore = React.createClass({
         info: [],
         footer: null,
       });
-      
+
       clusters.forEach((cluster, i) => {
         const clusterData = cluster.segments.map(x => Math.round(x.potential));
         stats.push({
@@ -113,23 +112,23 @@ var SavingsPotentialExplore = React.createClass({
             data: cluster.segments.map(x => x.name)
           },
           grid: {
-            x: Math.max(Math.max(...cluster.segments.map(group => group.name.length))*6.5, 45) + 'px',
+            x: Math.max(Math.max(...cluster.segments.map(group => group.name.length)) * 6.5, 45) + 'px',
           },
           series: [
             {
               name: cluster.clusterName,
-              color: (name, data, dataIndex) => theme.color.find((x, i, arr) => i  === dataIndex % arr.length),
+              color: (name, data, dataIndex) => theme.color.find((x, i, arr) => i === dataIndex % arr.length),
               label: {
                 formatter: y => `${Math.round(y / 1000)} \u33A5`,
               },
               fill: 0.8,
-              data: cluster.clusterName === 'Consumption Class' ? clusterData.reverse() : clusterData, 
+              data: cluster.clusterName === 'Consumption Class' ? clusterData.reverse() : clusterData,
             }
           ]
         });
-      
+
       });
-      
+
       /*
       stats.push({
         id: 25,
@@ -150,60 +149,60 @@ var SavingsPotentialExplore = React.createClass({
       <div>
         <bs.Panel header={<h3>{name + _t('Savings.Explore.overview')}</h3>}>
           <bs.Row>
-          <bs.Col md={6} style={{ float: 'right' }}>
-            <bs.Button 
-              style={{ float: 'right' }}
-              bsStyle='success' 
-              onClick={() => { goToListView(); }}
+            <bs.Col md={6} style={{ float: 'right' }}>
+              <bs.Button
+                style={{ float: 'right' }}
+                bsStyle='success'
+                onClick={() => { goToListView(); }}
               >
-              <i className='fa fa-chevron-left'></i> Back to all
+                <i className='fa fa-chevron-left'></i> Back to all
             </bs.Button>
-            <bs.Button
-              bsStyle='danger'
-              style={{ float: 'right', marginRight: 25 }}
-              onClick={() => confirmRemoveScenario(scenarioId)}
+              <bs.Button
+                bsStyle='danger'
+                style={{ float: 'right', marginRight: 25 }}
+                onClick={() => confirmRemoveScenario(scenarioId)}
               >
-              { _t('Savings.Explore.delete') }
-            </bs.Button>
-            {
-              status !== 'PENDING' && status !== 'RUNNING' && status !== 'COMPLETED' ? 
-                <bs.Button
-                  bsStyle='warning'
-                  style={{ float: 'right', marginRight: 25 }}
-                  onClick={() => refreshSavingsScenario(scenarioId)}
+                {_t('Savings.Explore.delete')}
+              </bs.Button>
+              {
+                status !== 'PENDING' && status !== 'RUNNING' && status !== 'COMPLETED' ?
+                  <bs.Button
+                    bsStyle='warning'
+                    style={{ float: 'right', marginRight: 25 }}
+                    onClick={() => refreshSavingsScenario(scenarioId)}
                   >
-                  { _t('Savings.List.refresh') }
-                </bs.Button>
-                :
+                    {_t('Savings.List.refresh')}
+                  </bs.Button>
+                  :
                   <span />
-           }
-          </bs.Col>
-          <bs.Col md={3} style={{ float: 'left' }}>
-            <h5>Status: { status }</h5>
-          </bs.Col>
-        </bs.Row>
-        <hr/>
+              }
+            </bs.Col>
+            <bs.Col md={3} style={{ float: 'left' }}>
+              <h5>Status: {status}</h5>
+            </bs.Col>
+          </bs.Row>
+          <hr />
 
-        <WidgetRow
-          widgets={details}
-        />
-      </bs.Panel>
-      { 
-        completed ?
-          <div>
-            <bs.Panel header={<h3>{_t('Savings.Explore.stats')}</h3>}>
-              <WidgetRow
-                itemsPerRow={2}
-                widgets={stats}
-              />
-            </bs.Panel>
-          </div>
+          <WidgetRow
+            widgets={details}
+          />
+        </bs.Panel>
+        {
+          completed ?
+            <div>
+              <bs.Panel header={<h3>{_t('Savings.Explore.stats')}</h3>}>
+                <WidgetRow
+                  itemsPerRow={2}
+                  widgets={stats}
+                />
+              </bs.Panel>
+            </div>
             :
-              <div />
-      }
-    </div>
+            <div />
+        }
+      </div>
     );
   }
 });
-               
+
 module.exports = SavingsPotentialExplore;

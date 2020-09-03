@@ -3,7 +3,6 @@ var moment = require('moment');
 
 var React = require('react');
 var ReactRedux = require('react-redux');
-var Select = require('react-select').default;
 
 var PropTypes = React.PropTypes;
 var { configPropType } = require('../prop-types');

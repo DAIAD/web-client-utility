@@ -8,68 +8,67 @@ var Select = require('react-select').default;
 var DateRangePicker = require('react-bootstrap-daterangepicker');
 var FilterTag = require('../chart/dimension/FilterTag');
 var Timeline = require('../Timeline');
-var GroupSearchTextBox = require('../GroupSearchTextBox');
-var {FormattedTime} = require('react-intl');
+var { FormattedTime } = require('react-intl');
 var moment = require('moment');
 var _ = require('lodash');
 
 var { Map, TileLayer, GeoJSON, Choropleth, LayersControl, InfoControl, DrawControl } = require('react-leaflet-wrapper');
 
 var { getTimeline, getFeatures, getChart, setEditor, setEditorValue,
-      setTimezone, addFavourite, updateFavourite, setEditorValuesBatch, 
-      getMetersLocations, getGroups, filterByType, setGroup } = require('../../actions/MapActions');
+  setTimezone, addFavourite, updateFavourite, setEditorValuesBatch,
+  getMetersLocations, getGroups, filterByType, setGroup } = require('../../actions/MapActions');
 
-var getTags = function(props){
+var getTags = function (props) {
   var tags = 'Map - ' +
-      (props.defaultFavouriteValues.source ? props.favourite.queries[0].source : props.source) +
-        ' - '+ props.interval[0].format("DD/MM/YYYY") +
-          ' to ' + props.interval[1].format("DD/MM/YYYY") +
-            (props.population ? ' - ' + props.population.label : '') +
-              (props.geometry ? ' - Custom' : '');  
-    
+    (props.defaultFavouriteValues.source ? props.favourite.queries[0].source : props.source) +
+    ' - ' + props.interval[0].format("DD/MM/YYYY") +
+    ' to ' + props.interval[1].format("DD/MM/YYYY") +
+    (props.population ? ' - ' + props.population.label : '') +
+    (props.geometry ? ' - Custom' : '');
+
   return tags;
 };
 
-var _filterRows = function(rows, type, name) {
-  var filteredRows = rows.filter( r => {
-    if(name) {
-      if(r.text.indexOf(name) === -1) {
+var _filterRows = function (rows, type, name) {
+  var filteredRows = rows.filter(r => {
+    if (name) {
+      if (r.text.indexOf(name) === -1) {
         return false;
       }
     }
-    if(type && type !== 'SET') {
+    if (type && type !== 'SET') {
       return (r.cluster == type);
     }
-    if(type && type === 'SET'){
-     return (r.type == type);
+    if (type && type === 'SET') {
+      return (r.type == type);
     }
     return true;
   });
   return filteredRows;
 };
 
-var _getTimelineValues = function(timeline) {
-  if(timeline) {
+var _getTimelineValues = function (timeline) {
+  if (timeline) {
     return timeline.getTimestamps();
   }
   return [];
 };
 
-var _getTimelineLabels = function(timeline) {
-  if(timeline) {
-    return timeline.getTimestamps().map(function(timestamp) {
+var _getTimelineLabels = function (timeline) {
+  if (timeline) {
+    return timeline.getTimestamps().map(function (timestamp) {
       return (
-        <FormattedTime  value={new Date(timestamp)}
-                        day='numeric'
-                        month='numeric'
-                        year='numeric'/>
+        <FormattedTime value={new Date(timestamp)}
+          day='numeric'
+          month='numeric'
+          year='numeric' />
       );
     });
   }
   return [];
 };
 
-var _onChangeTimeline = function(value, label, index) {
+var _onChangeTimeline = function (value, label, index) {
   this.props.actions.getFeatures(index, value);
 };
 
@@ -83,39 +82,23 @@ var _onSourceEditorChange = function (e) {
   this.props.actions.setEditorValue('source', e.value);
 };
 
-var onPopulationEditorChange = function(e) {
-  this.props.defaultFavouriteValues.population = false;
-  if(!e) {
-    var utility = this.props.profile.utility;
-
-    e = {
-      key: utility.key,
-      name: utility.name,
-      type: 'UTILITY'
-    };
-  }
-  this.props.actions.setGroup(e);
-  this.props.actions.setEditorValue('population', e);
-};
-
-var _setEditor = function(key) {
+var _setEditor = function (key) {
   this.props.actions.setEditor(key);
 };
 
-var _onFeatureChange = function(features) {
-  if(!features || !features.features || !Array.isArray(features.features) || features.features.length===0){
+var _onFeatureChange = function (features) {
+  if (!features || !features.features || !Array.isArray(features.features) || features.features.length === 0) {
     this.props.actions.setEditorValue('spatial', null);
   } else {
     this.props.actions.setEditorValue('spatial', features.features[0].geometry);
   }
 };
 
-var _filterByType = function(e) {
+var _filterByType = function (e) {
   this.props.defaultFavouriteValues.population = false;
-  var profile = this.props.profile;
   this.props.actions.filterByType(e.value === 'UNDEFINED' ? null : e.value);
 
-  if(e.value === 'UNDEFINED'){
+  if (e.value === 'UNDEFINED') {
     var utility = this.props.profile.utility;
     var population = {
       utility: utility.key,
@@ -126,24 +109,18 @@ var _filterByType = function(e) {
   }
 };
 
-var _groupSelect = function(e) {
-  if(this.props.defaultFavouriteValues.population){
-  
-    if(e.group.type === 'SET'){
+var _groupSelect = function (e) {
+  if (this.props.defaultFavouriteValues.population) {
+
+    if (e.group.type === 'SET') {
       this.props.actions.filterByType('SET');
     } else {
       this.props.actions.filterByType(e.group.cluster === 'UNDEFINED' ? 'UNDEFINED' : e.group.cluster);
     }
 
-    if(e.group.cluster === 'UNDEFINED'){
-      var utility = this.props.profile.utility;
-      var population = {
-        utility: utility.key,
-        label: utility.name,
-        type: 'UTILITY'
-      };
+    if (e.group.cluster === 'UNDEFINED') {
       this.props.actions.getTimeline(e.group);
-    }    
+    }
   }
 
   this.props.defaultFavouriteValues.population = false;
@@ -153,37 +130,37 @@ var _groupSelect = function(e) {
 var AnalyticsMap = React.createClass({
 
   contextTypes: {
-      intl: React.PropTypes.object
+    intl: React.PropTypes.object
   },
 
-  componentWillMount : function() {
-  
+  componentWillMount: function () {
+
     if (!this.props.metersLocations) {
       this.props.actions.getMetersLocations();
     }
 
     var utility = this.props.profile.utility;
 
-    this.props.actions.setTimezone(utility.timezone);  
-  
-  
-    if(this.props.map.groups == null) {
+    this.props.actions.setTimezone(utility.timezone);
+
+
+    if (this.props.map.groups == null) {
       this.props.actions.getGroups().then(response => {
-        
+
         var isDefault;
-        if(this.props.favourite && this.props.favourite.type == 'MAP'){
+        if (this.props.favourite && this.props.favourite.type == 'MAP') {
           isDefault = false;
           this.props.defaultFavouriteValues.interval = true;
           this.props.defaultFavouriteValues.source = true;
           this.props.defaultFavouriteValues.population = true;
           this.props.defaultFavouriteValues.spatial = true;
 
-          this.props.actions.setEditorValuesBatch(isDefault);    
-      
-          if(!this.props.map.timeline) {
+          this.props.actions.setEditorValuesBatch(isDefault);
+
+          if (!this.props.map.timeline) {
             this.props.actions.getTimeline(this.props.favourite.queries[0].population[0]);
-          }            
-        } else{
+          }
+        } else {
           isDefault = true;
           this.props.defaultFavouriteValues.interval = false;
           this.props.defaultFavouriteValues.source = false;
@@ -191,24 +168,24 @@ var AnalyticsMap = React.createClass({
           this.props.defaultFavouriteValues.spatial = false;
 
           this.props.actions.setEditorValuesBatch(isDefault);
-      
-          if(!this.props.map.timeline) {
+
+          if (!this.props.map.timeline) {
             var population = {
               utility: utility.key,
               label: utility.name,
               type: 'UTILITY'
             };
             this.props.actions.getTimeline(population);
-          }            
+          }
         }
       });
     }
   },
 
-  componentDidMount : function() {
+  componentDidMount: function () {
   },
 
-  clickedAddFavourite : function() {
+  clickedAddFavourite: function () {
 
     var tags = getTags(this.props);
 
@@ -218,33 +195,33 @@ var AnalyticsMap = React.createClass({
     namedQuery.tags = tags;
     namedQuery.title = this.refs.favouriteLabel.value;
 
-    var request =  {
-      'namedQuery' : namedQuery
+    var request = {
+      'namedQuery': namedQuery
     };
 
-    if(this.props.favourite){
+    if (this.props.favourite) {
       namedQuery.id = this.props.favourite.id;
       var previousTitle = this.props.favourite.title;
       this.props.actions.updateFavourite(request, previousTitle);
     }
-    else{
+    else {
       this.props.actions.addFavourite(request);
     }
   },
 
-  render: function() {
-    if(!this.props.groups){
+  render: function () {
+    if (!this.props.groups) {
       return (
         <div>
           <img className='preloader' src='/assets/images/utility/preloader-counterclock.png' />
           <img className='preloader-inner' src='/assets/images/utility/preloader-clockwise.png' />
         </div>
-      );    
+      );
     }
     var favouriteIcon;
-    if(this.props.favourite && this.props.favourite.type == 'CHART'){
+    if (this.props.favourite && this.props.favourite.type == 'CHART') {
       favouriteIcon = 'star-o';
-    } else if(this.props.isBeingEdited && !this.props.favourite){
+    } else if (this.props.isBeingEdited && !this.props.favourite) {
       favouriteIcon = 'star-o';
     }
     else {
@@ -255,8 +232,8 @@ var AnalyticsMap = React.createClass({
     var _t = this.context.intl.formatMessage;
 
     // Filter configuration
-    var intervalLabel ='';
-    if(this.props.interval) {
+    var intervalLabel = '';
+    if (this.props.interval) {
       var start = this.props.defaultFavouriteValues.interval ?
         moment(this.props.favourite.queries[0].time.start).format('DD/MM/YYYY') : this.props.interval[0].format('DD/MM/YYYY');
       var end = this.props.defaultFavouriteValues.interval ?
@@ -271,33 +248,33 @@ var AnalyticsMap = React.createClass({
     var intervalEditor = (
       <div className='col-md-3'>
         <DateRangePicker startDate={this.props.defaultFavouriteValues.interval ?
-                                    moment(this.props.favourite.queries[0].time.start) : this.props.interval[0]}
-                         endDate={this.props.defaultFavouriteValues.interval ?
-                         moment(this.props.favourite.queries[0].time.end) : this.props.interval[1]}
-                         ranges={this.props.ranges}
-                         locale={this.props.dateRangePickerLocale}
-                         onEvent={_onIntervalEditorChange.bind(this)}>
-          <div className='clearfix Select-control' style={{ cursor: 'pointer', padding: '5px 10px', width: '100%'}}>
+          moment(this.props.favourite.queries[0].time.start) : this.props.interval[0]}
+          endDate={this.props.defaultFavouriteValues.interval ?
+            moment(this.props.favourite.queries[0].time.end) : this.props.interval[1]}
+          ranges={this.props.ranges}
+          locale={this.props.dateRangePickerLocale}
+          onEvent={_onIntervalEditorChange.bind(this)}>
+          <div className='clearfix Select-control' style={{ cursor: 'pointer', padding: '5px 10px', width: '100%' }}>
             <span>{intervalLabel}</span>
           </div>
-          </DateRangePicker>
-          <span className='help-block'>Select time interval</span>
+        </DateRangePicker>
+        <span className='help-block'>Select time interval</span>
       </div>
     );
 
     var typeOptions = [];
     var customGroup;
-    if(this.props.defaultFavouriteValues.population){
+    if (this.props.defaultFavouriteValues.population) {
       var favPop = this.props.favourite.queries[0].population[0];
 
-      if(favPop.type === 'GROUP'){
+      if (favPop.type === 'GROUP') {
         typeOptions = [];
-        var customGroupArray = _.filter(this.props.groups.groups, function(g) {
+        var customGroupArray = _.filter(this.props.groups.groups, function (g) {
           return g.key == favPop.group && g.type == 'SET';
         });
-        
+
         customGroup = customGroupArray[0];
-        if(customGroup){
+        if (customGroup) {
 
           var allCustomGroups = this.props.groups.groups.filter(g => g.type === 'SET');
           typeOptions = allCustomGroups.map((group) => {
@@ -306,7 +283,7 @@ var AnalyticsMap = React.createClass({
               label: group.name,
               group: group
             };
-          });            
+          });
         } else {
           var cluster = favPop.label;
           var clusterName = cluster.substring(0, cluster.indexOf(":"));
@@ -318,11 +295,11 @@ var AnalyticsMap = React.createClass({
               label: group.type == 'SEGMENT' ? group.cluster + ': ' + group.name : group.name,
               group: group
             };
-          });        
+          });
         }
       }
     } else {
-      if(this.props.groups && this.props.populationType){
+      if (this.props.groups && this.props.populationType) {
         typeOptions = this.props.groups.filtered.map((group) => {
           return {
             name: group.name,
@@ -334,31 +311,31 @@ var AnalyticsMap = React.createClass({
     }
 
     var groupTypeValue;
-    if(this.props.defaultFavouriteValues.population){
-      if(customGroup){
+    if (this.props.defaultFavouriteValues.population) {
+      if (customGroup) {
         groupTypeValue = 'SET';
       } else {
-        if(this.props.populationType){
+        if (this.props.populationType) {
           groupTypeValue = this.props.populationType;
         } else {
-        groupTypeValue = 'UNDEFINED';
+          groupTypeValue = 'UNDEFINED';
         }
       }
     } else {
-      if(this.props.populationType){
+      if (this.props.populationType) {
         groupTypeValue = this.props.populationType;
       } else {
         groupTypeValue = 'UNDEFINED';
-      }    
+      }
     }
-    
+
     var groupTypeSelect = (
       <div>
         <Select name='groupType'
           value={groupTypeValue}
-          
+
           options={[
-            { value: 'UNDEFINED', label: this.props.profile.utility.name},
+            { value: 'UNDEFINED', label: this.props.profile.utility.name },
             { value: 'Income', label: 'Income' },
             { value: 'Apartment Size', label: 'Apartment Size' },
             { value: 'Household Members', label: 'Household Members' },
@@ -368,43 +345,43 @@ var AnalyticsMap = React.createClass({
           ]}
           onChange={_filterByType.bind(this)}
           clearable={false}
-          searchable={false} className='form-group'/>
+          searchable={false} className='form-group' />
         <span className='help-block'>Filter group type</span>
-    </div>
-  );
+      </div>
+    );
 
-  var groupValue;
-  if(this.props.defaultFavouriteValues.population){
-    if(favPop.type === 'UTILITY'){
-      groupValue = {name: favPop.label, label: <i>Everyone</i>};
+    var groupValue;
+    if (this.props.defaultFavouriteValues.population) {
+      if (favPop.type === 'UTILITY') {
+        groupValue = { name: favPop.label, label: <i>Everyone</i> };
+      } else {
+        groupValue = { name: favPop.label, label: favPop.label };
+      }
     } else {
-      groupValue = {name: favPop.label, label: favPop.label};
+      if (this.props.group) {
+        groupValue = { name: this.props.group.name, label: this.props.group.label };
+      } else {
+        groupValue = { name: 'UNDEFINED', label: <i>Everyone</i> };
+      }
     }
-  } else {
-    if(this.props.group){
-      groupValue = {name:this.props.group.name,label:this.props.group.label};
-    } else {
-      groupValue = {name:'UNDEFINED', label:<i>Everyone</i>};
-    }
-  }
-  
-  var groupSelect = (
-    <div>
-      <Select name='group'
-        value={groupValue}
-        options={typeOptions}
-        onChange={_groupSelect.bind(this)}
-        clearable={false}
-        searchable={false} className='form-group'/>
-      <span className='help-block'>Select group</span>
-    </div>
-  );
- 
+
+    var groupSelect = (
+      <div>
+        <Select name='group'
+          value={groupValue}
+          options={typeOptions}
+          onChange={_groupSelect.bind(this)}
+          clearable={false}
+          searchable={false} className='form-group' />
+        <span className='help-block'>Select group</span>
+      </div>
+    );
+
     var addFavouriteText;
-    if(this.props.favourite){
+    if (this.props.favourite) {
       addFavouriteText = 'Buttons.UpdateFavourite';
     }
-    else{
+    else {
       addFavouriteText = 'Buttons.AddFavourite';
     }
 
@@ -412,19 +389,19 @@ var AnalyticsMap = React.createClass({
       <div>
         <div className='col-md-3'>
           <input id='favouriteLabel' name='favouriteLabel' type='favourite' ref='favouriteLabel' autoFocus
-            defaultValue ={this.props.favourite ? this.props.favourite.title : null}
+            defaultValue={this.props.favourite ? this.props.favourite.title : null}
             placeholder={this.props.favourite ? this.props.favourite.title : 'Label ...'}
-            className='form-control' style={{ marginBottom : 15 }}/>
+            className='form-control' style={{ marginBottom: 15 }} />
           <span className='help-block'>Insert a label for this favourite</span>
         </div>
         <div className='col-md-6'>
-          <input  id='name' name='name' type='name' ref='name' autoFocus disabled
-            placeholder={tags} className='form-control' style={{ marginBottom : 15 }}/>
+          <input id='name' name='name' type='name' ref='name' autoFocus disabled
+            placeholder={tags} className='form-control' style={{ marginBottom: 15 }} />
           <span className='help-block'>Auto-generated Identifier</span>
         </div>
         <div className='col-md-3'>
           <Bootstrap.Button bsStyle='success' onClick={this.clickedAddFavourite} disabled={!this.props.isBeingEdited}>
-            {_t({ id:addFavouriteText})}
+            {_t({ id: addFavouriteText })}
           </Bootstrap.Button>
         </div>
       </div>
@@ -440,14 +417,14 @@ var AnalyticsMap = React.createClass({
           ]}
           onChange={_onSourceEditorChange.bind(this)}
           clearable={false}
-          searchable={false} className='form-group'/>
-          <span className='help-block'>Select a data source</span>
-        </div>
+          searchable={false} className='form-group' />
+        <span className='help-block'>Select a data source</span>
+      </div>
     );
 
     var filter = null;
 
-    switch(this.props.editor) {
+    switch (this.props.editor) {
       case 'interval':
         filter = (
           <Bootstrap.ListGroupItem>
@@ -462,12 +439,12 @@ var AnalyticsMap = React.createClass({
         filter = (
           <Bootstrap.ListGroupItem>
             <div className="row">
-                  <div className='col-md-3'>
-                    {groupTypeSelect}
-                  </div>
-                  <div className='col-md-3' >
-                    {groupSelect}
-                  </div>
+              <div className='col-md-3'>
+                {groupTypeSelect}
+              </div>
+              <div className='col-md-3' >
+                {groupSelect}
+              </div>
             </div>
           </Bootstrap.ListGroupItem>
         );
@@ -475,51 +452,51 @@ var AnalyticsMap = React.createClass({
 
       case 'source':
         filter = (
-            <Bootstrap.ListGroupItem>
-              <div className="row">
-                {sourceEditor}
-              </div>
-            </Bootstrap.ListGroupItem>
-          );
+          <Bootstrap.ListGroupItem>
+            <div className="row">
+              {sourceEditor}
+            </div>
+          </Bootstrap.ListGroupItem>
+        );
         break;
       case 'favourite':
         filter = (
-            <Bootstrap.ListGroupItem>
-              <div className="row">
-                {favouriteEditor}
-              </div>
-            </Bootstrap.ListGroupItem>
-          );
+          <Bootstrap.ListGroupItem>
+            <div className="row">
+              {favouriteEditor}
+            </div>
+          </Bootstrap.ListGroupItem>
+        );
         break;
     }
-   
+
     // Map configuration
     var mapTitle = (
       <span>
-      <div className="header-wrapper">
-        <i className='fa fa-map fa-fw'></i>
-        <span style={{ paddingLeft: 4 }}>Map</span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
-          <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'source')}>
-            <i className='fa fa-database fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
-        <Bootstrap.Button bsStyle='default'  onClick={_setEditor.bind(this, 'population')}>
-            <i className='fa fa-group fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
-        <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'interval')}>
-            <i className='fa fa-calendar fa-fw'></i>
-          </Bootstrap.Button>
-        </span>
-        <span style={{float: 'right',  marginTop: -3, marginLeft: 0}}>
-        <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'favourite')}>
-            <i className={'fa fa-' + favouriteIcon + ' fa-fw'}></i>
-          </Bootstrap.Button>
-        </span>
-      </div>
+        <div className="header-wrapper">
+          <i className='fa fa-map fa-fw'></i>
+          <span style={{ paddingLeft: 4 }}>Map</span>
+          <span style={{ float: 'right', marginTop: -3, marginLeft: 0 }}>
+            <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'source')}>
+              <i className='fa fa-database fa-fw'></i>
+            </Bootstrap.Button>
+          </span>
+          <span style={{ float: 'right', marginTop: -3, marginLeft: 0 }}>
+            <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'population')}>
+              <i className='fa fa-group fa-fw'></i>
+            </Bootstrap.Button>
+          </span>
+          <span style={{ float: 'right', marginTop: -3, marginLeft: 0 }}>
+            <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'interval')}>
+              <i className='fa fa-calendar fa-fw'></i>
+            </Bootstrap.Button>
+          </span>
+          <span style={{ float: 'right', marginTop: -3, marginLeft: 0 }}>
+            <Bootstrap.Button bsStyle='default' onClick={_setEditor.bind(this, 'favourite')}>
+              <i className={'fa fa-' + favouriteIcon + ' fa-fw'}></i>
+            </Bootstrap.Button>
+          </span>
+        </div>
       </span>
     );
 
@@ -527,8 +504,8 @@ var AnalyticsMap = React.createClass({
       series: []
     };
 
-    if(this.props.chart.series) {
-      if(this.props.chart.series.meters) {
+    if (this.props.chart.series) {
+      if (this.props.chart.series.meters) {
         chartData.series.push({
           legend: 'Meter',
           xAxis: 'date',
@@ -537,7 +514,7 @@ var AnalyticsMap = React.createClass({
         });
       }
 
-      if(this.props.chart.series.devices) {
+      if (this.props.chart.series.devices) {
         chartData.series.push({
           legend: 'Amphiro B1',
           xAxis: 'date',
@@ -560,13 +537,13 @@ var AnalyticsMap = React.createClass({
       <FilterTag key='time' text={intervalLabel} icon='calendar' />
     );
     mapFilterTags.push(
-      <FilterTag key='population' text={ this.props.population ? this.props.population.label : 'All' } icon='group' />
+      <FilterTag key='population' text={this.props.population ? this.props.population.label : 'All'} icon='group' />
     );
     mapFilterTags.push(
-      <FilterTag key='spatial' text={ this.props.geometry ? 'Custom' : 'Alicante' } icon='map' />
+      <FilterTag key='spatial' text={this.props.geometry ? 'Custom' : 'Alicante'} icon='map' />
     );
     mapFilterTags.push(
-      <FilterTag key='source' text={ this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source} icon='database' />
+      <FilterTag key='source' text={this.props.defaultFavouriteValues.source ? this.props.favourite.queries[0].source : this.props.source} icon='database' />
     );
 
     const timelineMin = this.props.map.timeline && this.props.map.timeline.min || 0;
@@ -581,14 +558,14 @@ var AnalyticsMap = React.createClass({
             width='100%'
             height={600}
           >
-            <LayersControl position='topright'> 
+            <LayersControl position='topright'>
               <TileLayer />
 
               <DrawControl
                 onFeatureChange={_onFeatureChange.bind(this)}
               />
 
-              <InfoControl position='bottomleft'> 
+              <InfoControl position='bottomleft'>
                 <Choropleth
                   name='Areas'
                   data={this.props.map.features}
@@ -598,15 +575,15 @@ var AnalyticsMap = React.createClass({
                   limits={[timelineMin, timelineMax]}
                   steps={6}
                   mode='e'
-                  infoContent={feature => feature && feature.properties ? 
+                  infoContent={feature => feature && feature.properties ?
                     <div>
                       <h5>{feature.properties.label}</h5>
                       <span>{feature.properties.value}</span>
-                    </div> 
-                      : <div><h5>Hover over an area...</h5></div>
+                    </div>
+                    : <div><h5>Hover over an area...</h5></div>
                   }
                   highlightStyle={{ weight: 3 }}
-                  onClick={(feature, layer, map) => map.fitBounds(layer.getBounds()) }
+                  onClick={(feature, layer, map) => map.fitBounds(layer.getBounds())}
                   style={{
                     fillColor: "#ffff00",
                     color: "#000",
@@ -619,12 +596,12 @@ var AnalyticsMap = React.createClass({
               <GeoJSON
                 name='Meters'
                 data={this.props.metersLocations}
-                popupContent={feature => 
+                popupContent={feature =>
                   <div>
                     <h5>Serial:</h5>
                     <h5>{feature.properties.serial}</h5>
                   </div>
-                  }
+                }
                 circleMarkers
                 style={{
                   radius: 8,
@@ -639,20 +616,20 @@ var AnalyticsMap = React.createClass({
           </Map>
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem>
-          <Timeline   onChange={_onChangeTimeline.bind(this)}
-                      labels={ _getTimelineLabels(this.props.map.timeline) }
-                      values={ _getTimelineValues(this.props.map.timeline) }
-                      defaultIndex={this.props.map.index}
-                      speed={1000}
-                      animate={false}>
+          <Timeline onChange={_onChangeTimeline.bind(this)}
+            labels={_getTimelineLabels(this.props.map.timeline)}
+            values={_getTimelineValues(this.props.map.timeline)}
+            defaultIndex={this.props.map.index}
+            speed={1000}
+            animate={false}>
           </Timeline>
         </Bootstrap.ListGroupItem>
         <Bootstrap.ListGroupItem className='clearfix'>
           <div className='pull-left'>
             {mapFilterTags}
           </div>
-          <span style={{ paddingLeft : 7}}> </span>
-          <Link className='pull-right' to='/' style={{ paddingLeft : 7, paddingTop: 12 }}>View dashboard</Link>
+          <span style={{ paddingLeft: 7 }}> </span>
+          <Link className='pull-right' to='/' style={{ paddingLeft: 7, paddingTop: 12 }}>View dashboard</Link>
         </Bootstrap.ListGroupItem>
       </Bootstrap.ListGroup>
     );
@@ -672,7 +649,7 @@ var AnalyticsMap = React.createClass({
         </div>
       </div>
     );
-    }
+  }
 });
 
 AnalyticsMap.icon = 'map';
@@ -680,34 +657,36 @@ AnalyticsMap.title = 'Section.Map';
 
 function mapStateToProps(state) {
   return {
-      source: state.map.source,
-      geometry: state.map.geometry,
-      population: state.map.population,
-      interval: state.map.interval,
-      editor: state.map.editor,
-      ranges: state.map.ranges,
-      map: state.map.map,
-      chart: state.map.chart,
-      profile: state.session.profile,
-      routing: state.routing,
-      favourite: state.favourites.selectedFavourite,
-      isBeingEdited: state.map.isBeingEdited,
-      filtersChanged: state.map.filterChanged,
-      defaultFavouriteValues : state.map.defaultFavouriteValues,
-      metersLocations: state.map.metersLocations,
-      groups:state.map.groups,
-      group:state.map.group,
-      populationType:state.map.populationType,
-      dateRangePickerLocale: state.i18n.data[state.i18n.locale].messages['Library.DateRangePicker.$locale']
+    source: state.map.source,
+    geometry: state.map.geometry,
+    population: state.map.population,
+    interval: state.map.interval,
+    editor: state.map.editor,
+    ranges: state.map.ranges,
+    map: state.map.map,
+    chart: state.map.chart,
+    profile: state.session.profile,
+    routing: state.routing,
+    favourite: state.favourites.selectedFavourite,
+    isBeingEdited: state.map.isBeingEdited,
+    filtersChanged: state.map.filterChanged,
+    defaultFavouriteValues: state.map.defaultFavouriteValues,
+    metersLocations: state.map.metersLocations,
+    groups: state.map.groups,
+    group: state.map.group,
+    populationType: state.map.populationType,
+    dateRangePickerLocale: state.i18n.data[state.i18n.locale].messages['Library.DateRangePicker.$locale']
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions : bindActionCreators(Object.assign({}, { getTimeline, getFeatures, getChart,
-                                                     setEditor, setEditorValue, setTimezone,
-                                                     addFavourite, updateFavourite, setEditorValuesBatch, 
-                                                     getMetersLocations, getGroups, filterByType, setGroup}) , dispatch)
+    actions: bindActionCreators(Object.assign({}, {
+      getTimeline, getFeatures, getChart,
+      setEditor, setEditorValue, setTimezone,
+      addFavourite, updateFavourite, setEditorValuesBatch,
+      getMetersLocations, getGroups, filterByType, setGroup
+    }), dispatch)
   };
 }
 

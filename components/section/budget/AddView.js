@@ -1,33 +1,30 @@
 var React = require('react');
 
-var { connect } = require('react-redux');
 var bs = require('react-bootstrap');
-var Modal = require('../../Modal');
-var { FormattedMessage } = require('react-intl');
 var Wizard = require('../../wizard/Wizard');
-var { SetName, SelectWho, SelectWhere, SelectWhen, SelectBudgetType, SelectSavingsScenario, SetSavingsPercentage, SetGoal, SelectDistribution  } = require('../../wizard/items/');
-var { nameToId, getFeature } = require('../../../helpers/common');
+var { SetName, SelectWho, SelectWhere, SelectBudgetType, SelectSavingsScenario, SetSavingsPercentage, SetGoal, SelectDistribution } = require('../../wizard/items/');
+var { getFeature } = require('../../../helpers/common');
 
-const validateBudgetType = ({type:value}) => {
+const validateBudgetType = ({ type: value }) => {
   if (!value) {
     throw 'noBudget';
   }
 }
 
 const validateWho = (value) => {
-  if ((!Array.isArray(value) && value.selected !== 'all') || 
-     (Array.isArray(value) && value.length == 0)) {
+  if ((!Array.isArray(value) && value.selected !== 'all') ||
+    (Array.isArray(value) && value.length == 0)) {
     throw 'noWho';
   }
 };
 
 const validateWhere = (value) => {
   if ((!Array.isArray(value) && value.selected !== 'all') ||
-     (Array.isArray(value) && value.length == 0)) {
-       throw 'noWhere';
+    (Array.isArray(value) && value.length == 0)) {
+    throw 'noWhere';
   }
 };
-const validateSavingsPercentage = ({savings:value}) => {
+const validateSavingsPercentage = ({ savings: value }) => {
   if (isNaN(value)) {
     throw 'notANumber';
   }
@@ -36,13 +33,13 @@ const validateSavingsPercentage = ({savings:value}) => {
   }
 };
 
-const validateDistribution = ({type:value}) => {
+const validateDistribution = ({ type: value }) => {
   if (!value) {
     throw 'noDistribution';
   }
 };
 
-const validateGoal = ({goal:value}) => {
+const validateGoal = ({ goal: value }) => {
   if (isNaN(value)) {
     throw 'notANumber';
   }
@@ -51,13 +48,13 @@ const validateGoal = ({goal:value}) => {
   }
 };
 
-const validateSavingsScenario = ({key:value}) => {
+const validateSavingsScenario = ({ key: value }) => {
   if (!value) {
-      throw 'noSavingsScenario';
+    throw 'noSavingsScenario';
   }
 };
 
-const validateName = function ({name:value}) { 
+const validateName = function ({ name: value }) {
   const existing = this.props.budgets.map(budget => budget.name);
 
   if (!value) {
@@ -67,44 +64,44 @@ const validateName = function ({name:value}) {
   }
 };
 
-var BudgetsAdd = React.createClass ({
+var BudgetsAdd = React.createClass({
   componentWillMount: function () {
-    this.props.actions.fetchCompletedSavingsScenarios(); 
+    this.props.actions.fetchCompletedSavingsScenarios();
   },
-  render: function() {
-    const { utility, groups, clusters, actions, wizardType, validationError, savings, intl } = this.props;
-    const { setValidationError, setAddBudgetWizardType, goToListView, addBudget } = actions;
-    const areas =  this.props.areas.map(area => ({
+  render: function () {
+    const { utility, groups, clusters, actions, savings, intl } = this.props;
+    const { goToListView, addBudget } = actions;
+    const areas = this.props.areas.map(area => ({
       key: area.key,
       value: area.key,
       label: area.title,
       feature: getFeature(area),
-    })); 
+    }));
 
 
     const savingsItems = savings
-    //.filter(scenario => scenario.completedOn != null)
-    .map(scenario => ({ 
-        label: scenario.name, 
-        value: scenario.key, 
-        parameters: scenario.parameters 
-    }));
+      //.filter(scenario => scenario.completedOn != null)
+      .map(scenario => ({
+        label: scenario.name,
+        value: scenario.key,
+        parameters: scenario.parameters
+      }));
     const _t = x => intl.formatMessage({ id: x });
     return (
       <bs.Panel header={<h3>{_t('Budgets.Add.title')}</h3>}>
         <bs.Row>
           <bs.Col md={6}>
           </bs.Col>
-          <bs.Col md={6} style={{textAlign: 'right'}}>
+          <bs.Col md={6} style={{ textAlign: 'right' }}>
             <bs.Button bsStyle='success' onClick={() => { goToListView(); }}><i className='fa fa-chevron-left'></i> Back to all</bs.Button>
           </bs.Col>
         </bs.Row>
-        <hr/>
-        
+        <hr />
+
         <Wizard
-          onComplete={(values) => { 
-            addBudget(values); 
-            goToListView();  
+          onComplete={(values) => {
+            addBudget(values);
+            goToListView();
           }}
           validateLive
           childrenProps={{ intl }}
@@ -112,7 +109,7 @@ var BudgetsAdd = React.createClass ({
           <SelectBudgetType
             id='budgetType'
             initialValue={{}}
-            next={value => value.selected === 'estimate' ? 'goal' : 'scenario'} 
+            next={value => value.selected === 'estimate' ? 'goal' : 'scenario'}
             validate={validateBudgetType}
           />
           <SelectSavingsScenario
@@ -123,13 +120,13 @@ var BudgetsAdd = React.createClass ({
           />
           <SetSavingsPercentage
             id='savings'
-            initialValue={{savings: parseFloat(0).toFixed(2)}}
+            initialValue={{ savings: parseFloat(0).toFixed(2) }}
             validate={validateSavingsPercentage}
-            next={value => 'title'} 
+            next={value => 'title'}
           />
           <SetGoal
             id='goal'
-            initialValue={{goal: parseFloat(0).toFixed(2)}}
+            initialValue={{ goal: parseFloat(0).toFixed(2) }}
             validate={validateGoal}
           />
           <SelectDistribution
@@ -146,10 +143,10 @@ var BudgetsAdd = React.createClass ({
             validate={validateWho}
           />
           <SelectWhere
-           id='spatial'
-           areas={areas}
-           initialValue={{}}
-           validate={validateWhere}
+            id='spatial'
+            areas={areas}
+            initialValue={{}}
+            validate={validateWhere}
           />
           <SelectWho
             id='excludePopulation'
@@ -173,8 +170,8 @@ var BudgetsAdd = React.createClass ({
             id='confirmation'
             initialValue={{}}
           />
-         </Wizard>
-    </bs.Panel>
+        </Wizard>
+      </bs.Panel>
     );
   }
 });

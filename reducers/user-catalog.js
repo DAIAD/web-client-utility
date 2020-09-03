@@ -3,111 +3,45 @@ var types = require('../constants/UserCatalogActionTypes');
 
 var { extractFeatures } = require('../helpers/common');
 
-var _createInitialSelectionState = function() {
+var _createInitialSelectionState = function () {
   return {
-    enabled : false,
-    selected : {}
+    enabled: false,
+    selected: {}
   };
 };
 
-var _createInitialeDataState = function() {
+var _createInitialeDataState = function () {
   return {
-    total : 0,
-    index : 0,
-    size : 10,
-    accounts : null,
-    features : null
+    total: 0,
+    index: 0,
+    size: 10,
+    accounts: null,
+    features: null
   };
 };
 
-var _createInitialeState = function() {
+var _createInitialeState = function () {
   return {
-    isLoading : false,
-    query : {
-      index : 0,
-      size : 10,
-      text : null,
-      serial : null,
-      geometry : null,
+    isLoading: false,
+    query: {
+      index: 0,
+      size: 10,
+      text: null,
+      serial: null,
+      geometry: null,
       favorite: false
     },
-    data : _createInitialeDataState(),
-    interval : [
-        moment().subtract(30, 'days'), moment()
+    data: _createInitialeDataState(),
+    interval: [
+      moment().subtract(30, 'days'), moment()
     ],
-    charts : {},
-    search : 'text',
-    selection : _createInitialSelectionState()
+    charts: {},
+    search: 'text',
+    selection: _createInitialSelectionState()
   };
 };
 
-var _fillMeterSeries = function(interval, data) {
-  var d;
-  var allPoints = [];
-
-  var ref = interval[1].clone();
-  var days = interval[1].diff(interval[0], 'days') + 1;
-
-  if ((!data) || (data.values.length === 0)) {
-    for (d = days; d > 0; d--) {
-      allPoints.push({
-        volume : 0,
-        difference : 0,
-        timestamp : ref.clone().toDate().getTime()
-      });
-
-      ref.subtract(1, 'days');
-    }
-  } else {
-    var index = 0;
-    var values = data.values;
-
-    values.sort(function(p1, p2) {
-      return (p2.timestamp - p1.timestamp);
-    });
-
-    for (d = days; d > 0; d--) {
-      if (index === values.length) {
-        allPoints.push({
-          volume : 0,
-          difference : 0,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isBefore(values[index].timestamp, 'day')) {
-        index++;
-      } else if (ref.isAfter(values[index].timestamp, 'day')) {
-        allPoints.push({
-          volume : 0,
-          difference : 0,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        ref.subtract(1, 'days');
-      } else if (ref.isSame(values[index].timestamp, 'day')) {
-        allPoints.push({
-          difference : values[index].difference,
-          volume : values[index].volume,
-          timestamp : ref.clone().toDate().getTime()
-        });
-
-        index++;
-        ref.subtract(1, 'days');
-      }
-    }
-  }
-
-  allPoints.sort(function(p1, p2) {
-    return (p1.timestamp - p2.timestamp);
-  });
-
-  data.values = allPoints;
-
-  return data;
-};
-
-var selectionReducer = function(state, action) {
+var selectionReducer = function (state, action) {
   switch (action.type) {
     case types.USER_CATALOG_TOGGLE_CONSUMER:
       var selected = state.selected;
@@ -118,33 +52,33 @@ var selectionReducer = function(state, action) {
         selected[action.id] = true;
       }
 
-      action.accounts.forEach( a => {
-        if(a.id === action.id){
+      action.accounts.forEach(a => {
+        if (a.id === action.id) {
           a.selected = !a.selected;
         }
       });
-      
+
       return Object.assign({}, state, {
-        enabled : state.enabled,
-        selected : selected
+        enabled: state.enabled,
+        selected: selected
       });
 
     case types.USER_CATALOG_CREATE_BAG_OF_CONSUMER:
       return Object.assign({}, state, {
-        enabled : action.enabled,
-        selected : {}
+        enabled: action.enabled,
+        selected: {}
       });
 
     case types.USER_CATALOG_SAVE_BAG_OF_CONSUMER:
       return Object.assign({}, state, {
-        enabled : state.enabled,
-        selected : {}
+        enabled: state.enabled,
+        selected: {}
       });
 
     case types.USER_CATALOG_DISCARD_BAG_OF_CONSUMER:
       return Object.assign({}, state, {
-        enabled : false,
-        selected : {}
+        enabled: false,
+        selected: {}
       });
 
     default:
@@ -152,65 +86,65 @@ var selectionReducer = function(state, action) {
   }
 };
 
-var dataReducer = function(state, action) {
+var dataReducer = function (state, action) {
   switch (action.type) {
     case types.USER_CATALOG_DISCARD_BAG_OF_CONSUMER:
-      state.accounts.forEach( a => {
+      state.accounts.forEach(a => {
         a.selected = false;
       });
-      
+
       return state;
-      
+
     case types.USER_CATALOG_REQUEST_COMPLETE:
 
       if (action.success === true) {
-        action.accounts.forEach( a => {
+        action.accounts.forEach(a => {
           if (action.selection.selected.hasOwnProperty(a.id)) {
             a.selected = true;
           } else {
             a.selected = false;
           }
-          
+
           if (a.meter) {
             a.serial = a.meter.serial;
           }
         });
 
         return Object.assign({}, state, {
-          total : action.total || 0,
-          index : action.index || 0,
-          size : action.size || 10,
-          accounts : action.accounts || [],
-          features : extractFeatures(action.accounts || [])
+          total: action.total || 0,
+          index: action.index || 0,
+          size: action.size || 10,
+          accounts: action.accounts || [],
+          features: extractFeatures(action.accounts || [])
         });
       } else {
         return Object.assign({}, state, {
-          total : 0,
-          index : 0,
-          size : 10,
-          accounts : [],
-          features : extractFeatures([])
+          total: 0,
+          index: 0,
+          size: 10,
+          accounts: [],
+          features: extractFeatures([])
         });
       }
 
     case types.USER_CATALOG_SAVE_BAG_OF_CONSUMER_RESPONSE:
-      if(action.success) {
-        state.accounts.forEach( a => {
+      if (action.success) {
+        state.accounts.forEach(a => {
           a.selected = false;
         });
       }
-      
+
       return state;
     case types.USER_CATALOG_ADD_FAVORITE_RESPONSE:
     case types.USER_CATALOG_REMOVE_FAVORITE_RESPONSE:
       if (action.success === true) {
-        state.accounts.forEach(function(account) {
+        state.accounts.forEach(function (account) {
           if (account.id === action.userKey) {
             account.favorite = action.favorite;
           }
         });
         return Object.assign({}, state, {
-          accounts : state.accounts || [],
+          accounts: state.accounts || [],
         });
       } else {
         return state.data;
@@ -221,82 +155,82 @@ var dataReducer = function(state, action) {
   }
 };
 
-var userCatalog = function(state, action) {
+var userCatalog = function (state, action) {
   switch (action.type) {
     case types.USER_CATALOG_ADD_FAVORITE_REQUEST:
     case types.USER_CATALOG_REMOVE_FAVORITE_REQUEST:
     case types.USER_CATALOG_SAVE_BAG_OF_CONSUMER_REQUEST:
       return Object.assign({}, state, {
-        isLoading : true,
+        isLoading: true,
       });
 
     case types.USER_CATALOG_CHANGE_INDEX:
 
       return Object.assign({}, state, {
-        isLoading : true,
-        query : Object.assign({}, state.query, {
-          index : (action.index < 0 ? 0 : action.index)
+        isLoading: true,
+        query: Object.assign({}, state.query, {
+          index: (action.index < 0 ? 0 : action.index)
         })
       });
 
     case types.USER_CATALOG_FILTER_TEXT:
       return Object.assign({}, state, {
-        query : Object.assign({}, state.query, {
-          text : action.text || '',
-          index : 0
+        query: Object.assign({}, state.query, {
+          text: action.text || '',
+          index: 0
         })
       });
 
     case types.USER_CATALOG_FILTER_SERIAL:
       return Object.assign({}, state, {
-        query : Object.assign({}, state.query, {
-          serial : action.serial || '',
-          index : 0
+        query: Object.assign({}, state.query, {
+          serial: action.serial || '',
+          index: 0
         })
       });
 
     case types.USER_CATALOG_FILTER_FAVORITE:
       return Object.assign({}, state, {
-        query : Object.assign({}, state.query, {
+        query: Object.assign({}, state.query, {
           favorite: !state.query.favorite,
-          index : 0
+          index: 0
         })
       });
 
     case types.USER_CATALOG_SET_SEARCH_GEOMETRY:
       return Object.assign({}, state, {
-        query : Object.assign({}, state.query, {
-          geometry : action.geometry || null,
-          index : 0
+        query: Object.assign({}, state.query, {
+          geometry: action.geometry || null,
+          index: 0
         })
       });
 
     case types.USER_CATALOG_FILTER_CLEAR:
       return Object.assign({}, state, {
-        query : Object.assign({}, state.query, {
-          text : null,
-          serial : null,
+        query: Object.assign({}, state.query, {
+          text: null,
+          serial: null,
           favorite: false
         })
       });
 
     case types.USER_CATALOG_REQUEST_INIT:
       return Object.assign({}, state, {
-        isLoading : true
+        isLoading: true
       });
 
     case types.USER_CATALOG_REQUEST_COMPLETE:
       action.selection = state.selection;
-      
+
       return Object.assign({}, state, {
-        isLoading : false,
-        data : dataReducer(state.data, action)
+        isLoading: false,
+        data: dataReducer(state.data, action)
       });
 
     case types.USER_CATALOG_SAVE_BAG_OF_CONSUMER_RESPONSE:
-      if(action.success) {
+      if (action.success) {
         return Object.assign({}, state, {
-          isLoading : false,
+          isLoading: false,
           data: dataReducer(state.data, action),
           selection: _createInitialSelectionState()
         });
@@ -306,42 +240,42 @@ var userCatalog = function(state, action) {
 
     case types.USER_CATALOG_CHART_REQUEST:
       var requestCharts = state.charts;
-      requestCharts[action.userKey] = {series: null, query:action.query};
-      
+      requestCharts[action.userKey] = { series: null, query: action.query };
+
       return Object.assign({}, state, {
-        isLoading : true,
-        charts : requestCharts,
-        finished: false           
-      });  
+        isLoading: true,
+        charts: requestCharts,
+        finished: false
+      });
 
     case types.USER_CATALOG_CHART_RESPONSE:
       var responseCharts = state.charts;
       if (action.success) {
-        responseCharts[action.userKey] = {series: action.dataChart};    
+        responseCharts[action.userKey] = { series: action.dataChart };
 
         return Object.assign({}, state, {
-          isLoading : false,
-          charts : responseCharts,
+          isLoading: false,
+          charts: responseCharts,
           finished: action.timestamp
         });
       } else {
-        responseCharts[action.userKey] = {series: null};
+        responseCharts[action.userKey] = { series: null };
         return Object.assign({}, state, {
-          isLoading : false,
-          charts : responseCharts,
-          finished: action.timestamp          
-        });      
+          isLoading: false,
+          charts: responseCharts,
+          finished: action.timestamp
+        });
       }
-      
+
     case types.USER_CATALOG_CLEAR_CHART:
       return Object.assign({}, state, {
-        isLoading : false,
-        charts : {}
+        isLoading: false,
+        charts: {}
       });
 
     case types.USER_CATALOG_SET_SEARCH_MODE:
       return Object.assign({}, state, {
-        search : action.search
+        search: action.search
       });
 
     case types.USER_RECEIVED_LOGOUT:
@@ -350,8 +284,8 @@ var userCatalog = function(state, action) {
     case types.USER_CATALOG_ADD_FAVORITE_RESPONSE:
     case types.USER_CATALOG_REMOVE_FAVORITE_RESPONSE:
       return Object.assign({}, state, {
-        isLoading : false,
-        data : dataReducer(state.data, action)
+        isLoading: false,
+        data: dataReducer(state.data, action)
       });
 
     case types.USER_CATALOG_CREATE_BAG_OF_CONSUMER:
@@ -361,8 +295,8 @@ var userCatalog = function(state, action) {
       action.accounts = state.data.accounts;
 
       return Object.assign({}, state, {
-        data : dataReducer(state.data, action),
-        selection : selectionReducer(state.selection, action)
+        data: dataReducer(state.data, action),
+        selection: selectionReducer(state.selection, action)
       });
 
     default:

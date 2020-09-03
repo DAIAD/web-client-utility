@@ -2,17 +2,17 @@ var React = require('react');
 var bs = require('react-bootstrap');
 var CheckboxGroup = require('react-checkbox-group');
 var DisplayParams = require('../../DisplayParams');
-var { getFriendlyParams, getPopulationValue, getAllPopulationGroups } = require('../../../helpers/wizard');
+var { getPopulationValue, getAllPopulationGroups } = require('../../../helpers/wizard');
 
 var WhoItem = React.createClass({
-  getInitialState: function() {
+  getInitialState: function () {
     return {
       showModal: false,
       selectedCluster: Array.isArray(this.props.clusters) && this.props.clusters[0] ? this.props.clusters[0] : null,
-      selectedGroups: this.valueToGroups(this.props.value) 
+      selectedGroups: this.valueToGroups(this.props.value)
     };
   },
-  componentWillReceiveProps: function(nextProps) {
+  componentWillReceiveProps: function (nextProps) {
     if (Array.isArray(nextProps.clusters) && nextProps.clusters[0]) {
       this.setState({ selectedCluster: nextProps.clusters[0] });
     }
@@ -21,13 +21,13 @@ var WhoItem = React.createClass({
       this.setState({ selectedGroups: [] });
     }
   },
-  valueToGroups: function(value) {
-    return Array.isArray(value) ? 
+  valueToGroups: function (value) {
+    return Array.isArray(value) ?
       getAllPopulationGroups(this.props.clusters, this.props.utility).filter(group => value.find(g => g.group === group.key) ? true : false)
-        :
-          [];
+      :
+      [];
   },
-  render: function() {
+  render: function () {
     const { clusters, setValue, value, noAll, intl, id } = this.props;
     const { selectedCluster, selectedGroups } = this.state;
     const _t = x => intl.formatMessage({ id: x });
@@ -38,7 +38,7 @@ var WhoItem = React.createClass({
     if (!clusters) return null;
 
     const allGroups = getAllPopulationGroups(this.props.clusters, this.props.utility);
-    
+
     const displayParams = clusters.map(cluster => {
       const selectedClusterGroups = selectedGroups.filter(group => group.clusterKey === cluster.key);
       return {
@@ -46,75 +46,75 @@ var WhoItem = React.createClass({
         value: selectedClusterGroups.map(g => g.name)
       };
     });
-    
+
     return (
       <div>
         <bs.Col md={4}>
           <bs.ButtonGroup vertical block>
-            { !noAll ? 
-              <bs.Button bsSize='large' bsStyle={value.selected === 'all' ? 'primary' : 'default'} style={{marginBottom: 10}} onClick={() => { setValue(getPopulationValue('all', allLabel, this.props.utility)); }}>{allLabel}</bs.Button>
-              : 
-                <div />
+            {!noAll ?
+              <bs.Button bsSize='large' bsStyle={value.selected === 'all' ? 'primary' : 'default'} style={{ marginBottom: 10 }} onClick={() => { setValue(getPopulationValue('all', allLabel, this.props.utility)); }}>{allLabel}</bs.Button>
+              :
+              <div />
             }
-            <bs.Button bsSize='large' bsStyle={Array.isArray(value) ? 'primary' : 'default'}  style={{marginBottom: 10}} onClick={() => this.setState({showModal: true})}>{_t('Wizard.common.choose')}</bs.Button>
+            <bs.Button bsSize='large' bsStyle={Array.isArray(value) ? 'primary' : 'default'} style={{ marginBottom: 10 }} onClick={() => this.setState({ showModal: true })}>{_t('Wizard.common.choose')}</bs.Button>
           </bs.ButtonGroup>
         </bs.Col>
         <bs.Col md={7}>
-          { value.selected !== 'all' ?
-          <DisplayParams 
-            params={displayParams}
-            limit={40}
-            style={{ width: '80%' }}
-          /> 
+          {value.selected !== 'all' ?
+            <DisplayParams
+              params={displayParams}
+              limit={40}
+              style={{ width: '80%' }}
+            />
             : <div />
           }
         </bs.Col>
-        
+
         <bs.Modal
           show={this.state.showModal}
           animation={false}
           bsSize='large'
           backdrop='static'
-          onHide={() => this.setState({showModal: false})}
-          >
+          onHide={() => this.setState({ showModal: false })}
+        >
           <bs.Modal.Header closeButton>
             <h4>{_t(`Wizard.items.${id}.modal`)}</h4>
           </bs.Modal.Header>
           <bs.Modal.Body>
-            
+
             <bs.Row>
               <bs.Tabs position='top' tabWidth={20} activeKey={selectedCluster.key} onSelect={(val) => this.setState({ selectedCluster: clusters.find(cluster => cluster.key === val) })}>
                 {
                   clusters.map((cluster, idx) => (
                     <bs.Tab key={idx} eventKey={cluster.key} title={cluster.name} />
-                    ))
+                  ))
                 }
               </bs.Tabs>
             </bs.Row>
-            
+
             <bs.Row style={{ marginTop: 15 }}>
               <bs.Col md={4}>
-                <CheckboxGroup name='select-groups' value={selectedGroups.map(group => group.key)} onChange={newValues =>  this.setState({ selectedGroups: newValues.map(key => allGroups.find(group => group.key === key))  })}>
-                {
-                  Checkbox => 
-                  <ul style={{listStyle: 'none'}}>
-                    {
-                      selectedCluster.groups  
-                      .map((group, idx) => (
-                        <li key={idx}><label><Checkbox value={group.key}/> {group.name} </label></li>
-                      ))
-                    }
-                  </ul>
-                }
+                <CheckboxGroup name='select-groups' value={selectedGroups.map(group => group.key)} onChange={newValues => this.setState({ selectedGroups: newValues.map(key => allGroups.find(group => group.key === key)) })}>
+                  {
+                    Checkbox =>
+                      <ul style={{ listStyle: 'none' }}>
+                        {
+                          selectedCluster.groups
+                            .map((group, idx) => (
+                              <li key={idx}><label><Checkbox value={group.key} /> {group.name} </label></li>
+                            ))
+                        }
+                      </ul>
+                  }
                 </CheckboxGroup>
               </bs.Col>
-            
-                <bs.Col md={6}>
-                  <DisplayParams 
-                    params={displayParams}
-                    limit={40}
-                    style={{ width: '80%' }}
-                  />
+
+              <bs.Col md={6}>
+                <DisplayParams
+                  params={displayParams}
+                  limit={40}
+                  style={{ width: '80%' }}
+                />
               </bs.Col>
 
               <bs.Col xs={3} md={2}>
@@ -125,8 +125,8 @@ var WhoItem = React.createClass({
 
           </bs.Modal.Body>
           <bs.Modal.Footer>
-            <bs.Button onClick={() => { setValue(selectedGroups.map(group => group.value));  this.setState({showModal: false}); }}>OK</bs.Button>
-            <bs.Button onClick={() => this.setState({showModal: false})}>{_t('Buttons.Cancel')}</bs.Button>
+            <bs.Button onClick={() => { setValue(selectedGroups.map(group => group.value)); this.setState({ showModal: false }); }}>OK</bs.Button>
+            <bs.Button onClick={() => this.setState({ showModal: false })}>{_t('Buttons.Cancel')}</bs.Button>
           </bs.Modal.Footer>
         </bs.Modal>
       </div>

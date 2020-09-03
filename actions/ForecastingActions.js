@@ -215,7 +215,7 @@ var ForecastingActions = {
             }
             var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
             var res1 = (resultSets || []).map(rs => {
-              var [g, rr] = population.fromString(rs.label);
+              var [g] = population.fromString(rs.label);
 
               //sort points on timestamp in order to handle pre-aggregated data.
               rs.points = _.orderBy(rs.points, 'timestamp', 'desc');

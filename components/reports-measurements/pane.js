@@ -15,13 +15,12 @@ var Errors = require('../../constants/Errors');
 var Granularity = require('../../model/granularity');
 var TimeSpan = require('../../model/timespan');
 var population = require('../../model/population');
-var { computeKey } = require('../../reports').measurements;
 var { timespanPropType, populationPropType, seriesPropType, configPropType } = require('../../prop-types');
 var { equalsPair } = require('../../helpers/comparators');
 
 var Chart = require('./chart');
 
-var { Button, Collapse, Panel, ListGroup, ListGroupItem, Accordion } = Bootstrap;
+var { Panel, ListGroup, ListGroupItem, Accordion } = Bootstrap;
 
 var { PropTypes } = React;
 
@@ -81,8 +80,6 @@ var computeTimespan = function (val) {
   }
 };
 
-var Option = ({ value, text }) => (<option value={value} key={value}>{text}</option>);
-
 var getDefaultQuery = function (object) {
   var { config } = object.context;
   var defaultPopulation = new population.Utility(config.utility.key, config.utility.name);
@@ -130,7 +127,7 @@ var shapeFavouriteQueries = function (favouriteQueries, config) {
     query.query = {};
 
     //construct population 
-    var [g, rr] = population.fromString(favouriteQueries[i].population[0].label);
+    var [g] = population.fromString(favouriteQueries[i].population[0].label);
     var [clusterKey, groupKey] = population.extractGroupParams(g);
     if (favouriteQueries[i].population.length === 1) {
       var target;
@@ -462,10 +459,10 @@ var ReportPanel = React.createClass({
       (nextProps.level != this.props.level) ||
       (nextProps.reportName != this.props.reportName)
     ) {
-      console.info(sprintf(
-        'The panel will switch to report (%s, %s, %s)',
-        nextProps.field, nextProps.level, nextProps.reportName
-      ));
+      // console.log(sprintf(
+      //   'The panel will switch to report (%s, %s, %s)',
+      //   nextProps.field, nextProps.level, nextProps.reportName
+      // ));
       console.assert(nextContext.config == this.context.config,
         'Unexpected change for configuration in context!');
 
@@ -521,7 +518,7 @@ var ReportPanel = React.createClass({
       changedState, _.toPairs(ignoredNextState), equalsPair
     );
 
-    if (changedState.length == 0) console.info('Skipping update of <ReportPanel>');
+    // if (changedState.length == 0) console.info('Skipping update of <ReportPanel>');
     return (changedState.length > 0);
   },
 
@@ -743,10 +740,10 @@ var ReportPanel = React.createClass({
     switch (key) {
       case 'refresh':
         {
-          console.debug(sprintf(
-            'About to refresh data for report (%s, %s, %s)...',
-            field, level, reportName
-          ));
+          // console.debug(sprintf(
+          //   'About to refresh data for report (%s, %s, %s)...',
+          //   field, level, reportName
+          // ));
           this.props.refreshMultipleData(field, level, reportName);
           this.setState({ draw: true });
         }

@@ -1,7 +1,6 @@
 var _ = require('lodash');
 
 var React = require('react');
-var ReactBootstrap = require('react-bootstrap');
 
 var PropTypes = React.PropTypes;
 var commonPropTypes = {

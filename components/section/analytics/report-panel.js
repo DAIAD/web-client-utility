@@ -1,10 +1,10 @@
 var React = require('react');
 var Redux = require('react-redux');
 
-var {MeasurementsReportPanel} = require('../../reports');
+var { MeasurementsReportPanel } = require('../../reports');
 
 var PropTypes = React.PropTypes;
-var {configPropType} = require('../../../prop-types');
+var { configPropType } = require('../../../prop-types');
 
 var Page = React.createClass({
   displayName: 'Analytics.ReportPanel',
@@ -18,8 +18,8 @@ var Page = React.createClass({
     intl: React.PropTypes.object
   },
 
-  render: function() {
-    var {routes, config} = this.props;
+  render: function () {
+    var { config } = this.props;
     return (
       <div className="container-fluid">
         <div className="row">

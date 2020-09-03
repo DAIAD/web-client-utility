@@ -7,7 +7,6 @@ var Select = require('react-select').default;
 var DateRangePicker = require('react-bootstrap-daterangepicker');
 var UserSearchTextBox = require('../UserSearchTextBox');
 var Chart = require('../reports-measurements/chart');
-var population = require('../../model/population');
 
 var { setUser, setGroup, setInterval, getUtilityChart, getUserChart, 
       filterByType, getGroups, addFavourite} = require('../../actions/ForecastingActions');

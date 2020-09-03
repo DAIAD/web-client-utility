@@ -5,263 +5,264 @@ var adminAPI = require('../api/admin');
 var queryAPI = require('../api/query');
 var population = require('../model/population');
 
-var _buildGroupQuery = function(key, label, timezone) {
+var _buildGroupQuery = function (key, label, timezone) {
   var interval = [
-      moment().subtract(30, 'days').valueOf(), moment().valueOf()
+    moment().subtract(30, 'days').valueOf(), moment().valueOf()
   ];
 
   return {
-    'query' : {
-      'timezone' : timezone,
-      'time' : {
-        'type' : 'ABSOLUTE',
-        'start' : interval[0],
-        'end' : interval[1],
-        'granularity' : 'DAY'
+    'query': {
+      'timezone': timezone,
+      'time': {
+        'type': 'ABSOLUTE',
+        'start': interval[0],
+        'end': interval[1],
+        'granularity': 'DAY'
       },
-      'population' : [
+      'population': [
         {
-          'type' : 'GROUP',
-          'label' : label,
-          'group' : key
+          'type': 'GROUP',
+          'label': label,
+          'group': key
         }
       ],
-      'source' : 'METER',
-      'metrics' : [
+      'source': 'METER',
+      'metrics': [
         'AVERAGE'
       ]
     }
   };
 };
 
-var _buildUserQuery = function(id, name, timezone, from, to) {
+var _buildUserQuery = function (id, name, timezone, from, to) {
   return {
-    'queries' : [{
-      'timezone' : timezone,
-      'time' : {
-        'type' : 'ABSOLUTE',
-        'start' : from,
-        'end' : to,
-        'granularity' : 'DAY'
+    'queries': [{
+      'timezone': timezone,
+      'time': {
+        'type': 'ABSOLUTE',
+        'start': from,
+        'end': to,
+        'granularity': 'DAY'
       },
-      'population' : [
+      'population': [
         {
-          'type' : 'USER',
-          'label' : name,
-          'users' : [
+          'type': 'USER',
+          'label': name,
+          'users': [
             id
           ]
         }
       ],
-      'overlap':null,
-      'source' : 'METER',
-      'metrics' : [
+      'overlap': null,
+      'source': 'METER',
+      'metrics': [
         'AVERAGE'
-      ]}
+      ]
+    }
     ]
   };
 };
 
-var _buildPopulationQuery = function(population, timezone) {
+var _buildPopulationQuery = function (population, timezone) {
   var interval = [
-      moment().subtract(30, 'days').valueOf(), moment().valueOf()
+    moment().subtract(30, 'days').valueOf(), moment().valueOf()
   ];
   return {
-    "level":"week",
-    "field":"volume",
-    "overlap":null,
-    "queries":[{
+    "level": "week",
+    "field": "volume",
+    "overlap": null,
+    "queries": [{
       "time": {
-        "type":"ABSOLUTE",
-        "granularity":"DAY",
-        "start":interval[0],
-        "end":interval[1]
+        "type": "ABSOLUTE",
+        "granularity": "DAY",
+        "start": interval[0],
+        "end": interval[1]
       },
-      "population":population,
-      "source":"METER",
-      "metrics":["AVERAGE"]
-      }
+      "population": population,
+      "source": "METER",
+      "metrics": ["AVERAGE"]
+    }
     ]
   };
 };
 
-var _userChartRequest = function(query, userKey) {
+var _userChartRequest = function (query, userKey) {
   return {
-    type : types.USER_CHART_REQUEST,
-    query : query,
-    userKey : userKey    
+    type: types.USER_CHART_REQUEST,
+    query: query,
+    userKey: userKey
   };
 };
 
-var _userChartResponse = function(success, errors, data, userKey, t=null) {
+var _userChartResponse = function (success, errors, data, userKey, t = null) {
   return {
-    type : types.USER_CHART_RESPONSE,
-    success : success,
-    errors : errors,
-    dataChart : data,
-    userKey : userKey,
+    type: types.USER_CHART_RESPONSE,
+    success: success,
+    errors: errors,
+    dataChart: data,
+    userKey: userKey,
     timestamp: (t || new Date()).getTime()
   };
 };
 
-var _groupChartRequest = function(query, key) {
+var _groupChartRequest = function (query, key) {
   return {
-    type : types.USER_GROUP_CHART_REQUEST,
-    query : query,
-    groupKey : key
+    type: types.USER_GROUP_CHART_REQUEST,
+    query: query,
+    groupKey: key
   };
 };
 
-var _groupChartResponse = function(success, errors, data, key, t=null) {
+var _groupChartResponse = function (success, errors, data, key, t = null) {
   return {
-    type : types.USER_GROUP_CHART_RESPONSE,
-    success : success,
-    errors : errors,
-    dataChart : data,
-    groupKey : key,
+    type: types.USER_GROUP_CHART_RESPONSE,
+    success: success,
+    errors: errors,
+    dataChart: data,
+    groupKey: key,
     timestamp: (t || new Date()).getTime()
   };
 };
 
-var requestedUser = function() {
+var requestedUser = function () {
   return {
-    type : types.USER_REQUEST_USER
+    type: types.USER_REQUEST_USER
   };
 };
 
-var receivedUser = function(success, errors, user, meters, devices, configurations, groups, favorite) {
+var receivedUser = function (success, errors, user, meters, devices, configurations, groups, favorite) {
   return {
-    type : types.USER_RECEIVE_USER_INFO,
-    success : success,
-    errors : errors,
-    favorite : favorite,
-    user : user,
-    meters : meters,
-    devices : devices,
-    configurations : configurations,
-    groups : groups
+    type: types.USER_RECEIVE_USER_INFO,
+    success: success,
+    errors: errors,
+    favorite: favorite,
+    user: user,
+    meters: meters,
+    devices: devices,
+    configurations: configurations,
+    groups: groups
   };
 };
 
-var selectAmphiro = function(userKey, deviceKey) {
+var selectAmphiro = function (userKey, deviceKey) {
   return {
-    type : types.SELECT_AMPHIRO,
-    userKey : userKey,
-    deviceKey : deviceKey
+    type: types.SELECT_AMPHIRO,
+    userKey: userKey,
+    deviceKey: deviceKey
   };
 };
 
-var requestedSessions = function(userKey, deviceKey) {
+var requestedSessions = function (userKey, deviceKey) {
   return {
-    type : types.AMPHIRO_REQUEST,
-    userKey : userKey,
-    deviceKey : deviceKey
+    type: types.AMPHIRO_REQUEST,
+    userKey: userKey,
+    deviceKey: deviceKey
   };
 };
 
-var receivedSessions = function(success, errors, devices, t=null) {
+var receivedSessions = function (success, errors, devices, t = null) {
   return {
-    type : types.AMPHIRO_RESPONSE,
-    success : success,
-    errors : errors,
-    devices : devices,
+    type: types.AMPHIRO_RESPONSE,
+    success: success,
+    errors: errors,
+    devices: devices,
     timestamp: (t || new Date()).getTime()
   };
 };
 
-var requestedMeters = function(userKey) {
+var requestedMeters = function (userKey) {
   return {
-    type : types.METER_REQUEST,
-    userKey : userKey
+    type: types.METER_REQUEST,
+    userKey: userKey
   };
 };
 
-var receivedMeters = function(success, errors, meters) {
+var receivedMeters = function (success, errors, meters) {
   return {
-    type : types.METER_RESPONSE,
-    success : success,
-    errors : errors,
-    meters : meters
+    type: types.METER_RESPONSE,
+    success: success,
+    errors: errors,
+    meters: meters
   };
 };
 
-var requestedGroup = function(groupKey, label) {
+var requestedGroup = function (groupKey, label) {
   return {
-    type : types.GROUP_DATA_REQUEST,
-    groupKey : groupKey,
-    label : label
+    type: types.GROUP_DATA_REQUEST,
+    groupKey: groupKey,
+    label: label
   };
 };
 
-var receivedGroup = function(success, errors, groupKey, meters) {
+var receivedGroup = function (success, errors, groupKey, meters) {
   return {
-    type : types.GROUP_DATA_RESPONSE,
-    success : success,
-    errors : errors,
-    groupKey : groupKey,
-    data : (meters.length === 0 ? null : meters[0])
+    type: types.GROUP_DATA_RESPONSE,
+    success: success,
+    errors: errors,
+    groupKey: groupKey,
+    data: (meters.length === 0 ? null : meters[0])
   };
 };
 
-var requestedExport = function(userKey, username) {
+var requestedExport = function (userKey, username) {
   return {
-    type : types.EXPORT_REQUEST,
-    userKey : userKey,
-    username : username
+    type: types.EXPORT_REQUEST,
+    userKey: userKey,
+    username: username
   };
 };
 
-var receivedExport = function(success, errors, token) {
+var receivedExport = function (success, errors, token) {
   return {
-    type : types.EXPORT_RESPONSE,
-    success : success,
-    errors : errors,
-    token : token
+    type: types.EXPORT_RESPONSE,
+    success: success,
+    errors: errors,
+    token: token
   };
 };
 
 var UserActions = {
 
-  showUser : function(id, timezone) {
-    return function(dispatch, getState) {
+  showUser: function (id, timezone) {
+    return function (dispatch, getState) {
       dispatch(requestedUser());
 
       return userAPI.fetchUser(id).then(
-          function(response) {
-            dispatch(receivedUser(response.success, response.errors, response.user, response.meters, response.devices,
-                response.configurations, response.groups, response.favorite));
+        function (response) {
+          dispatch(receivedUser(response.success, response.errors, response.user, response.meters, response.devices,
+            response.configurations, response.groups, response.favorite));
 
-            var interval = getState().user.interval;
-            var query = _buildUserQuery(id, name, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime()); 
-            dispatch(_userChartRequest(query, id));
-            
-            if (response.meters.length > 0) {
-              var promises =[];
+          var interval = getState().user.interval;
+          var query = _buildUserQuery(id, name, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());
+          dispatch(_userChartRequest(query, id));
 
-              var name = response.user.fullname;
+          if (response.meters.length > 0) {
+            var promises = [];
 
-              promises.push(queryAPI.queryMeasurements({query: query.queries[0]}));
+            var name = response.user.fullname;
 
-              Promise.all(promises).then(
-                res => {
+            promises.push(queryAPI.queryMeasurements({ query: query.queries[0] }));
+
+            Promise.all(promises).then(
+              res => {
                 var source = query.queries[0].source; //source is same for all queries
                 var resAll = [];
-                for(let m=0; m< res.length; m++){
+                for (let m = 0; m < res.length; m++) {
                   if (res[m].errors.length) {
-                    throw 'The request is rejected: ' + res[m].errors[0].description; 
+                    throw 'The request is rejected: ' + res[m].errors[0].description;
                   }
                   var resultSets = res[m].meters;
                   var res1 = (resultSets || []).map(rs => {
                     var g = new population.User(id, rs.label);
                     g.name = name;
-                    
+
                     //sort points on timestamp in order to handle pre-aggregated data.
                     rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
-              
+
                     var timespan1;
-                    if(rs.points.length !== 0){
+                    if (rs.points.length !== 0) {
                       //Recalculate xAxis timespan based on returned data. (scale). If no data, keep timespan from query
-                      timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+                      timespan1 = [rs.points[rs.points.length - 1].timestamp, rs.points[0].timestamp];
                     } else {
                       timespan1 = [query.queries[0].time.start, query.queries[0].time.end];
                     }
@@ -274,84 +275,84 @@ var UserActions = {
                       granularity: query.queries[0].time.granularity,
                       metric,
                       population: g,
-                      forecast: m===0 ? false : true, //first promise is actual data, second is forecast data
+                      forecast: m === 0 ? false : true, //first promise is actual data, second is forecast data
                       data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
                     }));
                     return _.flatten(res2);
                   });
 
-                  resAll.push(_.flatten(res1)); 
+                  resAll.push(_.flatten(res1));
                 }
 
-                var success = res.every(x => x.success === true); 
+                var success = res.every(x => x.success === true);
                 var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
 
                 dispatch(_userChartResponse(success, errors, _.flatten(resAll), id));
 
                 return _.flatten(resAll);
               });
-            } else {
-              dispatch(_userChartResponse(true, [], [], id)); //no meters available, return empty data.
-            }
-          }, function(error) {
-            dispatch(receivedUser(false, error, null));
-          });
+          } else {
+            dispatch(_userChartResponse(true, [], [], id)); //no meters available, return empty data.
+          }
+        }, function (error) {
+          dispatch(receivedUser(false, error, null));
+        });
     };
   },
 
-  getGroupChart : function(group, name, timezone) {
+  getGroupChart: function (group, name, timezone) {
 
-    return function(dispatch, getState) {
-      var promises =[];
-      var query = _buildPopulationQuery(group, timezone);   
+    return function (dispatch, getState) {
+      var promises = [];
+      var query = _buildPopulationQuery(group, timezone);
 
       dispatch(_groupChartRequest(query, group[0].group)); //group[0].group -> group key
 
-      promises.push(queryAPI.queryMeasurements({query: query.queries[0]}));
+      promises.push(queryAPI.queryMeasurements({ query: query.queries[0] }));
 
       Promise.all(promises).then(
         res => {
 
           var source = query.queries[0].source; //source is same for all queries
           var resAll = [];
-          for(let m=0; m< res.length; m++){
+          for (let m = 0; m < res.length; m++) {
             if (res[m].errors.length) {
-              throw 'The request is rejected: ' + res[m].errors[0].description; 
+              throw 'The request is rejected: ' + res[m].errors[0].description;
             }
             var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
             var res1 = (resultSets || []).map(rs => {
-            
-              var [g, rr] = population.fromString(rs.label);
+
+              var [g] = population.fromString(rs.label);
               g.name = name;
 
               //sort points on timestamp in order to handle pre-aggregated data.
               rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
-              
-              var timespan1;  
-              if(rs.points.length !== 0){
+
+              var timespan1;
+              if (rs.points.length !== 0) {
                 //Recalculate xAxis timespan based on returned data. (scale)
-                timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+                timespan1 = [rs.points[rs.points.length - 1].timestamp, rs.points[0].timestamp];
               } else {
                 timespan1 = [query.queries[0].time.start, query.queries[0].time.end];
-              }              
+              }
 
-               // Shape a normal timeseries result for requested metrics
-               // Todo support other metrics (as client-side "average")
-               var res2 = query.queries[0].metrics.map(metric => ({
-                 source,
-                 timespan: timespan1,
-                 granularity: query.queries[0].time.granularity,
-                 metric,
-                 population: g,
-                 forecast: m===0 ? false : true, //first promise is actual data, second is forecast data
-                 data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
-               }));
+              // Shape a normal timeseries result for requested metrics
+              // Todo support other metrics (as client-side "average")
+              var res2 = query.queries[0].metrics.map(metric => ({
+                source,
+                timespan: timespan1,
+                granularity: query.queries[0].time.granularity,
+                metric,
+                population: g,
+                forecast: m === 0 ? false : true, //first promise is actual data, second is forecast data
+                data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+              }));
               return _.flatten(res2);
             });
-            resAll.push(_.flatten(res1)); 
+            resAll.push(_.flatten(res1));
           }
 
-          var success = res.every(x => x.success === true); 
+          var success = res.every(x => x.success === true);
           var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
 
           dispatch(_groupChartResponse(success, errors, _.flatten(resAll), group[0].group));
@@ -361,9 +362,9 @@ var UserActions = {
       );
     };
   },
-  
-  getSessions : function(userKey, deviceKey) {
-    return function(dispatch, getState) {
+
+  getSessions: function (userKey, deviceKey) {
+    return function (dispatch, getState) {
       var data = getState().user.data;
 
       if ((data) && (data.devices)) {
@@ -373,69 +374,69 @@ var UserActions = {
       } else {
         dispatch(requestedSessions(userKey, deviceKey));
 
-        return adminAPI.getSessions(userKey).then(function(response) {
+        return adminAPI.getSessions(userKey).then(function (response) {
           dispatch(receivedSessions(response.success, response.errors, response.devices));
-        }, function(error) {
+        }, function (error) {
           dispatch(receivedSessions(false, error, null));
         });
       }
     };
   },
 
-  getMeters : function(userKey) {
-    return function(dispatch, getState) {
+  getMeters: function (userKey) {
+    return function (dispatch, getState) {
       dispatch(requestedMeters(userKey));
 
-      return adminAPI.getMeters(userKey).then(function(response) {
+      return adminAPI.getMeters(userKey).then(function (response) {
         dispatch(receivedMeters(response.success, response.errors, response.series));
-      }, function(error) {
+      }, function (error) {
         dispatch(receivedMeters(false, error, null));
       });
     };
   },
 
-  showFavouriteAccountForm : function(accountId) {
+  showFavouriteAccountForm: function (accountId) {
     return {
-      type : types.USER_SHOW_FAVOURITE_ACCOUNT_FORM,
-      accountId : accountId
+      type: types.USER_SHOW_FAVOURITE_ACCOUNT_FORM,
+      accountId: accountId
     };
   },
 
-  hideFavouriteAccountForm : function() {
+  hideFavouriteAccountForm: function () {
     return {
-      type : types.USER_HIDE_FAVOURITE_ACCOUNT_FORM
+      type: types.USER_HIDE_FAVOURITE_ACCOUNT_FORM
     };
   },
 
-  clearGroupSeries : function() {
+  clearGroupSeries: function () {
     return {
-      type : types.GROUP_DATA_CLEAR
+      type: types.GROUP_DATA_CLEAR
     };
   },
 
-  getGroupSeries : function(groupKey, label, timezone) {
-    return function(dispatch, getState) {
+  getGroupSeries: function (groupKey, label, timezone) {
+    return function (dispatch, getState) {
       dispatch(requestedGroup(groupKey, label));
 
       var query = _buildGroupQuery(groupKey, label, timezone);
 
-      return queryAPI.queryMeasurements(query).then(function(response) {
+      return queryAPI.queryMeasurements(query).then(function (response) {
         if (response.success) {
           dispatch(receivedGroup(response.success, response.errors, groupKey, response.meters));
         } else {
           dispatch(receivedGroup(response.success, response.errors, groupKey, []));
         }
-      }, function(error) {
+      }, function (error) {
         dispatch(receivedGroup(false, error, null, null));
       });
     };
   },
 
-  exportData : function(userKey, username) {
-    return function(dispatch, getState) {
+  exportData: function (userKey, username) {
+    return function (dispatch, getState) {
       dispatch(requestedExport(userKey, username));
 
-      return adminAPI.exportUserData(userKey).then(function(response) {
+      return adminAPI.exportUserData(userKey).then(function (response) {
         dispatch(receivedExport(response.success, response.errors, response.token));
 
         var link = document.createElement('a');
@@ -445,68 +446,68 @@ var UserActions = {
         link.click();
         document.body.removeChild(link);
 
-      }, function(error) {
+      }, function (error) {
         dispatch(receivedExport(false, error, null));
       });
     };
   },
 
-  addFavorite : function(userKey) {
-    return function(dispatch, getState) {
+  addFavorite: function (userKey) {
+    return function (dispatch, getState) {
       dispatch({
-        type : types.ADD_FAVORITE_REQUEST,
-        userKey : userKey
+        type: types.ADD_FAVORITE_REQUEST,
+        userKey: userKey
       });
 
-      return userAPI.addFavorite(userKey).then(function(response) {
+      return userAPI.addFavorite(userKey).then(function (response) {
         dispatch({
-          type : types.ADD_FAVORITE_RESPONSE,
-          success : response.success,
-          errors : response.errors
+          type: types.ADD_FAVORITE_RESPONSE,
+          success: response.success,
+          errors: response.errors
         });
-      }, function(error) {
+      }, function (error) {
         dispatch({
-          type : types.ADD_FAVORITE_RESPONSE,
-          success : false,
-          errors : error
+          type: types.ADD_FAVORITE_RESPONSE,
+          success: false,
+          errors: error
         });
       });
     };
   },
 
-  removeFavorite : function(userKey) {
-    return function(dispatch, getState) {
+  removeFavorite: function (userKey) {
+    return function (dispatch, getState) {
       dispatch({
-        type : types.REMOVE_FAVORITE_REQUEST,
-        userKey : userKey
+        type: types.REMOVE_FAVORITE_REQUEST,
+        userKey: userKey
       });
 
-      return userAPI.removeFavorite(userKey).then(function(response) {
+      return userAPI.removeFavorite(userKey).then(function (response) {
         dispatch({
-          type : types.REMOVE_FAVORITE_RESPONSE,
-          success : response.success,
-          errors : response.errors
+          type: types.REMOVE_FAVORITE_RESPONSE,
+          success: response.success,
+          errors: response.errors
         });
-      }, function(error) {
+      }, function (error) {
         dispatch({
-          type : types.REMOVE_FAVORITE_RESPONSE,
-          success : false,
-          errors : error
+          type: types.REMOVE_FAVORITE_RESPONSE,
+          success: false,
+          errors: error
         });
       });
     };
   },
 
-  showAmphiroConfig : function(activeDevice) {
+  showAmphiroConfig: function (activeDevice) {
     return {
-      type : types.AMPHIRO_CONFIG_SHOW,
-      activeDevice : activeDevice
+      type: types.AMPHIRO_CONFIG_SHOW,
+      activeDevice: activeDevice
     };
   },
 
-  hideAmphiroConfig : function() {
+  hideAmphiroConfig: function () {
     return {
-      type : types.AMPHIRO_CONFIG_HIDE
+      type: types.AMPHIRO_CONFIG_HIDE
     };
   }
 

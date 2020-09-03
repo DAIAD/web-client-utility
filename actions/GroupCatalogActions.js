@@ -5,201 +5,201 @@ var queryAPI = require('../api/query');
 
 var population = require('../model/population');
 
-var _buildGroupQuery = function(population, metric, timezone, from, to) {
+var _buildGroupQuery = function (population, metric, timezone, from, to) {
   return {
-    "level":"week",
-    "field":"volume",
-    "overlap":null,
-    "queries":[{
+    "level": "week",
+    "field": "volume",
+    "overlap": null,
+    "queries": [{
       "time": {
-        "type":"ABSOLUTE",
-        "granularity":"DAY",
-        "start":from,
-        "end":to
+        "type": "ABSOLUTE",
+        "granularity": "DAY",
+        "start": from,
+        "end": to
       },
-      "population":population,
-      "source":"METER",
-      "metrics":[metric]
-      }
+      "population": population,
+      "source": "METER",
+      "metrics": [metric]
+    }
     ]
   };
 };
 
-var _groupChartRequest = function(query, key) {
+var _groupChartRequest = function (query, key) {
   return {
-    type : types.GROUP_CATALOG_CHART_REQUEST,
-    query : query,
-    groupKey : key
+    type: types.GROUP_CATALOG_CHART_REQUEST,
+    query: query,
+    groupKey: key
   };
 };
 
-var _groupChartResponse = function(success, errors, data, key, t=null) {
+var _groupChartResponse = function (success, errors, data, key, t = null) {
   return {
-    type : types.GROUP_CATALOG_CHART_RESPONSE,
-    success : success,
-    errors : errors,
-    dataChart : data,
-    groupKey : key,
+    type: types.GROUP_CATALOG_CHART_RESPONSE,
+    success: success,
+    errors: errors,
+    dataChart: data,
+    groupKey: key,
     timestamp: (t || new Date()).getTime()
   };
 };
 
-var getGroupsInit = function() {
+var getGroupsInit = function () {
   return {
-    type : types.GROUP_CATALOG_REQUEST
+    type: types.GROUP_CATALOG_REQUEST
   };
 };
 
-var getGroupsComplete = function(success, errors, total, groups, index, size) {
+var getGroupsComplete = function (success, errors, total, groups, index, size) {
   return {
-    type : types.GROUP_CATALOG_RESPONSE,
-    success : success,
-    errors : errors,
-    total : total,
-    groups : groups,
-    index : index,
-    size : size
+    type: types.GROUP_CATALOG_RESPONSE,
+    success: success,
+    errors: errors,
+    total: total,
+    groups: groups,
+    index: index,
+    size: size
   };
 };
 
-var changeIndex = function(index) {
+var changeIndex = function (index) {
   return {
-    type : types.GROUP_CATALOG_INDEX_CHANGE,
-    index : index
+    type: types.GROUP_CATALOG_INDEX_CHANGE,
+    index: index
   };
 };
 
-var deleteGroupInit = function(groupKey) {
+var deleteGroupInit = function (groupKey) {
   return {
-    type : types.GROUP_CATALOG_DELETE_REQUEST,
-    groupKey : groupKey
+    type: types.GROUP_CATALOG_DELETE_REQUEST,
+    groupKey: groupKey
   };
 };
 
-var deleteGroupComplete = function(success, errors) {
+var deleteGroupComplete = function (success, errors) {
   return {
-    type : types.GROUP_CATALOG_DELETE_RESPONSE,
-    success : success,
-    errors : errors
+    type: types.GROUP_CATALOG_DELETE_RESPONSE,
+    success: success,
+    errors: errors
   };
 };
 
-var setChartMetric = function(metric) {
+var setChartMetric = function (metric) {
   return {
-    type : types.GROUP_CATALOG_SET_METRIC,
-    metric : metric
+    type: types.GROUP_CATALOG_SET_METRIC,
+    metric: metric
   };
 };
 
 var GroupCatalogActionCreators = {
 
-  changeIndex : function(index) {
+  changeIndex: function (index) {
     return changeIndex(index);
   },
 
-  getGroups : function() {
-    return function(dispatch, getState) {
+  getGroups: function () {
+    return function (dispatch, getState) {
       dispatch(changeIndex(0));
 
       dispatch(getGroupsInit());
 
       return groupAPI.getGroups(getState().userCatalog.query).then(
-          function(response) {
-            dispatch(getGroupsComplete(response.success, response.errors, response.total, response.groups,
-                response.index, response.size));
-          }, function(error) {
-            dispatch(getGroupsComplete(false, error));
-          });
+        function (response) {
+          dispatch(getGroupsComplete(response.success, response.errors, response.total, response.groups,
+            response.index, response.size));
+        }, function (error) {
+          dispatch(getGroupsComplete(false, error));
+        });
     };
   },
 
-  deleteGroup : function(groupKey) {
-    return function(dispatch, getState) {
+  deleteGroup: function (groupKey) {
+    return function (dispatch, getState) {
       dispatch(deleteGroupInit(groupKey));
 
       return groupAPI.remove(groupKey).then(
-          function(response) {
-            dispatch(deleteGroupComplete(response.success, response.errors));
+        function (response) {
+          dispatch(deleteGroupComplete(response.success, response.errors));
 
-            dispatch(getGroupsInit());
+          dispatch(getGroupsInit());
 
-            return groupAPI.getGroups(getState().userCatalog.query).then(
-                function(response) {
-                  dispatch(getGroupsComplete(response.success, response.errors, response.total, response.groups,
-                      response.index, response.size));
-                }, function(error) {
-                  dispatch(getGroupsComplete(false, error));
-                });
+          return groupAPI.getGroups(getState().userCatalog.query).then(
+            function (response) {
+              dispatch(getGroupsComplete(response.success, response.errors, response.total, response.groups,
+                response.index, response.size));
+            }, function (error) {
+              dispatch(getGroupsComplete(false, error));
+            });
 
-          }, function(error) {
-            dispatch(deleteGroupComplete(false, error));
-          });
+        }, function (error) {
+          dispatch(deleteGroupComplete(false, error));
+        });
     };
   },
 
-  clearChart : function() {
+  clearChart: function () {
     return {
-      type : types.GROUP_CATALOG_CLEAR_CHART
+      type: types.GROUP_CATALOG_CLEAR_CHART
     };
   },
-  
-  getGroupChart : function(group, key, name, timezone) {
-    
-    return function(dispatch, getState) {
-      var promises =[];
+
+  getGroupChart: function (group, key, name, timezone) {
+
+    return function (dispatch, getState) {
+      var promises = [];
       var interval = getState().groupCatalog.interval;
       var metric = getState().groupCatalog.metric;
 
       var targetGroup = getState().groupCatalog.data.groups.find(g => (g.key == group[0].group));
 
-      var query = _buildGroupQuery(group, metric, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());   
+      var query = _buildGroupQuery(group, metric, timezone, interval[0].toDate().getTime(), interval[1].toDate().getTime());
       dispatch(_groupChartRequest(query, group[0].group)); //group[0].group -> group key
 
-      promises.push(queryAPI.queryMeasurements({query: query.queries[0]}));
+      promises.push(queryAPI.queryMeasurements({ query: query.queries[0] }));
 
       Promise.all(promises).then(
         res => {
 
           var source = query.queries[0].source; //source is same for all queries
           var resAll = [];
-          for(let m=0; m< res.length; m++){
+          for (let m = 0; m < res.length; m++) {
             if (res[m].errors.length) {
-              throw 'The request is rejected: ' + res[m].errors[0].description; 
+              throw 'The request is rejected: ' + res[m].errors[0].description;
             }
             var resultSets = (source == 'AMPHIRO') ? res[m].devices : res[m].meters;
             var res1 = (resultSets || []).map(rs => {
-            
-              var [g, rr] = population.fromString(rs.label);
+
+              var [g] = population.fromString(rs.label);
               g.name = targetGroup.name; //set group name for custom groups
-              
+
               //sort points on timestamp in order to handle pre-aggregated data.
               rs.points = _.orderBy(rs.points, 'timestamp', 'desc');
-              
-              var timespan1;  
-              if(rs.points.length !== 0){
-               //Recalculate xAxis timespan based on returned data. (scale)              
-                timespan1 = [rs.points[rs.points.length-1].timestamp, rs.points[0].timestamp];
+
+              var timespan1;
+              if (rs.points.length !== 0) {
+                //Recalculate xAxis timespan based on returned data. (scale)              
+                timespan1 = [rs.points[rs.points.length - 1].timestamp, rs.points[0].timestamp];
               } else {
                 timespan1 = [query.queries[0].time.start, query.queries[0].time.end];
-              }              
+              }
 
-               // Shape a normal timeseries result for requested metrics
-               // Todo support other metrics (as client-side "average")
-               var res2 = query.queries[0].metrics.map(metric => ({
-                 source,
-                 timespan: timespan1,
-                 granularity: query.queries[0].time.granularity,
-                 metric,
-                 population: g,
-                 forecast: m===0 ? false : true, //first promise is actual data, second is forecast data
-                 data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
-               }));
+              // Shape a normal timeseries result for requested metrics
+              // Todo support other metrics (as client-side "average")
+              var res2 = query.queries[0].metrics.map(metric => ({
+                source,
+                timespan: timespan1,
+                granularity: query.queries[0].time.granularity,
+                metric,
+                population: g,
+                forecast: m === 0 ? false : true, //first promise is actual data, second is forecast data
+                data: rs.points.map(p => ([p.timestamp, p.volume[metric]]))
+              }));
               return _.flatten(res2);
             });
-            resAll.push(_.flatten(res1)); 
+            resAll.push(_.flatten(res1));
           }
 
-          var success = res.every(x => x.success === true); 
+          var success = res.every(x => x.success === true);
           var errors = success ? [] : res[0].errors; //todo - return flattend array of errors?
 
           dispatch(_groupChartResponse(success, errors, _.flatten(resAll), group[0].group));
@@ -209,82 +209,82 @@ var GroupCatalogActionCreators = {
       );
     };
   },
-  
-  addFavorite : function(groupKey) {
-    return function(dispatch, getState) {
+
+  addFavorite: function (groupKey) {
+    return function (dispatch, getState) {
       dispatch({
-        type : types.GROUP_CATALOG_ADD_FAVORITE_REQUEST,
-        groupKey : groupKey
+        type: types.GROUP_CATALOG_ADD_FAVORITE_REQUEST,
+        groupKey: groupKey
       });
 
-      return groupAPI.addFavorite(groupKey).then(function(response) {
+      return groupAPI.addFavorite(groupKey).then(function (response) {
         dispatch({
-          type : types.GROUP_CATALOG_ADD_FAVORITE_RESPONSE,
-          success : response.success,
-          errors : response.errors,
-          groupKey : groupKey,
-          favorite : true
+          type: types.GROUP_CATALOG_ADD_FAVORITE_RESPONSE,
+          success: response.success,
+          errors: response.errors,
+          groupKey: groupKey,
+          favorite: true
         });
-      }, function(error) {
+      }, function (error) {
         dispatch({
-          type : types.GROUP_CATALOG_ADD_FAVORITE_RESPONSE,
-          success : false,
-          errors : error
+          type: types.GROUP_CATALOG_ADD_FAVORITE_RESPONSE,
+          success: false,
+          errors: error
         });
       });
     };
   },
 
-  removeFavorite : function(groupKey) {
-    return function(dispatch, getState) {
+  removeFavorite: function (groupKey) {
+    return function (dispatch, getState) {
       dispatch({
-        type : types.GROUP_CATALOG_REMOVE_FAVORITE_REQUEST,
-        groupKey : groupKey
+        type: types.GROUP_CATALOG_REMOVE_FAVORITE_REQUEST,
+        groupKey: groupKey
       });
 
-      return groupAPI.removeFavorite(groupKey).then(function(response) {
+      return groupAPI.removeFavorite(groupKey).then(function (response) {
         dispatch({
-          type : types.GROUP_CATALOG_REMOVE_FAVORITE_RESPONSE,
-          success : response.success,
-          errors : response.errors,
-          groupKey : groupKey,
-          favorite : false
+          type: types.GROUP_CATALOG_REMOVE_FAVORITE_RESPONSE,
+          success: response.success,
+          errors: response.errors,
+          groupKey: groupKey,
+          favorite: false
         });
-      }, function(error) {
+      }, function (error) {
         dispatch({
-          type : types.GROUP_CATALOG_REMOVE_FAVORITE_RESPONSE,
-          success : false,
-          errors : error
+          type: types.GROUP_CATALOG_REMOVE_FAVORITE_RESPONSE,
+          success: false,
+          errors: error
         });
       });
     };
   },
 
-  filterByType : function(type) {
+  filterByType: function (type) {
     return {
-      type : types.GROUP_CATALOG_FILTER_TYPE,
-      groupType : type
+      type: types.GROUP_CATALOG_FILTER_TYPE,
+      groupType: type
     };
   },
 
-  filterByName : function(name) {
+  filterByName: function (name) {
     return {
-      type : types.GROUP_CATALOG_FILTER_NAME,
-      name : name
+      type: types.GROUP_CATALOG_FILTER_NAME,
+      name: name
     };
   },
 
-  clearFilter : function() {
+  clearFilter: function () {
     return {
-      type : types.GROUP_CATALOG_FILTER_CLEAR
+      type: types.GROUP_CATALOG_FILTER_CLEAR
     };
   },
 
-  setChartMetric : function(metric, name, timezone) {
-    return function(dispatch, getState) {
+  setChartMetric: function (metric, name, timezone) {
+    return function (dispatch, getState) {
       dispatch(setChartMetric(metric));
       var obj = getState().groupCatalog.charts;
-      Object.keys(obj).map((key) => 
+      Object.keys(obj).map((key) =>
         dispatch(GroupCatalogActionCreators.getGroupChart(obj[key].query.queries[0].population, key, name, timezone)));
     };
   }

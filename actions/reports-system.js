@@ -1,7 +1,5 @@
 
 var ActionTypes = require('../action-types');
-var {computeKey} = require('../reports').system;
-var {queryStats} = require('../service/query');
 
 // Define actions
 
@@ -15,14 +13,14 @@ var actions = {
     reportName,
   }),
 
-  requestData: (level, reportName, t=null) => ({
+  requestData: (level, reportName, t = null) => ({
     type: ActionTypes.reports.system.REQUEST_DATA,
     level,
     reportName,
     timestamp: (t || new Date()).getTime(),
   }),
 
-  setData: (level, reportName, data, t=null) => ({
+  setData: (level, reportName, data, t = null) => ({
     type: ActionTypes.reports.system.SET_DATA,
     level,
     reportName,
@@ -40,7 +38,6 @@ var actions = {
   // Complex actions: functions processed by thunk middleware
 
   refreshData: (level, reportName) => (dispatch, getState) => {
-    var state = getState();
     // Todo
     return Promise.reject('Todo');
   },
