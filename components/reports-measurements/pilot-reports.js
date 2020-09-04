@@ -106,16 +106,21 @@ var ReportsPanel = React.createClass({
     var { reports, population: targetNames } = config.trials;
     var { clusters } = config.utility;
 
-    var targets = targetNames.map(name => {
-      if (name.startsWith('CLUSTER:')) {
-        name = name.substring('CLUSTER:'.length);
-        return new population.Cluster(
-          clusters.find(c => c.name == name).key, name
-        );
-      } else {
-        return new population.Utility(config.utility.key, config.utility.name);
-      }
-    });
+    // Default clusters are not computed for all utilities. First 
+    // resolve cluster from name and if it exists add it to targets.
+    // The final result must be filtered for null values.
+    var targets = targetNames
+      .map(name => {
+        if (name.startsWith('CLUSTER:')) {
+          name = name.substring('CLUSTER:'.length);
+
+          const cluster = clusters.find(c => c.name == name);
+          return cluster ? new population.Cluster(cluster.key, name) : null;
+        } else {
+          return new population.Utility(config.utility.key, config.utility.name);
+        }
+      })
+      .filter(c => !!c);
 
     var nameTarget = (target) => {
       if (target instanceof population.Cluster) {
