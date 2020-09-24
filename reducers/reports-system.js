@@ -1,7 +1,7 @@
 
 var _ = require('lodash');
 
-var ActionTypes = require('../action-types');
+var ActionTypes = require('../constants/ActionTypes');
 var reports = require('../reports');
 
 var assertInitialized = (r, key) => (
@@ -35,8 +35,8 @@ var reduce = function (state={}, action={}) {
           timespan: action.timespan || 'week',
           points: null,     // data points, aka series
           invalid: true,    // data that needs to be refreshed?
-          requested: null,  // time of last successfull attempt to fetch series
-          finished: null,   // time of last successfull update of series
+          requested: null,  // time of last successful attempt to fetch series
+          finished: null,   // time of last successful update of series
         };
       } else {
         r = null; // already initialized; dont touch state

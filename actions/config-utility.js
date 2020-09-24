@@ -2,7 +2,7 @@
 var _ = require('lodash');
 var sprintf = require('sprintf');
 
-var ActionTypes = require('../action-types');
+var ActionTypes = require('../constants/ActionTypes');
 var {getGroups} = require('../api/admin');
 
 

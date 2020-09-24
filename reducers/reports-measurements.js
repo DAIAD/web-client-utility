@@ -1,7 +1,7 @@
 
 var _ = require('lodash');
 
-var ActionTypes = require('../action-types');
+var ActionTypes = require('../constants/ActionTypes');
 var reports = require('../reports');
 
 var assertInitialized = (state, key) => (

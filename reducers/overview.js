@@ -2,7 +2,7 @@
 var _ = require('lodash');
 var moment = require('moment');
 
-var ActionTypes = require('../action-types');
+var ActionTypes = require('../constants/ActionTypes');
 
 var initialState = {
   source: 'meter',

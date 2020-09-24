@@ -1,5 +1,5 @@
 
-var ActionTypes = require('../action-types');
+var ActionTypes = require('../constants/ActionTypes');
 
 var reduce = function (state={}, action={}) {
   var state1 = state;

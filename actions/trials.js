@@ -1,4 +1,4 @@
-var ActionTypes = require('../action-types');
+var ActionTypes = require('../constants/ActionTypes');
 
 var actions = {
 
