@@ -52,6 +52,11 @@ var Development = React.createClass({
     };
   },
 
+  _resolveMapCenter: function () {
+    const center = this.props.profile.utility.center;
+    return (center ? center.coordinates.reverse() : [38.36, -0.479]);
+  },
+
   createUser: function (e) {
     if (this.refs.password.value) {
       this.props.actions.createUser(this.refs.password.value);
@@ -170,7 +175,7 @@ var Development = React.createClass({
         <Map
           height={400}
           width='100%'
-          center={[38.35, -0.48]}
+          center={this._resolveMapCenter()}
           zoom={13}
         >
           <TileLayer />

@@ -108,6 +108,11 @@ var UserCatalog = React.createClass({
     this.props.actions.getAccounts();
   },
 
+  _resolveMapCenter: function () {
+    const center = this.props.profile.utility.center;
+    return (center ? center.coordinates.reverse() : [38.36, -0.479]);
+  },
+
   render: function () {
     const tableFields = [{
       name: 'id',
@@ -302,7 +307,7 @@ var UserCatalog = React.createClass({
       <Map
         width='100%'
         height={600}
-        center={[38.35, -0.48]}
+        center={this._resolveMapCenter()}
         zoom={13}
       >
         <TileLayer />

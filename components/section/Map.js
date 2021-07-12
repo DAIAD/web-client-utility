@@ -133,6 +133,11 @@ var AnalyticsMap = React.createClass({
     intl: React.PropTypes.object
   },
 
+  _resolveMapCenter: function () {
+    const center = this.props.profile.utility.center;
+    return (center ? center.coordinates.reverse() : [38.36, -0.479]);
+  },
+
   componentWillMount: function () {
 
     if (!this.props.metersLocations) {
@@ -553,7 +558,7 @@ var AnalyticsMap = React.createClass({
         {filter}
         <Bootstrap.ListGroupItem>
           <Map
-            center={[38.36, -0.479]}
+            center={this._resolveMapCenter()}
             zoom={13}
             width='100%'
             height={600}
